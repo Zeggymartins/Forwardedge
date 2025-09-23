@@ -99,8 +99,7 @@
                                                     <div class="col-md-8">
                                                         <div class="coupon">
                                                             <input type="text" name="coupon_code" class="input-text"
-                                                                id="coupon_code" value=""
-                                                                placeholder="Coupon code">
+                                                                id="coupon_code" value="" placeholder="Coupon code">
 
                                                             <button type="submit" class="tj-primary-btn"
                                                                 name="apply_coupon" value="Apply coupon">
@@ -152,12 +151,13 @@
                                             </table>
 
                                             <div class="wc-proceed-to-checkout">
-                                                <a href="checkout.html"
+                                                <button id="paystack-checkout"
                                                     class="tj-primary-btn checkout-button button alt wc-forward">
                                                     <span class="btn-text"><span>Proceed to checkout</span></span>
                                                     <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                                </a>
+                                                </button>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -168,4 +168,221 @@
             </div>
         </div>
     </section>
-    @endsection
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // CSRF token helper
+            const CSRF = document.querySelector('meta[name="csrf-token"]')?.content;
+
+            // --- recalc totals (DOM-driven) ---
+            function recalcTotals() {
+                let subtotal = 0;
+                document.querySelectorAll("tr.cart_item").forEach(row => {
+                    const priceEl = row.querySelector(".product-price .amount bdi");
+                    const qtyEl = row.querySelector("input.qty");
+                    const subtotalEl = row.querySelector(".product-subtotal .amount bdi");
+
+                    if (!priceEl || !qtyEl || !subtotalEl) return;
+
+                    const price = parseFloat(priceEl.textContent.replace(/[^0-9.]/g, "")) || 0;
+                    const qty = parseInt(qtyEl.value) || 1;
+                    const lineTotal = price * qty;
+
+                    subtotal += lineTotal;
+
+                    subtotalEl.innerHTML =
+                        `<span class="woocommerce-Price-currencySymbol">₦</span>${lineTotal.toFixed(2)}`;
+                });
+
+                document.querySelectorAll(".cart-subtotal .amount bdi").forEach(el => {
+                    el.innerHTML =
+                        `<span class="woocommerce-Price-currencySymbol">₦</span>${subtotal.toFixed(2)}`;
+                });
+                document.querySelectorAll(".order-total .amount bdi").forEach(el => {
+                    el.innerHTML =
+                        `<span class="woocommerce-Price-currencySymbol">₦</span>${subtotal.toFixed(2)}`;
+                });
+            }
+
+            // init
+            recalcTotals();
+
+            // attach quantity listeners
+            document.querySelectorAll("input.qty").forEach(input => {
+                input.addEventListener("change", recalcTotals);
+                input.addEventListener("input", recalcTotals);
+            });
+
+            // plus/minus
+            document.querySelectorAll(".tj-cart-plus, .tj-cart-minus").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    const input = this.parentElement.querySelector("input.qty");
+                    let value = parseInt(input.value) || 1;
+                    if (this.classList.contains("tj-cart-plus")) value++;
+                    else if (this.classList.contains("tj-cart-minus") && value > 1) value--;
+                    input.value = value;
+                    recalcTotals();
+                });
+            });
+
+            // remove item (calls server and updates DOM)
+            document.querySelectorAll(".remove").forEach(removeBtn => {
+                removeBtn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    if (!confirm("Remove this item from cart?")) return;
+                    const row = this.closest("tr.cart_item");
+                    const courseId = this.dataset.courseId || this.getAttribute('data-course-id') ||
+                        null;
+
+                    // Visual feedback
+                    row.style.opacity = 0.6;
+
+                    if (courseId) {
+                        fetch("{{ route('user.cart.remove') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": CSRF,
+                                    "Accept": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    course_id: parseInt(courseId)
+                                })
+                            }).then(r => r.json())
+                            .then(json => {
+                                if (json.status === 'success') {
+                                    row.remove();
+                                    recalcTotals();
+                                    if (typeof toastr !== 'undefined') toastr.success(json
+                                        .message || 'Removed from cart');
+                                    // live count update if route exists
+                                    updateCartCount();
+                                } else {
+                                    row.style.opacity = 1;
+                                    throw new Error(json.message || 'Remove failed');
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Remove error', err);
+                                row.style.opacity = 1;
+                                alert('Could not remove item. See console.');
+                            });
+                    } else {
+                        // fallback: remove from DOM only
+                        row.remove();
+                        recalcTotals();
+                    }
+                });
+            });
+
+            // get total from DOM (returns number)
+            function getCartTotal() {
+                const totalEl = document.querySelector(".order-total .amount bdi");
+                if (!totalEl) return 0;
+                const txt = totalEl.textContent || totalEl.innerText || "0";
+                return parseFloat(txt.replace(/[^0-9.]/g, "")) || 0;
+            }
+
+            async function initializePayment() {
+                let total = getCartTotal();
+
+                try {
+                    let response = await fetch("{{ route('checkout.store') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            amount: total
+                        })
+                    });
+
+                    let data = await response.json();
+
+                    if (data.authorization_url) {
+                        window.location.href = data.authorization_url; // Redirect to Paystack
+                    } else {
+                        alert("Unable to initialize payment.");
+                        console.error(data);
+                    }
+                } catch (err) {
+                    console.error("❌ Network error:", err);
+                    alert("Payment init failed.");
+                }
+            }
+
+            // wire checkout button
+            const checkoutBtn = document.getElementById("paystack-checkout");
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener("click", function(e) {
+                    e.preventDefault();
+
+                    // >>> IMPORTANT <<<  You must provide a real server Order id here.
+                    // Option A: create order first via an endpoint and then call initializePayment with the returned ID.
+                    // Option B: create combined endpoint that creates order & calls payment.initialize server-side.
+                    //
+                    // Temporary placeholder: replace `1` below with actual order id you create on server.
+                    const ORDER_ID = 1; // <-- REPLACE THIS by your created Order ID
+                    initializePayment("Orders", ORDER_ID);
+                });
+            }
+
+            // Live counts update helpers (server endpoints expected)
+            function updateCartCount() {
+                fetch("{{ route('user.cart.count') }}", {
+                        headers: {
+                            "X-CSRF-TOKEN": CSRF,
+                            "Accept": "application/json"
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.cart_count !== undefined) document.querySelectorAll('#cart-count').forEach(el =>
+                            el.innerText = d.cart_count);
+                    })
+                    .catch(() => {});
+            }
+
+            function updateWishlistCount() {
+                fetch("{{ route('user.wishlist.count') }}", {
+                        headers: {
+                            "X-CSRF-TOKEN": CSRF,
+                            "Accept": "application/json"
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.wishlist_count !== undefined) document.querySelectorAll('#wishlist-count')
+                            .forEach(el => el.innerText = d.wishlist_count);
+                    })
+                    .catch(() => {});
+            }
+
+            // init counts on load
+            updateCartCount();
+            updateWishlistCount();
+
+            // debugging helper
+            window.debugPayment = function() {
+                console.log("Cart total:", getCartTotal());
+                console.log("CSRF:", CSRF);
+                console.log("Checkout button:", document.getElementById("paystack-checkout"));
+                // try server debug endpoint if present
+                fetch("/payment/debug", {
+                        headers: {
+                            "X-CSRF-TOKEN": CSRF,
+                            "Accept": "application/json"
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(j => console.log("Server debug:", j))
+                    .catch(e => console.log("No debug endpoint or error:", e));
+            };
+
+            console.log("Cart + Payment script loaded");
+        });
+    </script>
+
+
+@endsection

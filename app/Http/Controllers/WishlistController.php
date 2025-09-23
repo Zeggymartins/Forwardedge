@@ -15,7 +15,7 @@ class WishlistController extends Controller
             return response()->json(['status' => 'auth_required', 'message' => 'Please register or login to continue'], 401);
         }
 
-        $data = $request->validate(['course_id' => 'required|integer|exists:Course,id']);
+        $data = $request->validate(['course_id' => 'required|integer|exists:courses,id']);
 
         $course = Course::findOrFail($data['course_id']);
         $price = $course->discount_price ?? $course->price ?? null;

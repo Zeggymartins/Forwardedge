@@ -9,27 +9,30 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+     protected $fillable = [
         'user_id',
-        'course_schedule_id',
-        'payment_plan',
-        'total_amount',
-        'balance',
+        'payable_id',
+        'payable_type',
+        'amount',
         'status',
+        'method',
+        'reference',
+        'currency',
+        'metadata'
     ];
 
-    public function schedule()
-    {
-        return $this->belongsTo(CourseSchedule::class, 'course_schedule_id');
-    }
-
+    protected $casts = [
+        'metadata' => 'array',
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function payments()
+    // Polymorphic relation (links to Enrollment, Order, or EventRegistration)
+    public function payable()
     {
-        return $this->hasMany(Payment::class);
+        return $this->morphTo();
     }
 }

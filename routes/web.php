@@ -8,7 +8,10 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\OrderController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -88,6 +91,31 @@ Route::post('/ajax/verify-otp', [AjaxAuthController::class, 'verifyOtp'])->name(
 
 Route::get('/enroll/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('enroll.pricing');
 Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enroll.store');
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
+    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success', [OrderController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/cancel', [OrderController::class, 'cancel'])->name('checkout.cancel');
+});
+
+// Public routes (no auth required)
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
+
+// Success/failure pages
+Route::get('/payment/success', function (Request $request) {
+    $reference = $request->query('reference');
+    return view('user.pages.payment_success', compact('reference'));
+})->name('payment.success');
+
+Route::get('/payment/failed', function () {
+    return view('user.pages.payment_failed');
+})->name('payment.failed');
+
+// Debug route (only in development)
+Route::get('/payment/debug', [PaymentController::class, 'debug'])->name('payment.debug');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

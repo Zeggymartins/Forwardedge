@@ -1,5 +1,5 @@
 @extends('user.master_page')
-@section('title', 'Read Blog | Forward Edge Consulting')
+@section('title', ($blog->title ?? 'Read Blog') . ' | Forward Edge Consulting')
 @section('main')
     @include('user.partials.breadcrumb')
     <section class="tj-blog-section section-gap slidebar-stickiy-container">
@@ -9,8 +9,11 @@
                     <div class="post-details-wrapper">
                         {{-- Blog Image --}}
                         <div class="blog-images wow fadeInUp" data-wow-delay=".1s">
-                            <img src="{{ $blog->thumbnail ? asset($blog->thumbnail) : asset('frontend/assets/images/blog/blog-1.webp') }}"
-                                alt="{{ $blog->title }}">
+                            <img src="{{ ($blog->thumbnail && file_exists(public_path($blog->thumbnail))) 
+                                        ? asset($blog->thumbnail) 
+                                        : asset('frontend/assets/images/service/service-1.webp') }}"
+                                alt="{{ $blog->title ?? 'Blog Post' }}"
+                                class="img-fluid">
                         </div>
 
                         {{-- Blog Title --}}
@@ -22,12 +25,14 @@
                         <div class="blog-category-two wow fadeInUp" data-wow-delay=".3s">
                             <div class="category-item">
                                 <div class="cate-images">
-                                    <img src="{{ $blog->author->avatar ?? asset('frontend/assets/images/testimonial/client-2.webp') }}"
-                                        alt="Author">
+                                    <img src="{{ ($blog->author && $blog->author->avatar) 
+                                                ? asset($blog->author->avatar) 
+                                                : asset('frontend/assets/images/testimonial/client-2.webp') }}"
+                                        alt="Author" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
                                 </div>
                                 <div class="cate-text">
                                     <span class="degination">Authored by</span>
-                                    <h6 class="title">{{ $blog->author->name ?? 'Burdee Nicolas' }}</h6>
+                                    <h6 class="title">{{ $blog->author->name ?? 'Forward Edge Team' }}</h6>
                                 </div>
                             </div>
                             <div class="category-item">
@@ -35,22 +40,22 @@
                                 <div class="cate-text">
                                     <span class="degination">Date Released</span>
                                     <h6 class="text">
-                                        {{ $blog->created_at ? $blog->created_at->format('d F, Y') : '29 December, 2025' }}
+                                        {{ $blog->created_at ? $blog->created_at->format('d F, Y') : now()->format('d F, Y') }}
                                     </h6>
                                 </div>
                             </div>
                             <div class="category-item">
                                 <div class="cate-icons"><i class="tji-comment"></i></div>
                                 <div class="cate-text">
-                                    <span class="degination">Comments</span>
-                                    <h6 class="text">{{ $blog->comments_count ?? '03 Comments' }}</h6>
+                                    <span class="degination">Category</span>
+                                    <h6 class="text">{{ $blog->category ?? 'Business Strategy' }}</h6>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Blog Body --}}
                         <div class="blog-text">
-                            @if ($blog->details->count())
+                            @if ($blog->details && $blog->details->count() > 0)
                                 {{-- Loop over blog_details blocks --}}
                                 @foreach ($blog->details as $block)
                                     @if ($block->type === 'paragraph')
@@ -60,98 +65,143 @@
                                     @elseif($block->type === 'feature')
                                         <blockquote class="wow fadeInUp" data-wow-delay=".3s">
                                             <p>{{ $block->content }}</p>
-                                            <cite>{{ $block->extras['author'] ?? 'Anonymous' }}</cite>
+                                            <cite>{{ $block->extras['author'] ?? 'Forward Edge Consulting' }}</cite>
                                         </blockquote>
                                     @elseif($block->type === 'list')
                                         <ul class="wow fadeInUp" data-wow-delay=".3s">
-                                            @foreach (json_decode($block->content, true) as $item)
+                                            @foreach (json_decode($block->content, true) ?: [] as $item)
                                                 <li><span><i class="tji-check"></i></span>{{ $item }}</li>
                                             @endforeach
                                         </ul>
                                     @elseif($block->type === 'image')
                                         <div class="image-box wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ asset($block->content) }}" alt="Blog Image">
+                                            <img src="{{ (file_exists(public_path($block->content))) 
+                                                        ? asset($block->content) 
+                                                        : asset('frontend/assets/images/service/service-2.webp') }}" 
+                                                alt="Blog Image" class="img-fluid">
                                         </div>
                                     @elseif($block->type === 'video')
                                         <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ asset($block->extras['thumbnail'] ?? 'frontend/assets/images/blog/blog-video.webp') }}"
-                                                alt="Video">
+                                            <img src="{{ ($block->extras['thumbnail'] ?? false) 
+                                                        ? asset($block->extras['thumbnail']) 
+                                                        : asset('frontend/assets/images/service/service-3.webp') }}"
+                                                alt="Video Thumbnail" class="img-fluid">
                                             <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
-                                                href="{{ $block->content }}">
+                                                href="{{ $block->content ?? 'https://www.youtube.com/watch?v=MLpWrANjFbI' }}">
                                                 <span><i class="tji-play"></i></span>
                                             </a>
                                         </div>
                                     @endif
                                 @endforeach
                             @else
-                                {{-- Dummy Fallback Content --}}
+                                {{-- Enhanced Dummy Content --}}
                                 <p class="wow fadeInUp" data-wow-delay=".3s">
-                                    In today’s competitive landscape, businesses must continuously adapt and innovate to
-                                    thrive...
+                                    In today's rapidly evolving business landscape, organizations face unprecedented challenges 
+                                    and opportunities. At Forward Edge Consulting, we understand that success isn't just about 
+                                    adapting to change—it's about staying ahead of the curve and leading your industry through 
+                                    strategic innovation and operational excellence.
                                 </p>
-                                <blockquote class="wow fadeInUp" data-wow-delay=".3s">
-                                    <p>The true entrepreneur is a doer, not a dreamer. Innovation is the catalyst that
-                                        transforms ideas into reality.</p>
-                                    <cite>Kevin Hooks</cite>
+
+                                <p class="wow fadeInUp" data-wow-delay=".4s">
+                                    Our comprehensive approach to business transformation combines cutting-edge technology, 
+                                    proven methodologies, and deep industry expertise to deliver measurable results. Whether 
+                                    you're looking to optimize your operations, enhance customer experience, or drive digital 
+                                    transformation, we're here to guide you every step of the way.
+                                </p>
+
+                                <blockquote class="wow fadeInUp" data-wow-delay=".5s">
+                                    <p>Success in business isn't about following the crowd—it's about creating your own path 
+                                    and inspiring others to follow. Innovation coupled with strategic execution is the 
+                                    catalyst that transforms vision into reality.</p>
+                                    <cite>Forward Edge Consulting Team</cite>
                                 </blockquote>
-                                <h3 class="wow fadeInUp" data-wow-delay=".3s">Key lessons of Business Potential</h3>
-                                <ul class="wow fadeInUp" data-wow-delay=".3s">
-                                    <li><span><i class="tji-check"></i></span>Embrace Innovation</li>
-                                    <li><span><i class="tji-check"></i></span>Customer-Centric Approach</li>
-                                    <li><span><i class="tji-check"></i></span>Effective Leadership</li>
-                                    <li><span><i class="tji-check"></i></span>Operational Efficiency</li>
-                                </ul>
-                                <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
-                                    <img src="{{ asset('frontend/assets/images/blog/blog-video.webp') }}" alt="Video">
-                                    <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
-                                        href="https://www.youtube.com/watch?v=MLpWrANjFbI">
-                                        <span><i class="tji-play"></i></span>
-                                    </a>
+
+                                <h3 class="wow fadeInUp" data-wow-delay=".6s">Key Pillars of Business Excellence</h3>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="wow fadeInUp" data-wow-delay=".7s">
+                                            <li><span><i class="tji-check"></i></span>Strategic Innovation Framework</li>
+                                            <li><span><i class="tji-check"></i></span>Customer-Centric Design Thinking</li>
+                                            <li><span><i class="tji-check"></i></span>Data-Driven Decision Making</li>
+                                            <li><span><i class="tji-check"></i></span>Agile Leadership Development</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="wow fadeInUp" data-wow-delay=".8s">
+                                            <li><span><i class="tji-check"></i></span>Digital Transformation Strategy</li>
+                                            <li><span><i class="tji-check"></i></span>Operational Excellence Programs</li>
+                                            <li><span><i class="tji-check"></i></span>Change Management Support</li>
+                                            <li><span><i class="tji-check"></i></span>Sustainable Growth Practices</li>
+                                        </ul>
+                                    </div>
                                 </div>
+
+                                <div class="images-wrap">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="image-box wow fadeInUp" data-wow-delay=".9s">
+                                                <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}" 
+                                                    alt="Business Strategy" class="img-fluid">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="image-box wow fadeInUp" data-wow-delay="1.0s">
+                                                <img src="{{ asset('frontend/assets/images/service/service-2.webp') }}" 
+                                                    alt="Team Collaboration" class="img-fluid">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 class="wow fadeInUp" data-wow-delay="1.1s">Driving Results Through Partnership</h3>
+                                <p class="wow fadeInUp" data-wow-delay="1.2s">
+                                    Our success is measured by your success. We don't just provide consulting services—we 
+                                    become your strategic partner, working alongside your team to achieve sustainable growth 
+                                    and competitive advantage. From initial assessment to implementation and beyond, we're 
+                                    committed to delivering excellence at every stage of our engagement.
+                                </p>
                             @endif
                         </div>
+
+                        {{-- Tags and Share --}}
                         <div class="tj-tags-post wow fadeInUp" data-wow-delay=".3s">
                             <div class="tagcloud">
                                 <span>Tags:</span>
-                                <a href="blog.html">Growth</a>
-                                <a href="blog.html">Success</a>
-                                <a href="blog.html">Innovate</a>
+                                <a href="#">Business Strategy</a>
+                                <a href="#">Innovation</a>
+                                <a href="#">Leadership</a>
+                                <a href="#">Growth</a>
                             </div>
                             <div class="post-share">
                                 <ul>
-                                    <li> Share:</li>
-                                    <li><a href="https://www.facebook.com/" target="_blank"><i
-                                                class="fa-brands fa-facebook-f"></i></a>
-                                    </li>
-                                    <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
-                                    </li>
-                                    <li><a href="https://www.instagram.com/" target="_blank"><i
-                                                class="fa-brands fa-instagram"></i></a>
-                                    </li>
-                                    <li><a href="https://www.linkedin.com/" target="_blank"><i
-                                                class="fa-brands fa-linkedin-in"></i></a>
-                                    </li>
+                                    <li>Share:</li>
+                                    <li><a href="https://www.facebook.com/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a></li>
+                                    <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
+                                    <li><a href="https://www.instagram.com/" target="_blank"><i class="fa-brands fa-instagram"></i></a></li>
+                                    <li><a href="https://www.linkedin.com/" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a></li>
                                 </ul>
                             </div>
                         </div>
+
+                        {{-- Navigation --}}
                         <div class="tj-post__navigation wow fadeInUp" data-wow-delay=".3s">
-                            <!-- previous post -->
                             <div class="tj-nav__post previous">
                                 <div class="tj-nav-post__nav prev_post">
-                                    <a href="blog-details.html"><span><i class="tji-arrow-left"></i></span>Previous</a>
+                                    <a href="{{ route('blog') }}"><span><i class="tji-arrow-left"></i></span>Previous</a>
                                 </div>
                             </div>
                             <div class="tj-nav-post__grid">
-                                <a href="blog.html"><i class="tji-window"></i></a>
+                                <a href="{{ route('blog') }}"><i class="tji-window"></i></a>
                             </div>
-                            <!-- next post -->
                             <div class="tj-nav__post next">
                                 <div class="tj-nav-post__nav next_post">
-                                    <a href="blog-details.html">Next<span><i class="tji-arrow-right"></i></span></a>
+                                    <a href="{{ route('blog') }}">Next<span><i class="tji-arrow-right"></i></span></a>
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Comments Section --}}
                         <div class="tj-comments-container">
                             <div class="tj-comments-wrap">
                                 <div class="comments-title">
@@ -162,91 +212,43 @@
                                         <li class="tj-comment">
                                             <div class="comment-content">
                                                 <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-1.webp') }}"
-                                                        alt="Image">
+                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-1.webp') }}" 
+                                                        alt="Commenter" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
                                                 </div>
                                                 <div class="comments-header">
                                                     <div class="avatar-name">
-                                                        <h6 class="title">
-                                                            <a href="blog-details.html">Great insights!</a>
-                                                        </h6>
+                                                        <h6 class="title">Sarah Johnson</h6>
                                                     </div>
                                                     <div class="comment-text">
-                                                        <span class="date">June 18, 2024 at 06:00 pm</span>
-                                                        <a class="reply" href="blog-details.html">Reply</a>
+                                                        <span class="date">{{ now()->subDays(2)->format('M j, Y') }} at 2:30 pm</span>
+                                                        <a class="reply" href="#">Reply</a>
                                                     </div>
                                                     <div class="desc">
-                                                        <p>"I completely agree that embracing innovation and leveraging data
-                                                            are crucial for
-                                                            any
-                                                            business looking to stay competitive in today's market. The
-                                                            focus on leadership and
-                                                            adaptability really resonated with me. Looking forward to
-                                                            implementing these
-                                                            strategies"
-                                                        </p>
+                                                        <p>Excellent insights on business transformation! The strategic framework 
+                                                        you've outlined really resonates with the challenges we're facing in our 
+                                                        organization. Looking forward to implementing some of these strategies.</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </li>
                                         <li class="tj-comment">
-                                            <ul class="children">
-                                                <li class="tj-comment">
-                                                    <div class="comment-content">
-                                                        <div class="comment-avatar">
-                                                            <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}"
-                                                                alt="Image">
-                                                        </div>
-                                                        <div class="comments-header">
-                                                            <div class="avatar-name">
-                                                                <h6 class="title">
-                                                                    <a href="blog-details.html">This was a fantastic
-                                                                        read</a>
-                                                                </h6>
-                                                            </div>
-                                                            <div class="comment-text">
-                                                                <span class="date">June 18, 2024 at 06:00 pm</span>
-                                                                <a class="reply" href="blog-details.html">Reply</a>
-                                                            </div>
-                                                            <div class="desc">
-                                                                <p>"The lessons on customer-centric approaches and
-                                                                    operational efficiency are
-                                                                    especially
-                                                                    relevant. It's inspiring to see how these core
-                                                                    principles can truly unlock a
-                                                                    business's
-                                                                    potential. Thanks for sharing such valuable content!"
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li class="tj-comment">
                                             <div class="comment-content">
                                                 <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}"
-                                                        alt="Image">
+                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}" 
+                                                        alt="Commenter" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
                                                 </div>
                                                 <div class="comments-header">
                                                     <div class="avatar-name">
-                                                        <h6 class="title">
-                                                            <a href="blog-details.html">This was a fantastic read</a>
-                                                        </h6>
+                                                        <h6 class="title">Michael Chen</h6>
                                                     </div>
                                                     <div class="comment-text">
-                                                        <span class="date">June 18, 2024 at 06:00 pm</span>
-                                                        <a class="reply" href="blog-details.html">Reply</a>
+                                                        <span class="date">{{ now()->subDays(1)->format('M j, Y') }} at 10:15 am</span>
+                                                        <a class="reply" href="#">Reply</a>
                                                     </div>
                                                     <div class="desc">
-                                                        <p>"The lessons on customer-centric approaches and operational
-                                                            efficiency are
-                                                            especially
-                                                            relevant. It's inspiring to see how these core principles can
-                                                            truly unlock a
-                                                            business's
-                                                            potential. Thanks for sharing such valuable content!"</p>
+                                                        <p>The focus on customer-centric design thinking is spot on. We've seen 
+                                                        significant improvements in our customer satisfaction scores after 
+                                                        applying similar principles. Great article!</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -254,140 +256,176 @@
                                     </ul>
                                 </div>
                             </div>
+
+                            {{-- Comment Form --}}
                             <div class="tj-comments__container">
                                 <div class="comment-respond">
                                     <h3 class="comment-reply-title">Leave a Comment</h3>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="form-input">
-                                                <textarea id="comment" name="message" placeholder="Write Your Comment *"></textarea>
+                                    <form class="comment-form" method="post" action="#">
+                                        @csrf
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="form-input">
+                                                    <textarea id="comment" name="message" placeholder="Write Your Comment *" rows="5" required></textarea>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="form-input">
-                                                <input type="text" id="name" name="name"
-                                                    placeholder="Full Name *" required="">
+                                            <div class="col-lg-4">
+                                                <div class="form-input">
+                                                    <input type="text" id="name" name="name" placeholder="Full Name *" required>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="form-input">
-                                                <input type="email" id="emailOne" name="name"
-                                                    placeholder="Your Email *" required="">
+                                            <div class="col-lg-4">
+                                                <div class="form-input">
+                                                    <input type="email" id="emailOne" name="email" placeholder="Your Email *" required>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="form-input">
-                                                <input type="text" id="website" name="name"
-                                                    placeholder="Website" required="">
+                                            <div class="col-lg-4">
+                                                <div class="form-input">
+                                                    <input type="url" id="website" name="website" placeholder="Website (Optional)">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="comments-btn">
                                             <button class="tj-primary-btn" type="submit">
-                                                <span class="btn-text"><span>Submit Now</span></span>
+                                                <span class="btn-text"><span>Submit Comment</span></span>
                                                 <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                                             </button>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {{-- Sidebar --}}
                 <div class="col-lg-4">
                     <div class="tj-main-sidebar slidebar-stickiy">
+                        {{-- Search Widget --}}
                         <div class="tj-sidebar-widget widget-search wow fadeInUp" data-wow-delay=".1s">
-                            <h4 class="widget-title">Search here</h4>
+                            <h4 class="widget-title">Search Articles</h4>
                             <div class="search-box">
-                                <form action="#">
-                                    <input type="search" name="search" id="searchTwo" placeholder="Search here">
+                                <form action="{{ route('blog') }}" method="get">
+                                    <input type="search" name="search" id="searchTwo" 
+                                           placeholder="Search articles..." 
+                                           value="{{ request('search') }}">
                                     <button type="submit" value="search">
                                         <i class="tji-search"></i>
                                     </button>
                                 </form>
                             </div>
                         </div>
+
+                        {{-- Related Posts Widget --}}
                         <div class="tj-sidebar-widget tj-recent-posts wow fadeInUp" data-wow-delay=".3s">
-                            <h4 class="widget-title">Related post</h4>
+                            <h4 class="widget-title">Related Articles</h4>
                             <ul>
                                 <li>
                                     <div class="post-thumb">
-                                        <a href="blog-details.html"> <img
-                                                src="{{ asset('frontend/assets/images/blog/post-1.webp') }}"
-                                                alt="Blog"></a>
+                                        <a href="#">
+                                            <img src="{{ asset('frontend/assets/images/service/service-1.webp') }}" 
+                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
+                                        </a>
                                     </div>
                                     <div class="post-content">
                                         <h6 class="post-title">
-                                            <a href="blog-details.html">How to Stay Ahead of the Business Curve</a>
+                                            <a href="#">Digital Transformation: A Complete Guide for Modern Businesses</a>
                                         </h6>
                                         <div class="blog-meta">
                                             <ul>
-                                                <li>04 SEP 2025</li>
+                                                <li>{{ now()->subDays(3)->format('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="post-thumb">
-                                        <a href="blog-details.html"> <img
-                                                src="{{ asset('frontend/assets/images/blog/post-2.webp') }}"
-                                                alt="Blog"></a>
+                                        <a href="#">
+                                            <img src="{{ asset('frontend/assets/images/service/service-2.webp') }}" 
+                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
+                                        </a>
                                     </div>
                                     <div class="post-content">
                                         <h6 class="post-title">
-                                            <a href="blog-details.html">How Digital Tools Shaping the Workforce</a>
+                                            <a href="#">Building Resilient Teams in the Age of Remote Work</a>
                                         </h6>
                                         <div class="blog-meta">
                                             <ul>
-                                                <li>02 JAN 2025</li>
+                                                <li>{{ now()->subDays(7)->format('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="post-thumb">
-                                        <a href="blog-details.html"> <img
-                                                src="{{ asset('frontend/assets/images/blog/post-3.webp') }}"
-                                                alt="Blog"></a>
+                                        <a href="#">
+                                            <img src="{{ asset('frontend/assets/images/service/service-3.webp') }}" 
+                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
+                                        </a>
                                     </div>
                                     <div class="post-content">
                                         <h6 class="post-title">
-                                            <a href="blog-details.html">How to Sustainability into your Strategy</a>
+                                            <a href="#">Customer Experience: The Ultimate Competitive Advantage</a>
                                         </h6>
                                         <div class="blog-meta">
                                             <ul>
-                                                <li>24 FEB 2025</li>
+                                                <li>{{ now()->subDays(10)->format('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </li>
                             </ul>
                         </div>
+
+                        {{-- Categories Widget --}}
                         <div class="tj-sidebar-widget widget-categories wow fadeInUp" data-wow-delay=".5s">
                             <h4 class="widget-title">Categories</h4>
                             <ul>
-                                <li><a href="blog-details.html">Innovation<span class="number">(03)</span></a></li>
-                                <li><a href="blog-details.html">Leadership<span class="number">(02)</span></a></li>
-                                <li><a href="blog-details.html">Technology<span class="number">(03)</span></a></li>
-                                <li><a href="blog-details.html">Marketing<span class="number">(06)</span></a></li>
-                                <li><a href="blog-details.html">Management<span class="number">(04)</span></a></li>
+                                <li><a href="#">Business Strategy<span class="number">(8)</span></a></li>
+                                <li><a href="#">Leadership<span class="number">(5)</span></a></li>
+                                <li><a href="#">Digital Innovation<span class="number">(12)</span></a></li>
+                                <li><a href="#">Customer Experience<span class="number">(6)</span></a></li>
+                                <li><a href="#">Operations<span class="number">(4)</span></a></li>
+                                <li><a href="#">Training & Development<span class="number">(9)</span></a></li>
                             </ul>
                         </div>
+
+                        {{-- Tags Widget --}}
                         <div class="tj-sidebar-widget widget-tag-cloud wow fadeInUp" data-wow-delay=".7s">
-                            <h4 class="widget-title">Tags</h4>
+                            <h4 class="widget-title">Popular Tags</h4>
                             <nav>
                                 <div class="tagcloud">
-                                    <a href="blog-details.html">Growth</a>
-                                    <a href="blog-details.html">Success</a>
-                                    <a href="blog-details.html">Innovate</a>
-                                    <a href="blog-details.html">Lead</a>
-                                    <a href="blog-details.html">Impact</a>
-                                    <a href="blog-details.html">Focus</a>
-                                    <a href="blog-details.html">Tech</a>
-                                    <a href="blog-details.html">Optimize</a>
-                                    <a href="blog-details.html">Results</a>
-                                    <a href="blog-details.html">Drive</a>
+                                    <a href="#">Strategy</a>
+                                    <a href="#">Innovation</a>
+                                    <a href="#">Leadership</a>
+                                    <a href="#">Growth</a>
+                                    <a href="#">Digital</a>
+                                    <a href="#">Consulting</a>
+                                    <a href="#">Training</a>
+                                    <a href="#">Excellence</a>
+                                    <a href="#">Transformation</a>
+                                    <a href="#">Success</a>
                                 </div>
                             </nav>
+                        </div>
+
+                        {{-- Newsletter Widget --}}
+                        <div class="tj-sidebar-widget widget-feature-item wow fadeInUp" data-wow-delay=".9s">
+                            <div class="feature-box">
+                                <div class="feature-content">
+                                    <h2 class="title">Stay Updated</h2>
+                                    <span>Get Latest Insights</span>
+                                    <form class="newsletter-form" action="#" method="post">
+                                        @csrf
+                                        <div class="form-input mb-3">
+                                            <input type="email" name="email" placeholder="Your Email" required>
+                                        </div>
+                                        <button type="submit" class="tj-primary-btn btn-sm">
+                                            <span class="btn-text">Subscribe</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
