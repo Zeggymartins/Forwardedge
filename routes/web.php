@@ -89,33 +89,23 @@ Route::post('/ajax/send-otp', [AjaxAuthController::class, 'sendOtp'])->name('aja
 Route::post('/ajax/verify-otp', [AjaxAuthController::class, 'verifyOtp'])->name('ajax.verifyOtp');
 
 
-Route::get('/enroll/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('enroll.pricing');
-Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enroll.store');
-
-
 Route::middleware('auth')->group(function () {
-    Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
-    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success', [OrderController::class, 'success'])->name('checkout.success');
-    Route::get('/checkout/cancel', [OrderController::class, 'cancel'])->name('checkout.cancel');
+    Route::get('/enroll/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('enroll.pricing');
+    Route::post('/enroll/store', [EnrollmentController::class, 'store'])->name('enroll.store');
+});
+Route::middleware('auth')->group(function () {
+    Route::post('/checkout/store', [OrderController::class, 'store'])->name('checkout.store');
 });
 
+// Public routes
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
+Route::get('/payment/success', [OrderController::class, 'success'])->name('payment.success');
+Route::get('/payment/failed', [OrderController::class, 'cancel'])->name('payment.failed');
 // Public routes (no auth required)
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
-// Success/failure pages
-Route::get('/payment/success', function (Request $request) {
-    $reference = $request->query('reference');
-    return view('user.pages.payment_success', compact('reference'));
-})->name('payment.success');
-
-Route::get('/payment/failed', function () {
-    return view('user.pages.payment_failed');
-})->name('payment.failed');
-
-// Debug route (only in development)
-Route::get('/payment/debug', [PaymentController::class, 'debug'])->name('payment.debug');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

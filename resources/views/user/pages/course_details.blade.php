@@ -346,7 +346,8 @@
                                                 <div class="price-tag mb-3">
                                                     ₦{{ number_format($schedule->price, 0) }}
                                                 </div>
-                                                <button class="tj-primary-btn enroll-btn" data-schedule-id="{{ $schedule->id }}">
+                                                <button class="tj-primary-btn enroll-btn"  data-schedule-id="{{ $schedule->id }}"
+        data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}>
                                                     <span class="btn-text">Enroll Now</span>
                                                     <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                                                 </button>

@@ -495,21 +495,27 @@
             .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
     }
 
-/* === Enroll === */
 $(document).on('click', '.enroll-btn', function(e) {
     e.preventDefault();
+    let enrollUrl = $(this).data('enroll-url');
     let scheduleId = $(this).data('schedule-id');
+    
+    if (!enrollUrl || !scheduleId) {
+        console.error('Missing enrollment data on button');
+        alert('Error: Enrollment information missing');
+        return;
+    }
+    
     @auth
-    window.location.href = "/enroll/price/" + scheduleId;
+        window.location.href = enrollUrl;
     @else
-    $('#pending_action').val('enroll');
-    $('#pending_payload').val(JSON.stringify({
-        schedule_id: scheduleId
-    }));
-    $('#authModal').modal('show');
+        $('#pending_action').val('enroll');
+        $('#pending_payload').val(JSON.stringify({
+            schedule_id: scheduleId
+        }));
+        $('#authModal').modal('show');
     @endauth
 });
-
 
 
     /* === Auth Forms === */

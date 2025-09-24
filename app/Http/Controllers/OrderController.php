@@ -4,26 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\CartItem;
 use App\Models\Course;
+use App\Models\OrderItem;
 use App\Models\Orders;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
     public function store(Request $request)
     {
         try {
-            // ✅ Ensure user is logged in
+            // Check authentication
             if (!Auth::check()) {
                 return response()->json(['error' => 'You must be logged in to proceed.'], 401);
             }
 
             $user = Auth::user();
 
-            // ✅ Calculate amount from Cart Items instead of trusting request
+            // Get cart items and calculate total
             $cartItems = CartItem::where('user_id', $user->id)->with('course')->get();
 
             if ($cartItems->isEmpty()) {
@@ -34,88 +36,126 @@ class OrderController extends Controller
                 return $item->price * $item->quantity;
             });
 
-            // ✅ Create Order
-            $order = Orders::create([
-                'user_id'     => $user->id,
-                'status'      => 'pending',
-                'total_price' => $amount,
+            // Generate unique reference BEFORE any DB operations
+            $reference = 'FEC_' . strtoupper(Str::random(12));
+
+            Log::info('Starting payment initialization', [
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'reference' => $reference
             ]);
 
-            // (optional) Save items into order_items table if you have one
-            // foreach ($cartItems as $item) {
-            //     $order->items()->create([
-            //         'course_id' => $item->course_id,
-            //         'price'     => $item->price,
-            //         'quantity'  => $item->quantity,
-            //     ]);
-            // }
-
-            // ✅ Generate a unique reference before saving
-            $reference = uniqid('ref_'); // you control reference, safer for matching
-
-            // ✅ Create Payment record (polymorphic)
-            $payment = Payment::create([
-                'user_id'      => $user->id,
-                'payable_id'   => $order->id,
-                'payable_type' => Orders::class,
-                'amount'       => $amount,
-                'status'       => 'pending',
-                'method'       => 'paystack',
-                'currency'     => 'NGN',
-                'reference'    => $reference, // ✅ required upfront
-                'metadata'     => [
-                    'cart_items' => $cartItems->toArray(),
+            // 🔥 FIRST - Try Paystack initialization (NO DB writes yet)
+            $paystackResponse = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.paystack.secret'),
+                'Content-Type' => 'application/json',
+            ])->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $user->email,
+                'amount' => intval($amount * 100), // Convert to kobo
+                'reference' => $reference,
+                'currency' => 'NGN',
+                'callback_url' => route('payment.callback'),
+                'metadata' => [
+                    'user_id' => $user->id,
+                    'cart_items_count' => $cartItems->count(),
+                    'items' => $cartItems->map(function ($item) {
+                        return [
+                            'course_id' => $item->course_id,
+                            'course_name' => $item->course->name,
+                            'price' => $item->price,
+                            'quantity' => $item->quantity
+                        ];
+                    })->toArray()
                 ],
             ]);
 
-            // ✅ Initialize Paystack payment
-            $response = Http::withToken(config('services.paystack.secret'))
-                ->post('https://api.paystack.co/transaction/initialize', [
-                    'email'        => $user->email,
-                    'amount'       => $amount * 100, // convert to kobo
-                    'reference'    => $reference,    // ✅ send same reference to Paystack
-                    'callback_url' => route('payment.callback'),
+            // Check if Paystack initialization failed
+            if (!$paystackResponse->successful()) {
+                Log::error('Paystack initialization failed', [
+                    'status' => $paystackResponse->status(),
+                    'response' => $paystackResponse->body(),
+                    'reference' => $reference
                 ]);
-
-            if (!$response->successful()) {
-                Log::error('Paystack initialization failed', ['response' => $response->body()]);
-                return response()->json(['error' => 'Paystack initialization failed.'], 500);
+                return response()->json(['error' => 'Payment service unavailable. Please try again.'], 500);
             }
 
-            $data = $response->json();
+            $paystackData = $paystackResponse->json();
 
-            if (!isset($data['data']['authorization_url'])) {
-                Log::error('Invalid Paystack response', ['data' => $data]);
-                return response()->json(['error' => 'Invalid Paystack response'], 500);
+            if (!isset($paystackData['data']['authorization_url'])) {
+                Log::error('Invalid Paystack response - no authorization URL', ['data' => $paystackData]);
+                return response()->json(['error' => 'Payment initialization failed.'], 500);
             }
 
-            // (optional) update metadata with Paystack response
-            $payment->update([
-                'metadata' => array_merge($payment->metadata ?? [], [
-                    'paystack_response' => $data['data'],
-                ]),
+            // 🎉 SUCCESS! Now create DB records since Paystack accepted the transaction
+
+            // Create Order
+            $order = Orders::create([
+                'user_id' => $user->id,
+                'status' => 'pending', // Will change to 'paid' after verification
+                'total_price' => $amount,
+            ]);
+
+            // Create order items (if you have OrderItem model)
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'course_id' => $item->course_id,
+                    'price' => $item->price,
+                    'quantity' => $item->quantity,
+                ]);
+            }
+
+            // Create Payment record
+            $payment = Payment::create([
+                'user_id' => $user->id,
+                'payable_id' => $order->id,
+                'payable_type' => Orders::class,
+                'amount' => $amount,
+                'currency' => 'NGN',
+                'status' => 'pending', // Will change to 'successful' after verification
+                'reference' => $reference,
+                'method' => 'paystack',
+                'metadata' => [
+                    'cart_items_snapshot' => $cartItems->toArray(),
+                    'paystack_data' => $paystackData['data'],
+                    'initialized_at' => now()->toISOString(),
+                ],
+            ]);
+
+            Log::info('Order and payment created successfully', [
+                'order_id' => $order->id,
+                'payment_id' => $payment->id,
+                'reference' => $reference
             ]);
 
             return response()->json([
-                'authorization_url' => $data['data']['authorization_url'],
+                'success' => true,
+                'authorization_url' => $paystackData['data']['authorization_url'],
+                'reference' => $reference,
+                'order_id' => $order->id
             ]);
         } catch (\Exception $e) {
-            Log::error('Checkout failed: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+            Log::error('Checkout failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id()
             ]);
-            return response()->json(['error' => 'An unexpected server error occurred.'], 500);
+
+            return response()->json([
+                'error' => 'An unexpected error occurred. Please try again.',
+                'debug' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
     }
 
-
-
     public function success(Request $request)
     {
-        return view('checkout.success');
+        $reference = $request->query('reference');
+        return view('user.pages.payment_success', compact('reference'));
     }
 
     public function cancel()
     {
-        return view('checkout.cancel');
+        return view('user.pages.payment_failed');
     }
 }

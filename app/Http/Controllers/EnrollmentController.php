@@ -8,6 +8,8 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class EnrollmentController extends Controller
 {
@@ -20,59 +22,63 @@ class EnrollmentController extends Controller
 
         $user = Auth::user();
         if (!$user) {
-            return response()->json(['status' => 'auth_required', 'message' => 'Please login first'], 401);
+            return response()->json(['error' => 'Please login first'], 401);
         }
 
         $schedule = CourseSchedule::findOrFail($data['schedule_id']);
 
-        // ❌ Block enrollment if bootcamp has started
-        if (Carbon::now()->gte($schedule->start_date)) {
-            return response()->json([
-                'status' => 'closed',
-                'message' => 'Enrollment closed. This bootcamp has already started.',
-            ], 403);
-        }
-
         $total = $schedule->price;
-        $initialPayment = $total;
-        $balance = 0;
+        $initialPayment = $data['payment_plan'] === 'partial'
+            ? round($total * 0.7, 2)
+            : $total;
 
-        if ($data['payment_plan'] === 'partial') {
-            $initialPayment = round($total * 0.7, 2); // 70% upfront
-            $balance = $total - $initialPayment;
-        }
-
-        // Create Enrollment
-        $enrollment = Enrollment::create([
-            'user_id'           => $user->id,
-            'course_schedule_id' => $schedule->id,
-            'payment_plan'      => $data['payment_plan'],
-            'total_amount'      => $total,
-            'balance'           => $balance,
-            'status'            => 'pending', // will change to active after payment verification
-        ]);
-
-        // Record initial payment (gateway integration will update `status`)
-        Payment::create([
-            'enrollment_id' => $enrollment->id,
+        // ✅ Create Payment intent (no enrollment yet)
+        $payment = Payment::create([
+            'user_id'       => $user->id,
+            'payable_id'    => $schedule->id, // temporarily link to schedule
+            'payable_type'  => CourseSchedule::class,
             'amount'        => $initialPayment,
             'status'        => 'pending',
-            'method'        => 'gateway', // e.g. Paystack, Stripe, etc.
+            'method'        => 'paystack',
+            'reference'     => uniqid('pay_'),
+            'currency'      => 'NGN',
+            'metadata'      => [
+                'schedule_id'  => $schedule->id,
+                'payment_plan' => $data['payment_plan'],
+                'total'        => $total,
+            ],
         ]);
 
+        // ✅ Initialize Paystack payment
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . config('services.paystack.secret'),
+            'Accept' => 'application/json',
+        ])->post('https://api.paystack.co/transaction/initialize', [
+            'email'        => $user->email,
+            'amount'       => $initialPayment * 100, // kobo
+            'reference'    => $payment->reference,
+            'callback_url' => route('payment.callback'),
+        ]);
+
+        if (!$response->successful()) {
+            Log::error('Paystack initialization failed', ['response' => $response->body()]);
+            return response()->json(['error' => 'Payment initialization failed.'], 500);
+        }
+
+        $data = $response->json();
+
+        if (!isset($data['data']['authorization_url'])) {
+            return response()->json(['error' => 'Invalid Paystack response'], 500);
+        }
+
         return response()->json([
-            'status' => 'success',
-            'message' => 'Enrollment initiated. Redirecting to payment gateway...',
-            'enrollment' => $enrollment,
-            'payment' => [
-                'amount' => $initialPayment,
-                'status' => 'pending',
-            ]
+            'authorization_url' => $data['data']['authorization_url'],
+            'reference' => $payment->reference,
         ]);
     }
-    public function pricingPage($scheduleId)
+
+    public function pricingPage(CourseSchedule $schedule)
     {
-        $schedule = CourseSchedule::findOrFail($scheduleId);
         return view('user.pages.pricing', compact('schedule'));
     }
 }
