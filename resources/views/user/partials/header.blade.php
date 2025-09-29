@@ -18,7 +18,7 @@
                                    <li><a href="{{ route('about') }}">About Us</a></li>
                                    <li><a href="{{ route('academy') }}">Academy</a></li>
                                    <li><a href="{{ route('services') }}">Services</a></li>
-                                   <li><a href="{{ route('events') }}">Events</a></li>
+                                   <li><a href="{{ route('events.index') }}">Events</a></li>
                                    <li><a href="{{ route('shop') }}">Shop</a></li>
                                    <li><a href="{{ route('gallery') }}">Gallery</a></li>
                                    <li><a href="{{ route('blog') }}">Blog</a></li>
@@ -167,7 +167,7 @@
                                    <li><a href="{{ route('about') }}">About Us</a></li>
                                    <li><a href="{{ route('academy') }}">Academy</a></li>
                                    <li><a href="{{ route('services') }}">Services</a></li>
-                                   <li><a href="{{ route('events') }}">Events</a></li>
+                                   <li><a href="{{ route('events.index') }}">Events</a></li>
                                    <li><a href="{{ route('shop') }}">Shop</a></li>
                                    <li><a href="{{ route('gallery') }}">Gallery</a></li>
                                    <li><a href="{{ route('blog') }}">Blog</a></li>

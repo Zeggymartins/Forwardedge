@@ -20,10 +20,6 @@ return new class extends Migration
                 'list',
                 'image',
                 'feature',
-                'speaker',
-                'schedule',
-                'ticket',
-                'sponsor'
             ]);
             $table->longText('content'); 
             $table->integer('position')->default(0);

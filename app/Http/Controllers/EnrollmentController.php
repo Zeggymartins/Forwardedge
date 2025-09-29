@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 
 class EnrollmentController extends Controller
 {
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -35,27 +38,29 @@ class EnrollmentController extends Controller
         // ✅ Create Payment intent (no enrollment yet)
         $payment = Payment::create([
             'user_id'       => $user->id,
-            'payable_id'    => $schedule->id, // temporarily link to schedule
+            'payable_id'    => $schedule->id, // temp, enrollment later
             'payable_type'  => CourseSchedule::class,
             'amount'        => $initialPayment,
             'status'        => 'pending',
             'method'        => 'paystack',
-            'reference'     => uniqid('pay_'),
+            'reference'     => Str::uuid(), // safer than uniqid
             'currency'      => 'NGN',
             'metadata'      => [
-                'schedule_id'  => $schedule->id,
-                'payment_plan' => $data['payment_plan'],
-                'total'        => $total,
+                'schedule_id'   => $schedule->id,
+                'payment_plan'  => $data['payment_plan'],
+                'total'         => $total,
+                'initial'       => $initialPayment,
+                'user_id'       => $user->id,
             ],
         ]);
 
         // ✅ Initialize Paystack payment
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . config('services.paystack.secret'),
-            'Accept' => 'application/json',
+            'Accept'        => 'application/json',
         ])->post('https://api.paystack.co/transaction/initialize', [
             'email'        => $user->email,
-            'amount'       => $initialPayment * 100, // kobo
+            'amount'       => $initialPayment * 100, // in kobo
             'reference'    => $payment->reference,
             'callback_url' => route('payment.callback'),
         ]);
@@ -65,17 +70,18 @@ class EnrollmentController extends Controller
             return response()->json(['error' => 'Payment initialization failed.'], 500);
         }
 
-        $data = $response->json();
+        $resData = $response->json();
 
-        if (!isset($data['data']['authorization_url'])) {
+        if (!isset($resData['data']['authorization_url'])) {
             return response()->json(['error' => 'Invalid Paystack response'], 500);
         }
 
         return response()->json([
-            'authorization_url' => $data['data']['authorization_url'],
-            'reference' => $payment->reference,
+            'authorization_url' => $resData['data']['authorization_url'],
+            'reference'         => $payment->reference,
         ]);
     }
+
 
     public function pricingPage(CourseSchedule $schedule)
     {

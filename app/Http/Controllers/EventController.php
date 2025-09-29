@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\EventTicket;
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
@@ -113,50 +116,88 @@ class EventController extends Controller
      * @param string $slug
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function submitRegistration(Request $request, string $slug)
+    public function submitRegistration(Request $request)
     {
-        $event = Event::where('slug', $slug)->firstOrFail();
-
-        $validatedData = $request->validate([
-            'ticket_id' => 'required|exists:event_tickets,id',
+        $request->validate([
+            'event_id'   => 'required|exists:events,id',
+            'ticket_id'  => 'required|exists:event_tickets,id',
             'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'company' => 'nullable|string|max:255',
-            'job_title' => 'nullable|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|max:255',
+            'phone'      => 'nullable|string|max:20',
+            'company'    => 'nullable|string|max:255',
+            'job_title'  => 'nullable|string|max:255',
             'special_requirements' => 'nullable|string|max:500',
         ]);
 
-        // Use a database transaction to prevent race conditions when updating the ticket count
-        return DB::transaction(function () use ($validatedData, $event) {
-            $ticket = EventTicket::findOrFail($validatedData['ticket_id']);
+        $eventId  = $request->event_id;
+        $ticketId = $request->ticket_id;
 
-            // Re-check ticket availability just before creating the registration
-            if (!$ticket->is_available) {
-                return redirect()->back()->with('error', 'The selected ticket is no longer available.');
-            }
+        $ticket = EventTicket::findOrFail($ticketId);
 
-            // Create the registration record
-            EventRegistration::create([
-                'event_id' => $event->id,
-                'ticket_id' => $ticket->id,
-                'first_name' => $validatedData['first_name'],
-                'last_name' => $validatedData['last_name'],
-                'email' => $validatedData['email'],
-                'phone' => $validatedData['phone'],
-                'company' => $validatedData['company'],
-                'job_title' => $validatedData['job_title'],
-                'special_requirements' => $validatedData['special_requirements'],
-                'registration_code' => Str::uuid(),
-                'registered_at' => now(),
-            ]);
+        // Check availability
+        if ($ticket->quantity_available <= 0) {
+            return back()->with('error', 'This ticket is sold out.');
+        }
 
-            // Increment the quantity sold on the ticket
-            $ticket->increment('quantity_sold');
+        $amount = $ticket->price;
 
-            return redirect()->route('events.show', $event->slug)
-                ->with('success', 'Thank you! Your registration has been submitted successfully.');
-        });
+        // Generate unique reference
+        $reference = Str::uuid()->toString();
+
+        // Store payment with registration metadata (not creating registration yet)
+        $payment = Payment::create([
+            'user_id'   => Auth::id(),
+            'reference' => $reference,
+            'status'    => 'pending',
+            'amount'    => $amount,
+            'payable_type' => EventTicket::class,
+            'payable_id'   => $ticket->id,
+            'metadata'  => [
+                'event_id'            => $eventId,
+                'first_name'          => $request->first_name,
+                'last_name'           => $request->last_name,
+                'email'               => $request->email,
+                'phone'               => $request->phone,
+                'company'             => $request->company,
+                'job_title'           => $request->job_title,
+                'special_requirements' => $request->special_requirements,
+            ]
+        ]);
+
+        // Initialize Paystack transaction
+        $paystackSecret = config('services.paystack.secret');
+        $callbackUrl = route('payment.callback', ['reference' => $reference]);
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $paystackSecret,
+        ])->post('https://api.paystack.co/transaction/initialize', [
+            'email'       => $request->email,
+            'amount'      => $amount * 100, // Paystack expects kobo
+            'reference'   => $reference,
+            'callback_url' => $callbackUrl,
+            'metadata'    => [
+                'custom_fields' => [
+                    [
+                        'display_name'  => 'Event',
+                        'variable_name' => 'event_id',
+                        'value'         => $eventId,
+                    ],
+                    [
+                        'display_name'  => 'Ticket',
+                        'variable_name' => 'ticket_id',
+                        'value'         => $ticketId,
+                    ]
+                ]
+            ]
+        ]);
+
+        if (!$response->successful()) {
+            return back()->with('error', 'Could not initialize payment. Please try again.');
+        }
+
+        $data = $response->json('data');
+
+        return redirect($data['authorization_url']);
     }
 }

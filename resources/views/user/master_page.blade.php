@@ -8,15 +8,13 @@
     <meta name="description" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-
-
     <!-- Site Title -->
     <title>@yield('title')</title>
 
     <!-- Place favicon.ico in the root directory -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/assets/images/fav.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
     <!-- CSS here -->
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/font-awesome-pro.min.css') }}">
@@ -34,7 +32,6 @@
             content: "";
             display: inline-block;
             width: 24px;
-            /* size of your icon */
             height: 24px;
             background: url('{{ asset('frontend/assets/images/fav.png') }}') no-repeat center center;
             background-size: contain;
@@ -45,7 +42,6 @@
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
         }
 
-        /* make sure the button cursor is pointer */
         .header-button .tj-primary-btn {
             cursor: pointer;
         }
@@ -72,6 +68,15 @@
         #toast-container>.toast-warning {
             background-color: #ffc107 !important;
             color: #212529 !important;
+        }
+
+        /* Modal z-index fix */
+        .modal {
+            z-index: 9999 !important;
+        }
+        
+        .modal-backdrop {
+            z-index: 9998 !important;
         }
     </style>
     @stack('styles')
@@ -122,8 +127,7 @@
                 </div>
                 <div class="offcanvas-text">
                     <p>Developing personalize our customer journeys to increase satisfaction & loyalty of our expansion
-                        recognized
-                        by industry leaders.</p>
+                        recognized by industry leaders.</p>
                 </div>
                 <div class="hamburger-search-area">
                     <h5 class="hamburger-title">Search Now!</h5>
@@ -158,15 +162,12 @@
                 <div class="social-links style-3">
                     <ul>
                         <li><a href="https://www.facebook.com/" target="_blank"><i
-                                    class="fa-brands fa-facebook-f"></i></a>
-                        </li>
+                                    class="fa-brands fa-facebook-f"></i></a></li>
                         <li><a href="https://www.instagram.com/" target="_blank"><i
-                                    class="fa-brands fa-instagram"></i></a>
-                        </li>
+                                    class="fa-brands fa-instagram"></i></a></li>
                         <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
                         <li><a href="https://www.linkedin.com/" target="_blank"><i
-                                    class="fa-brands fa-linkedin-in"></i></a>
-                        </li>
+                                    class="fa-brands fa-linkedin-in"></i></a></li>
                     </ul>
                 </div>
             </div>
@@ -215,27 +216,26 @@
                 <div class="social-links style-3">
                     <ul>
                         <li><a href="https://www.facebook.com/" target="_blank"><i
-                                    class="fa-brands fa-facebook-f"></i></a>
-                        </li>
+                                    class="fa-brands fa-facebook-f"></i></a></li>
                         <li><a href="https://www.instagram.com/" target="_blank"><i
-                                    class="fa-brands fa-instagram"></i></a>
-                        </li>
+                                    class="fa-brands fa-instagram"></i></a></li>
                         <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
                         <li><a href="https://www.linkedin.com/" target="_blank"><i
-                                    class="fa-brands fa-linkedin-in"></i></a>
-                        </li>
+                                    class="fa-brands fa-linkedin-in"></i></a></li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
     <!-- end: Hamburger Menu -->
-    <div class="modal fade" id="authModal" tabindex="-1">
+    
+    <!-- Auth Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Welcome</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 id="authModalLabel" class="modal-title">Welcome</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     {{-- Nav tabs --}}
@@ -245,13 +245,14 @@
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
                                 href="#registerTab">Register</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#otpTab">OTP</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#forgotTab">Forgot</a>
+                        </li>
                     </ul>
 
                     <div class="tab-content mt-3">
                         {{-- Login --}}
                         <div class="tab-pane fade show active" id="loginTab">
-                            <form id="loginForm">
-                                @csrf
+                            <form id="loginForm">@csrf
                                 <input type="email" name="email" class="form-control mb-2" placeholder="Email"
                                     required>
                                 <input type="password" name="password" class="form-control mb-2"
@@ -266,8 +267,7 @@
 
                         {{-- Register --}}
                         <div class="tab-pane fade" id="registerTab">
-                            <form id="registerForm">
-                                @csrf
+                            <form id="registerForm">@csrf
                                 <input type="text" name="name" class="form-control mb-2"
                                     placeholder="Full Name" required>
                                 <input type="email" name="email" class="form-control mb-2" placeholder="Email"
@@ -285,15 +285,40 @@
 
                         {{-- OTP --}}
                         <div class="tab-pane fade" id="otpTab">
-                            <form id="otpForm">
-                                @csrf
+                            <form id="otpForm">@csrf
                                 <input type="email" name="email" class="form-control mb-2" placeholder="Email"
                                     required>
                                 <input type="text" name="otp" class="form-control mb-2"
                                     placeholder="OTP Code">
+                                <div id="otpMessage"></div>
                                 <button type="button" id="sendOtpBtn" class="btn btn-info w-100 mb-2">Send
                                     OTP</button>
                                 <button type="submit" class="btn btn-warning w-100">Verify OTP</button>
+                            </form>
+                        </div>
+
+                        {{-- Forgot Password --}}
+                        <div class="tab-pane fade" id="forgotTab">
+                            <form id="forgotForm">@csrf
+                                <input type="email" name="email" class="form-control mb-2"
+                                    placeholder="Your Email" required>
+                                <div id="forgotPasswordMessage"></div>
+                                <button type="submit" class="btn btn-secondary w-100">Send Reset Link</button>
+                            </form>
+                        </div>
+
+                        {{-- Reset Password (if shown in modal) --}}
+                        <div class="tab-pane fade" id="resetTab">
+                            <form id="resetPasswordForm">@csrf
+                                <input type="hidden" name="token" id="resetToken">
+                                <input type="email" name="email" class="form-control mb-2"
+                                    placeholder="Your Email" required>
+                                <input type="password" name="password" class="form-control mb-2"
+                                    placeholder="New Password" required>
+                                <input type="password" name="password_confirmation" class="form-control mb-2"
+                                    placeholder="Confirm Password" required>
+                                <div id="resetPasswordMessage"></div>
+                                <button type="submit" class="btn btn-success w-100">Reset Password</button>
                             </form>
                         </div>
                     </div>
@@ -311,19 +336,18 @@
 
                 @yield('main')
                 @include('user.partials.footer')
+            </main>
         </div>
-        </main>
-
     </div>
 
     <input type="hidden" id="pending_action" value="">
     <input type="hidden" id="pending_payload" value="{}">
+    
     <!-- JS here -->
-    @yield('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="{{ asset('frontend/assets/js/jquery.min.js') }}"></script>
+    
     <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/ScrollSmoother.js') }}"></script>
@@ -340,297 +364,389 @@
     <script src="{{ asset('frontend/assets/js/range-slider.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
 
-  <script>
-    /* === Setup === */
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-    // Toastr defaults
-    toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: "toast-top-right",
-        timeOut: "3000"
-    };
-
-    /* === UI Updaters === */
-    function updateCartUI(cart) {
-        if (!Array.isArray(cart)) cart = Object.values(cart);
-
-        document.querySelectorAll('#cart-count').forEach(el => el.innerText = cart.length);
-
-        let dropdown = document.querySelector('.cart-dropdown .custom-scroll');
-        if (!dropdown) return;
-        dropdown.innerHTML = '';
-
-        let total = 0;
-        cart.forEach(item => {
-            total += (item.price * item.quantity);
-            dropdown.innerHTML += `
-        <li class="d-flex align-items-center mb-2">
-            <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
-            <div>
-              <strong>${item.name}</strong>
-              <div>${item.quantity} × ₦${Number(item.price).toLocaleString()}</div>
-            </div>
-            <button class="btn btn-sm btn-link ms-auto" onclick="removeFromCart(${item.course_id})"><i class="fas fa-times"></i></button>
-        </li>`;
+    <script>
+        // Setup
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
 
-        let container = document.querySelector('.cart-dropdown .cart-btn');
-        if (container) {
-            container.innerHTML = `
-        <div class="p-2">
-            <div class="mb-2"><strong>Total:</strong> ₦${Number(total).toLocaleString()}</div>
-            <a href="{{ route('user.cart.index') }}" class="btn btn-primary btn-sm w-100">View cart</a>
-        </div>`;
+        // Toastr defaults
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            timeOut: "7000"
+        };
+
+        // Modal helper function
+        function showAuthModal(message = 'Please login to continue') {
+            console.log('Showing auth modal:', message);
+            toastr.info(message);
+            $('#authModal').modal('show');
         }
-    }
 
-    function updateWishlistUI(wishlist) {
-        if (!Array.isArray(wishlist)) wishlist = Object.values(wishlist);
+        // UI Updaters
+        function updateCartUI(cart) {
+            if (!Array.isArray(cart)) cart = Object.values(cart);
+            document.querySelectorAll('#cart-count').forEach(el => el.innerText = cart.length);
 
-        document.querySelectorAll('#wishlist-count').forEach(el => el.innerText = wishlist.length);
+            let dropdown = document.querySelector('.cart-dropdown .custom-scroll');
+            if (!dropdown) return;
+            dropdown.innerHTML = '';
 
-        let dropdown = document.querySelector('.wishlist-dropdown .custom-scroll');
-        if (!dropdown) return;
-        dropdown.innerHTML = '';
-
-        if (wishlist.length === 0) {
-            dropdown.innerHTML = `<li class="text-center p-3">Your wishlist is empty</li>`;
-        } else {
-            wishlist.forEach(item => {
+            let total = 0;
+            cart.forEach(item => {
+                total += (item.price * item.quantity);
                 dropdown.innerHTML += `
-            <li class="d-flex align-items-center mb-2">
-                <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
-                <div>
-                  <strong>${item.name}</strong>
-                  <div>₦${item.price ? Number(item.price).toLocaleString() : '—'}</div>
-                </div>
-                <button class="btn btn-sm btn-link ms-auto" onclick="removeFromWishlist(${item.course_id})"><i class="fas fa-times"></i></button>
-            </li>`;
+                    <li class="d-flex align-items-center mb-2">
+                        <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
+                        <div>
+                          <strong>${item.name}</strong>
+                          <div>${item.quantity} × ₦${Number(item.price).toLocaleString()}</div>
+                        </div>
+                        <button class="btn btn-sm btn-link ms-auto" onclick="removeFromCart(${item.course_id})"><i class="fas fa-times"></i></button>
+                    </li>`;
             });
 
-            let container = document.querySelector('.wishlist-dropdown .cart-btn');
+            let container = document.querySelector('.cart-dropdown .cart-btn');
             if (container) {
-                container.innerHTML =
-                    `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
+                container.innerHTML = `
+                    <div class="p-2">
+                        <div class="mb-2"><strong>Total:</strong> ₦${Number(total).toLocaleString()}</div>
+                        <a href="{{ route('user.cart.index') }}" class="btn btn-primary btn-sm w-100">View cart</a>
+                    </div>`;
             }
         }
-    }
 
-    /* === Core actions === */
-    function addToCart(courseId, quantity = 1) {
-        $.post("{{ route('user.cart.add') }}", {
-                course_id: courseId,
-                quantity
-            })
-            .done(res => {
-                toastr.success(res.message || 'Added to cart');
-                updateCartUI(res.cart);
-                updateCartCount(); // ✅ live update
-            })
-            .fail(xhr => {
-                if (xhr.status === 401) {
-                    $('#authModal').modal('show');
-                    $('#pending_action').val('add_to_cart');
-                    $('#pending_payload').val(JSON.stringify({
-                        course_id: courseId,
-                        quantity
-                    }));
-                    toastr.info('Please register or login first');
-                    return;
+        function updateWishlistUI(wishlist) {
+            if (!Array.isArray(wishlist)) wishlist = Object.values(wishlist);
+            document.querySelectorAll('#wishlist-count').forEach(el => el.innerText = wishlist.length);
+
+            let dropdown = document.querySelector('.wishlist-dropdown .custom-scroll');
+            if (!dropdown) return;
+            dropdown.innerHTML = '';
+
+            if (wishlist.length === 0) {
+                dropdown.innerHTML = `<li class="text-center p-3">Your wishlist is empty</li>`;
+            } else {
+                wishlist.forEach(item => {
+                    dropdown.innerHTML += `
+                        <li class="d-flex align-items-center mb-2">
+                            <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
+                            <div>
+                              <strong>${item.name}</strong>
+                              <div>₦${item.price ? Number(item.price).toLocaleString() : '—'}</div>
+                            </div>
+                            <button class="btn btn-sm btn-link ms-auto" onclick="removeFromWishlist(${item.course_id})"><i class="fas fa-times"></i></button>
+                        </li>`;
+                });
+
+                let container = document.querySelector('.wishlist-dropdown .cart-btn');
+                if (container) {
+                    container.innerHTML = `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
                 }
-                toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
-            });
-    }
+            }
+        }
 
-    function removeFromCart(courseId) {
-        $.post("{{ route('user.cart.remove') }}", {
-                course_id: courseId
-            })
-            .done(res => {
-                toastr.success(res.message || 'Removed from cart');
-                updateCartUI(res.cart);
-                updateCartCount(); // ✅ live update
-            })
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
-    }
+        // Core actions
+        function addToCart(courseId, quantity = 1) {
+            console.log('Adding to cart:', courseId, quantity);
+            
+            $.post("{{ route('user.cart.add') }}", {
+                    course_id: courseId,
+                    quantity: quantity
+                })
+                .done(res => {
+                    toastr.success(res.message || 'Added to cart');
+                    updateCartUI(res.cart);
+                    updateCartCount();
+                })
+                .fail(xhr => {
+                    console.log('Cart add failed:', xhr.status, xhr.responseJSON);
+                    if (xhr.status === 401 || xhr.status === 403) {
+                        $('#pending_action').val('add_to_cart');
+                        $('#pending_payload').val(JSON.stringify({
+                            course_id: courseId,
+                            quantity: quantity
+                        }));
+                        showAuthModal('Please login to add items to cart');
+                        return;
+                    }
+                    toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+                });
+        }
 
-    function addToWishlist(courseId) {
-        $.post("{{ route('user.wishlist.add') }}", {
-                course_id: courseId
-            })
-            .done(res => {
-                toastr.success(res.message || 'Added to wishlist');
-                updateWishlistUI(res.wishlist);
-                updateWishlistCount(); // ✅ live update
-            })
-            .fail(xhr => {
-                if (xhr.status === 401) {
-                    $('#authModal').modal('show');
-                    $('#pending_action').val('add_to_wishlist');
-                    $('#pending_payload').val(JSON.stringify({
-                        course_id: courseId
-                    }));
-                    toastr.info('Please register or login first');
-                    return;
+        function removeFromCart(courseId) {
+            $.post("{{ route('user.cart.remove') }}", {
+                    course_id: courseId
+                })
+                .done(res => {
+                    toastr.success(res.message || 'Removed from cart');
+                    updateCartUI(res.cart);
+                    updateCartCount();
+                })
+                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
+        }
+
+        function addToWishlist(courseId) {
+            console.log('Adding to wishlist:', courseId);
+            
+            $.post("{{ route('user.wishlist.add') }}", {
+                    course_id: courseId
+                })
+                .done(res => {
+                    toastr.success(res.message || 'Added to wishlist');
+                    updateWishlistUI(res.wishlist);
+                    updateWishlistCount();
+                })
+                .fail(xhr => {
+                    console.log('Wishlist add failed:', xhr.status, xhr.responseJSON);
+                    if (xhr.status === 401 || xhr.status === 403) {
+                        $('#pending_action').val('add_to_wishlist');
+                        $('#pending_payload').val(JSON.stringify({
+                            course_id: courseId
+                        }));
+                        showAuthModal('Please login to add items to wishlist');
+                        return;
+                    }
+                    toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
+                });
+        }
+
+        function removeFromWishlist(courseId) {
+            $.post("{{ route('user.wishlist.remove') }}", {
+                    course_id: courseId
+                })
+                .done(res => {
+                    toastr.success(res.message || 'Removed from wishlist');
+                    updateWishlistUI(res.wishlist);
+                    updateWishlistCount();
+                })
+                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
+        }
+
+        // Event Handlers
+        $(document).on('click', '.cart-button', function(e) {
+            e.preventDefault();
+            console.log('Cart button clicked');
+            
+            let courseId = $(this).data('course-id');
+            let quantity = $(this).data('quantity') || 1;
+            
+            console.log('Course ID:', courseId, 'Quantity:', quantity);
+            
+            if (!courseId) {
+                console.error('Course ID not found on cart button');
+                toastr.error('Course ID not found');
+                return;
+            }
+            
+            addToCart(courseId, quantity);
+        });
+
+        $(document).on('click', '.product-add-wishlist-btn button', function(e) {
+            e.preventDefault();
+            console.log('Wishlist button clicked');
+            
+            // Find course ID from the product container
+            let courseId = $(this).closest('.tj-product').find('[data-course-id]').data('course-id');
+            
+            console.log('Course ID for wishlist:', courseId);
+            
+            if (!courseId) {
+                console.error('Course ID not found for wishlist');
+                toastr.error('Course ID not found');
+                return;
+            }
+            
+            addToWishlist(courseId);
+        });
+
+        $(document).on('click', '.enroll-btn', function(e) {
+            e.preventDefault();
+            console.log('Enroll button clicked');
+            
+            let enrollUrl = $(this).data('enroll-url');
+            let scheduleId = $(this).data('schedule-id');
+
+            console.log('Enroll URL:', enrollUrl, 'Schedule ID:', scheduleId);
+
+            if (!enrollUrl && !scheduleId) {
+                console.error('Missing enrollment data on button');
+                toastr.error('Enrollment information missing');
+                return;
+            }
+
+            @auth
+                if (enrollUrl) {
+                    window.location.href = enrollUrl;
+                } else if (scheduleId) {
+                 window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
                 }
-                toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
-            });
-    }
+            @else
+                $('#pending_action').val('enroll');
+                $('#pending_payload').val(JSON.stringify({
+                    schedule_id: scheduleId,
+                    enroll_url: enrollUrl
+                }));
+                showAuthModal('Please login to enroll in this course');
+            @endauth
+        });
 
-    function removeFromWishlist(courseId) {
-        $.post("{{ route('user.wishlist.remove') }}", {
-                course_id: courseId
-            })
-            .done(res => {
-                toastr.success(res.message || 'Removed from wishlist');
-                updateWishlistUI(res.wishlist);
-                updateWishlistCount(); // ✅ live update
-            })
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
-    }
+        // Auth Forms
+        $('#registerForm').submit(function(e) {
+            e.preventDefault();
+            $.post("{{ route('ajax.register') }}", $(this).serialize())
+                .done(res => {
+                    toastr.success(res.message);
+                    $('#authModal').modal('hide');
+                    retryPendingAction();
+                    updateCartCount();
+                    updateWishlistCount();
+                })
+                .fail(xhr => {
+                    let message = xhr.responseJSON?.message || 'Registration failed';
+                    if (xhr.responseJSON?.errors) {
+                        message = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                    }
+                    toastr.error(message);
+                });
+        });
 
-$(document).on('click', '.enroll-btn', function(e) {
-    e.preventDefault();
-    let enrollUrl = $(this).data('enroll-url');
-    let scheduleId = $(this).data('schedule-id');
-    
-    if (!enrollUrl || !scheduleId) {
-        console.error('Missing enrollment data on button');
-        alert('Error: Enrollment information missing');
-        return;
-    }
-    
-    @auth
-        window.location.href = enrollUrl;
-    @else
-        $('#pending_action').val('enroll');
-        $('#pending_payload').val(JSON.stringify({
-            schedule_id: scheduleId
-        }));
-        $('#authModal').modal('show');
-    @endauth
-});
+        $('#loginForm').submit(function(e) {
+            e.preventDefault();
+            $.post("{{ route('ajax.login') }}", $(this).serialize())
+                .done(res => {
+                    toastr.success(res.message);
+                    $('#authModal').modal('hide');
+                    retryPendingAction();
+                    updateCartCount();
+                    updateWishlistCount();
+                })
+                .fail(xhr => {
+                    let message = xhr.responseJSON?.message || 'Login failed';
+                    toastr.error(message);
+                });
+        });
 
+        $('#sendOtpBtn').click(function() {
+            $.post("{{ route('ajax.sendOtp') }}", $('#otpForm').serialize())
+                .done(res => {
+                    toastr.success(res.message);
+                    $('#otpMessage').html(`<div class="text-success small">${res.message}</div>`);
+                })
+                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
+        });
 
-    /* === Auth Forms === */
-    $('#registerForm').submit(function(e) {
-        e.preventDefault();
-        $.post("{{ route('ajax.register') }}", $(this).serialize())
-            .done(res => {
-                toastr.success(res.message);
-                $('#authModal').modal('hide');
-                retryPendingAction();
-                updateCartCount();
-                updateWishlistCount();
-            })
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Registration failed'));
-    });
+        $('#otpForm').submit(function(e) {
+            e.preventDefault();
+            $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
+                .done(res => {
+                    toastr.success(res.message);
+                    $('#authModal').modal('hide');
+                    retryPendingAction();
+                    updateCartCount();
+                    updateWishlistCount();
+                })
+                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'OTP verification failed'));
+        });
 
-    $('#loginForm').submit(function(e) {
-        e.preventDefault();
-        $.post("{{ route('ajax.login') }}", $(this).serialize())
-            .done(res => {
-                toastr.success(res.message);
-                $('#authModal').modal('hide');
-                retryPendingAction();
-                updateCartCount();
-                updateWishlistCount();
-            })
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Login failed'));
-    });
+        $('#forgotForm').submit(function(e) {
+            e.preventDefault();
+            $.post("{{ route('password.email') }}", $(this).serialize())
+                .done(res => $('#forgotPasswordMessage').html(
+                    `<div class="text-success small">${res.message}</div>`))
+                .fail(xhr => $('#forgotPasswordMessage').html(
+                    `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
+                    ));
+        });
 
-    /* === OTP === */
-    $('#sendOtpBtn').click(function() {
-        $.post("{{ route('ajax.sendOtp') }}", $('#otpForm').serialize())
-            .done(res => toastr.success(res.message))
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
-    });
+        $('#resetPasswordForm').submit(function(e) {
+            e.preventDefault();
+            $.post("{{ route('password.update') }}", $(this).serialize())
+                .done(res => $('#resetPasswordMessage').html(
+                    `<div class="text-success small">${res.message}</div>`))
+                .fail(xhr => $('#resetPasswordMessage').html(
+                    `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
+                    ));
+        });
 
-    $('#otpForm').submit(function(e) {
-        e.preventDefault();
-        $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
-            .done(res => {
-                toastr.success(res.message);
-                $('#authModal').modal('hide');
-                retryPendingAction();
-                updateCartCount();
-                updateWishlistCount();
-            })
-            .fail(xhr => toastr.error(xhr.responseJSON?.message || 'OTP verification failed'));
-    });
+        // Pending Actions
+        function retryPendingAction() {
+            try {
+                let action = $('#pending_action').val();
+                let payload = JSON.parse($('#pending_payload').val() || '{}');
 
-    /* === Pending Actions === */
-    function retryPendingAction() {
-        try {
-            let action = $('#pending_action').val();
-            let payload = JSON.parse($('#pending_payload').val() || '{}');
+                console.log('Retrying pending action:', action, payload);
 
-            if (action === 'add_to_cart' && payload.course_id) {
-                addToCart(payload.course_id, payload.quantity || 1);
-            } else if (action === 'add_to_wishlist' && payload.course_id) {
-                addToWishlist(payload.course_id);
-            } else if (action === 'enroll' && payload.course_id) {
+                if (action === 'add_to_cart' && payload.course_id) {
+                    addToCart(payload.course_id, payload.quantity || 1);
+                } else if (action === 'add_to_wishlist' && payload.course_id) {
+                    addToWishlist(payload.course_id);
+                } else if (action === 'enroll') {
+                    if (payload.enroll_url) {
+                        window.location.href = payload.enroll_url;
+                     } else if (action === 'enroll' && payload.course_id) {
                 window.location.href = "/enroll/price/" + payload.course_id;
             }
+                }
 
-            $('#pending_action').val('');
-            $('#pending_payload').val('{}');
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    /* === Live counts === */
-    function updateCartCount() {
-        $.get("{{ route('user.cart.count') }}", function(data) {
-            if (data.cart_count !== undefined) {
-                $('#cart-count').text(data.cart_count);
+                $('#pending_action').val('');
+                $('#pending_payload').val('{}');
+            } catch (e) {
+                console.error('Error retrying pending action:', e);
             }
-        });
-    }
-
-    function updateWishlistCount() {
-        $.get("{{ route('user.wishlist.count') }}", function(data) {
-            if (data.wishlist_count !== undefined) {
-                $('#wishlist-count').text(data.wishlist_count);
-            }
-        });
-    }
-
-    /* === Init === */
-    $(document).ready(function() {
-        updateCartCount();
-        updateWishlistCount();
-    });
-
-    /* === Dropdown fix === */
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof bootstrap === 'undefined') {
-            console.warn('Bootstrap JS not found. Dropdowns will not work.');
-            return;
         }
-        document.querySelectorAll('.header-button .dropdown-toggle').forEach(function(toggle) {
-            const menu = toggle.nextElementSibling;
-            if (menu) menu.style.zIndex = 3000;
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const instance = bootstrap.Dropdown.getOrCreateInstance(toggle);
-                instance.toggle();
+
+        // Live counts
+        function updateCartCount() {
+            $.get("{{ route('user.cart.count') }}", function(data) {
+                if (data.cart_count !== undefined) {
+                    $('#cart-count').text(data.cart_count);
+                }
+            }).fail(function() {
+                console.log('Failed to update cart count');
+            });
+        }
+
+        function updateWishlistCount() {
+            $.get("{{ route('user.wishlist.count') }}", function(data) {
+                if (data.wishlist_count !== undefined) {
+                    $('#wishlist-count').text(data.wishlist_count);
+                }
+            }).fail(function() {
+                console.log('Failed to update wishlist count');
+            });
+        }
+
+        // Initialize
+        $(document).ready(function() {
+            console.log('Document ready, initializing...');
+            updateCartCount();
+            updateWishlistCount();
+        });
+
+        // Dropdown fix
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof bootstrap === 'undefined') {
+                console.warn('Bootstrap JS not found. Dropdowns will not work.');
+                return;
+            }
+            document.querySelectorAll('.header-button .dropdown-toggle').forEach(function(toggle) {
+                const menu = toggle.nextElementSibling;
+                if (menu) menu.style.zIndex = 3000;
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const instance = bootstrap.Dropdown.getOrCreateInstance(toggle);
+                    instance.toggle();
+                });
             });
         });
-    });
-</script>
+    </script>
 
-
-
-
+    @stack('scripts')
 </body>
-
 </html>

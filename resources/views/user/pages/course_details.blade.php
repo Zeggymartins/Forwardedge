@@ -137,20 +137,19 @@
                     <div class="post-details-wrapper">
                         {{-- Course Hero Image --}}
                         <div class="blog-images wow fadeInUp" data-wow-delay=".1s">
-                            <img src="{{ ($course->thumbnail && file_exists(storage_path('app/public/' . $course->thumbnail))) 
-                                        ? asset('storage/' . $course->thumbnail) 
-                                        : asset('frontend/assets/images/service/service-1.webp') }}"
-                                alt="{{ $course->title ?? 'Course' }}"
-                                class="img-fluid"
+                            <img src="{{ $course->thumbnail && file_exists(storage_path('app/public/' . $course->thumbnail))
+                                ? asset('storage/' . $course->thumbnail)
+                                : asset('frontend/assets/images/service/service-1.webp') }}"
+                                alt="{{ $course->title ?? 'Course' }}" class="img-fluid"
                                 style="height: 400px; width: 100%; object-fit: cover; border-radius: 12px;">
                         </div>
 
                         {{-- Course Title and Basic Info --}}
                         <div class="course-header mt-4">
                             <h2 class="title title-anim">{{ $course->title ?? 'Digital Marketing Mastery Program' }}</h2>
-                            
+
                             <div class="course-meta d-flex flex-wrap align-items-center gap-4 mt-3">
-                                @if($course->schedules && $course->schedules->count() > 0)
+                                @if ($course->schedules && $course->schedules->count() > 0)
                                     <div class="meta-item">
                                         <span class="price-tag">
                                             ₦{{ number_format($course->schedules->first()->price ?? 250000, 0) }}
@@ -189,7 +188,9 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="stat-item">
-                                            <div class="stat-number">{{ $course->phases->sum(function($phase) { return $phase->topics->count(); }) ?: '24' }}</div>
+                                            <div class="stat-number">
+                                                {{ $course->phases->sum(function ($phase) {return $phase->topics->count();}) ?:'24' }}
+                                            </div>
                                             <div class="stat-label">Topics Covered</div>
                                         </div>
                                     </div>
@@ -211,28 +212,31 @@
                             {{-- Course Phases --}}
                             <h3 class="wow fadeInUp" data-wow-delay=".5s">Course Curriculum</h3>
                             <p class="wow fadeInUp" data-wow-delay=".6s">
-                                Our structured learning path takes you from fundamentals to advanced implementation, 
+                                Our structured learning path takes you from fundamentals to advanced implementation,
                                 ensuring you build solid expertise at each stage.
                             </p>
 
                             <div class="row row-gap-4 mt-4">
-                                @if($course->phases && $course->phases->count() > 0)
+                                @if ($course->phases && $course->phases->count() > 0)
                                     @foreach ($course->phases->sortBy('order') as $phase)
                                         <div class="col-xl-6 col-md-6">
-                                            <div class="phase-card wow fadeInUp" data-wow-delay=".{{ 5 + $loop->iteration * 2 }}s">
+                                            <div class="phase-card wow fadeInUp"
+                                                data-wow-delay=".{{ 5 + $loop->iteration * 2 }}s">
                                                 <div class="phase-number">{{ $phase->order }}</div>
                                                 <h5 class="phase-title mb-3">{{ $phase->title }}</h5>
-                                                <p class="phase-description mb-3">{{ $phase->description ?? 'Comprehensive coverage of essential concepts and practical applications.' }}</p>
-                                                
-                                                @if($phase->topics && $phase->topics->count() > 0)
+                                                <p class="phase-description mb-3">
+                                                    {{ $phase->description ?? 'Comprehensive coverage of essential concepts and practical applications.' }}
+                                                </p>
+
+                                                @if ($phase->topics && $phase->topics->count() > 0)
                                                     <ul class="topic-list list-unstyled">
-                                                        @foreach($phase->topics->take(4) as $topic)
+                                                        @foreach ($phase->topics->take(4) as $topic)
                                                             <li>
                                                                 <i class="tji-check text-success me-2"></i>
                                                                 {{ $topic->title }}
                                                             </li>
                                                         @endforeach
-                                                        @if($phase->topics->count() > 4)
+                                                        @if ($phase->topics->count() > 4)
                                                             <li class="text-muted">
                                                                 <i class="tji-plus me-2"></i>
                                                                 {{ $phase->topics->count() - 4 }} more topics...
@@ -241,10 +245,14 @@
                                                     </ul>
                                                 @else
                                                     <ul class="topic-list list-unstyled">
-                                                        <li><i class="tji-check text-success me-2"></i>Core concepts and fundamentals</li>
-                                                        <li><i class="tji-check text-success me-2"></i>Practical exercises and projects</li>
-                                                        <li><i class="tji-check text-success me-2"></i>Real-world case studies</li>
-                                                        <li><i class="tji-check text-success me-2"></i>Assessment and feedback</li>
+                                                        <li><i class="tji-check text-success me-2"></i>Core concepts and
+                                                            fundamentals</li>
+                                                        <li><i class="tji-check text-success me-2"></i>Practical exercises
+                                                            and projects</li>
+                                                        <li><i class="tji-check text-success me-2"></i>Real-world case
+                                                            studies</li>
+                                                        <li><i class="tji-check text-success me-2"></i>Assessment and
+                                                            feedback</li>
                                                     </ul>
                                                 @endif
 
@@ -259,53 +267,91 @@
                                     @endforeach
                                 @else
                                     {{-- Dummy Phases --}}
-                                    @for($i = 1; $i <= 4; $i++)
+                                    @for ($i = 1; $i <= 4; $i++)
                                         <div class="col-xl-6 col-md-6">
                                             <div class="phase-card wow fadeInUp" data-wow-delay=".{{ 5 + $i * 2 }}s">
                                                 <div class="phase-number">{{ $i }}</div>
                                                 <h5 class="phase-title mb-3">
                                                     @switch($i)
-                                                        @case(1) Foundation & Strategy @break
-                                                        @case(2) Content & Social Media @break  
-                                                        @case(3) Paid Advertising & Analytics @break
-                                                        @case(4) Advanced Tactics & Optimization @break
+                                                        @case(1)
+                                                            Foundation & Strategy
+                                                        @break
+
+                                                        @case(2)
+                                                            Content & Social Media
+                                                        @break
+
+                                                        @case(3)
+                                                            Paid Advertising & Analytics
+                                                        @break
+
+                                                        @case(4)
+                                                            Advanced Tactics & Optimization
+                                                        @break
                                                     @endswitch
                                                 </h5>
                                                 <p class="phase-description mb-3">
                                                     @switch($i)
-                                                        @case(1) Build your foundation with digital marketing fundamentals, strategy development, and market analysis. @break
-                                                        @case(2) Master content creation, social media marketing, and community engagement strategies. @break
-                                                        @case(3) Learn paid advertising platforms, conversion tracking, and data-driven decision making. @break
-                                                        @case(4) Implement advanced techniques, automation, and continuous optimization strategies. @break
+                                                        @case(1)
+                                                            Build your foundation with digital marketing fundamentals, strategy
+                                                            development, and market analysis.
+                                                        @break
+
+                                                        @case(2)
+                                                            Master content creation, social media marketing, and community
+                                                            engagement strategies.
+                                                        @break
+
+                                                        @case(3)
+                                                            Learn paid advertising platforms, conversion tracking, and data-driven
+                                                            decision making.
+                                                        @break
+
+                                                        @case(4)
+                                                            Implement advanced techniques, automation, and continuous optimization
+                                                            strategies.
+                                                        @break
                                                     @endswitch
                                                 </p>
-                                                
+
                                                 <ul class="topic-list list-unstyled">
                                                     @switch($i)
                                                         @case(1)
-                                                            <li><i class="tji-check text-success me-2"></i>Digital Marketing Landscape</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Target Audience Research</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Digital Marketing
+                                                                Landscape</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Target Audience Research
+                                                            </li>
                                                             <li><i class="tji-check text-success me-2"></i>Competitive Analysis</li>
                                                             <li><i class="tji-check text-success me-2"></i>Strategic Planning</li>
-                                                            @break
+                                                        @break
+
                                                         @case(2)
-                                                            <li><i class="tji-check text-success me-2"></i>Content Marketing Strategy</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Social Media Platforms</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Content Marketing
+                                                                Strategy</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Social Media Platforms
+                                                            </li>
                                                             <li><i class="tji-check text-success me-2"></i>Community Building</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Influencer Partnerships</li>
-                                                            @break
+                                                            <li><i class="tji-check text-success me-2"></i>Influencer Partnerships
+                                                            </li>
+                                                        @break
+
                                                         @case(3)
                                                             <li><i class="tji-check text-success me-2"></i>Google Ads Mastery</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Facebook & Instagram Ads</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Facebook & Instagram Ads
+                                                            </li>
                                                             <li><i class="tji-check text-success me-2"></i>Analytics & Tracking</li>
                                                             <li><i class="tji-check text-success me-2"></i>ROI Optimization</li>
-                                                            @break
+                                                        @break
+
                                                         @case(4)
                                                             <li><i class="tji-check text-success me-2"></i>Marketing Automation</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Advanced SEO Techniques</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Conversion Rate Optimization</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Growth Hacking Strategies</li>
-                                                            @break
+                                                            <li><i class="tji-check text-success me-2"></i>Advanced SEO Techniques
+                                                            </li>
+                                                            <li><i class="tji-check text-success me-2"></i>Conversion Rate
+                                                                Optimization</li>
+                                                            <li><i class="tji-check text-success me-2"></i>Growth Hacking Strategies
+                                                            </li>
+                                                        @break
                                                     @endswitch
                                                 </ul>
 
@@ -322,20 +368,22 @@
                             </div>
 
                             {{-- Schedule Information --}}
-                            @if($course->schedules && $course->schedules->count() > 0)
+                            @if ($course->schedules && $course->schedules->count() > 0)
                                 <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Upcoming Schedule</h3>
-                                @foreach($course->schedules->take(3) as $schedule)
+                                @foreach ($course->schedules->take(3) as $schedule)
                                     <div class="schedule-card wow fadeInUp" data-wow-delay=".{{ 4 + $loop->iteration }}s">
                                         <div class="row align-items-center">
                                             <div class="col-md-6">
                                                 <h5 class="mb-2">Batch {{ $loop->iteration }}</h5>
                                                 <p class="mb-1">
                                                     <i class="tji-calendar me-2"></i>
-                                                    <strong>Start Date:</strong> {{ \Carbon\Carbon::parse($schedule->start_date)->format('M j, Y') }}
+                                                    <strong>Start Date:</strong>
+                                                    {{ \Carbon\Carbon::parse($schedule->start_date)->format('M j, Y') }}
                                                 </p>
                                                 <p class="mb-1">
                                                     <i class="tji-calendar me-2"></i>
-                                                    <strong>End Date:</strong> {{ \Carbon\Carbon::parse($schedule->end_date)->format('M j, Y') }}
+                                                    <strong>End Date:</strong>
+                                                    {{ \Carbon\Carbon::parse($schedule->end_date)->format('M j, Y') }}
                                                 </p>
                                                 <p class="mb-0">
                                                     <i class="tji-location me-2"></i>
@@ -346,8 +394,9 @@
                                                 <div class="price-tag mb-3">
                                                     ₦{{ number_format($schedule->price, 0) }}
                                                 </div>
-                                                <button class="tj-primary-btn enroll-btn"  data-schedule-id="{{ $schedule->id }}"
-        data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}>
+                                                <button class="tj-primary-btn enroll-btn"
+                                                    data-schedule-id="{{ $schedule->id }}"
+                                                    data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}">
                                                     <span class="btn-text">Enroll Now</span>
                                                     <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                                                 </button>
@@ -389,10 +438,13 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <ul class="wow fadeInUp" data-wow-delay=".4s">
-                                        <li><span><i class="tji-check"></i></span>Complete digital marketing strategy development</li>
-                                        <li><span><i class="tji-check"></i></span>Advanced social media marketing techniques</li>
+                                        <li><span><i class="tji-check"></i></span>Complete digital marketing strategy
+                                            development</li>
+                                        <li><span><i class="tji-check"></i></span>Advanced social media marketing
+                                            techniques</li>
                                         <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery</li>
-                                        <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best practices</li>
+                                        <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
+                                            practices</li>
                                         <li><span><i class="tji-check"></i></span>Content marketing and storytelling</li>
                                     </ul>
                                 </div>
@@ -412,15 +464,18 @@
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="image-box wow fadeInUp" data-wow-delay=".6s">
-                                            <img src="{{ asset('frontend/assets/images/service/service-3.webp') }}" alt="Hands-on Learning">
-                                            <button class="enroll-btn" data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
+                                            <img src="{{ asset('frontend/assets/images/service/service-3.webp') }}"
+                                                alt="Hands-on Learning">
+                                            <button class="enroll-btn"
+                                                data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
                                                 Start Learning
                                             </button>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="image-box wow fadeInUp" data-wow-delay=".7s">
-                                            <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}" alt="Expert Instruction">
+                                            <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}"
+                                                alt="Expert Instruction">
                                         </div>
                                     </div>
                                 </div>
@@ -429,8 +484,9 @@
                             {{-- Course Benefits --}}
                             <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Why Choose This Course?</h3>
                             <p class="wow fadeInUp" data-wow-delay=".4s">
-                                Our comprehensive approach combines theoretical knowledge with practical application, 
-                                ensuring you're ready to implement what you learn immediately in your professional environment.
+                                Our comprehensive approach combines theoretical knowledge with practical application,
+                                ensuring you're ready to implement what you learn immediately in your professional
+                                environment.
                             </p>
 
                             <div class="details-content-box">
@@ -440,7 +496,8 @@
                                             <span class="number">01.</span>
                                             <h6 class="title">Expert-Led Training</h6>
                                             <div class="desc">
-                                                <p>Learn from industry professionals with over 10 years of digital marketing experience and proven track records.</p>
+                                                <p>Learn from industry professionals with over 10 years of digital marketing
+                                                    experience and proven track records.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -449,7 +506,8 @@
                                             <span class="number">02.</span>
                                             <h6 class="title">Hands-On Projects</h6>
                                             <div class="desc">
-                                                <p>Work on real client projects and build a portfolio that demonstrates your skills to potential employers.</p>
+                                                <p>Work on real client projects and build a portfolio that demonstrates your
+                                                    skills to potential employers.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -458,7 +516,8 @@
                                             <span class="number">03.</span>
                                             <h6 class="title">Certification & Support</h6>
                                             <div class="desc">
-                                                <p>Receive industry-recognized certification and ongoing career support to help you advance professionally.</p>
+                                                <p>Receive industry-recognized certification and ongoing career support to
+                                                    help you advance professionally.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -473,7 +532,8 @@
                                         <span class="count-plus">%</span>
                                     </div>
                                     <span class="count-text">Job Placement Rate</span>
-                                    <span class="count-separator" data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                                    <span class="count-separator"
+                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
                                 </div>
                                 <div class="countup-item">
                                     <div class="inline-content">
@@ -481,7 +541,8 @@
                                         <span class="count-plus">+</span>
                                     </div>
                                     <span class="count-text">Successful Graduates</span>
-                                    <span class="count-separator" data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                                    <span class="count-separator"
+                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
                                 </div>
                                 <div class="countup-item">
                                     <div class="inline-content">
@@ -489,11 +550,13 @@
                                         <span class="count-plus">/5</span>
                                     </div>
                                     <span class="count-text">Student Rating</span>
-                                    <span class="count-separator" data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                                    <span class="count-separator"
+                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
                                 </div>
                                 <div class="countup-item">
                                     <div class="inline-content">
-                                        <span class="odometer countup-number" data-count="24</span>
+                                        <span class="odometer countup-number"
+                                            data-count="24</span>
                                         <span class="count-plus">/7</span>
                                     </div>
                                     <span class="count-text">Learning Support</span>
@@ -504,42 +567,54 @@
                             <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Frequently Asked Questions</h3>
                             <div class="accordion tj-faq style-2" id="faqOne">
                                 <div class="accordion-item active wow fadeInUp" data-wow-delay=".4s">
-                                    <button class="faq-title" type="button" data-bs-toggle="collapse" data-bs-target="#faq-1" aria-expanded="true">
+                                    <button class="faq-title" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq-1" aria-expanded="true">
                                         What are the prerequisites for this course?
                                     </button>
                                     <div id="faq-1" class="collapse show" data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            <p>No prior digital marketing experience is required. Basic computer literacy and internet familiarity are helpful but not mandatory. We start from fundamentals and build up to advanced concepts.</p>
+                                            <p>No prior digital marketing experience is required. Basic computer literacy
+                                                and internet familiarity are helpful but not mandatory. We start from
+                                                fundamentals and build up to advanced concepts.</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="accordion-item wow fadeInUp" data-wow-delay=".5s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-2" aria-expanded="false">
+                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq-2" aria-expanded="false">
                                         What support is available during the course?
                                     </button>
                                     <div id="faq-2" class="collapse" data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            <p>You'll have access to dedicated instructors, peer collaboration forums, weekly office hours, and our comprehensive learning management system. Plus, career counseling and job placement assistance.</p>
+                                            <p>You'll have access to dedicated instructors, peer collaboration forums,
+                                                weekly office hours, and our comprehensive learning management system. Plus,
+                                                career counseling and job placement assistance.</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="accordion-item wow fadeInUp" data-wow-delay=".6s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-3" aria-expanded="false">
+                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq-3" aria-expanded="false">
                                         Are there flexible payment options available?
                                     </button>
                                     <div id="faq-3" class="collapse" data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            <p>Yes! We offer both full payment and installment plans. You can pay 70% upfront and the remaining 30% during the course. Scholarships and corporate training discounts are also available.</p>
+                                            <p>Yes! We offer both full payment and installment plans. You can pay 70%
+                                                upfront and the remaining 30% during the course. Scholarships and corporate
+                                                training discounts are also available.</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="accordion-item wow fadeInUp" data-wow-delay=".7s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-4" aria-expanded="false">
+                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#faq-4" aria-expanded="false">
                                         What certification will I receive upon completion?
                                     </button>
                                     <div id="faq-4" class="collapse" data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            <p>You'll receive a Forward Edge Consulting Digital Marketing Professional Certificate, plus preparation for industry certifications like Google Ads, Facebook Blueprint, and HubSpot Content Marketing.</p>
+                                            <p>You'll receive a Forward Edge Consulting Digital Marketing Professional
+                                                Certificate, plus preparation for industry certifications like Google Ads,
+                                                Facebook Blueprint, and HubSpot Content Marketing.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -550,7 +625,8 @@
                         <div class="tj-post__navigation mb-0 wow fadeInUp" data-wow-delay=".3s">
                             <div class="tj-nav__post previous">
                                 <div class="tj-nav-post__nav prev_post">
-                                    <a href="{{ route('academy') }}"><span><i class="tji-arrow-left"></i></span>All Courses</a>
+                                    <a href="{{ route('academy') }}"><span><i class="tji-arrow-left"></i></span>All
+                                        Courses</a>
                                 </div>
                             </div>
                             <div class="tj-nav-post__grid">
@@ -558,7 +634,8 @@
                             </div>
                             <div class="tj-nav__post next">
                                 <div class="tj-nav-post__nav next_post">
-                                    <a href="{{ route('shop') }}">Browse Shop<span><i class="tji-arrow-right"></i></span></a>
+                                    <a href="{{ route('shop') }}">Browse Shop<span><i
+                                                class="tji-arrow-right"></i></span></a>
                                 </div>
                             </div>
                         </div>
@@ -568,4 +645,3 @@
         </div>
     </section>
 @endsection
-

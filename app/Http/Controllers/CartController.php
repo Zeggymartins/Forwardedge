@@ -121,3 +121,8 @@ class CartController extends Controller
         return response()->json(['cart_count' => $count]);
     }
 }
+
+
+
+
+
