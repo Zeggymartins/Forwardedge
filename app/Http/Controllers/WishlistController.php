@@ -52,11 +52,18 @@ class WishlistController extends Controller
             'wishlist' => $this->buildWishlistPayload(Auth::id())
         ]);
     }
-    public function index()
-    {
+    public function index(Request $request){
+
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login to view your cart');
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'auth_required',
+                    'message' => 'Please login to continue'
+                ], 401);
+            }
+            abort(401);
         }
+
 
         $wishlistItems = WishlistItem::with('course')->where('user_id', Auth::id())->get();
 

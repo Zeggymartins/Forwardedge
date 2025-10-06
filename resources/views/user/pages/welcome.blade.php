@@ -28,7 +28,7 @@
                 </div>
                 <div class="banner-right-box">
                     <div class="banner-img">
-                        <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/hero-img.webp') }}" alt="">
+                        <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.jpg') }}" alt="">
                     </div>
                     <!-- <div class="box-area">
                     <div class="customers-box">
@@ -181,8 +181,8 @@
                     <div class="col-xl-6 col-lg-6 order-lg-1 order-2">
                         <div class="about-img-area wow fadeInLeft" data-wow-delay=".2s">
                             <div class="about-img overflow-hidden">
-                                <img data-speed="0.8" src="{{ asset('frontend/assets/images/about/about-1.webp') }}"
-                                    alt="">
+                                <img data-speed="0.8" src="{{ asset('frontend/assets/images/about/banner1.jpg') }}"
+                                    alt="" height="400px">
                             </div>
                             <div class="box-area">
                                 <div class="experience-box wow fadeInUp" data-wow-delay=".3s">
@@ -431,7 +431,7 @@
                         <div class="project-area tj-arrange-container">
                             <div class="project-item tj-arrange-item">
                                 <div class="project-img"
-                                    data-bg-image="{{ asset('frontend/assets/images/project/project-1.webp') }}"></div>
+                                    data-bg-image="{{ asset('frontend/assets/images/project/event2.jpg') }}"></div>
                                 <div class="project-content">
                                     <span class="categories"><a href="portfolio-details.html">Connect</a></span>
                                     <div class="project-text">
@@ -445,7 +445,7 @@
                             </div>
                             <div class="project-item tj-arrange-item">
                                 <div class="project-img"
-                                    data-bg-image="{{ asset('frontend/assets/images/project/project-2.webp') }}"></div>
+                                    data-bg-image="{{ asset('frontend/assets/images/project/picture.jpg') }}"></div>
                                 <div class="project-content">
                                     <span class="categories"><a href="portfolio-details.html">Empower</a></span>
                                     <div class="project-text">
@@ -459,7 +459,7 @@
                             </div>
                             <div class="project-item tj-arrange-item">
                                 <div class="project-img"
-                                    data-bg-image="{{ asset('frontend/assets/images/project/project-3.webp') }}"></div>
+                                    data-bg-image="{{ asset('frontend/assets/images/project/picture3.jpg') }}"></div>
                                 <div class="project-content">
                                     <span class="categories"><a href="portfolio-details.html">Support</a></span>
                                     <div class="project-text">
@@ -473,7 +473,7 @@
                             </div>
                             <div class="project-item tj-arrange-item">
                                 <div class="project-img"
-                                    data-bg-image="{{ asset('frontend/assets/images/project/project-4.webp') }}"></div>
+                                    data-bg-image="{{ asset('frontend/assets/images/project/eventbanner.jpg') }}"></div>
                                 <div class="project-content">
                                     <span class="categories"><a href="portfolio-details.html">Business</a></span>
                                     <div class="project-text">
@@ -673,7 +673,7 @@
                     <div class="col-lg-6">
                         <div class="faq-img-area tj-arrange-item-2">
                             <div class="faq-img overflow-hidden">
-                                <img src="{{ asset('frontend/assets/images/faq/faq.webp') }}" alt="">
+                                <img src="{{ asset('frontend/assets/images/faq/pic.jpg') }}" alt="">
                                 <h2 class="title">Need Help? Start Here...</h2>
                             </div>
                             <div class="box-area ">

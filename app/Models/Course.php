@@ -16,6 +16,9 @@ class Course extends Model
         'brief_description',
         'thumbnail',
         'status',
+        'price',
+        'discount_price',
+        'is_featured'
     ];
     protected $table = 'courses';
 
@@ -30,5 +33,10 @@ class Course extends Model
     public function schedules()
     {
         return $this->hasMany(CourseSchedule::class);
+    }
+
+    public function details()
+    {
+        return $this->hasMany(CourseDetails::class)->orderBy('position', 'asc');
     }
 }

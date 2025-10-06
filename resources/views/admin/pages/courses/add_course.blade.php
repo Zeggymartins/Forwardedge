@@ -4,17 +4,7 @@
 <div class="container py-4">
   <h3 class="mb-4 fw-bold">Create Course</h3>
 
-  {{-- Validation + Success --}}
-  @if($errors->any())
-    <div class="alert alert-danger"><ul class="mb-0">
-      @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
-    </ul></div>
-  @endif
-  @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-  @endif
-
-  <form action="{{ route('courses.store') }}" method="POST" enctype="multipart/form-data" id="courseForm">
+  <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" id="courseForm">
     @csrf
 
     {{-- Course Info --}}
@@ -47,7 +37,7 @@
     {{-- Contents --}}
     <div class="card shadow-sm mb-4 p-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-semibold">Course Contents</h5>
+        <h5 class="fw-semibold">Course Details</h5>
         <button type="button" class="btn btn-sm btn-outline-primary" id="addContent">+ Add Content</button>
       </div>
       <div id="contentsContainer">
@@ -90,21 +80,22 @@
 <template id="contentTemplate">
   <div class="content-block border rounded p-3 mb-3">
     <div class="d-flex justify-content-between mb-2">
-      <label class="form-label fw-semibold">Content Type</label>
+      <label class="form-label fw-semibold">Detail Type</label>
       <button type="button" class="btn btn-sm btn-outline-danger remove-block">Remove</button>
     </div>
-    <select class="form-select content-type" name="contents[__INDEX__][type]" required>
+    <select class="form-select content-type" name="details[__INDEX__][type]" required>
       <option value="" disabled selected>-- Select Type --</option>
-      <option value="text">Text</option>
-      <option value="video">Video</option>
-      <option value="pdf">PDF</option>
-      <option value="quiz">Quiz</option>
-      <option value="assignment">Assignment</option>
+      <option value="heading">Heading</option>
+      <option value="paragraph">Paragraph</option>
+      <option value="image">Image</option>
+      <option value="features">Features</option>
+      <option value="list">List</option>
     </select>
     <div class="content-fields mt-3"></div>
-    <input type="hidden" name="contents[__INDEX__][position]" value="__INDEX_PLUS__">
+    <input type="hidden" name="details[__INDEX__][order]" value="__INDEX_PLUS__">
   </div>
 </template>
+
 
 <template id="phaseTemplate">
   <div class="phase-block border rounded p-3 mb-3">
@@ -167,34 +158,42 @@
     contentIndex++;
   }
 
-  function renderContentFields(block, type, values = null) {
-    let index = block.querySelector('.content-type').name.match(/\d+/)[0];
-    let fieldsDiv = block.querySelector('.content-fields');
-    fieldsDiv.innerHTML = '';
+function renderContentFields(block, type, values = null) {
+  let index = block.querySelector('.content-type').name.match(/\d+/)[0];
+  let fieldsDiv = block.querySelector('.content-fields');
+  fieldsDiv.innerHTML = '';
 
-    switch (type) {
-      case 'text':
-        fieldsDiv.innerHTML = `<textarea class="form-control" name="contents[${index}][content]" rows="3" placeholder="Text"></textarea>`;
-        if (values) fieldsDiv.querySelector('textarea').value = values;
-        break;
-      case 'video':
-        fieldsDiv.innerHTML = `<input type="url" class="form-control" name="contents[${index}][content]" placeholder="Video URL">`;
-        if (values) fieldsDiv.querySelector('input').value = values;
-        break;
-      case 'pdf':
-        fieldsDiv.innerHTML = `<input type="url" class="form-control" name="contents[${index}][content]" placeholder="PDF URL">`;
-        if (values) fieldsDiv.querySelector('input').value = values;
-        break;
-      case 'quiz':
-        fieldsDiv.innerHTML = `<textarea class="form-control" name="contents[${index}][content]" rows="3" placeholder="Quiz Questions"></textarea>`;
-        if (values) fieldsDiv.querySelector('textarea').value = values;
-        break;
-      case 'assignment':
-        fieldsDiv.innerHTML = `<textarea class="form-control" name="contents[${index}][content]" rows="3" placeholder="Assignment"></textarea>`;
-        if (values) fieldsDiv.querySelector('textarea').value = values;
-        break;
-    }
+  switch (type) {
+    case 'heading':
+      fieldsDiv.innerHTML = `<input type="text" class="form-control" 
+                               name="details[${index}][content]" placeholder="Heading">`;
+      if (values) fieldsDiv.querySelector('input').value = values;
+      break;
+    case 'paragraph':
+      fieldsDiv.innerHTML = `<textarea class="form-control" 
+                                name="details[${index}][content]" rows="3" 
+                                placeholder="Paragraph"></textarea>`;
+      if (values) fieldsDiv.querySelector('textarea').value = values;
+      break;
+    case 'image':
+      fieldsDiv.innerHTML = `<input type="file" class="form-control" 
+                               name="details[${index}][file]" accept="image/*">`;
+      break;
+    case 'features':
+      fieldsDiv.innerHTML = `<textarea class="form-control" 
+                                name="details[${index}][content]" rows="3" 
+                                placeholder="Feature list (one per line)"></textarea>`;
+      if (values) fieldsDiv.querySelector('textarea').value = values;
+      break;
+    case 'list':
+      fieldsDiv.innerHTML = `<textarea class="form-control" 
+                                name="details[${index}][content]" rows="3" 
+                                placeholder="List items (comma separated)"></textarea>`;
+      if (values) fieldsDiv.querySelector('textarea').value = values;
+      break;
   }
+}
+
 
   document.getElementById('addContent').addEventListener('click', () => addContentBlock());
 
@@ -251,85 +250,88 @@
   });
 
   // Local Storage
-  const form = document.getElementById('courseForm');
-  const LS_KEY = "courseFormData";
+const form = document.getElementById('courseForm');
+const LS_KEY = "courseFormData";
 
-  function saveForm() {
-    let data = {};
-    let fd = new FormData(form);
-    for (let [key, value] of fd.entries()) {
-      if (value instanceof File && value.name) continue;
-      if (data[key]) {
-        if (!Array.isArray(data[key])) data[key] = [data[key]];
-        data[key].push(value);
-      } else {
-        data[key] = value;
-      }
+function saveForm() {
+  let data = {};
+  let fd = new FormData(form);
+  for (let [key, value] of fd.entries()) {
+    if (value instanceof File && value.name) continue; // skip files
+    if (data[key]) {
+      if (!Array.isArray(data[key])) data[key] = [data[key]];
+      data[key].push(value);
+    } else {
+      data[key] = value;
     }
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
   }
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
 
-  form.addEventListener('input', saveForm);
-  form.addEventListener('change', saveForm);
+form.addEventListener('input', saveForm);
+form.addEventListener('change', saveForm);
 
-  window.addEventListener('DOMContentLoaded', () => {
-    let saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      let data = JSON.parse(saved);
+window.addEventListener('DOMContentLoaded', () => {
+  let saved = localStorage.getItem(LS_KEY);
+  if (saved) {
+    let data = JSON.parse(saved);
 
-      // Simple fields
-      ['title','slug','description','status'].forEach(k=>{
-        if (data[k] && form.querySelector(`[name="${k}"]`)) form.querySelector(`[name="${k}"]`).value = data[k];
-      });
+    // Restore simple fields
+    ['title','slug','description','status'].forEach(k=>{
+      if (data[k] && form.querySelector(`[name="${k}"]`)) {
+        form.querySelector(`[name="${k}"]`).value = data[k];
+      }
+    });
 
-      // Restore contents
-      let contentGroups = {};
-      Object.keys(data).forEach(k=>{
-        let m = k.match(/^contents\[(\d+)]\[(.+)]$/);
-        if (m) {
-          let i = m[1], field = m[2];
-          contentGroups[i] = contentGroups[i] || {};
-          contentGroups[i][field] = data[k];
-        }
-      });
-      Object.values(contentGroups).forEach(c=> addContentBlock(c.type, c.content));
+    // Restore details
+    let detailGroups = {};
+    Object.keys(data).forEach(k=>{
+      let m = k.match(/^details\[(\d+)]\[(.+)]$/);
+      if (m) {
+        let i = m[1], field = m[2];
+        detailGroups[i] = detailGroups[i] || {};
+        detailGroups[i][field] = data[k];
+      }
+    });
+    Object.values(detailGroups).forEach(d => addContentBlock(d.type, d.content));
 
-      // Restore phases
-      let phaseGroups = {};
-      Object.keys(data).forEach(k=>{
-        let m = k.match(/^phases\[(\d+)]\[(.+)]$/);
-        if (m) {
-          let i = m[1], field = m[2];
-          phaseGroups[i] = phaseGroups[i] || {topics:[]};
-          if (field === 'title') phaseGroups[i].title = data[k];
-          if (field === 'topics') phaseGroups[i].topics = [].concat(data[k]);
-        }
-      });
-      Object.values(phaseGroups).forEach(p=> addPhaseBlock(p.title, p.topics));
+    // Restore phases
+    let phaseGroups = {};
+    Object.keys(data).forEach(k=>{
+      let m = k.match(/^phases\[(\d+)]\[(.+)]$/);
+      if (m) {
+        let i = m[1], field = m[2];
+        phaseGroups[i] = phaseGroups[i] || {topics:[]};
+        if (field === 'title') phaseGroups[i].title = data[k];
+        if (field === 'topics') phaseGroups[i].topics = [].concat(data[k]);
+      }
+    });
+    Object.values(phaseGroups).forEach(p=> addPhaseBlock(p.title, p.topics));
 
-      // Restore schedules
-      let scheduleGroups = {};
-      Object.keys(data).forEach(k=>{
-        let m = k.match(/^schedules\[(\d+)]\[(.+)]$/);
-        if (m) {
-          let i = m[1], field = m[2];
-          scheduleGroups[i] = scheduleGroups[i] || {};
-          scheduleGroups[i][field] = data[k];
-        }
-      });
-      Object.values(scheduleGroups).forEach(s=> addScheduleBlock(s));
-    }
-  });
+    // Restore schedules
+    let scheduleGroups = {};
+    Object.keys(data).forEach(k=>{
+      let m = k.match(/^schedules\[(\d+)]\[(.+)]$/);
+      if (m) {
+        let i = m[1], field = m[2];
+        scheduleGroups[i] = scheduleGroups[i] || {};
+        scheduleGroups[i][field] = data[k];
+      }
+    });
+    Object.values(scheduleGroups).forEach(s=> addScheduleBlock(s));
+  }
+});
 
-  document.getElementById('clearForm').addEventListener('click', () => {
-    if (confirm("Clear all saved data?")) {
-      localStorage.removeItem(LS_KEY);
-      form.reset();
-      document.getElementById('contentsContainer').innerHTML = "<p class='text-muted' id='contentsHint'>Add content blocks...</p>";
-      document.getElementById('phasesContainer').innerHTML = "<p class='text-muted' id='phasesHint'>Add phases...</p>";
-      document.getElementById('schedulesContainer').innerHTML = "<p class='text-muted' id='schedulesHint'>Add schedules...</p>";
-      contentIndex = phaseIndex = scheduleIndex = 0;
-    }
-  });
+document.getElementById('clearForm').addEventListener('click', () => {
+  if (confirm("Clear all saved data?")) {
+    localStorage.removeItem(LS_KEY);
+    form.reset();
+    document.getElementById('contentsContainer').innerHTML = "<p class='text-muted' id='contentsHint'>Add detail blocks...</p>";
+    document.getElementById('phasesContainer').innerHTML = "<p class='text-muted' id='phasesHint'>Add phases...</p>";
+    document.getElementById('schedulesContainer').innerHTML = "<p class='text-muted' id='schedulesHint'>Add schedules...</p>";
+    contentIndex = phaseIndex = scheduleIndex = 0;
+  }
+});
+
 </script>
 @endsection

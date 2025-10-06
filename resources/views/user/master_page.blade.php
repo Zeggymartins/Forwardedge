@@ -14,7 +14,7 @@
     <!-- Place favicon.ico in the root directory -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/assets/images/fav.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    
+
     <!-- CSS here -->
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/font-awesome-pro.min.css') }}">
@@ -74,7 +74,7 @@
         .modal {
             z-index: 9999 !important;
         }
-        
+
         .modal-backdrop {
             z-index: 9998 !important;
         }
@@ -228,7 +228,7 @@
         </div>
     </div>
     <!-- end: Hamburger Menu -->
-    
+
     <!-- Auth Modal -->
     <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -342,12 +342,12 @@
 
     <input type="hidden" id="pending_action" value="">
     <input type="hidden" id="pending_payload" value="{}">
-    
+
     <!-- JS here -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    
+
     <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
     <script src="{{ asset('frontend/assets/js/ScrollSmoother.js') }}"></script>
@@ -386,6 +386,48 @@
             toastr.info(message);
             $('#authModal').modal('show');
         }
+
+     function openCart() {
+    $.ajax({
+        url: "{{ route('user.cart.index') }}",
+        type: "GET",
+        dataType: "html",
+        success: function (res, status, xhr) {
+            if (xhr.status === 200) {
+                window.location.href = "{{ route('user.cart.index') }}";
+            }
+        },
+        error: function (xhr) {
+            if (xhr.status === 401) {
+                showAuthModal('Please login to view your cart');
+            } else {
+                toastr.error('Could not load cart');
+            }
+        }
+    });
+}
+
+function openWishlist() {
+    $.ajax({
+        url: "{{ route('user.wishlist.index') }}",
+        type: "GET",
+        dataType: "html",
+        success: function (res, status, xhr) {
+            if (xhr.status === 200) {
+                window.location.href = "{{ route('user.wishlist.index') }}";
+            }
+        },
+        error: function (xhr) {
+            if (xhr.status === 401) {
+                showAuthModal('Please login to view your wishlist');
+            } else {
+                toastr.error('Could not load wishlist');
+            }
+        }
+    });
+}
+
+
 
         // UI Updaters
         function updateCartUI(cart) {
@@ -445,7 +487,8 @@
 
                 let container = document.querySelector('.wishlist-dropdown .cart-btn');
                 if (container) {
-                    container.innerHTML = `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
+                    container.innerHTML =
+                        `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
                 }
             }
         }
@@ -453,7 +496,7 @@
         // Core actions
         function addToCart(courseId, quantity = 1) {
             console.log('Adding to cart:', courseId, quantity);
-            
+
             $.post("{{ route('user.cart.add') }}", {
                     course_id: courseId,
                     quantity: quantity
@@ -492,7 +535,7 @@
 
         function addToWishlist(courseId) {
             console.log('Adding to wishlist:', courseId);
-            
+
             $.post("{{ route('user.wishlist.add') }}", {
                     course_id: courseId
                 })
@@ -531,43 +574,43 @@
         $(document).on('click', '.cart-button', function(e) {
             e.preventDefault();
             console.log('Cart button clicked');
-            
+
             let courseId = $(this).data('course-id');
             let quantity = $(this).data('quantity') || 1;
-            
+
             console.log('Course ID:', courseId, 'Quantity:', quantity);
-            
+
             if (!courseId) {
                 console.error('Course ID not found on cart button');
                 toastr.error('Course ID not found');
                 return;
             }
-            
+
             addToCart(courseId, quantity);
         });
 
         $(document).on('click', '.product-add-wishlist-btn button', function(e) {
             e.preventDefault();
             console.log('Wishlist button clicked');
-            
+
             // Find course ID from the product container
             let courseId = $(this).closest('.tj-product').find('[data-course-id]').data('course-id');
-            
+
             console.log('Course ID for wishlist:', courseId);
-            
+
             if (!courseId) {
                 console.error('Course ID not found for wishlist');
                 toastr.error('Course ID not found');
                 return;
             }
-            
+
             addToWishlist(courseId);
         });
 
         $(document).on('click', '.enroll-btn', function(e) {
             e.preventDefault();
             console.log('Enroll button clicked');
-            
+
             let enrollUrl = $(this).data('enroll-url');
             let scheduleId = $(this).data('schedule-id');
 
@@ -580,19 +623,19 @@
             }
 
             @auth
-                if (enrollUrl) {
-                    window.location.href = enrollUrl;
-                } else if (scheduleId) {
-                 window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
-                }
-            @else
-                $('#pending_action').val('enroll');
-                $('#pending_payload').val(JSON.stringify({
-                    schedule_id: scheduleId,
-                    enroll_url: enrollUrl
-                }));
-                showAuthModal('Please login to enroll in this course');
-            @endauth
+            if (enrollUrl) {
+                window.location.href = enrollUrl;
+            } else if (scheduleId) {
+                window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
+            }
+        @else
+            $('#pending_action').val('enroll');
+            $('#pending_payload').val(JSON.stringify({
+                schedule_id: scheduleId,
+                enroll_url: enrollUrl
+            }));
+            showAuthModal('Please login to enroll in this course');
+        @endauth
         });
 
         // Auth Forms
@@ -660,7 +703,7 @@
                     `<div class="text-success small">${res.message}</div>`))
                 .fail(xhr => $('#forgotPasswordMessage').html(
                     `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
-                    ));
+                ));
         });
 
         $('#resetPasswordForm').submit(function(e) {
@@ -670,7 +713,7 @@
                     `<div class="text-success small">${res.message}</div>`))
                 .fail(xhr => $('#resetPasswordMessage').html(
                     `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
-                    ));
+                ));
         });
 
         // Pending Actions
@@ -688,9 +731,9 @@
                 } else if (action === 'enroll') {
                     if (payload.enroll_url) {
                         window.location.href = payload.enroll_url;
-                     } else if (action === 'enroll' && payload.course_id) {
-                window.location.href = "/enroll/price/" + payload.course_id;
-            }
+                    } else if (action === 'enroll' && payload.course_id) {
+                        window.location.href = "/enroll/price/" + payload.course_id;
+                    }
                 }
 
                 $('#pending_action').val('');
@@ -749,4 +792,5 @@
 
     @stack('scripts')
 </body>
+
 </html>

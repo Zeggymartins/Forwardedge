@@ -14,14 +14,12 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold text-dark">🎉 Events</h1>
-        <a href="{{ route('events.create') }}" class="btn btn-primary rounded-pill px-4 py-2">
+        <a href="{{ route('admin.events.create') }}" class="btn btn-primary rounded-pill px-4 py-2">
             <i class="bi bi-plus-circle me-2"></i> Create Event
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success shadow-sm rounded py-3 px-4">{{ session('success') }}</div>
-    @endif
+
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
@@ -64,11 +62,11 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <a href="{{ route('events.dashboard', $event->id) }}" 
+                                <a href="{{ route('admin.events.dashboard', $event->id) }}" 
                                    class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 me-2">
                                    <i class="bi bi-eye"></i> View
                                 </a>
-                                <form action="{{ route('events.destroy', $event->id) }}" 
+                                <form action="{{ route('admin.events.destroy', $event->id) }}" 
                                       method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2" 

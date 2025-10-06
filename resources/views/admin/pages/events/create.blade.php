@@ -6,23 +6,12 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold text-primary">Create New Event</h1>
-        <a href="{{ route('events.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('admin.events.list') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
 
-    @if($errors->any())
-        <div class="alert alert-danger shadow-sm rounded-3">
-            <h6 class="mb-2"><i class="bi bi-exclamation-circle"></i> Please fix the following:</h6>
-            <ul class="mb-0">
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data" class="card border-0 shadow-lg p-4 modern-form">
+    <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data" class="card border-0 shadow-md p-4 modern-form">
         @csrf
 
         <!-- Section: Event Details -->

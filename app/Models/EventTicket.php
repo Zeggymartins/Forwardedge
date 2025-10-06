@@ -55,4 +55,20 @@ class EventTicket extends Model
 
         return true;
     }
+
+    public function getFeaturesAttribute($value)
+    {
+        if (is_null($value) || $value === '') {
+            return [];
+        }
+
+        // If it's valid JSON, decode it
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        // Otherwise treat it as comma-separated
+        return explode(',', $value);
+    }
 }

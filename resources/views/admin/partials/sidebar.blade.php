@@ -1,15 +1,15 @@
 <aside id="sidebar" class="sidebar">
 
-    <ul class="sidebar-nav" id="sidebar-nav">
+    <ul class="sidebar-nav mt-3" id="sidebar-nav">
 
         <li class="nav-item">
-            <a class="nav-link " href="index">
+            <a class="nav-link " href="{{ route('dashboard') }}">
                 <i class="bi bi-grid"></i>
                 <span>Dashboard</span>
             </a>
         </li><!-- End Dashboard Nav -->
 
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-menu-button-wide"></i><span>Home Page</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
@@ -56,11 +56,11 @@
                     </a>
                 </li>
             </ul>
-        </li><!-- End Components Nav -->
+        </li><!-- End Components Nav --> --}}
 
         <!-- About Us -->
         <!-- About Us -->
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-journal-text"></i><span>About Page</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
@@ -86,7 +86,7 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
         <!-- About Us -->
         <!-- About Us -->
 
@@ -98,13 +98,13 @@
             </a>
             <ul id="academy-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
-                        <i class="bi bi-circle"></i><span>Add Academy</span>
+                    <a href="{{ route('admin.courses.create') }}">
+                        <i class="bi bi-circle"></i><span>Add Course</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data">
-                        <i class="bi bi-circle"></i><span>View Academy</span>
+                    <a href="{{ route('admin.courses.index') }}">
+                        <i class="bi bi-circle"></i><span>View Courses</span>
                     </a>
                 </li>
             </ul>
@@ -120,12 +120,12 @@
             </a>
             <ul id="services-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{{ route('services.add') }}">
+                    <a href="{{ route('admin.services.add') }}">
                         <i class="bi bi-circle"></i><span>Add Services</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data">
+                    <a href="{{ route('admin.services.index') }}">
                         <i class="bi bi-circle"></i><span>View Services</span>
                     </a>
                 </li>
@@ -142,7 +142,7 @@
             </a>
             <ul id="shop-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
+                    <a href="{{ route('admin.course_contents.index') }}">
                         <i class="bi bi-circle"></i><span>Add Product</span>
                     </a>
                 </li>
@@ -164,13 +164,19 @@
             </a>
             <ul id="event-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
+                    <a href="{{ route('admin.events.create') }}">
                         <i class="bi bi-circle"></i><span>Add Events</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data">
+                    <a href="{{ route('admin.events.list') }}">
                         <i class="bi bi-circle"></i><span>View Events</span>
+                    </a>
+                </li>
+
+                    <li>
+                    <a href="{{ route('admin.events.registrations') }}">
+                        <i class="bi bi-circle"></i><span>Registrations</span>
                     </a>
                 </li>
             </ul>
@@ -186,13 +192,8 @@
             </a>
             <ul id="gallery-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
-                        <i class="bi bi-circle"></i><span>Add Image</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="tables-data">
-                        <i class="bi bi-circle"></i><span>View Image</span>
+                    <a href="{{ route('admin.gallery.index') }}">
+                        <i class="bi bi-circle"></i><span>View Gallery</span>
                     </a>
                 </li>
             </ul>
@@ -208,13 +209,13 @@
             </a>
             <ul id="blog-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
-                        <i class="bi bi-circle"></i><span>Articles</span>
+                    <a href="{{ route('admin.blogs.create') }}">
+                        <i class="bi bi-circle"></i><span>Create Blog</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data">
-                        <i class="bi bi-circle"></i><span>News</span>
+                    <a href="{{ route('admin.blogs.index') }}">
+                        <i class="bi bi-circle"></i><span>Blog articles</span>
                     </a>
                 </li>
             </ul>
@@ -222,7 +223,23 @@
         <!-- Blogs -->
         <!-- Blogs -->
 
-
+       <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-layout-text-window-reverse"></i><span>Courses</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{ route('admin.courses.create') }}">
+                        <i class="bi bi-circle"></i><span>Create Course</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.courses.index') }}">
+                        <i class="bi bi-circle"></i><span>View Courses</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
         <!-- Contact Us -->
         <!-- Contact Us -->
         <li class="nav-item">
@@ -239,6 +256,22 @@
         </li>
         <!-- Contact Us -->
         <!-- Contact Us -->
+
+
+  <li class="nav-item">
+    <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
+      <i class="bi bi-journal-text"></i><span>FAQ</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+   
+      <li>
+        <a href="{{ route('admin.faqs.index') }}">
+          <i class="bi bi-circle"></i><span>FAQs</span>
+        </a>
+      </li>
+    </ul>
+  </li><!-- End Forms Nav -->
+
 
     </ul>
 

@@ -192,17 +192,65 @@
                                    </svg>
                                </button>
                            </div>
-                           <div class="header-button">
-                               <a class="tj-primary-btn" href="contact.html">
-                                   <span class="btn-text"><span>Let’s Talk</span></span>
-                                   <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                           <div class="header-right-item d-none d-lg-inline-flex">
+                               {{-- Wishlist --}}
+                               <a href="javascript:void(0)" class="header-icon-link" onclick="openWishlist()">
+                                   <i class="fal fa-heart"></i>
+                                   <span class="counter" id="wishlist-count">0</span>
+                               </a>
+
+                               {{-- Cart --}}
+                               <a href="javascript:void(0)" class="header-icon-link" onclick="openCart()">
+                                   <i class="fal fa-shopping-cart"></i>
+                                   <span class="counter" id="cart-count">0</span>
                                </a>
                            </div>
-                           <div class="menu_bar menu_offcanvas d-none d-lg-inline-flex">
-                               <span></span>
-                               <span></span>
-                               <span></span>
+
+
+                           <!-- BEGIN: header-button (replace your old Let's Talk block) -->
+                           <div class="header-button dropdown">
+                               @auth
+                                   <a class="tj-primary-btn dropdown-toggle" href="#" id="userMenuBtn"
+                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                       <span class="btn-text"><span>{{ Auth::user()->name }}</span></span>
+                                       <span class="btn-icon"><i class="tji-arrow-down"></i></span>
+                                   </a>
+
+                                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuBtn"
+                                       style="min-width:200px;">
+                                       <li><a class="dropdown-item" href="">My Enrollments</a></li>
+                                       <li>
+                                           <hr class="dropdown-divider">
+                                       </li>
+                                       <li>
+                                           <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                               class="m-0">
+                                               @csrf
+                                               <button type="submit" class="dropdown-item">Logout</button>
+                                           </form>
+                                       </li>
+                                   </ul>
+                               @else
+                                   <a class="tj-primary-btn dropdown-toggle" href="#" id="guestMenuBtn"
+                                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                       <span class="btn-text"><span>Guest</span></span>
+                                       <span class="btn-icon"><i class="tji-arrow-down"></i></span>
+                                   </a>
+
+                                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="guestMenuBtn"
+                                       style="min-width:220px;">
+                                       <li>
+                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                               data-bs-target="#loginModal">Login</a>
+                                       </li>
+                                       <li>
+                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                               data-bs-target="#guestRegisterModal">Register</a>
+                                       </li>
+                                   </ul>
+                               @endauth
                            </div>
+                           <!-- END: header-button -->
                        </div>
 
                        <!-- menu bar -->

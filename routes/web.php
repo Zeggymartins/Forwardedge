@@ -1,13 +1,19 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBlogController;
+use App\Http\Controllers\Admin\AdminCourseController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminServiceController;
+use App\Http\Controllers\Admin\AdminEnrollmentController;
+use App\Http\Controllers\Admin\AdminTransactionsController;
 use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -87,6 +93,28 @@ Route::prefix('events')->name('events.')->group(function () {
         ->name('register');
 });
 
+
+
+/*
+|--------------------------------------------------------------------------
+| AJAX Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('ajax')->name('ajax.')->group(function () {
+    Route::post('/register', [AjaxAuthController::class, 'register'])->name('register');
+    Route::post('/login', [AjaxAuthController::class, 'login'])->name('login');
+    Route::post('/send-otp', [AjaxAuthController::class, 'sendOtp'])->name('sendOtp');
+    Route::post('/verify-otp', [AjaxAuthController::class, 'verifyOtp'])->name('verifyOtp');
+    Route::post('/forgot-password', [AjaxAuthController::class, 'forgotPassword'])->name('forgotPassword');
+    Route::post('/reset-password', [AjaxAuthController::class, 'resetPassword'])->name('resetPassword');
+});
+
+// Password reset view
+Route::get('/reset-password', function () {
+    return view('auth.reset');
+})->name('password.reset');
+
+
 /*
 |--------------------------------------------------------------------------
 | Cart & Wishlist Routes (Public but require auth for backend)
@@ -109,52 +137,25 @@ Route::prefix('user/wishlist')->name('user.wishlist.')->group(function () {
     Route::get('/json', [WishlistController::class, 'getwishlistJson'])->name('json');
     Route::get('/count', [WishlistController::class, 'count'])->name('count');
 });
-
-/*
-|--------------------------------------------------------------------------
-| AJAX Authentication Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('ajax')->name('ajax.')->group(function () {
-    Route::post('/register', [AjaxAuthController::class, 'register'])->name('register');
-    Route::post('/login', [AjaxAuthController::class, 'login'])->name('login');
-    Route::post('/send-otp', [AjaxAuthController::class, 'sendOtp'])->name('sendOtp');
-    Route::post('/verify-otp', [AjaxAuthController::class, 'verifyOtp'])->name('verifyOtp');
-    Route::post('/forgot-password', [AjaxAuthController::class, 'forgotPassword'])->name('forgotPassword');
-    Route::post('/reset-password', [AjaxAuthController::class, 'resetPassword'])->name('resetPassword');
-});
-
-// Password reset view
-Route::get('/reset-password', function () {
-    return view('auth.reset');
-})->name('password.reset');
-
-/*
-|--------------------------------------------------------------------------
-| Payment Routes (Public callbacks)
-|--------------------------------------------------------------------------
-*/
-Route::prefix('payment')->name('payment.')->group(function () {
-    Route::get('/callback', [PaymentController::class, 'callback'])->name('callback');
-    Route::post('/webhook', [PaymentController::class, 'webhook'])->name('webhook');
-    Route::get('/success', [OrderController::class, 'success'])->name('success');
-    Route::get('/failed', [OrderController::class, 'cancel'])->name('failed');
-});
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:user'])->group(function () {
 
-    // Profile management
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+
+    /*
+|--------------------------------------------------------------------------
+| Payment Routes (Public callbacks)
+|--------------------------------------------------------------------------
+*/
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::get('/callback', [PaymentController::class, 'callback'])->name('callback');
+        Route::post('/webhook', [PaymentController::class, 'webhook'])->name('webhook');
+        Route::get('/success', [OrderController::class, 'success'])->name('success');
+        Route::get('/failed', [OrderController::class, 'cancel'])->name('failed');
     });
-
     // Course enrollment
     Route::prefix('enroll')->name('enroll.')->group(function () {
         Route::get('/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('pricing');
@@ -172,54 +173,156 @@ Route::middleware('auth')->group(function () {
 | Admin/Dashboard Routes (if needed)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', function () {
-    return view('admin.pages.dashboard');
-})->middleware(['auth'])->name('dashboard');
 
-// Show form
-Route::get('/add-services', function () {
-    return view('admin.pages.services.add_service');
-})->name('services.add');
 
-Route::post('/services/store', [AdminServiceController::class, 'store'])->name('services.store');
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.pages.dashboard');
+    })->name('dashboard');
 
-Route::get('/admin/courses/create',function () {
-        return view('admin.pages.courses.add_course');})->name('courses.create'); // returns view we've built
-Route::post('/admin/courses', [CourseController::class, 'store'])->name('courses.store');
+    // Profile management
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
 
-// routes/web.php
-Route::prefix('admin/events')->group(function () {
-    // main events
-    Route::get('/', [AdminEventController::class, 'index'])->name('events.index');
-    Route::get('/create', [AdminEventController::class, 'create'])->name('events.create');
-    Route::post('/', [AdminEventController::class, 'store'])->name('events.store');
-    Route::get('/{event}/dashboard', [AdminEventController::class, 'dashboard'])->name('events.dashboard');
-    Route::get('/{event}/edit', [AdminEventController::class, 'edit'])->name('events.edit');
-    Route::put('/{event}', [AdminEventController::class, 'update'])->name('events.update');
-    Route::delete('/{event}', [AdminEventController::class, 'destroy'])->name('events.destroy');
+    /*
+|--------------------------------------------------------------------------
+| Admin Routes - Services
+|--------------------------------------------------------------------------
+*/
+    // Show form
+    Route::get('/admin/services/add', function () {
+        return view('admin.pages.services.add_service');
+    })->name('admin.services.add');
+    Route::prefix('admin/services')->name('admin.services.')->middleware(['auth'])->group(function () {
+        Route::get('/', [AdminServiceController::class, 'index'])->name('index');
+        Route::post('/', [AdminServiceController::class, 'store'])->name('store');
+        Route::get('/{id}', [AdminServiceController::class, 'show'])->name('show');
+        Route::put('/{id}', [AdminServiceController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminServiceController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/contents', [AdminServiceController::class, 'storeContent'])->name('contents.store');
+        Route::put('/{serviceId}/contents/{contentId}', [AdminServiceController::class, 'updateContent'])->name('contents.update');
+        Route::delete('/{serviceId}/contents/{contentId}', [AdminServiceController::class, 'destroyContent'])->name('contents.destroy');
+    });
 
-    // sub resources
-    Route::post('/{event}/contents', [AdminEventController::class, 'storeContent'])->name('events.contents.store');
-    Route::delete('/{event}/contents/{content}', [AdminEventController::class, 'destroyContent'])->name('events.contents.destroy');
+    // routes/web.php
+    Route::prefix('admin/events')->name('admin.events.')->group(function () {
+        // main events
+        Route::get('/', [AdminEventController::class, 'index'])->name('list');
+        Route::get('/create', [AdminEventController::class, 'create'])->name('create');
+        Route::post('/', [AdminEventController::class, 'store'])->name('store');
+        Route::get('/{event}/dashboard', [AdminEventController::class, 'dashboard'])->name('dashboard');
+        Route::put('/{event}', [AdminEventController::class, 'update'])->name('update');
+        Route::delete('/{event}', [AdminEventController::class, 'destroy'])->name('destroy');
+        Route::get('/registrations', [AdminEventController::class, 'Registrations'])->name('registrations');
+        // sub resources
+        Route::post('/{event}/contents', [AdminEventController::class, 'storeContent'])->name('contents.store');
+        Route::put('/contents/{content}', [AdminEventController::class, 'updateContent'])->name('contents.update');
+        Route::delete('/contents/{content}', [AdminEventController::class, 'destroyContent'])->name('contents.destroy');
 
-    Route::post('/{event}/phases', [AdminEventController::class, 'storePhase'])->name('events.phases.store');
-    Route::delete('/{event}/phases/{phase}', [AdminEventController::class, 'destroyPhase'])->name('events.phases.destroy');
+        // Tickets
+        Route::post('/{event}/tickets', [AdminEventController::class, 'storeTicket'])->name('tickets.store');
+        Route::put('/tickets/{ticket}', [AdminEventController::class, 'updateTicket'])->name('tickets.update');
+        Route::delete('/tickets/{ticket}', [AdminEventController::class, 'destroyTicket'])->name('tickets.destroy');
 
-    Route::post('/{event}/topics/{phase}', [AdminEventController::class, 'storeTopic'])->name('events.topics.store');
-    Route::delete('/{event}/topics/{topic}', [AdminEventController::class, 'destroyTopic'])->name('events.topics.destroy');
+        // Speakers
+        Route::post('/{event}/speakers', [AdminEventController::class, 'storeSpeaker'])->name('speakers.store');
+        Route::put('/speakers/{speaker}', [AdminEventController::class, 'updateSpeaker'])->name('speakers.update');
+        Route::delete('/speakers/{speaker}', [AdminEventController::class, 'destroySpeaker'])->name('speakers.destroy');
 
-    Route::post('/{event}/schedules', [AdminEventController::class, 'storeSchedule'])->name('events.schedules.store');
-    Route::delete('/{event}/schedules/{schedule}', [AdminEventController::class, 'destroySchedule'])->name('events.schedules.destroy');
+        // Schedules
+        Route::post('/{event}/schedules', [AdminEventController::class, 'storeSchedule'])->name('schedules.store');
+        Route::put('/schedules/{schedule}', [AdminEventController::class, 'updateSchedule'])->name('schedules.update');
+        Route::delete('/schedules/{schedule}', [AdminEventController::class, 'destroySchedule'])->name('schedules.destroy');
 
-    Route::post('/{event}/tickets', [AdminEventController::class, 'storeTicket'])->name('events.tickets.store');
-    Route::delete('/{event}/tickets/{ticket}', [AdminEventController::class, 'destroyTicket'])->name('events.tickets.destroy');
+        // Sponsors
+        Route::post('/{event}/sponsors', [AdminEventController::class, 'storeSponsor'])->name('sponsors.store');
+        Route::put('/sponsors/{sponsor}', [AdminEventController::class, 'updateSponsor'])->name('sponsors.update');
+        Route::delete('/sponsors/{sponsor}', [AdminEventController::class, 'destroySponsor'])->name('sponsors.destroy');
+    });
 
-    Route::post('/{event}/speakers', [AdminEventController::class, 'storeSpeaker'])->name('events.speakers.store');
-    Route::delete('/{event}/speakers/{speaker}', [AdminEventController::class, 'destroySpeaker'])->name('events.speakers.destroy');
+    Route::prefix('admin')->group(function () {
+        Route::get('enrollments', [AdminEnrollmentController::class, 'index'])->name('admin.enrollments.index');
+        Route::get('enrollments/{id}', [AdminEnrollmentController::class, 'show'])->name('admin.enrollments.show');
+    });
 
-    Route::post('/{event}/sponsors', [AdminEventController::class, 'storeSponsor'])->name('events.sponsors.store');
-    Route::delete('/{event}/sponsors/{sponsor}', [AdminEventController::class, 'destroySponsor'])->name('events.sponsors.destroy');
+
+    /*
+|--------------------------------------------------------------------------
+| Admin Routes - Blogs
+|--------------------------------------------------------------------------
+*/
+    Route::prefix('admin/blogs')->name('admin.blogs.')->group(function () {
+        Route::get('/', [AdminBlogController::class, 'index'])->name('index');
+        Route::get('/create', [AdminBlogController::class, 'create'])->name('create');
+        Route::post('/', [AdminBlogController::class, 'store'])->name('store');
+        Route::get('/{id}', [AdminBlogController::class, 'show'])->name('show');
+        Route::put('/{id}', [AdminBlogController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminBlogController::class, 'destroy'])->name('destroy');
+
+        // Blog Detail Routes
+        Route::post('/{id}/details', [AdminBlogController::class, 'storeDetail'])->name('details.store');
+        Route::put('/{blogId}/details/{detailId}', [AdminBlogController::class, 'updateDetail'])->name('details.update');
+        Route::delete('/{blogId}/details/{detailId}', [AdminBlogController::class, 'destroyDetail'])->name('details.destroy');
+    });
+
+    /*
+|--------------------------------------------------------------------------
+| Admin Routes - Courses
+|--------------------------------------------------------------------------
+*/
+    Route::prefix('admin/courses')->name('admin.courses.')->group(function () {
+        Route::get('/', [AdminCourseController::class, 'index'])->name('index');
+        Route::get('/create', [AdminCourseController::class, 'create'])->name('create');
+        Route::post('/', [AdminCourseController::class, 'store'])->name('store');
+        Route::get('/{id}/dashboard', [AdminCourseController::class, 'dashboard'])->name('dashboard');
+        Route::put('/{id}', [AdminCourseController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminCourseController::class, 'destroy'])->name('destroy');
+
+        // Course Contents
+        Route::post('/{id}/details', [AdminCourseController::class, 'storeDetails'])->name('details.store');
+        Route::put('/{courseId}/contents/{contentId}', [AdminCourseController::class, 'updateDetails'])->name('details.update');
+        Route::delete('/{courseId}/contents/{contentId}', [AdminCourseController::class, 'destroyDetails'])->name('details.destroy');
+
+        // Course Phases
+        Route::post('/{id}/phases', [AdminCourseController::class, 'storePhase'])->name('phases.store');
+        Route::put('/{courseId}/phases/{phaseId}', [AdminCourseController::class, 'updatePhase'])->name('phases.update');
+        Route::delete('/{courseId}/phases/{phaseId}', [AdminCourseController::class, 'destroyPhase'])->name('phases.destroy');
+
+        // Course Topics
+        Route::post('/{courseId}/phases/{phaseId}/topics', [AdminCourseController::class, 'storeTopic'])->name('topics.store');
+        Route::put('/{courseId}/phases/{phaseId}/topics/{topicId}', [AdminCourseController::class, 'updateTopic'])->name('topics.update');
+        Route::delete('/{courseId}/phases/{phaseId}/topics/{topicId}', [AdminCourseController::class, 'destroyTopic'])->name('topics.destroy');
+
+        // Course Schedules
+        Route::post('/{id}/schedules', [AdminCourseController::class, 'storeSchedule'])->name('schedules.store');
+        Route::put('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'updateSchedule'])->name('schedules.update');
+        Route::delete('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'destroySchedule'])->name('schedules.destroy');
+    });
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/transactions', [AdminTransactionsController::class, 'index'])->name('transactions.index');
+        Route::get('/transactions/{transaction}', [AdminTransactionsController::class, 'show'])->name('transactions.show');
+    });
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('faqs', FaqController::class)->except(['create', 'edit', 'show',]);
+    });
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('gallery', GalleryController::class)
+            ->except(['create', 'edit', 'show']);
+    });
+
+
+  Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('course-contents', [AdminCourseController::class, 'courseContent'])->name('course_contents.index');
+    Route::post('course-contents', [AdminCourseController::class, 'storeContent'])->name('course_contents.store');
+    Route::delete('course-contents/{courseContent}', [AdminCourseController::class, 'destroyContent'])->name('course_contents.destroy');
+    Route::get('course-contents/{courseId}', [AdminCourseController::class, 'showContent'])->name('course_contents.show');
 });
+
+});
+
 
 /*
 |--------------------------------------------------------------------------

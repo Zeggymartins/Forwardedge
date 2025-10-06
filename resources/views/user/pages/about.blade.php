@@ -121,7 +121,7 @@
               <div class="col-xl-6 col-lg-6 order-lg-1 order-2">
                 <div class="about-img-area style-2 wow fadeInLeft" data-wow-delay=".3s">
                   <div class="about-img overflow-hidden">
-                    <img data-speed=".8" src="{{asset('frontend/assets/images/about/about-5.webp')}}" alt="">
+                    <img data-speed=".8" src="{{asset('frontend/assets/images/about/pic1.jpg')}}" alt="">
                   </div>
                   <div class="box-area style-2">
                     <div class="progress-box wow fadeInUp" data-wow-delay=".3s">
@@ -207,7 +207,7 @@
               <div class="col-lg-6 order-lg-2">
                 <div class="testimonial-img-area wow fadeInUp" data-wow-delay=".3s">
                   <div class="testimonial-img">
-                    <img src="{{asset('frontend/assets/images/testimonial/testimonial-img.webp')}}" alt="">
+                    <img src="{{asset('frontend/assets/images/testimonial/pic.jpg')}}" alt="">
                     <div class="sec-heading style-2">
                       <h2 class="sec-title title-anim">Our <span>Commitment.</span></h2>
                     </div>

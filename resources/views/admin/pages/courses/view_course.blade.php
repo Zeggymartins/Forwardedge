@@ -4,14 +4,10 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold text-dark">📚 Courses</h1>
-        <a href="{{ route('courses.create') }}" class="btn btn-primary rounded-pill px-4 py-2">
+        <a href="{{ route('admin.courses.create') }}" class="btn btn-primary rounded-pill px-4 py-2">
             <i class="bi bi-plus-circle me-2"></i> Add Course
         </a>
     </div>
-
-    @if(session('success'))
-        <div class="alert alert-success shadow-sm rounded py-3 px-4">{{ session('success') }}</div>
-    @endif
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
@@ -37,10 +33,10 @@
                             </td>
                             <td class="py-4 px-4 text-muted">{{ $course->slug }}</td>
                             <td class="py-4 px-4 text-center">
-                                <a href="{{ route('courses.show', $course->id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 me-2">
+                                <a href="{{ route('admin.courses.dashboard', $course->id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 me-2">
                                     <i class="bi bi-eye"></i> View
                                 </a>
-                                <form action="{{ route('courses.destroy', $course->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.courses.destroy', $course->id) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2"
                                             onclick="return confirm('Delete this course?')">

@@ -5,7 +5,7 @@
                     <div class="col-12">
                         <div class="cta-area">
                             <div class="cta-content">
-                                <h2 class="title title-anim">Let’s Build Future Together.</h2>
+                                <h2 class="title title-anim">Let’s Build A Future Together.</h2>
                                 <div class="cta-btn wow fadeInUp" data-wow-delay=".6s">
                                     <a class="tj-primary-btn btn-dark" href="contact.html">
                                         <span class="btn-text"><span>Get Started Now</span></span>
@@ -14,7 +14,7 @@
                                 </div>
                             </div>
                             <div class="cta-img">
-                                <img src="{{ asset('frontend/assets/images/cta/cta-bg.webp') }}" alt="">
+                                <img src="{{ asset('frontend/assets/images/cta/picture2.jpg') }}" alt="">
                             </div>
                         </div>
                     </div>

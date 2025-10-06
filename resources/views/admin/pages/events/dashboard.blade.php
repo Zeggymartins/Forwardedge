@@ -17,7 +17,7 @@
     }
 
     #eventTabs .nav-link.active {
-        background: linear-gradient(90deg, #4e73df, #1cc88a);
+        background: linear-gradient(90deg, #4e73df, #1c0876ff);
         color: #fff !important;
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
@@ -28,9 +28,6 @@
     <div class="container py-4">
         <h1>{{ $event->title }} <small class="text-muted">Dashboard</small></h1>
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
         <ul class="nav nav-tabs nav-pills flex-wrap mb-4 shadow-sm rounded-3" id="eventTabs" role="tablist"
             style="background: #f8f9fc;">
             <li class="nav-item" role="presentation">
@@ -83,13 +80,12 @@
                             <i class="bi bi-pencil-square me-1"></i> Edit Info
                         </button>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="row g-4">
                             <div class="col-md-4 text-center">
-                                <img src="{{ $event->thumbnail ? asset($event->thumbnail) : 'https://via.placeholder.com/300x200?text=No+Thumbnail' }}"
-                                    class="img-fluid rounded shadow-sm mb-3" alt="Event Thumbnail">
-                                <img src="{{ $event->banner_image ? asset($event->banner_image) : 'https://via.placeholder.com/600x200?text=No+Banner' }}"
+                                <img src="{{ $event->banner_image ? asset('storage/' . $event->banner_image) : 'https://via.placeholder.com/600x200?text=No+Banner' }}"
                                     class="img-fluid rounded shadow-sm" alt="Event Banner">
+
                             </div>
                             <div class="col-md-8">
                                 <h4 class="fw-bold">{{ $event->title }}</h4>
@@ -136,120 +132,159 @@
                 </div>
             </div>
 
-       <!-- Contents -->
-<div class="tab-pane fade" id="contents">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Event Contents</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContentModal">
-            <i class="bi bi-plus-lg"></i> Add Content
-        </button>
-    </div>
-
-    <!-- List Existing Contents -->
-    <div class="row">
-        @foreach ($event->contents as $content)
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body p-4">
-                        <h6 class="text-muted text-uppercase small mb-3">{{ ucfirst($content->type) }}</h6>
-
-                        {{-- Render content by type --}}
-                        @if ($content->type === 'list')
-                            @php $items = is_array($content->content) ? $content->content : json_decode($content->content, true); @endphp
-                            <ul class="ps-3 mb-3">
-                                @foreach ($items as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                        @elseif($content->type === 'image')
-                            <img src="{{ asset('storage/' . $content->content) }}"
-                                 class="img-fluid rounded shadow-sm mb-3"
-                                 style="max-height: 180px; object-fit: cover;" alt="Event image">
-                        @else
-                            <p class="mb-3">{{ $content->content }}</p>
-                        @endif
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <!-- Edit -->
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#editContentModal{{ $content->id }}">
-                                <i class="bi bi-pencil"></i> Edit
-                            </button>
-
-                            <!-- Delete -->
-                            <form action="{{ route('events.contents.destroy', [$event->id, $content->id]) }}"
-                                  method="POST" onsubmit="return confirm('Delete this content?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+            <!-- Contents -->
+            <div class="tab-pane fade" id="contents">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Event Contents</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContentModal">
+                        <i class="bi bi-plus-lg"></i> Add Content
+                    </button>
                 </div>
-            </div>
 
-            <!-- Edit Modal -->
-            <div class="modal fade" id="editContentModal{{ $content->id }}" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action=""
-                              method="POST" enctype="multipart/form-data">
-                            @csrf @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit {{ ucfirst($content->type) }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
+                <!-- List Existing Contents -->
+                <div class="row">
+                    @foreach ($event->contents as $content)
+                        <div class="col-md-6 mb-4">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body p-4">
+                                    <h6 class="text-muted text-uppercase small mb-3">{{ ucfirst($content->type) }}</h6>
 
-                                {{-- Heading --}}
-                                @if ($content->type === 'heading')
-                                    <input type="text" name="content" value="{{ $content->content }}"
-                                           class="form-control" required>
-
-                                {{-- Paragraph / Feature --}}
-                                @elseif(in_array($content->type, ['paragraph','feature']))
-                                    <textarea name="content" class="form-control" rows="4" required>{{ $content->content }}</textarea>
-
-                                {{-- List --}}
-                                @elseif($content->type === 'list')
-                                    @php $items = is_array($content->content) ? $content->content : json_decode($content->content, true); @endphp
-                                    <div id="editListContainer{{ $content->id }}">
-                                        @foreach ($items as $item)
-                                            <div class="input-group mb-2">
-                                                <input type="text" name="content[]" value="{{ $item }}"
-                                                       class="form-control" required>
-                                                <button type="button"
-                                                        class="btn btn-outline-danger removeListItem">-</button>
-                                            </div>
+                                    {{-- Render content by type --}}
+                                    @if ($content->type === 'list')
+                                        @php
+                                            $items = is_array($content->content)
+                                                ? $content->content
+                                                : json_decode($content->content, true);
+                                        @endphp
+                                        <ul class="ps-3 mb-3">
+                                            @foreach ($items as $item)
+                                                <li>{{ $item }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif($content->type === 'image')
+                                        @php
+                                            $images = json_decode($content->content, true);
+                                            $images = is_array($images) ? $images : [$content->content];
+                                        @endphp
+                                        @foreach ($images as $img)
+                                            <img src="{{ asset('storage/' . $img) }}"
+                                                class="img-fluid rounded shadow-sm mb-3"
+                                                style="max-height: 180px; object-fit: cover;" alt="Event image">
                                         @endforeach
-                                        <button type="button" class="btn btn-outline-secondary addListItem">+ Add Item</button>
+                                    @else
+                                        <p class="mb-3">{{ $content->content }}</p>
+                                    @endif
+
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <!-- Edit -->
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#editContentModal{{ $content->id }}">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+
+                                        <!-- Delete -->
+                                        <form
+                                            action="{{ route('admin.events.contents.destroy', [$event->id, $content->id]) }}"
+                                            method="POST" onsubmit="return confirm('Delete this content?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
-
-                                {{-- Image --}}
-                                @elseif($content->type === 'image')
-                                    <img src="{{ asset('storage/' . $content->content) }}"
-                                         class="img-fluid mb-3 rounded shadow-sm" style="max-height: 150px;">
-                                    <input type="file" name="content" class="form-control" accept="image/*">
-                                @endif
-
-                                <div class="mt-3">
-                                    <label class="form-label">Position</label>
-                                    <input type="number" name="position" class="form-control"
-                                           value="{{ $content->position }}" required>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editContentModal{{ $content->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <form action="{{ route('admin.events.contents.update', $content->id) }}"
+                                        method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit {{ ucfirst($content->type) }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+
+                                            {{-- Heading --}}
+                                            @if ($content->type === 'heading')
+                                                <input type="text" name="content" value="{{ $content->content }}"
+                                                    class="form-control" required>
+
+                                                {{-- Paragraph --}}
+                                            @elseif($content->type === 'paragraph')
+                                                <textarea name="content" class="form-control" rows="4" required>{{ $content->content }}</textarea>
+
+                                                {{-- List --}}
+                                            @elseif($content->type === 'list')
+                                                @php $items = is_array($content->content) ? $content->content : json_decode($content->content, true); @endphp
+                                                <div id="editListContainer{{ $content->id }}">
+                                                    @foreach ($items as $item)
+                                                        <div class="input-group mb-2">
+                                                            <input type="text" name="list_items[]"
+                                                                value="{{ $item }}" class="form-control"
+                                                                required>
+                                                            <button type="button"
+                                                                class="btn btn-outline-danger removeListItem">-</button>
+                                                        </div>
+                                                    @endforeach
+                                                    <button type="button" class="btn btn-outline-secondary addListItem">+
+                                                        Add Item</button>
+                                                </div>
+
+                                                {{-- Image --}}
+                                            @elseif($content->type === 'image')
+                                                @php
+                                                    $images = json_decode($content->content, true);
+                                                    $images = is_array($images) ? $images : [$content->content];
+                                                @endphp
+                                                @foreach ($images as $img)
+                                                    <img src="{{ asset('storage/' . $img) }}"
+                                                        class="img-fluid mb-3 rounded shadow-sm"
+                                                        style="max-height: 150px;">
+                                                @endforeach
+                                                <input type="file" name="image" class="form-control"
+                                                    accept="image/*">
+
+                                                {{-- Feature --}}
+                                            @elseif($content->type === 'feature')
+                                                @php
+                                                    $data = json_decode($content->content, true);
+                                                @endphp
+                                                <input type="text" name="feature_title" class="form-control mb-2"
+                                                    value="{{ $data['title'] ?? '' }}" placeholder="Feature title"
+                                                    required>
+                                                <textarea name="feature_description" class="form-control mb-2" rows="3" placeholder="Feature description"
+                                                    required>{{ $data['description'] ?? '' }}</textarea>
+                                                <input type="text" name="feature_icon" class="form-control"
+                                                    value="{{ $data['icon'] ?? '' }}"
+                                                    placeholder="Feature icon (optional)">
+                                            @endif
+
+                                            <div class="mt-3">
+                                                <label class="form-label">Position</label>
+                                                <input type="number" name="position" class="form-control"
+                                                    value="{{ $content->position }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
+
             </div>
-        @endforeach
-    </div>
-</div>
 
 
 
@@ -281,7 +316,8 @@
                                             data-bs-target="#viewScheduleModal{{ $sch->id }}">
                                             View
                                         </button>
-                                        <form action="{{ route('events.schedules.destroy', [$event->id, $sch->id]) }}"
+                                        <form
+                                            action="{{ route('admin.events.schedules.destroy', [$event->id, $sch->id]) }}"
                                             method="POST" onsubmit="return confirm('Delete this schedule?')">
                                             @csrf @method('DELETE')
                                             <button class="btn btn-sm btn-danger">Delete</button>
@@ -295,7 +331,8 @@
                         <div class="modal fade" id="viewScheduleModal{{ $sch->id }}" tabindex="-1">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
-                                    <form action="" method="POST">
+                                    <form action="{{ route('admin.events.schedules.update', [$event->id, $sch->id]) }}"
+                                        method="POST">
                                         @csrf @method('PUT')
                                         <div class="modal-header">
                                             <h5 class="modal-title">Edit Schedule</h5>
@@ -363,349 +400,365 @@
             </div>
 
             <!-- Tickets -->
-     <div class="tab-pane fade" id="tickets">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Tickets</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTicketModal">
-            <i class="bi bi-plus-lg"></i> Add Ticket
-        </button>
-    </div>
-
-    <div class="row">
-        @foreach ($event->tickets as $t)
-            <div class="col-md-6 mb-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h6 class="card-title mb-1">{{ $t->name }}</h6>
-                        <small class="text-muted d-block mb-2">
-                            ${{ number_format($t->price, 2) }} |
-                            {{ $t->quantity_available - $t->quantity_sold }} left /
-                            {{ $t->quantity_available }} total
-                        </small>
-                        <p class="text-truncate mb-2">{{ $t->description ?? 'No description provided.' }}</p>
-
-                        {{-- Features list --}}
-                        @if (!empty($t->features) && is_array($t->features))
-                            <ul class="mb-2 small">
-                                @foreach ($t->features as $f)
-                                    <li>{{ $f }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
-
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#viewTicketModal{{ $t->id }}">
-                                View
-                            </button>
-                            <form action="{{ route('events.tickets.destroy', [$event->id, $t->id]) }}"
-                                method="POST" onsubmit="return confirm('Delete this ticket?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
+            <div class="tab-pane fade" id="tickets">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Tickets</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTicketModal">
+                        <i class="bi bi-plus-lg"></i> Add Ticket
+                    </button>
                 </div>
-            </div>
 
-            <!-- View/Edit Modal -->
-            <div class="modal fade" id="viewTicketModal{{ $t->id }}" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action="" method="POST">
-                            @csrf @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Ticket</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control"
-                                        value="{{ $t->name }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Price</label>
-                                    <input type="number" step="0.01" name="price" class="form-control"
-                                        value="{{ $t->price }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Quantity Available</label>
-                                    <input type="number" name="quantity_available" class="form-control"
-                                        value="{{ $t->quantity_available }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Quantity Sold</label>
-                                    <input type="number" name="quantity_sold" class="form-control"
-                                        value="{{ $t->quantity_sold }}" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Sale Start</label>
-                                    <input type="datetime-local" name="sale_start" class="form-control"
-                                        value="{{ $t->sale_start ? \Carbon\Carbon::parse($t->sale_start)->format('Y-m-d\TH:i') : '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Sale End</label>
-                                    <input type="datetime-local" name="sale_end" class="form-control"
-                                        value="{{ $t->sale_end ? \Carbon\Carbon::parse($t->sale_end)->format('Y-m-d\TH:i') : '' }}">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" class="form-control" rows="3">{{ $t->description }}</textarea>
-                                </div>
+                <div class="row">
+                    @foreach ($event->tickets as $t)
+                        <div class="col-md-6 mb-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-1">{{ $t->name }}</h6>
+                                    <small class="text-muted d-block mb-2">
+                                        ${{ number_format($t->price, 2) }} |
+                                        {{ $t->quantity_available - $t->quantity_sold }} left /
+                                        {{ $t->quantity_available }} total
+                                    </small>
+                                    <p class="text-truncate mb-2">{{ $t->description ?? 'No description provided.' }}</p>
 
-                                {{-- Features editable list --}}
-                                <div class="col-12">
-                                    <label class="form-label">Features</label>
-                                    <div id="featuresContainer{{ $t->id }}">
-                                        @if (!empty($t->features) && is_array($t->features))
+                                    {{-- Features list --}}
+                                    @if (!empty($t->features) && is_array($t->features))
+                                        <ul class="mb-2 small">
                                             @foreach ($t->features as $f)
-                                                <input type="text" name="features[]" class="form-control mb-2"
-                                                    value="{{ $f }}">
+                                                <li>{{ $f }}</li>
                                             @endforeach
-                                        @endif
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary addFeature"
-                                        data-target="featuresContainer{{ $t->id }}">
-                                        + Add Feature
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-</div>
-
-       <div class="tab-pane fade" id="speakers">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Speakers</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSpeakerModal">
-            <i class="bi bi-plus-lg"></i> Add Speaker
-        </button>
-    </div>
-
-    <div class="row">
-        @foreach ($event->speakers as $sp)
-            <div class="col-md-4 mb-3">
-                <div class="card shadow-sm h-100">
-                    @if ($sp->image)
-                        <img src="{{ asset('storage/' . $sp->image) }}" class="card-img-top" alt="{{ $sp->name }}">
-                    @else
-                        <img src="https://via.placeholder.com/400x250?text=No+Photo" class="card-img-top" alt="No Photo">
-                    @endif
-                    <div class="card-body">
-                        <h6 class="card-title mb-1">{{ $sp->name }}</h6>
-                        <small class="text-muted d-block mb-2">
-                            {{ $sp->title }} {{ $sp->company ? ' @ ' . $sp->company : '' }}
-                        </small>
-                        <p class="text-truncate mb-2">{{ $sp->bio ?? 'No bio provided.' }}</p>
-
-                        {{-- Social links --}}
-                        @if (!empty($sp->social_links) && is_array($sp->social_links))
-                            <div class="mb-2">
-                                @foreach ($sp->social_links as $platform => $link)
-                                    @if ($link)
-                                        <a href="{{ $link }}" target="_blank" class="me-2">
-                                            <i class="bi bi-{{ $platform }}"></i>
-                                        </a>
+                                        </ul>
                                     @endif
-                                @endforeach
-                            </div>
-                        @endif
 
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#viewSpeakerModal{{ $sp->id }}">
-                                View
-                            </button>
-                            <form action="{{ route('events.speakers.destroy', [$event->id, $sp->id]) }}"
-                                method="POST" onsubmit="return confirm('Delete this speaker?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- View/Edit Modal -->
-            <div class="modal fade" id="viewSpeakerModal{{ $sp->id }}" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action="" 
-                              method="POST" enctype="multipart/form-data">
-                            @csrf @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Speaker</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" value="{{ $sp->name }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Title</label>
-                                    <input type="text" name="title" class="form-control" value="{{ $sp->title }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Company</label>
-                                    <input type="text" name="company" class="form-control" value="{{ $sp->company }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" value="{{ $sp->email }}">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Bio</label>
-                                    <textarea name="bio" class="form-control" rows="3">{{ $sp->bio }}</textarea>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Photo</label>
-                                    <input type="file" name="image" class="form-control">
-                                </div>
-
-                                {{-- Social links editable --}}
-                                <div class="col-12">
-                                    <label class="form-label">Social Links</label>
-                                    <div id="socialLinksContainer{{ $sp->id }}">
-                                        @php
-                                            $links = is_array($sp->social_links) ? $sp->social_links : [];
-                                        @endphp
-                                        @foreach (['twitter','linkedin','website'] as $platform)
-                                            <input type="url" name="social_links[{{ $platform }}]" 
-                                                   class="form-control mb-2"
-                                                   placeholder="{{ ucfirst($platform) }} URL"
-                                                   value="{{ $links[$platform] ?? '' }}">
-                                        @endforeach
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#viewTicketModal{{ $t->id }}">
+                                            View
+                                        </button>
+                                        <form action="{{ route('admin.events.tickets.destroy', [$event->id, $t->id]) }}"
+                                            method="POST" onsubmit="return confirm('Delete this ticket?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+
+                        <!-- View/Edit Modal -->
+                        <div class="modal fade" id="viewTicketModal{{ $t->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <form action="{{ route('admin.events.tickets.update', [$event->id, $t->id]) }}"
+                                        method="POST">
+                                        @csrf @method('PUT')
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Ticket</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Name</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    value="{{ $t->name }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Price</label>
+                                                <input type="number" step="0.01" name="price" class="form-control"
+                                                    value="{{ $t->price }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Quantity Available</label>
+                                                <input type="number" name="quantity_available" class="form-control"
+                                                    value="{{ $t->quantity_available }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Quantity Sold</label>
+                                                <input type="number" name="quantity_sold" class="form-control"
+                                                    value="{{ $t->quantity_sold }}" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Sale Start</label>
+                                                <input type="datetime-local" name="sale_start" class="form-control"
+                                                    value="{{ $t->sale_start ? \Carbon\Carbon::parse($t->sale_start)->format('Y-m-d\TH:i') : '' }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Sale End</label>
+                                                <input type="datetime-local" name="sale_end" class="form-control"
+                                                    value="{{ $t->sale_end ? \Carbon\Carbon::parse($t->sale_end)->format('Y-m-d\TH:i') : '' }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Description</label>
+                                                <textarea name="description" class="form-control" rows="3">{{ $t->description }}</textarea>
+                                            </div>
+
+                                            {{-- Features editable list --}}
+                                            <div class="col-12">
+                                                <label class="form-label">Features</label>
+                                                <div id="featuresContainer{{ $t->id }}">
+                                                    @if (!empty($t->features) && is_array($t->features))
+                                                        @foreach ($t->features as $f)
+                                                            <input type="text" name="features[]"
+                                                                class="form-control mb-2" value="{{ $f }}">
+                                                        @endforeach
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary addFeature"
+                                                    data-target="featuresContainer{{ $t->id }}">
+                                                    + Add Feature
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-        @endforeach
-    </div>
-</div>
 
-        <!-- Sponsors -->
-<div class="tab-pane fade" id="sponsors">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Sponsors</h5>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSponsorModal">
-            <i class="bi bi-plus-lg"></i> Add Sponsor
-        </button>
-    </div>
+            <div class="tab-pane fade" id="speakers">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Speakers</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSpeakerModal">
+                        <i class="bi bi-plus-lg"></i> Add Speaker
+                    </button>
+                </div>
 
-    <div class="row">
-        @foreach ($event->sponsors as $spn)
-            <div class="col-md-4 mb-3">
-                <div class="card shadow-sm h-100">
-                    @if ($spn->logo)
-                        <img src="{{ asset('storage/' . $spn->logo) }}" class="card-img-top p-3"
-                             alt="{{ $spn->name }}" style="height: 150px; object-fit: contain;">
-                    @else
-                        <img src="https://via.placeholder.com/400x150?text=No+Logo" 
-                             class="card-img-top p-3" alt="No Logo">
-                    @endif
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="card-title mb-0">{{ $spn->name }}</h6>
-                            <span class="badge text-uppercase 
-                                @if($spn->tier === 'platinum') bg-dark text-light
+                <div class="row">
+                    @foreach ($event->speakers as $sp)
+                        <div class="col-md-4 mb-3">
+                            <div class="card shadow-sm h-100">
+                                @if ($sp->image)
+                                    <img src="{{ asset('storage/' . $sp->image) }}" class="card-img-top"
+                                        alt="{{ $sp->name }}">
+                                @else
+                                    <img src="https://via.placeholder.com/400x250?text=No+Photo" class="card-img-top"
+                                        alt="No Photo">
+                                @endif
+                                <div class="card-body">
+                                    <h6 class="card-title mb-1">{{ $sp->name }}</h6>
+                                    <small class="text-muted d-block mb-2">
+                                        {{ $sp->title }} {{ $sp->company ? ' @ ' . $sp->company : '' }}
+                                    </small>
+                                    <p class="text-truncate mb-2">{{ $sp->bio ?? 'No bio provided.' }}</p>
+
+                                    {{-- Social links --}}
+                                    @if (!empty($sp->social_links) && is_array($sp->social_links))
+                                        <div class="mb-2">
+                                            @foreach ($sp->social_links as $platform => $link)
+                                                @if ($link)
+                                                    <a href="{{ $link }}" target="_blank" class="me-2">
+                                                        <i class="bi bi-{{ $platform }}"></i>
+                                                    </a>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#viewSpeakerModal{{ $sp->id }}">
+                                            View
+                                        </button>
+                                        <form action="{{ route('admin.events.speakers.destroy', [$event->id, $sp->id]) }}"
+                                            method="POST" onsubmit="return confirm('Delete this speaker?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View/Edit Modal -->
+                        <div class="modal fade" id="viewSpeakerModal{{ $sp->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <form action="{{ route('admin.events.speakers.update', [$event->id, $sp->id]) }}"
+                                        method="POST" enctype="multipart/form-data">
+                                        @csrf @method('PUT')
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Speaker</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Name</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    value="{{ $sp->name }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Title</label>
+                                                <input type="text" name="title" class="form-control"
+                                                    value="{{ $sp->title }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Company</label>
+                                                <input type="text" name="company" class="form-control"
+                                                    value="{{ $sp->company }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" name="email" class="form-control"
+                                                    value="{{ $sp->email }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Bio</label>
+                                                <textarea name="bio" class="form-control" rows="3">{{ $sp->bio }}</textarea>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Photo</label>
+                                                <input type="file" name="image" class="form-control">
+                                            </div>
+
+                                            {{-- Social links editable --}}
+                                            <div class="col-12">
+                                                <label class="form-label">Social Links</label>
+                                                <div id="socialLinksContainer{{ $sp->id }}">
+                                                    @php
+                                                        $links = is_array($sp->social_links) ? $sp->social_links : [];
+                                                    @endphp
+                                                    @foreach (['twitter', 'linkedin', 'website'] as $platform)
+                                                        <input type="url" name="social_links[{{ $platform }}]"
+                                                            class="form-control mb-2"
+                                                            placeholder="{{ ucfirst($platform) }} URL"
+                                                            value="{{ $links[$platform] ?? '' }}">
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Sponsors -->
+            <div class="tab-pane fade" id="sponsors">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Sponsors</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSponsorModal">
+                        <i class="bi bi-plus-lg"></i> Add Sponsor
+                    </button>
+                </div>
+
+                <div class="row">
+                    @foreach ($event->sponsors as $spn)
+                        <div class="col-md-4 mb-3">
+                            <div class="card shadow-sm h-100">
+                                @if ($spn->logo)
+                                    <img src="{{ asset('storage/' . $spn->logo) }}" class="card-img-top p-3"
+                                        alt="{{ $spn->name }}" style="height: 150px; object-fit: contain;">
+                                @else
+                                    <img src="https://via.placeholder.com/400x150?text=No+Logo" class="card-img-top p-3"
+                                        alt="No Logo">
+                                @endif
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="card-title mb-0">{{ $spn->name }}</h6>
+                                        <span
+                                            class="badge text-uppercase 
+                                @if ($spn->tier === 'platinum') bg-dark text-light
                                 @elseif($spn->tier === 'gold') bg-warning text-dark
                                 @elseif($spn->tier === 'silver') bg-secondary
                                 @elseif($spn->tier === 'bronze') bg-brown text-light
                                 @else bg-info @endif
                                 px-3 py-2 fs-6">
-                                {{ $spn->tier }}
-                            </span>
+                                            {{ $spn->tier }}
+                                        </span>
+                                    </div>
+
+                                    <p class="text-truncate mb-2">{{ $spn->description ?? 'No description provided.' }}
+                                    </p>
+
+                                    @if ($spn->website)
+                                        <a href="{{ $spn->website }}" target="_blank"
+                                            class="small text-decoration-none">
+                                            <i class="bi bi-globe"></i> Visit Website
+                                        </a>
+                                    @endif
+
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#viewSponsorModal{{ $spn->id }}">
+                                            View
+                                        </button>
+                                        <form
+                                            action="{{ route('admin.events.sponsors.destroy', [$event->id, $spn->id]) }}"
+                                            method="POST" onsubmit="return confirm('Delete this sponsor?')">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <p class="text-truncate mb-2">{{ $spn->description ?? 'No description provided.' }}</p>
-
-                        @if ($spn->website)
-                            <a href="{{ $spn->website }}" target="_blank" class="small text-decoration-none">
-                                <i class="bi bi-globe"></i> Visit Website
-                            </a>
-                        @endif
-
-                        <div class="d-flex justify-content-between mt-3">
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#viewSponsorModal{{ $spn->id }}">
-                                View
-                            </button>
-                            <form action="{{ route('events.sponsors.destroy', [$event->id, $spn->id]) }}"
-                                method="POST" onsubmit="return confirm('Delete this sponsor?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
+                        <!-- View/Edit Modal -->
+                        <div class="modal fade" id="viewSponsorModal{{ $spn->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <form action="{{ route('admin.events.sponsors.update', [$event->id, $spn->id]) }}"
+                                        method="POST" enctype="multipart/form-data">
+                                        @csrf @method('PUT')
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Sponsor</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Name</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    value="{{ $spn->name }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Tier</label>
+                                                <select name="tier" class="form-select" required>
+                                                    @foreach (['platinum', 'gold', 'silver', 'bronze', 'partner'] as $tier)
+                                                        <option value="{{ $tier }}" @selected($spn->tier === $tier)>
+                                                            {{ ucfirst($tier) }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Website</label>
+                                                <input type="url" name="website" class="form-control"
+                                                    value="{{ $spn->website }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Logo</label>
+                                                <input type="file" name="logo" class="form-control">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Description</label>
+                                                <textarea name="description" class="form-control" rows="3">{{ $spn->description }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
-
-            <!-- View/Edit Modal -->
-            <div class="modal fade" id="viewSponsorModal{{ $spn->id }}" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action=""
-                              method="POST" enctype="multipart/form-data">
-                            @csrf @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Sponsor</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" value="{{ $spn->name }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tier</label>
-                                    <select name="tier" class="form-select" required>
-                                        @foreach (['platinum','gold','silver','bronze','partner'] as $tier)
-                                            <option value="{{ $tier }}" @selected($spn->tier === $tier)>{{ ucfirst($tier) }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Website</label>
-                                    <input type="url" name="website" class="form-control" value="{{ $spn->website }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Logo</label>
-                                    <input type="file" name="logo" class="form-control">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" class="form-control" rows="3">{{ $spn->description }}</textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-</div>
 
         </div>
     </div>
@@ -771,53 +824,7 @@
             });
         });
     </script>
-<!-- JS for dynamic fields -->
-{{-- <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const typeSelect = document.getElementById("contentType");
-        const fieldsContainer = document.getElementById("contentFields");
 
-        typeSelect.addEventListener("change", function () {
-            let type = this.value;
-            fieldsContainer.innerHTML = "";
-
-            if (type === "heading") {
-                fieldsContainer.innerHTML = `<input type="text" name="content" class="form-control" placeholder="Enter heading" required>`;
-            }
-            else if (type === "paragraph" || type === "feature") {
-                fieldsContainer.innerHTML = `<textarea name="content" class="form-control" rows="4" placeholder="Enter text" required></textarea>`;
-            }
-            else if (type === "list") {
-                fieldsContainer.innerHTML = `
-                    <div id="listContainer">
-                        <div class="input-group mb-2">
-                            <input type="text" name="content[]" class="form-control" placeholder="List item" required>
-                            <button type="button" class="btn btn-outline-secondary addListItem">+</button>
-                        </div>
-                    </div>
-                `;
-
-                fieldsContainer.querySelector(".addListItem").addEventListener("click", function () {
-                    let container = document.getElementById("listContainer");
-                    let newItem = document.createElement("div");
-                    newItem.classList.add("input-group", "mb-2");
-                    newItem.innerHTML = `
-                        <input type="text" name="content[]" class="form-control" placeholder="List item" required>
-                        <button type="button" class="btn btn-outline-danger removeListItem">-</button>
-                    `;
-                    container.appendChild(newItem);
-
-                    newItem.querySelector(".removeListItem").addEventListener("click", function () {
-                        newItem.remove();
-                    });
-                });
-            }
-            else if (type === "image") {
-                fieldsContainer.innerHTML = `<input type="file" name="content" class="form-control" accept="image/*" required>`;
-            }
-        });
-    });
-</script> --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.addFeature').forEach(btn => {
@@ -837,6 +844,156 @@
                     e.target.parentElement.remove();
                 }
             });
+
+            const contentType = document.getElementById("contentType");
+            const contentFields = document.getElementById("contentFields");
+
+            let contentIndex = 0;
+
+            function addContentBlock(type = null, values = null) {
+                const container = document.getElementById("contentBlocks");
+
+                const block = document.createElement("div");
+                block.classList.add("content-block", "mb-4", "p-3", "border", "rounded", "bg-light",
+                    "position-relative");
+                block.setAttribute("data-index", contentIndex);
+
+                block.innerHTML = `
+                    <span class="badge bg-primary position-absolute top-0 start-0 translate-middle rounded-pill">
+                    ${contentIndex + 1}
+                    </span>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-semibold m-0">Content Type</label>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-block">
+                        <i class="bi bi-x-circle"></i> Remove
+                    </button>
+                    </div>
+                    <select class="form-select content-type" name="contents[${contentIndex}][type]" required>
+                    <option value="" disabled ${!type ? "selected" : ""}>-- Select Type --</option>
+                    <option value="heading" ${type === "heading" ? "selected" : ""}>Heading</option>
+                    <option value="paragraph" ${type === "paragraph" ? "selected" : ""}>Paragraph</option>
+                    <option value="list" ${type === "list" ? "selected" : ""}>List</option>
+                    <option value="image" ${type === "image" ? "selected" : ""}>Image</option>
+                    <option value="feature" ${type === "feature" ? "selected" : ""}>Feature</option>
+                    </select>
+                    <div class="content-fields mt-3"></div>
+                    <input type="hidden" name="contents[${contentIndex}][position]" value="${contentIndex + 1}">
+                `;
+
+                container.appendChild(block);
+
+                if (type) renderFields(block, type, values);
+
+                contentIndex++;
+            }
+
+            function renderFields(block, type, values = null) {
+                const index = block.getAttribute("data-index");
+                const fieldsDiv = block.querySelector(".content-fields");
+                fieldsDiv.innerHTML = "";
+
+                switch (type) {
+                    case "heading":
+                        fieldsDiv.innerHTML = `
+        <input type="text" class="form-control" name="contents[${index}][content]" placeholder="Heading Text" required>
+      `;
+                        if (values) fieldsDiv.querySelector("input").value = values;
+                        break;
+
+                    case "paragraph":
+                        fieldsDiv.innerHTML = `
+        <textarea class="form-control" name="contents[${index}][content]" placeholder="Paragraph Text" rows="3" required></textarea>
+      `;
+                        if (values) fieldsDiv.querySelector("textarea").value = values;
+                        break;
+
+                    case "list":
+                        const listGroup = document.createElement("div");
+                        listGroup.classList.add("list-group");
+                        if (Array.isArray(values) && values.length) {
+                            values.forEach(v => listGroup.appendChild(makeListInput(index, v)));
+                        } else {
+                            listGroup.appendChild(makeListInput(index));
+                        }
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.classList.add("btn", "btn-sm", "btn-outline-secondary", "add-list-item");
+                        btn.textContent = "+ Add Item";
+                        listGroup.appendChild(btn);
+                        fieldsDiv.appendChild(listGroup);
+                        break;
+
+                    case "image":
+                        fieldsDiv.innerHTML = `
+        <input type="file" class="form-control" name="contents[${index}][content][]" multiple required>
+      `;
+                        break;
+
+                    case "feature":
+                        fieldsDiv.innerHTML = `
+        <input type="text" class="form-control mb-2" name="contents[${index}][content][heading]" placeholder="Feature Heading" required>
+        <textarea class="form-control" name="contents[${index}][content][paragraph]" placeholder="Feature Paragraph" rows="3" required></textarea>
+      `;
+                        if (values) {
+                            fieldsDiv.querySelector(`[name="contents[${index}][content][heading]"]`).value = values
+                                .heading || '';
+                            fieldsDiv.querySelector(`[name="contents[${index}][content][paragraph]"]`).value =
+                                values.paragraph || '';
+                        }
+                        break;
+                }
+            }
+
+            function makeListInput(index, value = '') {
+                const input = document.createElement("input");
+                input.type = "text";
+                input.classList.add("form-control", "mb-2");
+                input.name = `contents[${index}][content][]`;
+                input.value = value;
+                input.placeholder = "List Item";
+                return input;
+            }
+
+            // Event bindings
+            document.getElementById("addContentBlock")?.addEventListener("click", () => addContentBlock());
+
+            document.addEventListener("change", function(e) {
+                if (e.target.classList.contains("content-type")) {
+                    const block = e.target.closest(".content-block");
+                    renderFields(block, e.target.value);
+                }
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target.classList.contains("remove-block") || e.target.closest(".remove-block")) {
+                    e.preventDefault();
+                    e.target.closest(".content-block").remove();
+                }
+                if (e.target.classList.contains("add-list-item")) {
+                    e.preventDefault();
+                    const block = e.target.closest(".content-block");
+                    const index = block.getAttribute("data-index");
+                    const container = e.target.closest(".list-group");
+                    container.insertBefore(makeListInput(index), e.target);
+                }
+            });
+
+            let index = 1; // start from 1 since [0] already exists
+
+    document.getElementById("addScheduleRow").addEventListener("click", function () {
+        let container = document.getElementById("scheduleContainer");
+        let template = container.querySelector(".schedule-item").cloneNode(true);
+
+        // Update all input names with the new index
+        template.querySelectorAll("input, select, textarea").forEach(el => {
+            el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
+            el.value = ""; // clear old values
+        });
+
+        container.appendChild(template);
+        index++;
+    });
+
         });
     </script>
 
@@ -851,7 +1008,8 @@
                     Event Info</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.update', $event->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -963,114 +1121,120 @@
 <div class="modal fade" id="addContentModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('events.contents.store', $event->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.contents.store', $event->id) }}" method="POST"
+                enctype="multipart/form-data" id="eventContentForm">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add Event Content</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
-                    <!-- Content Type -->
-                    <div class="mb-3">
-                        <label class="form-label">Content Type</label>
-                        <select name="type" id="contentType" class="form-select" required>
-                            <option value="">Select type...</option>
-                            <option value="heading">Heading</option>
-                            <option value="paragraph">Paragraph</option>
-                            <option value="list">List</option>
-                            <option value="image">Image</option>
-                            <option value="feature">Feature</option>
-                        </select>
-                    </div>
-
-                    <!-- Dynamic Fields -->
-                    <div id="contentFields">
-                        <!-- Shown dynamically with JS -->
-                    </div>
-
-                    <!-- Position -->
-                    <div class="mt-3">
-                        <label class="form-label">Position</label>
-                        <input type="number" name="position" class="form-control" min="1" value="1">
-                    </div>
+                <div class="modal-body" id="contentBlocks" style="max-height:500px; overflow-y:auto;">
+                    <!-- Dynamic content blocks will be injected here -->
                 </div>
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Content</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-primary" id="addContentBlock">
+                        <i class="bi bi-plus-circle"></i> Add Content Block
+                    </button>
+                    <div>
+                        <button type="submit" class="btn btn-success">Save Content</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 
 
 <!-- Add Schedule Modal -->
 <div class="modal fade" id="addScheduleModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <form action="{{ route('events.schedules.store', $event->id) }}" method="POST">
+            <form action="{{ route('admin.events.schedules.store', $event->id) }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Schedule</h5>
+                    <h5 class="modal-title">Add New Schedule(s)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Date</label>
-                        <input type="date" name="schedule_date" class="form-control" required>
+
+                <div class="modal-body">
+                    <div id="scheduleContainer">
+                        {{-- Schedule Item Template --}}
+                        <div class="row g-3 schedule-item mb-4 border rounded p-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="schedules[0][schedule_date]" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" name="schedules[0][start_time]" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">End Time</label>
+                                <input type="time" name="schedules[0][end_time]" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Session Title</label>
+                                <input type="text" name="schedules[0][session_title]" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Session Type</label>
+                                <select name="schedules[0][session_type]" class="form-select">
+                                    <option value="keynote">Keynote</option>
+                                    <option value="session">Session</option>
+                                    <option value="workshop">Workshop</option>
+                                    <option value="break">Break</option>
+                                    <option value="lunch">Lunch</option>
+                                    <option value="networking">Networking</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Speaker</label>
+                                <select name="schedules[0][speaker_id]" class="form-select">
+                                    <option value="">-- None --</option>
+                                    @foreach ($event->speakers as $speaker)
+                                        <option value="{{ $speaker->id }}">{{ $speaker->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Location</label>
+                                <input type="text" name="schedules[0][location]" class="form-control">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="schedules[0][description]" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Start Time</label>
-                        <input type="time" name="start_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">End Time</label>
-                        <input type="time" name="end_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Session Title</label>
-                        <input type="text" name="session_title" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Session Type</label>
-                        <select name="session_type" class="form-select">
-                            <option value="keynote">Keynote</option>
-                            <option value="session">Session</option>
-                            <option value="workshop">Workshop</option>
-                            <option value="break">Break</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="networking">Networking</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Speaker Name</label>
-                        <input type="text" name="speaker_name" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Location</label>
-                        <input type="text" name="location" class="form-control">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
-                    </div>
+
+                    <button type="button" id="addScheduleRow" class="btn btn-outline-secondary mt-2">+ Add Another Schedule</button>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Add Schedule</button>
+                    <button type="submit" class="btn btn-primary">Save Schedules</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
 <!-- Add Ticket Modal -->
 <div class="modal fade" id="addTicketModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('events.tickets.store', $event->id) }}" method="POST">
+            <form action="{{ route('admin.events.tickets.store', $event->id) }}" method="POST">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Ticket</h5>
@@ -1121,7 +1285,8 @@
 <div class="modal fade" id="addSpeakerModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('events.speakers.store', $event->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.speakers.store', $event->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add Speaker</h5>
@@ -1156,10 +1321,9 @@
                     {{-- Social Links --}}
                     <div class="col-12">
                         <label class="form-label">Social Links</label>
-                        @foreach (['twitter','linkedin','website'] as $platform)
-                            <input type="url" name="social_links[{{ $platform }}]" 
-                                   class="form-control mb-2"
-                                   placeholder="{{ ucfirst($platform) }} URL">
+                        @foreach (['twitter', 'linkedin', 'website'] as $platform)
+                            <input type="url" name="social_links[{{ $platform }}]"
+                                class="form-control mb-2" placeholder="{{ ucfirst($platform) }} URL">
                         @endforeach
                     </div>
                 </div>
@@ -1175,7 +1339,8 @@
 <div class="modal fade" id="addSponsorModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('events.sponsors.store', $event->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.sponsors.store', $event->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Add Sponsor</h5>

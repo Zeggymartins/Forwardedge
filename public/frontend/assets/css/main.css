@@ -90,11 +90,11 @@ START: Theme Default CSS
   --tj-color-text-body-4: #18292c;
   --tj-color-text-body-5: rgba(255, 255, 255, 0.8);
   --tj-color-theme-primary: #2c99d4;
-  --tj-color-theme-bg: #d8e5e5;
-  --tj-color-theme-bg-2: #cee0e0;
-  --tj-color-theme-bg-3: #202e30;
-  --tj-color-theme-dark: #113a41;
-  --tj-color-theme-dark-2: #18292c;
+  --tj-color-theme-bg: #cfe2ea;
+  --tj-color-theme-bg-2: #ced8e0;
+  --tj-color-theme-bg-3: #202b30;
+  --tj-color-theme-dark: #153f5d;
+  --tj-color-theme-dark-2: #183f4d;
   --tj-color-theme-dark-3: #364e52;
   --tj-color-theme-dark-4: #67787a;
   --tj-color-theme-dark-5: #676e7a;

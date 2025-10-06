@@ -14,7 +14,7 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            <form action="{{ route('services.store') }}" method="POST" enctype="multipart/form-data" id="serviceForm">
+            <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data" id="serviceForm">
                 @csrf
 
                 {{-- Service Info --}}

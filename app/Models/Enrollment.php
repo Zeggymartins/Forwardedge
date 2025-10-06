@@ -32,4 +32,15 @@ class Enrollment extends Model
     {
         return $this->morphMany(Payment::class, 'payable');
     }
+
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function courseSchedule()
+    {
+        return $this->belongsTo(CourseSchedule::class);
+    }
 }

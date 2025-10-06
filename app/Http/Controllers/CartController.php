@@ -69,11 +69,19 @@ class CartController extends Controller
     }
 
     // Get cart
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login to view your cart');
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'auth_required',
+                    'message' => 'Please login to continue'
+                ], 401);
+            }
+            abort(401);
         }
+
+
 
         $cartItems = CartItem::with('course')->where('user_id', Auth::id())->get();
 
