@@ -33,7 +33,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold text-dark">📸 Gallery</h1>
         <!-- Add Photos Button -->
-        <button class="btn btn-primary rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <button class="btn btn-primary rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#addPhotoModal">
             <i class="bi bi-plus-circle me-2"></i> Add Photos
         </button>
     </div>
@@ -115,7 +115,7 @@
     </div>
 </div>
 
-{{-- Add Photo Modal --}}
+{{-- Add Photos Modal --}}
 <div class="modal fade" id="addPhotoModal" tabindex="-1">
     <div class="modal-dialog">
         <form action="{{ route('admin.gallery.store') }}" method="POST" enctype="multipart/form-data">
@@ -126,25 +126,24 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="photo-inputs">
-                        <div class="mb-3">
-                            <label>Title</label>
-                            <input type="text" name="titles[]" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label>Photo</label>
-                            <input type="file" name="images[]" class="form-control" required>
-                        </div>
+                    <div class="mb-3">
+                        <label>Title for all photos</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Summer" required>
                     </div>
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="addPhotoInput()">+ Add More</button>
+                    <div class="mb-3">
+                        <label>Choose Photos</label>
+                        <input type="file" name="images[]" class="form-control" multiple required accept="image/*">
+                        <small class="text-muted">You can select multiple images at once</small>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="submit" class="btn btn-primary">Upload Photos</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 
 {{-- JS to dynamically add inputs --}}
 <script>

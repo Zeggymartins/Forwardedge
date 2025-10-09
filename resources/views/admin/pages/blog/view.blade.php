@@ -68,7 +68,7 @@
             <!-- Overview Tab (Main Blog Info) -->
             <div class="tab-pane fade show active" id="overview">
                 <div class="card shadow-md border-0 rounded-3">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white"
+                    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white mb-4"
                         style="background: linear-gradient(90deg,#0d6efd,#36b9cc);">
                         <h5 class="mb-0">Blog Post Summary</h5>
                         <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editBlogModal">
@@ -79,7 +79,7 @@
                         <div class="row g-4">
                             <div class="col-md-4 text-center">
                                 <img src="{{ $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : 'https://via.placeholder.com/300x200?text=Post+Thumbnail' }}"
-                                    class="img-fluid rounded shadow-sm mb-3" alt="Blog Thumbnail">
+                                    class="img-fluid rounded shadow-sm mb-3" alt="Blog Thumbnail" style="height:350px; width:100%;">
                                 <p><strong>Category:</strong> {{ $blog->category ?? 'N/A' }}</p>
                             </div>
                             <div class="col-md-8">
@@ -302,112 +302,149 @@
     </div>
 
 
-    {{-- Add Detail Modal (For Content Details Tab) --}}
-    <div class="modal fade" id="addDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form action="{{ route('admin.blogs.details.store', $blog->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Add New Content Block</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  {{-- Add Detail Modal (Multi-block) --}}
+<div class="modal fade" id="addDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form action="{{ route('admin.blogs.details.store', $blog->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add Blog Content Blocks</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="contentBlocksContainer">
+                        <!-- Dynamic blocks will appear here -->
+                        <div class="content-block border p-3 rounded mb-3 bg-light position-relative">
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-block-btn" style="display: none;">
+                                <i class="bi bi-x"></i>
+                            </button>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Block Type</label>
+                                    <select name="blocks[0][type]" class="form-select block-type" required>
+                                        <option value="" disabled selected>Select type...</option>
+                                        <option value="heading">Heading</option>
+                                        <option value="paragraph">Paragraph</option>
+                                        <option value="quote">Quote</option>
+                                        <option value="image">Image</option>
+                                        <option value="list">List</option>
+                                        <option value="code">Code</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Order</label>
+                                    <input type="number" name="blocks[0][order]" class="form-control" min="1" value="{{ $blog->details->max('order') + 1 }}">
+                                </div>
+                                <div class="col-12 dynamic-content-area">
+                                    <p class="text-muted small">Select a type to load its input field...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="modal-body row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Block Type</label>
-                            <select name="type" id="blockType" class="form-select" required>
-                                <option value="" disabled selected>Select content type...</option>
-                                <option value="heading">Heading (H2/H3)</option>
-                                <option value="paragraph">Paragraph/Text</option>
-                                <option value="quote">Quote Block</option>
-                                <option value="image">Image</option>
-                                <option value="list">List (Ordered/Unordered)</option>
-                                <option value="code">Code Block</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Position/Order</label>
-                            <input type="number" name="order" class="form-control" min="1" value="{{ $blog->details->max('order') + 1 }}">
-                        </div>
-
-                        <!-- Dynamic Fields -->
-                        <div class="col-12" id="dynamicBlockContent">
-                            <p class="text-muted small">Select a block type to see the corresponding input fields.</p>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Extras (JSON format, optional)</label>
-                            <textarea name="extras" class="form-control" rows="2" placeholder='{"size": "h2"}'></textarea>
-                            <div class="form-text">For storing extra configuration (e.g., heading size, list style).</div>
-                        </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" id="addNewBlock" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Add Content Block
+                        </button>
                     </div>
+                </div>
 
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Add Block</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save All Blocks</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Script to handle dynamic fields in the Add Content Block modal
-            const typeSelect = document.getElementById('blockType');
-            const dynamicFieldContainer = document.getElementById('dynamicBlockContent');
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    let blockIndex = 1;
 
-            const updateDynamicFields = (type) => {
-                dynamicFieldContainer.innerHTML = ''; // Clear previous content
+    const container = document.getElementById('contentBlocksContainer');
+    const addBtn = document.getElementById('addNewBlock');
 
-                let contentHtml = '';
+    const blockTemplate = () => `
+        <div class="content-block border p-3 rounded mb-3 bg-light position-relative">
+            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-block-btn">
+                <i class="bi bi-x"></i>
+            </button>
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Block Type</label>
+                    <select name="blocks[${blockIndex}][type]" class="form-select block-type" required>
+                        <option value="" disabled selected>Select type...</option>
+                        <option value="heading">Heading</option>
+                        <option value="paragraph">Paragraph</option>
+                        <option value="quote">Quote</option>
+                        <option value="image">Image</option>
+                        <option value="list">List</option>
+                        <option value="code">Code</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Order</label>
+                    <input type="number" name="blocks[${blockIndex}][order]" class="form-control" min="1" value="${blockIndex + 1}">
+                </div>
+                <div class="col-12 dynamic-content-area">
+                    <p class="text-muted small">Select a type to load its input field...</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add new content block
+    addBtn.addEventListener('click', () => {
+        container.insertAdjacentHTML('beforeend', blockTemplate());
+        blockIndex++;
+        updateBlockListeners();
+    });
+
+    function updateBlockListeners() {
+        // Remove block
+        document.querySelectorAll('.remove-block-btn').forEach(btn => {
+            btn.onclick = () => btn.closest('.content-block').remove();
+        });
+
+        // Type change event
+        document.querySelectorAll('.block-type').forEach(select => {
+            select.onchange = (e) => {
+                const type = e.target.value;
+                const area = e.target.closest('.row').querySelector('.dynamic-content-area');
+                let inputHtml = '';
+                const index = e.target.name.match(/\d+/)[0];
 
                 switch (type) {
                     case 'heading':
-                        contentHtml = `
-                            <label class="form-label">Heading Text</label>
-                            <input type="text" name="content" class="form-control" placeholder="Enter your section heading" required>`;
+                        inputHtml = `<label class="form-label">Heading Text</label><input type="text" name="blocks[${index}][content]" class="form-control" required>`;
                         break;
                     case 'paragraph':
+                        inputHtml = `<label class="form-label">Paragraph</label><textarea name="blocks[${index}][content]" class="form-control" rows="5" required></textarea>`;
+                        break;
                     case 'quote':
-                    case 'code':
-                        contentHtml = `
-                            <label class="form-label">${type === 'paragraph' ? 'Paragraph Text' : (type === 'quote' ? 'Quote Text' : 'Code Block Content')}</label>
-                            <textarea name="content" class="form-control" rows="6" required placeholder="Enter the main text content or code here"></textarea>`;
+                        inputHtml = `<label class="form-label">Quote</label><textarea name="blocks[${index}][content]" class="form-control" rows="3" required></textarea>`;
                         break;
                     case 'image':
-                        contentHtml = `
-                            <label class="form-label">Upload Image File</label>
-                            <input type="file" name="content" class="form-control" accept="image/*" required>`;
+                        inputHtml = `<label class="form-label">Upload Image</label><input type="file" name="blocks[${index}][content]" class="form-control" accept="image/*" required>`;
                         break;
                     case 'list':
-                        contentHtml = `
-                            <label class="form-label">List Items (One per line)</label>
-                            <textarea name="content" class="form-control" rows="6" placeholder="Item 1\nItem 2\nItem 3" required></textarea>
-                            <div class="form-text">Each line will be treated as a separate list item and stored as JSON.</div>`;
+                        inputHtml = `<label class="form-label">List Items (one per line)</label><textarea name="blocks[${index}][content]" class="form-control" rows="5" required></textarea>`;
                         break;
-                    default:
-                        contentHtml = `<p class="text-danger small">Unknown block type selected.</p>`;
+                    case 'code':
+                        inputHtml = `<label class="form-label">Code Block</label><textarea name="blocks[${index}][content]" class="form-control font-monospace" rows="6" required></textarea>`;
                         break;
                 }
 
-                dynamicFieldContainer.innerHTML = contentHtml;
+                area.innerHTML = inputHtml;
             };
-
-            if (typeSelect) {
-                typeSelect.addEventListener('change', function() {
-                    updateDynamicFields(this.value);
-                });
-            }
-
-            // Publication status switch label update (for edit modal)
-            const isPublishedEditSwitch = document.getElementById('isPublishedEditSwitch');
-            if (isPublishedEditSwitch) {
-                isPublishedEditSwitch.addEventListener('change', function() {
-                    this.nextElementSibling.textContent = this.checked ? 'Published (Live)' : 'Draft (Hidden)';
-                });
-            }
         });
-    </script>
+    }
+
+    updateBlockListeners();
+});
+</script>
+
 @endsection

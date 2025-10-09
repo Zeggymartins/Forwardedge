@@ -22,9 +22,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($courses as $course)
+                    @forelse($courses as $index=>$course)
                         <tr class="table-row-hover">
-                            <td class="fw-semibold py-4 px-4">{{ $course->id }}</td>
+                            <td class="fw-semibold py-4 px-4">{{ $index + 1 }}</td>
                             <td class="py-4 px-4 fw-bold">{{ $course->title }}</td>
                             <td class="py-4 px-4">
                                 <span class="badge rounded-pill bg-{{ $course->status == 'published' ? 'success' : 'secondary' }} px-3 py-2">

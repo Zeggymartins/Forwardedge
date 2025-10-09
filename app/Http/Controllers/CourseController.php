@@ -19,6 +19,7 @@ class CourseController extends Controller
     public function showdetails($slug)
     {
         $course = Course::with([
+            'details',
             'phases.topics',
             'schedules',
         ])->where('slug', $slug)->firstOrFail();
@@ -30,16 +31,46 @@ class CourseController extends Controller
     {
         $query = Course::where('status', 'published');
 
-        if ($request->orderby == 'title') {
-            $query->orderBy('title', 'asc');
-        } else {
-            $query->latest();
+        // Handle sorting
+        $orderby = $request->get('orderby', 'date');
+
+        switch ($orderby) {
+            case 'title':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'price':
+                $query->orderByRaw('COALESCE(discount_price, price) ASC');
+                break;
+            case 'price-desc':
+                $query->orderByRaw('COALESCE(discount_price, price) DESC');
+                break;
+            case 'date':
+            default:
+                $query->latest();
+                break;
         }
 
-        $course = $query->paginate(6);
+        // Handle price filtering
+        if ($request->has('min_price') && $request->has('max_price')) {
+            $minPrice = $request->get('min_price');
+            $maxPrice = $request->get('max_price');
+
+            $query->where(function ($q) use ($minPrice, $maxPrice) {
+                $q->whereBetween('price', [$minPrice, $maxPrice])
+                    ->orWhereBetween('discount_price', [$minPrice, $maxPrice]);
+            });
+        }
+
+        $course = $query->paginate(6)->withQueryString();
         $latestCourse = Course::where('status', 'published')->latest()->take(3)->get();
 
-        return view('user.pages.shop', compact('course', 'latestCourse'));
+        // Get price range for filter
+        $priceRange = Course::where('status', 'published')
+            ->selectRaw('MIN(COALESCE(discount_price, price)) as min_price')
+            ->selectRaw('MAX(COALESCE(discount_price, price)) as max_price')
+            ->first();
+
+        return view('user.pages.shop', compact('course', 'latestCourse', 'priceRange'));
     }
 
     public function shopDetails($slug)
@@ -48,6 +79,4 @@ class CourseController extends Controller
 
         return view('user.pages.shop_details', compact('course'));
     }
-
-
 }

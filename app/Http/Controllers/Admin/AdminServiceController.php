@@ -7,6 +7,8 @@ use App\Models\Service;
 use App\Models\ServiceContent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -20,79 +22,124 @@ class AdminServiceController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title'             => 'required|string|max:255',
-            'slug'              => 'required|string|max:255|unique:services,slug',
-            'brief_description' => 'required|string',
-            'thumbnail'         => 'required|file|mimes:jpg,jpeg,png,svg,webp|max:2048',
-            'contents'          => 'required|array',
-            'contents.*.type'   => 'required|string|in:heading,paragraph,list,image,feature',
-        ]);
-
-        return DB::transaction(function () use ($request, $validated) {
-            // Handle thumbnail upload
-            if ($request->hasFile('thumbnail')) {
-                $validated['thumbnail'] = $request->file('thumbnail')
-                    ->store('services/thumbnails', 'public');
-            }
-
-            // Create the service
-            $service = Service::create([
-                'title'             => $validated['title'],
-                'slug'              => $validated['slug'],
-                'brief_description' => $validated['brief_description'],
-                'thumbnail'         => $validated['thumbnail'] ?? null,
+        try {
+            // ========== STEP 1: Log the raw request ==========
+            Log::info('🟡 Incoming store() request data', [
+                'all' => $request->all(),
+                'files' => $request->allFiles(),
             ]);
 
-            // Save service contents
-            foreach ($request->contents as $content) {
-                $data = [
-                    'service_id' => $service->id,
-                    'type'       => $content['type'],
-                    'position'   => $content['position'] ?? null,
-                    'content'    => null, // default
-                ];
+            // ========== STEP 2: Validate ==========
+            $validated = $request->validate([
+                'title'             => 'required|string|max:255',
+                'slug'              => 'required|string|max:255|unique:services,slug',
+                'brief_description' => 'required|string',
+                'thumbnail'         => 'required|file|mimes:jpg,jpeg,png,svg,webp|max:2048',
+                'contents'          => 'required|array',
+                'contents.*.type'   => 'required|string|in:heading,paragraph,list,image,feature',
+            ]);
 
-                switch ($content['type']) {
-                    case 'heading':
-                    case 'paragraph':
-                        $data['content'] = $content['content'] ?? '';
-                        break;
+            // ========== STEP 3: Log validation success ==========
+            Log::info('✅ Validation successful', ['validated' => $validated]);
 
-                    case 'list':
-                        // always encode as JSON
-                        $data['content'] = json_encode($content['content'] ?? []);
-                        break;
-
-                    case 'image':
-                        $images = [];
-                        if (isset($content['content']) && is_array($content['content'])) {
-                            foreach ($content['content'] as $img) {
-                                if ($img instanceof \Illuminate\Http\UploadedFile) {
-                                    $images[] = $img->store('services/images', 'public');
-                                }
-                            }
-                        }
-                        $data['content'] = json_encode($images);
-                        break;
-
-                    case 'feature':
-                        $featureData = [
-                            'heading'   => $content['content']['heading'] ?? '',
-                            'paragraph' => $content['content']['paragraph'] ?? '',
-                        ];
-                        $data['content'] = json_encode($featureData);
-                        break;
+            // ========== STEP 4: Start transaction ==========
+            return DB::transaction(function () use ($request, $validated) {
+                // Upload thumbnail
+                if ($request->hasFile('thumbnail')) {
+                    $validated['thumbnail'] = $request->file('thumbnail')
+                        ->store('services/thumbnails', 'public');
                 }
 
-                // Save each content block
-                ServiceContent::create($data);
+                // Create main Service
+                $service = Service::create([
+                    'title'             => $validated['title'],
+                    'slug'              => $validated['slug'],
+                    'brief_description' => $validated['brief_description'],
+                    'thumbnail'         => $validated['thumbnail'] ?? null,
+                ]);
+
+                Log::info('🟢 Service created', ['id' => $service->id]);
+
+                // Save Service Contents
+                foreach ($request->contents as $i => $content) {
+                    try {
+                        $data = [
+                            'service_id' => $service->id,
+                            'type'       => $content['type'] ?? null,
+                            'position'   => $content['position'] ?? $i + 1,
+                            'content'    => null,
+                        ];
+
+                        switch ($content['type']) {
+                            case 'heading':
+                            case 'paragraph':
+                                $data['content'] = $content['content'] ?? '';
+                                break;
+
+                            case 'list':
+                                $data['content'] = json_encode($content['content'] ?? []);
+                                break;
+
+                            case 'image':
+                                $images = [];
+                                if (isset($content['content']) && is_array($content['content'])) {
+                                    foreach ($content['content'] as $img) {
+                                        if ($img instanceof \Illuminate\Http\UploadedFile) {
+                                            $images[] = $img->store('services/images', 'public');
+                                        }
+                                    }
+                                }
+                                $data['content'] = json_encode($images);
+                                break;
+
+                            case 'feature':
+                                $featureData = [
+                                    'heading'   => $content['content']['heading'] ?? '',
+                                    'paragraph' => $content['content']['paragraph'] ?? '',
+                                ];
+                                $data['content'] = json_encode($featureData);
+                                break;
+
+                            default:
+                                Log::warning('⚠ Unknown content type', ['content' => $content]);
+                                break;
+                        }
+
+                        ServiceContent::create($data);
+                        Log::info("🟢 Content #{$i} saved", ['type' => $content['type']]);
+                    } catch (\Throwable $innerEx) {
+                        Log::error("❌ Error saving content #{$i}", [
+                            'content' => $content,
+                            'message' => $innerEx->getMessage(),
+                            'trace' => $innerEx->getTraceAsString(),
+                        ]);
+                    }
+                }
+
+                Log::info('✅ All contents processed successfully');
+
+                return redirect()
+                    ->back()
+                    ->with('success', 'Service created successfully.');
+            });
+        } catch (ValidationException $ex) {
+            Log::error('❌ Validation failed in store()', [
+                'errors' => $ex->errors(),
+                'input' => $request->all(),
+            ]);
+            return back()->withErrors($ex->errors())->withInput();
+        } catch (\Throwable $ex) {
+            Log::error('💥 Exception in store()', [
+                'message' => $ex->getMessage(),
+                'trace' => $ex->getTraceAsString(),
+            ]);
+
+            if (app()->environment('local')) {
+                return back()->with('error', $ex->getMessage());
             }
 
-            return redirect()
-                ->route('services.add')
-                ->with('success', 'Service created successfully.');
-        });
+            return back()->with('error', 'An unexpected error occurred.');
+        }
     }
 
     public function show($id)
@@ -107,7 +154,6 @@ class AdminServiceController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|unique:services,slug,' . $id,
             'brief_description' => 'nullable|string',
             'thumbnail' => 'nullable|image|max:4096',
         ]);

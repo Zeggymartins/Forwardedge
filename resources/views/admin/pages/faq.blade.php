@@ -37,9 +37,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($faqs as $faq)
+                    @forelse($faqs as $index=>$faq)
                         <tr class="table-row-hover">
-                            <td class="py-4 px-4 fw-semibold">{{ $faq->id }}</td>
+                            <td class="py-4 px-4 fw-semibold">{{ $index + 1 }}</td>
                             <td class="py-4 px-4">{{ $faq->question }}</td>
                             <td class="py-4 px-4">{{ Str::limit($faq->answer, 60) }}</td>
                             <td class="py-4 px-4 text-center">

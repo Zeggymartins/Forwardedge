@@ -34,9 +34,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($enrollments as $enrollment)
+                    @forelse($enrollments as $index=>$enrollment)
                         <tr class="table-row-hover">
-                            <td class="fw-semibold py-3 px-4">{{ $enrollment->id }}</td>
+                            <td class="fw-semibold py-3 px-4">{{ $index + 1 }}</td>
                             <td class="py-3 px-4">
                                 <span class="fw-bold">{{ $enrollment->user->name ?? '—' }}</span><br>
                                 <small class="text-muted">{{ $enrollment->user->email ?? '' }}</small>

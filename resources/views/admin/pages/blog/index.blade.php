@@ -42,9 +42,9 @@
                 </thead>
                 <tbody>
                     {{-- Loop through the Blog model collection --}}
-                    @forelse($blogs as $blog)
+                    @forelse($blogs as $index=>$blog)
                         <tr class="table-row-hover">
-                            <td class="fw-semibold py-4 px-4">{{ $blog->id }}</td>
+                            <td class="fw-semibold py-4 px-4">{{ $index + 1 }}</td>
                             <td class="py-4 px-4">
                                 <div>
                                     <span class="fw-bold fs-6">{{ $blog->title }}</span><br>

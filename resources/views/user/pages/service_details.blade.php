@@ -58,24 +58,32 @@
                                         if (!is_array($images)) {
                                             $images = [$images];
                                         }
-                                        $images = array_pad($images, 2, null);
                                     @endphp
+
                                     <div class="images-wrap">
                                         <div class="row">
-                                            <div class="col-sm-6">
+                                            {{-- First Image (span full if only one, else half) --}}
+                                            <div class="{{ !empty($images[1]) ? 'col-sm-6' : 'col-sm-8 d-flex justify-content-center' }}">
                                                 <div class="image-box wow fadeInUp" data-wow-delay=".3s">
-                                                    <img src="{{ $images[0] ? asset('storage/' . $images[0]) : asset('frontend/assets/images/service/service-3.webp') }}"
-                                                        alt="Service Image">
+                                                    <img src="{{ !empty($images[0]) ? asset('storage/' . $images[0]) : asset('frontend/assets/images/service/service-3.webp') }}"
+                                                        class="img-fluid rounded shadow-sm" alt="Service Image"
+                                                        loading="lazy"   style="max-height:400px; display:flex; align-items:center; justify-content:center; background:#f9f9f9;">
                                                 </div>
                                             </div>
-                                            <div class="col-sm-6">
-                                                <div class="image-box wow fadeInUp" data-wow-delay=".5s">
-                                                    <img src="{{ $images[1] ? asset('storage/' . $images[1]) : asset('frontend/assets/images/service/service-4.webp') }}"
-                                                        alt="Service Image">
+
+                                            {{-- Second Image (only show if it exists) --}}
+                                            @if (!empty($images[1]))
+                                                <div class="col-sm-6">
+                                                    <div class="image-box wow fadeInUp" data-wow-delay=".5s">
+                                                        <img src="{{ asset('storage/' . $images[1]) }}"
+                                                            class="img-fluid rounded shadow-sm" alt="Service Image"
+                                                            loading="lazy">
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
+
 
                                     {{-- FEATURE --}}
                                 @elseif($content->type === 'feature')
@@ -170,15 +178,16 @@
                     <div class="tj-sidebar-widget widget-feature-item wow fadeInUp" data-wow-delay=".3s">
                         <div class="feature-box">
                             <div class="feature-content">
-                                <h2 class="title">Modern</h2>
-                                <span>Home Makeover</span>
+                                <h2 class="title">Lets Build</h2>
+                                <span>Use our services</span>
                                 <a class="read-more feature-contact" href="tel:8321890640">
                                     <i class="tji-phone-3"></i>
                                     <span>+8 (321) 890-640</span>
                                 </a>
                             </div>
                             <div class="feature-images">
-                                <img src="{{ asset('frontend/assets/images/service/service-ad.webp') }}" alt="Feature">
+                                                  <img src="{{ $service->thumbnail ? asset('storage/' . $service->thumbnail) : asset('frontend/assets/images/service/service-ad.webp') }}"
+                                alt="{{ $service->title }}" class="img-fluid">
                             </div>
                         </div>
                     </div>

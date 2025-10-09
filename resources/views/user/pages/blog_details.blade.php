@@ -9,11 +9,11 @@
                     <div class="post-details-wrapper">
                         {{-- Blog Image --}}
                         <div class="blog-images wow fadeInUp" data-wow-delay=".1s">
-                            <img src="{{ ($blog->thumbnail && file_exists(public_path($blog->thumbnail))) 
-                                        ? asset($blog->thumbnail) 
-                                        : asset('frontend/assets/images/service/service-1.webp') }}"
-                                alt="{{ $blog->title ?? 'Blog Post' }}"
-                                class="img-fluid">
+                            <img src="{{ $blog->thumbnail
+                                ? asset('storage/' . $blog->thumbnail)
+                                : asset('frontend/assets/images/service/service-1.webp') }}"
+                                alt="{{ $blog->title ?? 'Blog Post' }}" class="img-fluid"
+                                style="height: 300px; width: 100%; object-fit: cover; border-radius: 8px;">
                         </div>
 
                         {{-- Blog Title --}}
@@ -25,10 +25,11 @@
                         <div class="blog-category-two wow fadeInUp" data-wow-delay=".3s">
                             <div class="category-item">
                                 <div class="cate-images">
-                                    <img src="{{ ($blog->author && $blog->author->avatar) 
-                                                ? asset($blog->author->avatar) 
-                                                : asset('frontend/assets/images/testimonial/client-2.webp') }}"
-                                        alt="Author" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <img src="{{ $blog->author && $blog->author->avatar
+                                        ? asset($blog->author->avatar)
+                                        : asset('frontend/assets/images/testimonial/client-2.webp') }}"
+                                        alt="Author" class="rounded-circle"
+                                        style="width: 50px; height: 50px; object-fit: cover;">
                                 </div>
                                 <div class="cate-text">
                                     <span class="degination">Authored by</span>
@@ -56,7 +57,6 @@
                         {{-- Blog Body --}}
                         <div class="blog-text">
                             @if ($blog->details && $blog->details->count() > 0)
-                                {{-- Loop over blog_details blocks --}}
                                 @foreach ($blog->details as $block)
                                     @if ($block->type === 'paragraph')
                                         <p class="wow fadeInUp" data-wow-delay=".3s">{{ $block->content }}</p>
@@ -75,16 +75,16 @@
                                         </ul>
                                     @elseif($block->type === 'image')
                                         <div class="image-box wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ (file_exists(public_path($block->content))) 
-                                                        ? asset($block->content) 
-                                                        : asset('frontend/assets/images/service/service-2.webp') }}" 
+                                            <img src="{{ file_exists(public_path($block->content))
+                                                ? asset($block->content)
+                                                : asset('frontend/assets/images/service/service-2.webp') }}"
                                                 alt="Blog Image" class="img-fluid">
                                         </div>
                                     @elseif($block->type === 'video')
                                         <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ ($block->extras['thumbnail'] ?? false) 
-                                                        ? asset($block->extras['thumbnail']) 
-                                                        : asset('frontend/assets/images/service/service-3.webp') }}"
+                                            <img src="{{ $block->extras['thumbnail'] ?? false
+                                                ? asset($block->extras['thumbnail'])
+                                                : asset('frontend/assets/images/service/service-3.webp') }}"
                                                 alt="Video Thumbnail" class="img-fluid">
                                             <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
                                                 href="{{ $block->content ?? 'https://www.youtube.com/watch?v=MLpWrANjFbI' }}">
@@ -96,23 +96,27 @@
                             @else
                                 {{-- Enhanced Dummy Content --}}
                                 <p class="wow fadeInUp" data-wow-delay=".3s">
-                                    In today's rapidly evolving business landscape, organizations face unprecedented challenges 
-                                    and opportunities. At Forward Edge Consulting, we understand that success isn't just about 
-                                    adapting to change—it's about staying ahead of the curve and leading your industry through 
+                                    In today's rapidly evolving business landscape, organizations face unprecedented
+                                    challenges
+                                    and opportunities. At Forward Edge Consulting, we understand that success isn't just
+                                    about
+                                    adapting to change—it's about staying ahead of the curve and leading your industry
+                                    through
                                     strategic innovation and operational excellence.
                                 </p>
 
                                 <p class="wow fadeInUp" data-wow-delay=".4s">
-                                    Our comprehensive approach to business transformation combines cutting-edge technology, 
-                                    proven methodologies, and deep industry expertise to deliver measurable results. Whether 
-                                    you're looking to optimize your operations, enhance customer experience, or drive digital 
+                                    Our comprehensive approach to business transformation combines cutting-edge technology,
+                                    proven methodologies, and deep industry expertise to deliver measurable results. Whether
+                                    you're looking to optimize your operations, enhance customer experience, or drive
+                                    digital
                                     transformation, we're here to guide you every step of the way.
                                 </p>
 
                                 <blockquote class="wow fadeInUp" data-wow-delay=".5s">
-                                    <p>Success in business isn't about following the crowd—it's about creating your own path 
-                                    and inspiring others to follow. Innovation coupled with strategic execution is the 
-                                    catalyst that transforms vision into reality.</p>
+                                    <p>Success in business isn't about following the crowd—it's about creating your own path
+                                        and inspiring others to follow. Innovation coupled with strategic execution is the
+                                        catalyst that transforms vision into reality.</p>
                                     <cite>Forward Edge Consulting Team</cite>
                                 </blockquote>
 
@@ -141,13 +145,13 @@
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <div class="image-box wow fadeInUp" data-wow-delay=".9s">
-                                                <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}" 
+                                                <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}"
                                                     alt="Business Strategy" class="img-fluid">
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="image-box wow fadeInUp" data-wow-delay="1.0s">
-                                                <img src="{{ asset('frontend/assets/images/service/service-2.webp') }}" 
+                                                <img src="{{ asset('frontend/assets/images/service/service-2.webp') }}"
                                                     alt="Team Collaboration" class="img-fluid">
                                             </div>
                                         </div>
@@ -156,9 +160,9 @@
 
                                 <h3 class="wow fadeInUp" data-wow-delay="1.1s">Driving Results Through Partnership</h3>
                                 <p class="wow fadeInUp" data-wow-delay="1.2s">
-                                    Our success is measured by your success. We don't just provide consulting services—we 
-                                    become your strategic partner, working alongside your team to achieve sustainable growth 
-                                    and competitive advantage. From initial assessment to implementation and beyond, we're 
+                                    Our success is measured by your success. We don't just provide consulting services—we
+                                    become your strategic partner, working alongside your team to achieve sustainable growth
+                                    and competitive advantage. From initial assessment to implementation and beyond, we're
                                     committed to delivering excellence at every stage of our engagement.
                                 </p>
                             @endif
@@ -176,10 +180,14 @@
                             <div class="post-share">
                                 <ul>
                                     <li>Share:</li>
-                                    <li><a href="https://www.facebook.com/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a></li>
-                                    <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
-                                    <li><a href="https://www.instagram.com/" target="_blank"><i class="fa-brands fa-instagram"></i></a></li>
-                                    <li><a href="https://www.linkedin.com/" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                                    <li><a href="https://www.facebook.com/" target="_blank"><i
+                                                class="fa-brands fa-facebook-f"></i></a></li>
+                                    <li><a href="https://x.com/" target="_blank"><i
+                                                class="fa-brands fa-x-twitter"></i></a></li>
+                                    <li><a href="https://www.instagram.com/" target="_blank"><i
+                                                class="fa-brands fa-instagram"></i></a></li>
+                                    <li><a href="https://www.linkedin.com/" target="_blank"><i
+                                                class="fa-brands fa-linkedin-in"></i></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -212,21 +220,26 @@
                                         <li class="tj-comment">
                                             <div class="comment-content">
                                                 <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-1.webp') }}" 
-                                                        alt="Commenter" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-1.webp') }}"
+                                                        alt="Commenter" class="rounded-circle"
+                                                        style="width: 60px; height: 60px; object-fit: cover;">
                                                 </div>
                                                 <div class="comments-header">
                                                     <div class="avatar-name">
                                                         <h6 class="title">Sarah Johnson</h6>
                                                     </div>
                                                     <div class="comment-text">
-                                                        <span class="date">{{ now()->subDays(2)->format('M j, Y') }} at 2:30 pm</span>
+                                                        <span class="date">{{ now()->subDays(2)->format('M j, Y') }} at
+                                                            2:30 pm</span>
                                                         <a class="reply" href="#">Reply</a>
                                                     </div>
                                                     <div class="desc">
-                                                        <p>Excellent insights on business transformation! The strategic framework 
-                                                        you've outlined really resonates with the challenges we're facing in our 
-                                                        organization. Looking forward to implementing some of these strategies.</p>
+                                                        <p>Excellent insights on business transformation! The strategic
+                                                            framework
+                                                            you've outlined really resonates with the challenges we're
+                                                            facing in our
+                                                            organization. Looking forward to implementing some of these
+                                                            strategies.</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -234,21 +247,25 @@
                                         <li class="tj-comment">
                                             <div class="comment-content">
                                                 <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}" 
-                                                        alt="Commenter" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}"
+                                                        alt="Commenter" class="rounded-circle"
+                                                        style="width: 60px; height: 60px; object-fit: cover;">
                                                 </div>
                                                 <div class="comments-header">
                                                     <div class="avatar-name">
                                                         <h6 class="title">Michael Chen</h6>
                                                     </div>
                                                     <div class="comment-text">
-                                                        <span class="date">{{ now()->subDays(1)->format('M j, Y') }} at 10:15 am</span>
+                                                        <span class="date">{{ now()->subDays(1)->format('M j, Y') }} at
+                                                            10:15 am</span>
                                                         <a class="reply" href="#">Reply</a>
                                                     </div>
                                                     <div class="desc">
-                                                        <p>The focus on customer-centric design thinking is spot on. We've seen 
-                                                        significant improvements in our customer satisfaction scores after 
-                                                        applying similar principles. Great article!</p>
+                                                        <p>The focus on customer-centric design thinking is spot on. We've
+                                                            seen
+                                                            significant improvements in our customer satisfaction scores
+                                                            after
+                                                            applying similar principles. Great article!</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -271,17 +288,20 @@
                                             </div>
                                             <div class="col-lg-4">
                                                 <div class="form-input">
-                                                    <input type="text" id="name" name="name" placeholder="Full Name *" required>
+                                                    <input type="text" id="name" name="name"
+                                                        placeholder="Full Name *" required>
                                                 </div>
                                             </div>
                                             <div class="col-lg-4">
                                                 <div class="form-input">
-                                                    <input type="email" id="emailOne" name="email" placeholder="Your Email *" required>
+                                                    <input type="email" id="emailOne" name="email"
+                                                        placeholder="Your Email *" required>
                                                 </div>
                                             </div>
                                             <div class="col-lg-4">
                                                 <div class="form-input">
-                                                    <input type="url" id="website" name="website" placeholder="Website (Optional)">
+                                                    <input type="url" id="website" name="website"
+                                                        placeholder="Website (Optional)">
                                                 </div>
                                             </div>
                                         </div>
@@ -301,79 +321,37 @@
                 {{-- Sidebar --}}
                 <div class="col-lg-4">
                     <div class="tj-main-sidebar slidebar-stickiy">
-                        {{-- Search Widget --}}
-                        <div class="tj-sidebar-widget widget-search wow fadeInUp" data-wow-delay=".1s">
-                            <h4 class="widget-title">Search Articles</h4>
-                            <div class="search-box">
-                                <form action="{{ route('blog') }}" method="get">
-                                    <input type="search" name="search" id="searchTwo" 
-                                           placeholder="Search articles..." 
-                                           value="{{ request('search') }}">
-                                    <button type="submit" value="search">
-                                        <i class="tji-search"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
                         {{-- Related Posts Widget --}}
                         <div class="tj-sidebar-widget tj-recent-posts wow fadeInUp" data-wow-delay=".3s">
                             <h4 class="widget-title">Related Articles</h4>
                             <ul>
-                                <li>
-                                    <div class="post-thumb">
-                                        <a href="#">
-                                            <img src="{{ asset('frontend/assets/images/service/service-1.webp') }}" 
-                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
-                                        </a>
-                                    </div>
-                                    <div class="post-content">
-                                        <h6 class="post-title">
-                                            <a href="#">Digital Transformation: A Complete Guide for Modern Businesses</a>
-                                        </h6>
-                                        <div class="blog-meta">
-                                            <ul>
-                                                <li>{{ now()->subDays(3)->format('d M Y') }}</li>
-                                            </ul>
+                                @forelse($relatedBlogs as $related)
+                                    <li>
+                                        <div class="post-thumb">
+                                            <a href="{{ route('blogs.show', $related->slug) }}">
+                                                <img src="{{ $related->thumbnail
+                                                    ? asset('storage/' . $related->thumbnail)
+                                                    : asset('frontend/assets/images/blog/default.webp') }}"
+                                                    alt="{{ $related->title }}" class="img-fluid"
+                                                    style="width: 80px; height: 60px; object-fit: cover;">
+                                            </a>
                                         </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="post-thumb">
-                                        <a href="#">
-                                            <img src="{{ asset('frontend/assets/images/service/service-2.webp') }}" 
-                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
-                                        </a>
-                                    </div>
-                                    <div class="post-content">
-                                        <h6 class="post-title">
-                                            <a href="#">Building Resilient Teams in the Age of Remote Work</a>
-                                        </h6>
-                                        <div class="blog-meta">
-                                            <ul>
-                                                <li>{{ now()->subDays(7)->format('d M Y') }}</li>
-                                            </ul>
+                                        <div class="post-content">
+                                            <h6 class="post-title">
+                                                <a href="{{ route('blogs.show', $related->slug) }}">
+                                                    {{ Str::limit($related->title, 50) }}
+                                                </a>
+                                            </h6>
+                                            <div class="blog-meta">
+                                                <ul>
+                                                    <li>{{ $related->created_at->format('d M Y') }}</li>
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="post-thumb">
-                                        <a href="#">
-                                            <img src="{{ asset('frontend/assets/images/service/service-3.webp') }}" 
-                                                alt="Article" class="img-fluid" style="width: 80px; height: 60px; object-fit: cover;">
-                                        </a>
-                                    </div>
-                                    <div class="post-content">
-                                        <h6 class="post-title">
-                                            <a href="#">Customer Experience: The Ultimate Competitive Advantage</a>
-                                        </h6>
-                                        <div class="blog-meta">
-                                            <ul>
-                                                <li>{{ now()->subDays(10)->format('d M Y') }}</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </li>
+                                    </li>
+                                @empty
+                                    <li>No related articles yet.</li>
+                                @endforelse
                             </ul>
                         </div>
 
@@ -381,33 +359,18 @@
                         <div class="tj-sidebar-widget widget-categories wow fadeInUp" data-wow-delay=".5s">
                             <h4 class="widget-title">Categories</h4>
                             <ul>
-                                <li><a href="#">Business Strategy<span class="number">(8)</span></a></li>
-                                <li><a href="#">Leadership<span class="number">(5)</span></a></li>
-                                <li><a href="#">Digital Innovation<span class="number">(12)</span></a></li>
-                                <li><a href="#">Customer Experience<span class="number">(6)</span></a></li>
-                                <li><a href="#">Operations<span class="number">(4)</span></a></li>
-                                <li><a href="#">Training & Development<span class="number">(9)</span></a></li>
+                                @foreach ($categories as $category => $count)
+                                    <li>
+                                        <a href="{{ route('blog', ['category' => $category]) }}">
+                                            {{ ucfirst($category) }}
+                                            <span class="number">({{ $count }})</span>
+                                        </a>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
 
-                        {{-- Tags Widget --}}
-                        <div class="tj-sidebar-widget widget-tag-cloud wow fadeInUp" data-wow-delay=".7s">
-                            <h4 class="widget-title">Popular Tags</h4>
-                            <nav>
-                                <div class="tagcloud">
-                                    <a href="#">Strategy</a>
-                                    <a href="#">Innovation</a>
-                                    <a href="#">Leadership</a>
-                                    <a href="#">Growth</a>
-                                    <a href="#">Digital</a>
-                                    <a href="#">Consulting</a>
-                                    <a href="#">Training</a>
-                                    <a href="#">Excellence</a>
-                                    <a href="#">Transformation</a>
-                                    <a href="#">Success</a>
-                                </div>
-                            </nav>
-                        </div>
+
 
                         {{-- Newsletter Widget --}}
                         <div class="tj-sidebar-widget widget-feature-item wow fadeInUp" data-wow-delay=".9s">

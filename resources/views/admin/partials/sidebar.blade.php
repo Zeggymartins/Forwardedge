@@ -107,6 +107,12 @@
                         <i class="bi bi-circle"></i><span>View Courses</span>
                     </a>
                 </li>
+
+                  <li>
+                    <a href="{{ route('admin.enrollments.index') }}">
+                        <i class="bi bi-circle"></i><span>Enrollments</span>
+                    </a>
+                </li>
             </ul>
         </li>
         <!-- Academy -->
@@ -143,12 +149,12 @@
             <ul id="shop-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{ route('admin.course_contents.index') }}">
-                        <i class="bi bi-circle"></i><span>Add Product</span>
+                        <i class="bi bi-circle"></i><span>Add Course Product</span>
                     </a>
                 </li>
                 <li>
-                    <a href="tables-data">
-                        <i class="bi bi-circle"></i><span>View Product</span>
+                    <a href="{{ route('admin.orders.show') }}">
+                        <i class="bi bi-circle"></i><span>View Orders</span>
                     </a>
                 </li>
             </ul>
@@ -272,7 +278,11 @@
     </ul>
   </li><!-- End Forms Nav -->
 
-
+  <li class="nav-item">
+    <a class="nav-link " data-bs-target="" data-bs-toggle="" href="{{ route('admin.transactions.index') }}">
+      <i class="bi bi-journal-text"></i><span>Transactions</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+  </li><!-- End Forms Nav -->
     </ul>
 
 </aside>

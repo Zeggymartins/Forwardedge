@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Orders;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class AdminTransactionsController extends Controller
     {
         $transactions = Payment::with(['user', 'payable'])
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
 
         return view('admin.pages.transactions', compact('transactions'));
     }
@@ -24,5 +25,11 @@ class AdminTransactionsController extends Controller
     {
         $transaction = Payment::with(['user', 'payable'])->findOrFail($id);
         return response()->json($transaction);
+    }
+
+    public function getOrders()
+    {
+        $orders = Orders::with(['user', 'items.course'])->latest()->paginate(10);
+        return view('admin.pages.orders', compact('orders'));
     }
 }

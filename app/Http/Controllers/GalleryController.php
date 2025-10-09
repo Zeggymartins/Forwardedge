@@ -13,20 +13,24 @@ class GalleryController extends Controller
         $photos = Gallery::latest()->get();
         return view('admin.pages.gallery', compact('photos'));
     }
-
+    public function getPhotos()
+    {
+        $photos = Gallery::latest()->get();
+        return view('user.pages.gallery', compact('photos'));
+    }
     public function store(Request $request)
     {
         $request->validate([
+            'title' => 'required|string|max:255',   // single shared title
             'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'titles.*' => 'nullable|string|max:255'
         ]);
 
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
+            foreach ($request->file('images') as $file) {
                 $path = $file->store('gallery', 'public');
 
                 Gallery::create([
-                    'title' => $request->titles[$index] ?? null,
+                    'title' => $request->title, // same title for all images
                     'image' => $path
                 ]);
             }
@@ -34,6 +38,7 @@ class GalleryController extends Controller
 
         return redirect()->back()->with('success', 'Photos uploaded successfully!');
     }
+
 
     public function update(Request $request, Gallery $gallery)
     {

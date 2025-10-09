@@ -433,7 +433,146 @@
                                 </div>
                             @endif
 
-                            {{-- What You'll Learn --}}
+                            {{-- Replace the "What You'll Learn" section with this dynamic version --}}
+
+                            @if ($course->details && $course->details->count() > 0)
+                                @foreach ($course->details->sortBy('sort_order') as $detail)
+                                    @php
+                                        $decoded = null;
+                                        if (!empty($detail->content)) {
+                                            $decoded = json_decode($detail->content, true);
+                                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                                $decoded = null; // Invalid JSON
+                                            }
+                                        }
+                                    @endphp
+
+                                    {{-- HEADINGS --}}
+                                    @if ($detail->type === 'heading')
+                                        <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">
+                                            {{ $detail->content }}
+                                        </h3>
+
+                                        {{-- PARAGRAPHS --}}
+                                    @elseif($detail->type === 'paragraph')
+                                        <p class="wow fadeInUp" data-wow-delay=".4s">
+                                            {{ $detail->content }}
+                                        </p>
+
+                                        {{-- LISTS --}}
+                                    @elseif(in_array($detail->type, ['list', 'lists']))
+                                        @php
+                                            $items = is_array($decoded) ? $decoded : explode("\n", $detail->content);
+                                            $items = array_filter(array_map('trim', $items));
+                                            $half = ceil(count($items) / 2);
+                                        @endphp
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <ul class="wow fadeInUp" data-wow-delay=".4s">
+                                                    @foreach (array_slice($items, 0, $half) as $item)
+                                                        <li><span><i class="tji-check"></i></span> {{ $item }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <ul class="wow fadeInUp" data-wow-delay=".5s">
+                                                    @foreach (array_slice($items, $half) as $item)
+                                                        <li><span><i class="tji-check"></i></span> {{ $item }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        {{-- IMAGES --}}
+                                    @elseif(in_array($detail->type, ['image', 'images']))
+                                        @php
+                                            $images = is_array($decoded) ? $decoded : [$detail->image ?? null];
+                                        @endphp
+                                        <div class="images-wrap mt-5">
+                                            <div class="row">
+                                                @foreach ($images as $index => $img)
+                                                    @if ($img)
+                                                        <div class="col-sm-6">
+                                                            <div class="image-box wow fadeInUp"
+                                                                data-wow-delay=".{{ 6 + $index }}s">
+                                                                <img src="{{ asset('storage/' . $img) }}"
+                                                                    alt="Course Image" style="height: 300px;">
+                                                                <button class="enroll-btn"
+                                                                    data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}"
+                                                                    data-enroll-url="{{ $course->schedules->first() ? route('enroll.pricing', $course->schedules->first()->id) : '#' }}">
+                                                                    Start Learning
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        {{-- FEATURES / BENEFITS --}}
+                                    @elseif(in_array($detail->type, ['benefits', 'features']))
+                                        @php
+                                            $features = is_array($decoded) ? $decoded : [];
+                                        @endphp
+                                        <div class="details-content-box">
+                                            <div class="row row-gap-4">
+                                                @foreach ($features as $index => $feature)
+                                                    <div class="col-xl-4 col-md-6">
+                                                        <div class="service-details-item wow fadeInUp"
+                                                            data-wow-delay=".{{ 5 + $index * 2 }}s">
+                                                            <span
+                                                                class="number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}.</span>
+                                                            <h6 class="title">{{ $feature['heading'] ?? '' }}</h6>
+                                                            <div class="desc">
+                                                                <p>{{ $feature['description'] ?? '' }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        {{-- FAQ --}}
+                                    @elseif(in_array($detail->type, ['faq', 'faqs']))
+                                        @php
+                                            $faqs = is_array($decoded) ? $decoded : [];
+                                        @endphp
+                                        <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Frequently Asked Questions</h3>
+                                        <div class="accordion tj-faq style-2" id="faqOne">
+                                            @foreach ($faqs as $index => $faq)
+                                                <div class="accordion-item {{ $index === 0 ? 'active' : '' }} wow fadeInUp"
+                                                    data-wow-delay=".{{ 4 + $index }}s">
+                                                    <button class="faq-title {{ $index > 0 ? 'collapsed' : '' }}"
+                                                        type="button" data-bs-toggle="collapse"
+                                                        data-bs-target="#faq-{{ $index }}"
+                                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
+                                                        {{ $faq['question'] ?? '' }}
+                                                    </button>
+                                                    <div id="faq-{{ $index }}"
+                                                        class="collapse {{ $index === 0 ? 'show' : '' }}"
+                                                        data-bs-parent="#faqOne">
+                                                        <div class="accordion-body faq-text">
+                                                            <p>{{ $faq['answer'] ?? '' }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        {{-- UNKNOWN TYPES --}}
+                                    @else
+                                        <p class="text-muted small">⚠️ Unknown or empty detail type: {{ $detail->type }}
+                                        </p>
+                                        @if ($detail->content)
+                                            <pre class="bg-light p-2 small">{{ Str::limit($detail->content, 300) }}</pre>
+                                        @endif
+                                    @endif
+                                @endforeach
+                            @else
+                     
+                            {{-- Fallback to default content if no details exist --}}
                             <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">What You'll Learn</h3>
                             <div class="row">
                                 <div class="col-md-6">
@@ -442,30 +581,34 @@
                                             development</li>
                                         <li><span><i class="tji-check"></i></span>Advanced social media marketing
                                             techniques</li>
-                                        <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery</li>
+                                        <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery
+                                        </li>
                                         <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
                                             practices</li>
-                                        <li><span><i class="tji-check"></i></span>Content marketing and storytelling</li>
+                                        <li><span><i class="tji-check"></i></span>Content marketing and storytelling
+                                        </li>
                                     </ul>
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="wow fadeInUp" data-wow-delay=".5s">
                                         <li><span><i class="tji-check"></i></span>Email marketing automation</li>
-                                        <li><span><i class="tji-check"></i></span>Analytics and performance tracking</li>
+                                        <li><span><i class="tji-check"></i></span>Analytics and performance tracking
+                                        </li>
                                         <li><span><i class="tji-check"></i></span>Conversion rate optimization</li>
                                         <li><span><i class="tji-check"></i></span>Marketing tools and platforms</li>
                                         <li><span><i class="tji-check"></i></span>ROI measurement and reporting</li>
                                     </ul>
                                 </div>
                             </div>
+                            @endif
 
                             {{-- Course Highlights --}}
                             <div class="images-wrap mt-5">
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="image-box wow fadeInUp" data-wow-delay=".6s">
-                                            <img src="{{ asset('frontend/assets/images/service/service-3.webp') }}"
-                                                alt="Hands-on Learning">
+                                            <img src="{{ asset('frontend/assets/images/service/pic.jpg') }}"
+                                                alt="Hands-on Learning" style="height: 300px;">
                                             <button class="enroll-btn"
                                                 data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
                                                 Start Learning
@@ -474,8 +617,12 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="image-box wow fadeInUp" data-wow-delay=".7s">
-                                            <img src="{{ asset('frontend/assets/images/service/service-4.webp') }}"
-                                                alt="Expert Instruction">
+                                            <img src="{{ asset('frontend/assets/images/service/pic3.jpg') }}"
+                                                alt="Expert Instruction" style="height: 300px;">
+                                            <button class="enroll-btn"
+                                                data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
+                                                Start Learning
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

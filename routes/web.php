@@ -14,10 +14,12 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,21 +29,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('user.pages.welcome');
-})->name('home');
-
+Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('/about', function () {
     return view('user.pages.about');
 })->name('about');
-
-Route::get('/contact', function () {
-    return view('user.pages.contact');
-})->name('contact');
-
-Route::get('/gallery', function () {
-    return view('user.pages.gallery');
-})->name('gallery');
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +50,9 @@ Route::prefix('services')->name('services')->group(function () {
     Route::get('/', [ServiceController::class, 'ServiceList']);
     Route::get('/{slug}', [ServiceController::class, 'show'])->name('.show');
 });
+Route::get('/contact', [MessageController::class, 'create'])->name('contact');
+Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
+Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +67,7 @@ Route::get('/course/{slug}', [CourseController::class, 'showdetails'])->name('co
 Route::prefix('shop')->name('shop')->group(function () {
     Route::get('/', [CourseController::class, 'shop']);
     Route::get('/{slug}', [CourseController::class, 'shopDetails'])->name('.details');
+    Route::get('/data', [CourseController::class, 'shopData'])->name('.data');
 });
 
 /*
@@ -196,7 +191,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/services/add', function () {
         return view('admin.pages.services.add_service');
     })->name('admin.services.add');
-    Route::prefix('admin/services')->name('admin.services.')->middleware(['auth'])->group(function () {
+    Route::prefix('admin/services')->name('admin.services.')->group(function () {
         Route::get('/', [AdminServiceController::class, 'index'])->name('index');
         Route::post('/', [AdminServiceController::class, 'store'])->name('store');
         Route::get('/{id}', [AdminServiceController::class, 'show'])->name('show');
@@ -304,6 +299,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/transactions', [AdminTransactionsController::class, 'index'])->name('transactions.index');
         Route::get('/transactions/{transaction}', [AdminTransactionsController::class, 'show'])->name('transactions.show');
+        Route::get('/orders', [AdminTransactionsController::class, 'getOrders'])->name('orders.show');
     });
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('faqs', FaqController::class)->except(['create', 'edit', 'show',]);
@@ -317,7 +313,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
   Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('course-contents', [AdminCourseController::class, 'courseContent'])->name('course_contents.index');
     Route::post('course-contents', [AdminCourseController::class, 'storeContent'])->name('course_contents.store');
-    Route::delete('course-contents/{courseContent}', [AdminCourseController::class, 'destroyContent'])->name('course_contents.destroy');
+        Route::put('course-contents/{courseContent}', [AdminCourseController::class, 'updateContent'])->name('course_contents.update');
+        Route::delete('course-contents/{courseContent}', [AdminCourseController::class, 'destroyContent'])->name('course_contents.destroy');
     Route::get('course-contents/{courseId}', [AdminCourseController::class, 'showContent'])->name('course_contents.show');
 });
 

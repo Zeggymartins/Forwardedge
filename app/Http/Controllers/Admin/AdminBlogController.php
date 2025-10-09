@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminBlogController extends Controller
 {
@@ -28,32 +29,47 @@ class AdminBlogController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|unique:blogs,slug',
             'category' => 'nullable|string|max:100',
             'thumbnail' => 'nullable|image|max:4096',
-            'is_published' => 'nullable|boolean',
         ]);
 
-        $slug = $validated['slug'] ?? Str::slug($validated['title']);
+        try {
+            DB::beginTransaction();
 
-        // Handle thumbnail
-        $thumbnailPath = null;
-        if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('blogs/thumbnails', 'public');
-        }
+            // Generate unique slug
+            $slugBase = Str::slug($validated['title']);
+            $slug = $slugBase;
+            $counter = 1;
+            while (Blog::where('slug', $slug)->exists()) {
+                $slug = $slugBase . '-' . $counter++;
+            }
 
-        $blog = Blog::create([
-            'title' => $validated['title'],
-            'slug' => $slug,
-            'category' => $validated['category'] ?? null,
-            'thumbnail' => $thumbnailPath,
-            'author_id' => Auth::id(),
-            'is_published' => $request->has('is_published'),
-        ]);
+            // Handle thumbnail
+            $thumbnailPath = null;
+            if ($request->hasFile('thumbnail')) {
+                $thumbnailPath = $request->file('thumbnail')->store('blogs/thumbnails', 'public');
+            }
 
-        return redirect()->route('admin.pages.blog.index', $blog->id)
-            ->with('success', 'Blog post created successfully!');
+            // Create blog
+            $blog = Blog::create([
+                'title' => $validated['title'],
+                'slug' => $slug,
+                'category' => $validated['category'] ?? null,
+                'thumbnail' => $thumbnailPath,
+                'author_id' => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.blogs.index')
+                ->with('success', 'Blog post created successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to create blog: ' . $e->getMessage());
+        };
+
     }
+
 
     public function show($id)
     {
@@ -61,7 +77,7 @@ class AdminBlogController extends Controller
             $query->orderBy('order');
         }, 'author'])->findOrFail($id);
 
-        return view('admin.blog.show', compact('blog'));
+        return view('admin.pages.blog.view', compact('blog'));
     }
 
     public function update(Request $request, $id)
@@ -110,40 +126,45 @@ class AdminBlogController extends Controller
             ->with('success', 'Blog post deleted successfully!');
     }
 
-    // Blog Detail Management
     public function storeDetail(Request $request, $blogId)
     {
         $blog = Blog::findOrFail($blogId);
 
-        $validated = $request->validate([
-            'type' => 'required|in:heading,subheading,paragraph,quote,list,image,code',
-            'content' => 'required',
-            'extras' => 'nullable|array',
-            'order' => 'nullable|integer|min:1',
+        $validatedBlocks = $request->validate([
+            'blocks' => 'required|array|min:1',
+            'blocks.*.type' => 'required|in:heading,paragraph,quote,list,image,code',
+            'blocks.*.content' => 'required',
+            'blocks.*.order' => 'nullable|integer|min:1',
         ]);
 
-        $contentData = $validated['content'];
+        DB::transaction(function () use ($validatedBlocks, $blog, $request) {
+            foreach ($validatedBlocks['blocks'] as $block) {
+                $content = $block['content'];
 
-        // Handle image uploads
-        if ($validated['type'] === 'image' && $request->hasFile('content')) {
-            $contentData = $request->file('content')->store('blogs/content', 'public');
-        }
+                // Handle image uploads
+                foreach ($request->blocks as $index => $block) {
+                    if ($request->hasFile("blocks.$index.content")) {
+                        $content = $request->file("blocks.$index.content")->store('blogs/content', 'public');
+                    }
+                }
 
-        // Handle lists
-        if ($validated['type'] === 'list' && is_array($contentData)) {
-            $contentData = json_encode(array_filter($contentData));
-        }
+                // Handle lists (convert to JSON)
+                if ($block['type'] === 'list' && is_string($content)) {
+                    $content = json_encode(array_filter(preg_split("/\r\n|\r|\n/", $content)));
+                }
 
-        BlogDetail::create([
-            'blog_id' => $blog->id,
-            'type' => $validated['type'],
-            'content' => $contentData,
-            'extras' => $validated['extras'] ?? null,
-            'order' => $validated['order'] ?? ($blog->details()->max('order') + 1),
-        ]);
+                BlogDetail::create([
+                    'blog_id' => $blog->id,
+                    'type' => $block['type'],
+                    'content' => $content,
+                    'order' => $block['order'] ?? ($blog->details()->max('order') + 1),
+                ]);
+            }
+        });
 
-        return back()->with('success', 'Content added successfully!');
+        return back()->with('success', 'All content blocks added successfully!');
     }
+
 
     public function updateDetail(Request $request, $blogId, $detailId)
     {

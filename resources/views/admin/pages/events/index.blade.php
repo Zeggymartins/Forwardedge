@@ -36,9 +36,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($events as $event)
+                    @forelse($events as $index=>$event)
                         <tr class="table-row-hover">
-                            <td class="fw-semibold py-4 px-4">{{ $event->id }}</td>
+                            <td class="fw-semibold py-4 px-4">{{ $index + 1 }}</td>
                             <td class="py-4 px-4">
                                 <div>
                                     <span class="fw-bold fs-6">{{ $event->title }}</span><br>

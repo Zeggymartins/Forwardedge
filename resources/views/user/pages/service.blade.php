@@ -17,7 +17,7 @@
                                 @endif
                             </div>
                             <div class="project-content">
-                               
+
                                 <div class="project-text">
                                     <h4 class="title">
                                         <a href="{{ route('services.show', $service->slug) }}">
@@ -35,25 +35,33 @@
             </div>
 
             <!-- Pagination -->
-            <div class="tj-pagination d-flex justify-content-center">
-                <ul>
-                    <li>
-                        <span aria-current="page" class="page-numbers current">1</span>
-                    </li>
-                    <li>
-                        <a class="page-numbers" href="#">2</a>
-                    </li>
-                    <li>
-                        <a class="page-numbers" href="#">3</a>
-                    </li>
-                    <li>
-                        <a class="next page-numbers" href="#"><i class="tji-arrow-right-long"></i></a>
-                    </li>
-                </ul>
-            </div>
+            @if ($services->hasPages())
+                <div class="tj-pagination d-flex justify-content-center mt-5">
+                    {{ $services->links('pagination::bootstrap-4') }}
+                </div>
+            @endif
+
         </div>
     </section>
 
-
+<script>
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.pagination a')) {
+        e.preventDefault();
+        let url = e.target.closest('.pagination a').getAttribute('href');
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(res => res.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                document.querySelector('.tj-project-section .container .row').innerHTML =
+                    doc.querySelector('.tj-project-section .container .row').innerHTML;
+                document.querySelector('.tj-pagination').innerHTML =
+                    doc.querySelector('.tj-pagination').innerHTML;
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            });
+    }
+});
+</script>
 
 @endsection
