@@ -91,7 +91,7 @@
                         <button type="submit" class="btn btn-success rounded-pill px-5 me-2 shadow-sm">
                             <i class="bi bi-save me-1"></i> Save Service
                         </button>
-                        <button type="button" class="btn btn-danger rounded-pill px-5 shadow-sm" id="clearForm">
+                        <button type="reset" class="btn btn-danger rounded-pill px-5 shadow-sm" id="clearForm">
                             <i class="bi bi-trash me-1"></i> Clear Form
                         </button>
                     </div>

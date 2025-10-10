@@ -132,33 +132,68 @@
                     <div class="swiper client-slider client-slider-1">
                         <div class="swiper-wrapper">
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-1.webp') }}" alt="">
+                                <div class="clien">
+                                    <img src="{{ asset('frontend/assets/images/brands/download.jpg') }}" alt="">
                                 </div>
                             </div>
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-2.webp') }}" alt="">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download1.png') }}" alt="">
                                 </div>
                             </div>
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-3.webp') }}" alt="">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download2.png') }}" alt="">
                                 </div>
                             </div>
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-4.webp') }}" alt="">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download3.png') }}" alt="">
                                 </div>
                             </div>
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-5.webp') }}" alt="">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/downloa4.jpg') }}" alt="">
                                 </div>
                             </div>
                             <div class="swiper-slide client-item">
-                                <div class="client-logo">
-                                    <img src="{{ asset('frontend/assets/images/brands/brand-6.webp') }}" alt="">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download5.png') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download6.jpg') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download7.png') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download8.jpg') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download9.png') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download10.png') }}" alt="">
+                                </div>
+                            </div>
+                             <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/skyhigh11.jpg') }}" alt="">
+                                </div>
+                            </div>
+                               <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download12.png') }}" alt="">
                                 </div>
                             </div>
                         </div>
