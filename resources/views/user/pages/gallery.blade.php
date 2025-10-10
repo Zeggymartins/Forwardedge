@@ -18,8 +18,8 @@
                     <div class="col-lg-3 col-sm-6">
                         <div class="team-item wow fadeInUp" data-wow-delay="{{ 0.1 + $index * 0.2 }}s">
                             <div class="team-img">
-                                <div class="team-img-inner">
-                                    <img src="{{ asset('storage/' . $photo->image) }}" alt="{{ $photo->title }}">
+                                <div class="team-img-inner"  style="height: 420px; overflow: hidden; ">
+                                    <img src="{{ asset('storage/' . $photo->image) }}" alt="{{ $photo->title }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                                 </div>
                             </div>
                             {{-- <div class="team-content text-center mt-3">

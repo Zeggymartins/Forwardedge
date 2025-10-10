@@ -8,9 +8,9 @@
               @foreach ($events as $event)
               <div class="col-xl-4 col-md-6">
                 <div class="project-item wow fadeInUp" data-wow-delay=".1s">
-                       <div class="project-img">
+                       <div class="project-img" style="height: 420px; overflow: hidden;">
                                 @if ($event->thumbnail)
-                                    <img src="{{ asset('storage/' . $event->thumbnail) }}" alt="{{ $event->title }}">
+                                    <img src="{{ asset('storage/' . $event->thumbnail) }}" alt="{{ $event->title }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                                 @else
                                     <img src="{{ asset('frontend/assets/images/project/project-6.webp') }}"
                                         alt="Default Image">

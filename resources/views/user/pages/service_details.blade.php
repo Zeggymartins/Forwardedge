@@ -177,7 +177,7 @@
 
                             <!-- Grid Icon (middle link back to all services) -->
                             <div class="tj-nav-post__grid">
-                                <a href="{{ route('services.index') }}"><i class="tji-window"></i></a>
+                                <a href="{{ route('services') }}"><i class="tji-window"></i></a>
                             </div>
 
                             <!-- Next Post -->

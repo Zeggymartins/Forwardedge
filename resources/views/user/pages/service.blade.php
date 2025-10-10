@@ -8,14 +8,17 @@
                 @foreach ($services as $service)
                     <div class="col-xl-4 col-md-6">
                         <div class="project-item wow fadeInUp" data-wow-delay=".{{ $loop->iteration * 2 }}s">
-                            <div class="project-img">
+                            <div class="project-img" style="height: 420px; overflow: hidden; border-radius: 10px;">
                                 @if ($service->thumbnail)
-                                    <img src="{{ asset('storage/' . $service->thumbnail) }}" alt="{{ $service->title }}">
+                                    <img src="{{ asset('storage/' . $service->thumbnail) }}" alt="{{ $service->title }}"
+                                        style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                                 @else
                                     <img src="{{ asset('frontend/assets/images/project/project-6.webp') }}"
-                                        alt="Default Image">
+                                        alt="Default Image"
+                                        style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                                 @endif
                             </div>
+
                             <div class="project-content">
 
                                 <div class="project-text">
@@ -44,24 +47,31 @@
         </div>
     </section>
 
-<script>
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.pagination a')) {
-        e.preventDefault();
-        let url = e.target.closest('.pagination a').getAttribute('href');
-        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-            .then(res => res.text())
-            .then(data => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
-                document.querySelector('.tj-project-section .container .row').innerHTML =
-                    doc.querySelector('.tj-project-section .container .row').innerHTML;
-                document.querySelector('.tj-pagination').innerHTML =
-                    doc.querySelector('.tj-pagination').innerHTML;
-                window.scrollTo({top: 0, behavior: 'smooth'});
-            });
-    }
-});
-</script>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.pagination a')) {
+                e.preventDefault();
+                let url = e.target.closest('.pagination a').getAttribute('href');
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(data => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(data, 'text/html');
+                        document.querySelector('.tj-project-section .container .row').innerHTML =
+                            doc.querySelector('.tj-project-section .container .row').innerHTML;
+                        document.querySelector('.tj-pagination').innerHTML =
+                            doc.querySelector('.tj-pagination').innerHTML;
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    });
+            }
+        });
+    </script>
 
 @endsection
