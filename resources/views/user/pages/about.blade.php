@@ -313,7 +313,7 @@
                     infrastructure, or software development? Chat with us on WhatsApp Now! <br>
                     Chat Us On WhatsApp Now</p>
                   <div class="wow fadeInUp" data-wow-delay=".8s">
-                    <a class="tj-primary-btn" href="contact.html">
+                    <a class="tj-primary-btn" href="{{ route('contact') }}">
                       <span class="btn-text"><span>Request a Call</span></span>
                       <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                     </a>

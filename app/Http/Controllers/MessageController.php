@@ -36,7 +36,7 @@ class MessageController extends Controller
 
         // Send Email
         Mail::send('emails.contact', ['messageData' => $message], function ($mail) use ($message) {
-            $mail->to('your@email.com') // replace with your admin email
+            $mail->to('your@email.com') 
                 ->subject('New Contact Message from ' . $message->name);
         });
 

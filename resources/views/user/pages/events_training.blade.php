@@ -33,7 +33,11 @@
               </div>
               @endforeach
             </div>
-            <div class="tj-pagination d-flex justify-content-center">
+                {{-- ✅ Dynamic Pagination --}}
+        <div class="tj-pagination d-flex justify-content-center mt-4">
+            {{ $events->links('vendor.pagination.custom') }}
+        </div>
+            {{-- <div class="tj-pagination d-flex justify-content-center">
               <ul>
                 <li>
                   <span aria-current="page" class="page-numbers current">1</span>
@@ -48,7 +52,7 @@
                   <a class="next page-numbers" href="#"><i class="tji-arrow-right-long"></i></a>
                 </li>
               </ul>
-            </div>
+            </div> --}}
           </div>
         </section>
 @endsection

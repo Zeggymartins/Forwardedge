@@ -66,12 +66,14 @@
                                 <div class="footer-widget widget-nav-menu wow fadeInUp" data-wow-delay=".5s">
                                     <h5 class="title">Resources</h5>
                                     <ul>
-                                        <li><a href="#">Contact us</a></li>
-                                        <li><a href="#">Team Member</a></li>
-                                        <li><a href="#">Recognitions</a></li>
-                                        <li><a href="#">Careers <span class="badge">New</span></a></li>
-                                        <li><a href="#">News</a></li>
-                                        <li><a href="#">Feedback</a></li>
+                                   <li><a href="{{ route('about') }}">About Us</a></li>
+                                   <li><a href="{{ route('academy') }}">Academy</a></li>
+                                   <li><a href="{{ route('services') }}">Services</a></li>
+                                   <li><a href="{{ route('events.index') }}">Events</a></li>
+                                   <li><a href="{{ route('shop') }}">Shop</a></li>
+                                   <li><a href="{{ route('gallery') }}">Gallery</a></li>
+                                   <li><a href="{{ route('blog') }}">Blog</a></li>
+                                   <li><a href="{{ route('contact') }}">Contact</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -102,13 +104,13 @@
                                             <li>
                                                 <a href="tel:10095447818">
                                                     <span class="icon"><i class="tji-phone-2"></i></span>
-                                                    <span class="text">+1 (009) 544-7818</span>
+                                                    <span class="text">+234 703 995 5591</span>
                                                 </a>
                                             </li>
                                             <li>
                                                 <a href="mailto:info@bexon.com">
                                                     <span class="icon"><i class="tji-envelop-2"></i></span>
-                                                    <span class="text">info@bexon.com</span>
+                                                    <span class="text">info@forwardedge.com</span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -130,7 +132,7 @@
                                     </div>
                                     <div class="copyright-text">
                                         <p>&copy; 2025 <a href="https://themeforest.net/user/theme-junction/portfolio"
-                                                target="_blank">Bexon</a>
+                                                target="_blank">ForwardEdge</a>
                                             All right reserved</p>
                                     </div>
                                 </div>

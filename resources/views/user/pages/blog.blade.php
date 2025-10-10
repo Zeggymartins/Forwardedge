@@ -53,7 +53,7 @@
 
                         {{-- Pagination --}}
                         <div class="tj-pagination d-flex">
-                            {{ $blogs->links('pagination::bootstrap-4') }}
+                            {{ $blogs->links('vendor.pagination.custom') }}
                         </div>
                     </div>
                 </div>

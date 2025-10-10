@@ -31,22 +31,22 @@
                     <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.jpg') }}" alt="">
                 </div>
                 <!-- <div class="box-area">
-                                <div class="customers-box">
-                                  <div class="customers">
-                                    <ul>
-                                      <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
-                                          alt=""></li>
-                                      <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
-                                          alt=""></li>
-                                      <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
-                                          alt=""></li>
-                                      <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
-                                    </ul>
-                                  </div>
-                                  <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
-                                  <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
-                                </div>
-                              </div> -->
+                                    <div class="customers-box">
+                                      <div class="customers">
+                                        <ul>
+                                          <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
+                                              alt=""></li>
+                                          <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
+                                              alt=""></li>
+                                          <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
+                                              alt=""></li>
+                                          <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
+                                        </ul>
+                                      </div>
+                                      <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
+                                      <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
+                                    </div>
+                                  </div> -->
             </div>
         </div>
         <div class="banner-scroll wow fadeInDown" data-wow-delay="2s">
@@ -234,12 +234,12 @@
                             </div>
                         </div>
                         <!-- <div class="video-img  wow fadeInUp" data-wow-delay=".9s">
-                                    <img src="assets/images/about/about-2.webp" alt="">
-                                    <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
-                                      href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
-                                      <span><i class="tji-play"></i></span>
-                                    </a>
-                                  </div> -->
+                                        <img src="assets/images/about/about-2.webp" alt="">
+                                        <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
+                                          href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
+                                          <span><i class="tji-play"></i></span>
+                                        </a>
+                                      </div> -->
                     </div>
                 </div>
             </div>
@@ -601,53 +601,71 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-               <div class="accordion tj-faq tj-arrange-item-2" id="faqOne">
-    @if($faqs->count())
-        @foreach($faqs as $index => $faq)
-        <div class="accordion-item {{ $index === 0 ? 'active' : '' }}">
-            <button class="faq-title {{ $index === 0 ? '' : 'collapsed' }}" type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#faq-{{ $index + 1 }}" 
-                    aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
-                {{ $faq->question }}
-            </button>
-            <div id="faq-{{ $index + 1 }}" class="collapse {{ $index === 0 ? 'show' : '' }}" 
-                 data-bs-parent="#faqOne">
-                <div class="accordion-body faq-text">
-                    {!! $faq->answer !!}
-                </div>
-            </div>
-        </div>
-        @endforeach
-    @else
-        @php
-            $dummyFaqs = [
-                ['question' => 'What services does Bexon offer to clients?', 'answer' => 'Getting started is easy! Simply reach out to us through our contact form or give us a call, and we’ll schedule a consultation to discuss your project and how we can best assist you. Our team keeps you informed throughout the process, ensuring quality control and timely delivery.'],
-                ['question' => 'How do I get started with Corporate Business?', 'answer' => 'Getting started is easy! Simply reach out to us through our contact form or give us a call, and we’ll schedule a consultation to discuss your project and how we can best assist you.'],
-                ['question' => 'How do you ensure the success of a project?', 'answer' => 'We ensure success by detailed planning, constant updates, and keeping you informed throughout the process.'],
-                ['question' => 'How long will it take to complete my project?', 'answer' => 'The timeline depends on project scope, but we provide realistic estimates and regular updates.'],
-                ['question' => 'Can I track the progress of my project?', 'answer' => 'Yes, our team provides progress reports and status updates so you are always informed.'],
-            ];
-        @endphp
+                    <div class="accordion tj-faq tj-arrange-item-2" id="faqOne">
+                        @if ($faqs->count())
+                            @foreach ($faqs as $index => $faq)
+                                <div class="accordion-item {{ $index === 0 ? 'active' : '' }}">
+                                    <button class="faq-title {{ $index === 0 ? '' : 'collapsed' }}" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#faq-{{ $index + 1 }}"
+                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
+                                        {{ $faq->question }}
+                                    </button>
+                                    <div id="faq-{{ $index + 1 }}" class="collapse {{ $index === 0 ? 'show' : '' }}"
+                                        data-bs-parent="#faqOne">
+                                        <div class="accordion-body faq-text">
+                                            {!! $faq->answer !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            @php
+                                $dummyFaqs = [
+                                    [
+                                        'question' => 'What services does Bexon offer to clients?',
+                                        'answer' =>
+                                            'Getting started is easy! Simply reach out to us through our contact form or give us a call, and we’ll schedule a consultation to discuss your project and how we can best assist you. Our team keeps you informed throughout the process, ensuring quality control and timely delivery.',
+                                    ],
+                                    [
+                                        'question' => 'How do I get started with Corporate Business?',
+                                        'answer' =>
+                                            'Getting started is easy! Simply reach out to us through our contact form or give us a call, and we’ll schedule a consultation to discuss your project and how we can best assist you.',
+                                    ],
+                                    [
+                                        'question' => 'How do you ensure the success of a project?',
+                                        'answer' =>
+                                            'We ensure success by detailed planning, constant updates, and keeping you informed throughout the process.',
+                                    ],
+                                    [
+                                        'question' => 'How long will it take to complete my project?',
+                                        'answer' =>
+                                            'The timeline depends on project scope, but we provide realistic estimates and regular updates.',
+                                    ],
+                                    [
+                                        'question' => 'Can I track the progress of my project?',
+                                        'answer' =>
+                                            'Yes, our team provides progress reports and status updates so you are always informed.',
+                                    ],
+                                ];
+                            @endphp
 
-        @foreach($dummyFaqs as $index => $faq)
-        <div class="accordion-item {{ $index === 0 ? 'active' : '' }}">
-            <button class="faq-title {{ $index === 0 ? '' : 'collapsed' }}" type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#faq-dummy-{{ $index + 1 }}" 
-                    aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
-                {{ $faq['question'] }}
-            </button>
-            <div id="faq-dummy-{{ $index + 1 }}" class="collapse {{ $index === 0 ? 'show' : '' }}" 
-                 data-bs-parent="#faqOne">
-                <div class="accordion-body faq-text">
-                    {!! $faq['answer'] !!}
-                </div>
-            </div>
-        </div>
-        @endforeach
-    @endif
-</div>
+                            @foreach ($dummyFaqs as $index => $faq)
+                                <div class="accordion-item {{ $index === 0 ? 'active' : '' }}">
+                                    <button class="faq-title {{ $index === 0 ? '' : 'collapsed' }}" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#faq-dummy-{{ $index + 1 }}"
+                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
+                                        {{ $faq['question'] }}
+                                    </button>
+                                    <div id="faq-dummy-{{ $index + 1 }}"
+                                        class="collapse {{ $index === 0 ? 'show' : '' }}" data-bs-parent="#faqOne">
+                                        <div class="accordion-body faq-text">
+                                            {!! $faq['answer'] !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
 
                 </div>
             </div>
@@ -697,8 +715,8 @@
                                 Touch</span>
                             <h2 class="sec-title title-anim">Drop Us a <span>Line.</span></h2>
                         </div>
-                        <form id="contact-form-2" action="{{ route('contact.store') }}" method="POST">
-                             @csrf
+                       <form id="contact-form-2" action="{{ route('contact.store') }}" method="POST">
+                            @csrf
                             <div class="row wow fadeInUp" data-wow-delay=".5s">
                                 <div class="col-sm-6">
                                     <div class="form-input">
@@ -742,7 +760,8 @@
                                     </button>
                                 </div>
                             </div>
-                        </form>
+                        </form> 
+                    
                     </div>
                 </div>
             </div>

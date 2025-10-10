@@ -29,11 +29,11 @@
 
                        <!-- header right info -->
                        <div class="header-right-item d-none d-lg-inline-flex">
-                           <div class="header-search">
-                               <button class="search">
+                           {{-- <div class="header-search">
+                               {{-- <button class="search">
                                    <i class="tji-search"></i>
-                               </button>
-                               <button type="button" class="search_close_btn">
+                               </button> --}}
+                               {{-- <button type="button" class="search_close_btn">
                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                                        xmlns="http://www.w3.org/2000/svg">
                                        <path d="M17 1L1 17" stroke="currentColor" stroke-width="1.5"
@@ -41,21 +41,22 @@
                                        <path d="M1 1L17 17" stroke="currentColor" stroke-width="1.5"
                                            stroke-linecap="round" stroke-linejoin="round" />
                                    </svg>
-                               </button>
-                           </div>
-                           <div class="header-right-item d-none d-lg-inline-flex">
-                               {{-- Wishlist --}}
-                               <a href="{{ route('user.wishlist.index') }}" class="header-icon-link">
-                                   <i class="fal fa-heart"></i>
-                                   <span class="counter" id="wishlist-count">0</span>
-                               </a>
+                               </button> 
+                           </div> --}}
+                        <div class="header-right-item d-none d-lg-inline-flex">
+    {{-- Wishlist --}}
+    <button type="button" class="header-icon-link open-wishlist-btn">
+        <i class="fal fa-heart"></i>
+        <span class="counter" id="wishlist-count">0</span>
+    </button>
 
-                               {{-- Cart --}}
-                               <a href="{{ route('user.cart.index') }}" class="header-icon-link">
-                                   <i class="fal fa-shopping-cart"></i>
-                                   <span class="counter" id="cart-count">0</span>
-                               </a>
-                           </div>
+    {{-- Cart --}}
+    <button type="button" class="header-icon-link open-cart-btn">
+        <i class="fal fa-shopping-cart"></i>
+        <span class="counter" id="cart-count">0</span>
+    </button>
+</div>
+
 
                            <!-- BEGIN: header-button (replace your old Let's Talk block) -->
                            <div class="header-button dropdown">
@@ -68,10 +69,7 @@
 
                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuBtn"
                                        style="min-width:200px;">
-                                       <li><a class="dropdown-item" href="">My Enrollments</a></li>
-                                       <li>
-                                           <hr class="dropdown-divider">
-                                       </li>
+                                    
                                        <li>
                                            <form id="logout-form" action="{{ route('logout') }}" method="POST"
                                                class="m-0">
@@ -121,7 +119,7 @@
        </div>
 
        <!-- Search Popup -->
-       <div class="search_popup">
+       {{-- <div class="search_popup">
            <div class="container">
                <div class="row justify-content-center">
                    <div class="col-8">
@@ -143,7 +141,7 @@
                    </div>
                </div>
            </div>
-       </div>
+       </div> --}}
    </header>
    <!-- end: Header Area -->
 
@@ -178,11 +176,11 @@
 
                        <!-- header right info -->
                        <div class="header-right-item d-none d-lg-inline-flex">
-                           <div class="header-search">
-                               <button class="search">
+                           {{-- <div class="header-search">
+                               {{-- <button class="search">
                                    <i class="tji-search"></i>
-                               </button>
-                               <button type="button" class="search_close_btn">
+                               </button> --}}
+                               {{-- <button type="button" class="search_close_btn">
                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                                        xmlns="http://www.w3.org/2000/svg">
                                        <path d="M17 1L1 17" stroke="currentColor" stroke-width="1.5"
@@ -190,8 +188,8 @@
                                        <path d="M1 1L17 17" stroke="currentColor" stroke-width="1.5"
                                            stroke-linecap="round" stroke-linejoin="round" />
                                    </svg>
-                               </button>
-                           </div>
+                               </button> 
+                           </div> --}}
                            <div class="header-right-item d-none d-lg-inline-flex">
                                {{-- Wishlist --}}
                                <a href="javascript:void(0)" class="header-icon-link" onclick="openWishlist()">
@@ -265,7 +263,7 @@
        </div>
 
        <!-- Search Popup -->
-       <div class="search_popup">
+       {{-- <div class="search_popup">
            <div class="container">
                <div class="row justify-content-center">
                    <div class="col-8">
@@ -287,6 +285,6 @@
                    </div>
                </div>
            </div>
-       </div>
+       </div> --}}
    </header>
    <!-- end: Header Area -->

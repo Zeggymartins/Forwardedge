@@ -42,7 +42,7 @@ class WishlistController extends Controller
             return response()->json(['status' => 'auth_required', 'message' => 'Please register or login to continue'], 401);
         }
 
-        $request->validate(['course_id' => 'required|integer|exists:Course,id']);
+        $request->validate(['course_id' => 'required|integer|exists:courses,id']);
 
         WishlistItem::where('user_id', Auth::id())->where('course_id', $request->course_id)->delete();
 
@@ -52,23 +52,20 @@ class WishlistController extends Controller
             'wishlist' => $this->buildWishlistPayload(Auth::id())
         ]);
     }
-    public function index(Request $request){
-
+    public function index(Request $request)
+    {
         if (!Auth::check()) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'status' => 'auth_required',
-                    'message' => 'Please login to continue'
-                ], 401);
-            }
-            abort(401);
+            return response()->json([
+                'status' => 'auth_required',
+                'message' => 'Please login to continue'
+            ], 401);
         }
-
 
         $wishlistItems = WishlistItem::with('course')->where('user_id', Auth::id())->get();
 
         return view('user.pages.wishlist', compact('wishlistItems'));
     }
+
 
     // ✅ JSON version for AJAX
     public function getWishlistJson()

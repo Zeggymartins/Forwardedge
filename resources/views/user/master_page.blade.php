@@ -129,7 +129,7 @@
                     <p>Developing personalize our customer journeys to increase satisfaction & loyalty of our expansion
                         recognized by industry leaders.</p>
                 </div>
-                <div class="hamburger-search-area">
+                {{-- <div class="hamburger-search-area">
                     <h5 class="hamburger-title">Search Now!</h5>
                     <div class="hamburger_search">
                         <form method="get" action="index.html">
@@ -138,21 +138,21 @@
                                 placeholder="Search here...">
                         </form>
                     </div>
-                </div>
+                </div> --}}
                 <div class="hamburger-infos">
                     <h5 class="hamburger-title">Contact Info</h5>
                     <div class="contact-info">
                         <div class="contact-item">
                             <span class="subtitle">Phone</span>
-                            <a class="contact-link" href="tel:10095447818">+1 (009) 544-7818</a>
+                            <a class="contact-link" href="tel:+2347039955591">+234 703 995 5591</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Email</span>
-                            <a class="contact-link" href="mailto:info@bexon.com">info@bexon.com</a>
+                            <a class="contact-link" href="mailto:info@forwardedge.com">info@forwardedge.com</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Location</span>
-                            <span class="contact-link">993 Renner Burg, West Rond, MT 94251-030</span>
+                            <span class="contact-link">Iwaya Road, 58 Iwaya Rd, Yaba, Lagos State</span>
                         </div>
                     </div>
                 </div>
@@ -386,46 +386,55 @@
             toastr.info(message);
             $('#authModal').modal('show');
         }
+        $(document).on('click', '.open-cart-btn', function(e) {
+            e.preventDefault();
+            openCart();
+        });
 
-     function openCart() {
-    $.ajax({
-        url: "{{ route('user.cart.index') }}",
-        type: "GET",
-        dataType: "html",
-        success: function (res, status, xhr) {
-            if (xhr.status === 200) {
-                window.location.href = "{{ route('user.cart.index') }}";
-            }
-        },
-        error: function (xhr) {
-            if (xhr.status === 401) {
-                showAuthModal('Please login to view your cart');
-            } else {
-                toastr.error('Could not load cart');
-            }
-        }
-    });
-}
+        $(document).on('click', '.open-wishlist-btn', function(e) {
+            e.preventDefault();
+            openWishlist();
+        });
 
-function openWishlist() {
-    $.ajax({
-        url: "{{ route('user.wishlist.index') }}",
-        type: "GET",
-        dataType: "html",
-        success: function (res, status, xhr) {
-            if (xhr.status === 200) {
-                window.location.href = "{{ route('user.wishlist.index') }}";
-            }
-        },
-        error: function (xhr) {
-            if (xhr.status === 401) {
-                showAuthModal('Please login to view your wishlist');
-            } else {
-                toastr.error('Could not load wishlist');
-            }
+        function openCart() {
+            $.get("{{ route('user.cart.index') }}")
+                .done(res => {
+                    // Authenticated → redirect to cart page
+                    window.location.href = "{{ route('user.cart.index') }}";
+                })
+                .fail(xhr => {
+                    console.log('Open cart failed:', xhr.status, xhr.responseJSON);
+                    if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
+                            'auth_required')) {
+                        $('#pending_action').val('open_cart');
+                        $('#pending_payload').val('{}');
+                        showAuthModal(xhr.responseJSON?.message || 'Please login to view your cart');
+                        return;
+                    }
+                    toastr.error('Could not load cart');
+                });
         }
-    });
-}
+
+        function openWishlist() {
+            $.get("{{ route('user.wishlist.index') }}")
+                .done(res => {
+                    // Authenticated → redirect to wishlist page
+                    window.location.href = "{{ route('user.wishlist.index') }}";
+                })
+                .fail(xhr => {
+                    console.log('Open wishlist failed:', xhr.status, xhr.responseJSON);
+                    if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
+                            'auth_required')) {
+                        $('#pending_action').val('open_wishlist');
+                        $('#pending_payload').val('{}');
+                        showAuthModal(xhr.responseJSON?.message || 'Please login to view your wishlist');
+                        return;
+                    }
+                    toastr.error('Could not load wishlist');
+                });
+        }
+
+
 
 
 
@@ -571,6 +580,38 @@ function openWishlist() {
         }
 
         // Event Handlers
+
+        // Add to cart from wishlist
+$(document).on('click', '.wishlist-add-to-cart', function(e) {
+    e.preventDefault(); // stop navigation
+    let courseId = $(this).data('course-id');
+    if (!courseId) return toastr.error('Course ID not found');
+
+    console.log('Adding to cart from wishlist:', courseId);
+
+    $.post("{{ route('user.cart.add') }}", { course_id: courseId, quantity: 1 })
+        .done(res => {
+            toastr.success(res.message || 'Added to cart');
+
+            // Update cart UI
+            updateCartUI(res.cart);
+            updateCartCount();
+
+            // Remove from wishlist UI
+            removeFromWishlist(courseId);
+        })
+        .fail(xhr => {
+            console.log('Failed to add from wishlist:', xhr.status, xhr.responseJSON);
+            if (xhr.status === 401 || xhr.status === 403) {
+                $('#pending_action').val('add_to_cart');
+                $('#pending_payload').val(JSON.stringify({ course_id: courseId }));
+                showAuthModal('Please login to add items to cart');
+                return;
+            }
+            toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+        });
+});
+
         $(document).on('click', '.cart-button', function(e) {
             e.preventDefault();
             console.log('Cart button clicked');
@@ -606,6 +647,29 @@ function openWishlist() {
 
             addToWishlist(courseId);
         });
+// Remove from cart table
+$(document).on('click', '.woocommerce-cart-form__cart-item .product-remove .remove', function(e) {
+    e.preventDefault();
+    let courseId = $(this).data('course-id');
+    if (!courseId) return toastr.error('Course ID not found');
+
+    removeFromCart(courseId);
+
+    // Remove row from table immediately
+    $(this).closest('tr').fadeOut(200, function(){ $(this).remove(); });
+});
+
+// Remove from wishlist table
+$(document).on('click', '.woosw-item--remove', function(e) {
+    e.preventDefault();
+    let courseId = $(this).data('course-id');
+    if (!courseId) return toastr.error('Course ID not found');
+
+    removeFromWishlist(courseId);
+
+    // Remove row from table immediately
+    $(this).closest('tr').fadeOut(200, function(){ $(this).remove(); });
+});
 
         $(document).on('click', '.enroll-btn', function(e) {
             e.preventDefault();
@@ -724,16 +788,26 @@ function openWishlist() {
 
                 console.log('Retrying pending action:', action, payload);
 
-                if (action === 'add_to_cart' && payload.course_id) {
-                    addToCart(payload.course_id, payload.quantity || 1);
-                } else if (action === 'add_to_wishlist' && payload.course_id) {
-                    addToWishlist(payload.course_id);
-                } else if (action === 'enroll') {
-                    if (payload.enroll_url) {
-                        window.location.href = payload.enroll_url;
-                    } else if (action === 'enroll' && payload.course_id) {
-                        window.location.href = "/enroll/price/" + payload.course_id;
-                    }
+                switch (action) {
+                    case 'add_to_cart':
+                        if (payload.course_id) addToCart(payload.course_id, payload.quantity || 1);
+                        break;
+                    case 'add_to_wishlist':
+                        if (payload.course_id) addToWishlist(payload.course_id);
+                        break;
+                    case 'open_cart':
+                        openCart();
+                        break;
+                    case 'open_wishlist':
+                        openWishlist();
+                        break;
+                    case 'enroll':
+                        if (payload.enroll_url) {
+                            window.location.href = payload.enroll_url;
+                        } else if (payload.schedule_id) {
+                            window.location.href = "/enroll/price/" + payload.schedule_id;
+                        }
+                        break;
                 }
 
                 $('#pending_action').val('');

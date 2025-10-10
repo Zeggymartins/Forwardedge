@@ -2,37 +2,93 @@
 @section('title', 'Shop | Forward Edge Consulting')
 
 @push('styles')
-<style>
-    .filter-active {
-        background: #007bff !important;
-        color: white !important;
-    }
-    
-    .price-range-display {
-        background: #f8f9fa;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 10px 0;
-        text-align: center;
-        font-weight: 600;
-    }
-    
-    .no-results {
-        text-align: center;
-        padding: 3rem;
-    }
-    
-    .no-results i {
-        font-size: 4rem;
-        color: #dee2e6;
-        margin-bottom: 1rem;
-    }
-</style>
+    <style>
+        .filter-active {
+            background: #007bff !important;
+            color: white !important;
+        }
+
+        .price-range-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+        /* Price Slider Custom Style */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: #ced8e0; /* light background track */
+    outline: none;
+    transition: background 0.3s;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2c99d4; /* theme primary color */
+    cursor: pointer;
+    border: 2px solid #18292c; /* subtle border */
+    transition: background 0.3s, transform 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #364e52; /* darker on hover */
+    transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2c99d4;
+    cursor: pointer;
+    border: 2px solid #18292c;
+    transition: background 0.3s, transform 0.2s;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: #364e52;
+    transform: scale(1.2);
+}
+
+/* Filled track effect for min-max range */
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #2c99d4 0%, #2c99d4 var(--percent, 50%), #ced8e0 var(--percent, 50%), #ced8e0 100%);
+}
+
+input[type="range"]::-moz-range-track {
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #2c99d4 0%, #2c99d4 var(--percent, 50%), #ced8e0 var(--percent, 50%), #ced8e0 100%);
+}
+
+    </style>
 @endpush
 
 @section('main')
     @include('user.partials.breadcrumb')
-    
+
     <!-- start: Shop Section -->
     <div class="tj-product-area section-gap slidebar-stickiy-container">
         <div class="container">
@@ -41,14 +97,15 @@
                     <div class="tj-shop-listing d-flex flex-wrap align-items-center mb-40 justify-content-between">
                         <div class="tj-shop-listing-number">
                             <p class="tj-shop-list-title">
-                                Showing {{ $course->firstItem() ?? 0 }}–{{ $course->lastItem() ?? 0 }} 
+                                Showing {{ $course->firstItem() ?? 0 }}–{{ $course->lastItem() ?? 0 }}
                                 of {{ $course->total() }} results
                             </p>
                         </div>
                         <div class="tj-shop-listing-popup">
                             <div class="tj-shop-from">
                                 <form id="sortForm" method="get">
-                                    <select name="orderby" class="orderby" aria-label="Shop order" onchange="this.form.submit()">
+                                    <select name="orderby" class="orderby" aria-label="Shop order"
+                                        onchange="this.form.submit()">
                                         <option value="date" {{ request('orderby') == 'date' ? 'selected' : '' }}>
                                             Sort by latest
                                         </option>
@@ -58,14 +115,15 @@
                                         <option value="price" {{ request('orderby') == 'price' ? 'selected' : '' }}>
                                             Sort by price: low to high
                                         </option>
-                                        <option value="price-desc" {{ request('orderby') == 'price-desc' ? 'selected' : '' }}>
+                                        <option value="price-desc"
+                                            {{ request('orderby') == 'price-desc' ? 'selected' : '' }}>
                                             Sort by price: high to low
                                         </option>
                                     </select>
-                                    @if(request('min_price'))
+                                    @if (request('min_price'))
                                         <input type="hidden" name="min_price" value="{{ request('min_price') }}">
                                     @endif
-                                    @if(request('max_price'))
+                                    @if (request('max_price'))
                                         <input type="hidden" name="max_price" value="{{ request('max_price') }}">
                                     @endif
                                 </form>
@@ -162,11 +220,11 @@
                             @endforelse
                         </div>
 
-                        @if($course->hasPages())
+                        @if ($course->hasPages())
                             <div class="row">
                                 <div class="col-sm-12">
                                     <div class="basic-pagination text-start">
-                                        {{ $course->links('pagination::bootstrap-4') }}
+                                        {{ $course->links('vendor.pagination.custom') }}
                                     </div>
                                 </div>
                             </div>
@@ -180,52 +238,48 @@
                         <div id="_price_filter-2" class="product-widget widget_price_filter">
                             <h5 class="product-widget-title">Filter by price</h5>
                             <form id="priceFilterForm" method="get">
-                                @if(request('orderby'))
+                                @if (request('orderby'))
                                     <input type="hidden" name="orderby" value="{{ request('orderby') }}">
                                 @endif
-                                
-                                <div class="price_slider_wrapper">
-                                    <div class="price-range-display">
-                                        <span>₦<span id="price-display-from">{{ request('min_price', $priceRange->min_price ?? 0) }}</span></span>
-                                        - 
-                                        <span>₦<span id="price-display-to">{{ request('max_price', $priceRange->max_price ?? 500000) }}</span></span>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label>Min Price: ₦<span id="min-price-label">{{ request('min_price', $priceRange->min_price ?? 0) }}</span></label>
-                                        <input type="range" 
-                                               id="min-price-slider" 
-                                               name="min_price" 
-                                               min="{{ $priceRange->min_price ?? 0 }}" 
-                                               max="{{ $priceRange->max_price ?? 500000 }}" 
-                                               value="{{ request('min_price', $priceRange->min_price ?? 0) }}"
-                                               step="1000"
-                                               class="form-range">
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label>Max Price: ₦<span id="max-price-label">{{ request('max_price', $priceRange->max_price ?? 500000) }}</span></label>
-                                        <input type="range" 
-                                               id="max-price-slider" 
-                                               name="max_price" 
-                                               min="{{ $priceRange->min_price ?? 0 }}" 
-                                               max="{{ $priceRange->max_price ?? 500000 }}" 
-                                               value="{{ request('max_price', $priceRange->max_price ?? 500000) }}"
-                                               step="1000"
-                                               class="form-range">
-                                    </div>
-                                    
-                                    <div class="price_slider_amount">
-                                        <button type="submit" class="button">Apply Filter</button>
-                                        @if(request('min_price') || request('max_price'))
-                                            <a href="{{ route('shop') }}" class="button" style="background: #dc3545;">
-                                                Clear
-                                            </a>
-                                        @endif
-                                    </div>
+
+                                <div class="price-range-display">
+                                    ₦<span
+                                        id="price-display-from">{{ request('min_price', $priceRange->min_price ?? 0) }}</span>
+                                    -
+                                    ₦<span
+                                        id="price-display-to">{{ request('max_price', $priceRange->max_price ?? 500000) }}</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Min Price: ₦<span
+                                            id="min-price-label">{{ request('min_price', $priceRange->min_price ?? 0) }}</span></label>
+                                    <input type="range" id="min-price-slider" name="min_price"
+                                        min="{{ $priceRange->min_price ?? 0 }}"
+                                        max="{{ $priceRange->max_price ?? 500000 }}"
+                                        value="{{ request('min_price', $priceRange->min_price ?? 0) }}" step="1000"
+                                        class="form-range">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label>Max Price: ₦<span
+                                            id="max-price-label">{{ request('max_price', $priceRange->max_price ?? 500000) }}</span></label>
+                                    <input type="range" id="max-price-slider" name="max_price"
+                                        min="{{ $priceRange->min_price ?? 0 }}"
+                                        max="{{ $priceRange->max_price ?? 500000 }}"
+                                        value="{{ request('max_price', $priceRange->max_price ?? 500000) }}"
+                                        step="1000" class="form-range">
+                                </div>
+
+                                <div class="price_slider_amount d-flex gap-2">
+                                    <button type="submit" class="button">Apply Filter</button>
+                                    @if (request('min_price') || request('max_price'))
+                                        <a href="{{ route('shop') }}" class="button"
+                                            style="background: #dc3545;">Clear</a>
+                                    @endif
                                 </div>
                             </form>
                         </div>
+
 
                         <!-- Latest Products -->
                         <div class="product-widget widget_products">
@@ -297,10 +351,13 @@
                             <h3 class="tj-product-details-title">{{ $courseItem->title }}</h3>
                             <p class="price">
                                 @if ($courseItem->discount_price)
-                                    <del><span class="price-amount amount"><span>₦</span>{{ number_format($courseItem->price) }}</span></del>
-                                    <span class="price-amount amount"><span>₦</span>{{ number_format($courseItem->discount_price) }}</span>
+                                    <del><span
+                                            class="price-amount amount"><span>₦</span>{{ number_format($courseItem->price) }}</span></del>
+                                    <span
+                                        class="price-amount amount"><span>₦</span>{{ number_format($courseItem->discount_price) }}</span>
                                 @else
-                                    <span class="price-amount amount"><span>₦</span>{{ number_format($courseItem->price) }}</span>
+                                    <span
+                                        class="price-amount amount"><span>₦</span>{{ number_format($courseItem->price) }}</span>
                                 @endif
                             </p>
                             <div class="product-details__short-description">
@@ -309,8 +366,7 @@
                             <div class="tj-product-details-action-wrapper">
                                 <div class="tj-product-details-action-item-wrapper d-flex align-items-center">
                                     <div class="tj-product-details-add-to-cart">
-                                        <button type="button"
-                                            class="single_add_to_cart_button tj-cart-btn cart-button"
+                                        <button type="button" class="single_add_to_cart_button tj-cart-btn cart-button"
                                             data-course-id="{{ $courseItem->id }}" data-quantity="1">
                                             <span class="btn-icon">
                                                 <i class="fal fa-shopping-cart"></i>
@@ -341,42 +397,58 @@
             </div>
         </div>
     @endforeach
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+       const minSlider = document.getElementById('min-price-slider');
+       const maxSlider = document.getElementById('max-price-slider');
+       const minLabel = document.getElementById('min-price-label');
+       const maxLabel = document.getElementById('max-price-label');
+       const displayFrom = document.getElementById('price-display-from');
+       const displayTo = document.getElementById('price-display-to');
+    
+       function formatNumber(num) {
+           return parseInt(num).toLocaleString();
+       }
+    
+       function updateDisplay() {
+           let minVal = parseInt(minSlider.value);
+           let maxVal = parseInt(maxSlider.value);
+    
+           // prevent sliders from crossing
+           if (minVal > maxVal) {
+               minVal = maxVal;
+               minSlider.value = minVal;
+           }
+           if (maxVal < minVal) {
+               maxVal = minVal;
+               maxSlider.value = maxVal;
+           }
+    
+           // Update labels
+           minLabel.textContent = formatNumber(minVal);
+           maxLabel.textContent = formatNumber(maxVal);
+           displayFrom.textContent = formatNumber(minVal);
+           displayTo.textContent = formatNumber(maxVal);
+    
+           // Calculate percentages
+           const minPercent = ((minVal - minSlider.min) / (minSlider.max - minSlider.min)) * 100;
+           const maxPercent = ((maxVal - minSlider.min) / (minSlider.max - minSlider.min)) * 100;
+    
+           // Update slider backgrounds to show filled track
+           minSlider.style.background = `linear-gradient(to right, #2c99d4 0%, #2c99d4 ${minPercent}%, #ced8e0 ${minPercent}%, #ced8e0 100%)`;
+           maxSlider.style.background = `linear-gradient(to right, #2c99d4 0%, #2c99d4 ${maxPercent}%, #ced8e0 ${maxPercent}%, #ced8e0 100%)`;
+       }
+    
+       minSlider.addEventListener('input', updateDisplay);
+       maxSlider.addEventListener('input', updateDisplay);
+    
+       updateDisplay();
+    });
+    
+    
+    </script>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const minSlider = document.getElementById('min-price-slider');
-    const maxSlider = document.getElementById('max-price-slider');
-    const minLabel = document.getElementById('min-price-label');
-    const maxLabel = document.getElementById('max-price-label');
-    const displayFrom = document.getElementById('price-display-from');
-    const displayTo = document.getElementById('price-display-to');
 
-    function formatNumber(num) {
-        return parseInt(num).toLocaleString();
-    }
-
-    function updateDisplay() {
-        const minVal = parseInt(minSlider.value);
-        const maxVal = parseInt(maxSlider.value);
-
-        // Ensure min is never greater than max
-        if (minVal > maxVal) {
-            minSlider.value = maxVal;
-        }
-
-        minLabel.textContent = formatNumber(minSlider.value);
-        maxLabel.textContent = formatNumber(maxSlider.value);
-        displayFrom.textContent = formatNumber(minSlider.value);
-        displayTo.textContent = formatNumber(maxSlider.value);
-    }
-
-    if (minSlider && maxSlider) {
-        minSlider.addEventListener('input', updateDisplay);
-        maxSlider.addEventListener('input', updateDisplay);
-        updateDisplay();
-    }
-});
-</script>
-@endpush

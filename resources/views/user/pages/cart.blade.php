@@ -26,7 +26,7 @@
                                                         <th class="product-remove">&nbsp;</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody class="">
                                                     @foreach ($cartItems as $item)
                                                         <tr class="woocommerce-cart-form__cart-item cart_item">
                                                             <td class="product-thumbnail" data-title="Product">

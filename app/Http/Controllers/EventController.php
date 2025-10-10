@@ -19,7 +19,7 @@ class EventController extends Controller
         $events = Event::where('status', 'published')
             ->published()
             ->orderBy('start_date', 'asc')
-            ->paginate(12);
+            ->paginate(6);
 
         return view('user.pages.events_training', compact('events'));
     }

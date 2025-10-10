@@ -33,7 +33,10 @@
                     </div>
                 @endforelse
             </div>
-
+    {{-- ✅ Dynamic Pagination --}}
+        <div class="tj-pagination d-flex justify-content-center mt-4">
+            {{ $photos->links('vendor.pagination.custom') }}
+        </div>
         </div>
     </section>
     <!-- end: Team Section -->

@@ -72,13 +72,10 @@ class CartController extends Controller
     public function index(Request $request)
     {
         if (!Auth::check()) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'status' => 'auth_required',
-                    'message' => 'Please login to continue'
-                ], 401);
-            }
-            abort(401);
+            return response()->json([
+                'status' => 'auth_required',
+                'message' => 'Please login to continue'
+            ], 401);
         }
 
 

@@ -37,7 +37,7 @@
             <!-- Pagination -->
             @if ($services->hasPages())
                 <div class="tj-pagination d-flex justify-content-center mt-5">
-                    {{ $services->links('pagination::bootstrap-4') }}
+                    {{ $services->links('vendor.pagination.custom') }}
                 </div>
             @endif
 
