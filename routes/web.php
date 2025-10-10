@@ -50,6 +50,7 @@ Route::prefix('services')->name('services')->group(function () {
     Route::get('/', [ServiceController::class, 'ServiceList']);
     Route::get('/{slug}', [ServiceController::class, 'show'])->name('.show');
 });
+
 Route::get('/contact', [MessageController::class, 'create'])->name('contact');
 Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
 Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
@@ -88,8 +89,6 @@ Route::prefix('events')->name('events.')->group(function () {
         ->name('register');
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
 | AJAX Authentication Routes
@@ -108,7 +107,6 @@ Route::prefix('ajax')->name('ajax.')->group(function () {
 Route::get('/reset-password', function () {
     return view('auth.reset');
 })->name('password.reset');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -132,25 +130,25 @@ Route::prefix('user/wishlist')->name('user.wishlist.')->group(function () {
     Route::get('/json', [WishlistController::class, 'getwishlistJson'])->name('json');
     Route::get('/count', [WishlistController::class, 'count'])->name('count');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Payment Routes (Public callbacks for Paystack)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::get('/callback', [PaymentController::class, 'callback'])->name('callback');
+    Route::post('/webhook', [PaymentController::class, 'webhook'])->name('webhook');
+    Route::get('/success', [OrderController::class, 'success'])->name('success');
+    Route::get('/failed', [OrderController::class, 'cancel'])->name('failed');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:user'])->group(function () {
-
-
-    /*
-|--------------------------------------------------------------------------
-| Payment Routes (Public callbacks)
-|--------------------------------------------------------------------------
-*/
-    Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/callback', [PaymentController::class, 'callback'])->name('callback');
-        Route::post('/webhook', [PaymentController::class, 'webhook'])->name('webhook');
-        Route::get('/success', [OrderController::class, 'success'])->name('success');
-        Route::get('/failed', [OrderController::class, 'cancel'])->name('failed');
-    });
     // Course enrollment
     Route::prefix('enroll')->name('enroll.')->group(function () {
         Route::get('/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('pricing');
@@ -165,12 +163,13 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin/Dashboard Routes (if needed)
+| Admin Routes - Secured with Custom Prefix
+| Change "ctrl-panel-v2" to something unique and memorable for your team
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(function () {
 
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Dashboard (Login Landing)
     Route::get('/dashboard', function () {
         return view('admin.pages.dashboard');
     })->name('dashboard');
@@ -183,15 +182,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
     /*
-|--------------------------------------------------------------------------
-| Admin Routes - Services
-|--------------------------------------------------------------------------
-*/
-    // Show form
-    Route::get('/admin/services/add', function () {
+    |--------------------------------------------------------------------------
+    | Admin - Services Management
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/services/add', function () {
         return view('admin.pages.services.add_service');
     })->name('admin.services.add');
-    Route::prefix('admin/services')->name('admin.services.')->group(function () {
+
+    Route::prefix('services')->name('admin.services.')->group(function () {
         Route::get('/', [AdminServiceController::class, 'index'])->name('index');
         Route::post('/', [AdminServiceController::class, 'store'])->name('store');
         Route::get('/{id}', [AdminServiceController::class, 'show'])->name('show');
@@ -202,9 +201,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::delete('/{serviceId}/contents/{contentId}', [AdminServiceController::class, 'destroyContent'])->name('contents.destroy');
     });
 
-    // routes/web.php
-    Route::prefix('admin/events')->name('admin.events.')->group(function () {
-        // main events
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Events Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('events')->name('admin.events.')->group(function () {
+        // Main events
         Route::get('/', [AdminEventController::class, 'index'])->name('list');
         Route::get('/create', [AdminEventController::class, 'create'])->name('create');
         Route::post('/', [AdminEventController::class, 'store'])->name('store');
@@ -212,7 +215,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/{event}', [AdminEventController::class, 'update'])->name('update');
         Route::delete('/{event}', [AdminEventController::class, 'destroy'])->name('destroy');
         Route::get('/registrations', [AdminEventController::class, 'Registrations'])->name('registrations');
-        // sub resources
+
+        // Event Contents
         Route::post('/{event}/contents', [AdminEventController::class, 'storeContent'])->name('contents.store');
         Route::put('/contents/{content}', [AdminEventController::class, 'updateContent'])->name('contents.update');
         Route::delete('/contents/{content}', [AdminEventController::class, 'destroyContent'])->name('contents.destroy');
@@ -238,18 +242,22 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::delete('/sponsors/{sponsor}', [AdminEventController::class, 'destroySponsor'])->name('sponsors.destroy');
     });
 
-    Route::prefix('admin')->group(function () {
-        Route::get('enrollments', [AdminEnrollmentController::class, 'index'])->name('admin.enrollments.index');
-        Route::get('enrollments/{id}', [AdminEnrollmentController::class, 'show'])->name('admin.enrollments.show');
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Enrollments Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('enrollments')->name('admin.enrollments.')->group(function () {
+        Route::get('/', [AdminEnrollmentController::class, 'index'])->name('index');
+        Route::get('/{id}', [AdminEnrollmentController::class, 'show'])->name('show');
     });
 
-
     /*
-|--------------------------------------------------------------------------
-| Admin Routes - Blogs
-|--------------------------------------------------------------------------
-*/
-    Route::prefix('admin/blogs')->name('admin.blogs.')->group(function () {
+    |--------------------------------------------------------------------------
+    | Admin - Blogs Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('blogs')->name('admin.blogs.')->group(function () {
         Route::get('/', [AdminBlogController::class, 'index'])->name('index');
         Route::get('/create', [AdminBlogController::class, 'create'])->name('create');
         Route::post('/', [AdminBlogController::class, 'store'])->name('store');
@@ -257,18 +265,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/{id}', [AdminBlogController::class, 'update'])->name('update');
         Route::delete('/{id}', [AdminBlogController::class, 'destroy'])->name('destroy');
 
-        // Blog Detail Routes
+        // Blog Details
         Route::post('/{id}/details', [AdminBlogController::class, 'storeDetail'])->name('details.store');
         Route::put('/{blogId}/details/{detailId}', [AdminBlogController::class, 'updateDetail'])->name('details.update');
         Route::delete('/{blogId}/details/{detailId}', [AdminBlogController::class, 'destroyDetail'])->name('details.destroy');
     });
 
     /*
-|--------------------------------------------------------------------------
-| Admin Routes - Courses
-|--------------------------------------------------------------------------
-*/
-    Route::prefix('admin/courses')->name('admin.courses.')->group(function () {
+    |--------------------------------------------------------------------------
+    | Admin - Courses Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('courses')->name('admin.courses.')->group(function () {
         Route::get('/', [AdminCourseController::class, 'index'])->name('index');
         Route::get('/create', [AdminCourseController::class, 'create'])->name('create');
         Route::post('/', [AdminCourseController::class, 'store'])->name('store');
@@ -296,30 +304,60 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'updateSchedule'])->name('schedules.update');
         Route::delete('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'destroySchedule'])->name('schedules.destroy');
     });
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/transactions', [AdminTransactionsController::class, 'index'])->name('transactions.index');
-        Route::get('/transactions/{transaction}', [AdminTransactionsController::class, 'show'])->name('transactions.show');
-        Route::get('/orders', [AdminTransactionsController::class, 'getOrders'])->name('orders.show');
-    });
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('faqs', FaqController::class)->except(['create', 'edit', 'show',]);
-    });
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('gallery', GalleryController::class)
-            ->except(['create', 'edit', 'show']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Course Contents (Separate Management)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('course-contents')->name('admin.course_contents.')->group(function () {
+        Route::get('/', [AdminCourseController::class, 'courseContent'])->name('index');
+        Route::post('/', [AdminCourseController::class, 'storeContent'])->name('store');
+        Route::put('/{courseContent}', [AdminCourseController::class, 'updateContent'])->name('update');
+        Route::delete('/{courseContent}', [AdminCourseController::class, 'destroyContent'])->name('destroy');
+        Route::get('/{courseId}', [AdminCourseController::class, 'showContent'])->name('show');
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Transactions & Orders Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('transactions')->name('admin.transactions.')->group(function () {
+        Route::get('/', [AdminTransactionsController::class, 'index'])->name('index');
+        Route::get('/{transaction}', [AdminTransactionsController::class, 'show'])->name('show');
+    });
 
-  Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('course-contents', [AdminCourseController::class, 'courseContent'])->name('course_contents.index');
-    Route::post('course-contents', [AdminCourseController::class, 'storeContent'])->name('course_contents.store');
-        Route::put('course-contents/{courseContent}', [AdminCourseController::class, 'updateContent'])->name('course_contents.update');
-        Route::delete('course-contents/{courseContent}', [AdminCourseController::class, 'destroyContent'])->name('course_contents.destroy');
-    Route::get('course-contents/{courseId}', [AdminCourseController::class, 'showContent'])->name('course_contents.show');
+    Route::get('/orders', [AdminTransactionsController::class, 'getOrders'])->name('admin.orders.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - FAQs Management
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('faqs', FaqController::class)
+        ->except(['create', 'edit', 'show'])
+        ->names([
+            'index' => 'admin.faqs.index',
+            'store' => 'admin.faqs.store',
+            'update' => 'admin.faqs.update',
+            'destroy' => 'admin.faqs.destroy',
+        ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Gallery Management
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('gallery', GalleryController::class)
+        ->except(['create', 'edit', 'show'])
+        ->names([
+            'index' => 'admin.gallery.index',
+            'store' => 'admin.gallery.store',
+            'update' => 'admin.gallery.update',
+            'destroy' => 'admin.gallery.destroy',
+        ]);
 });
-
-});
-
 
 /*
 |--------------------------------------------------------------------------

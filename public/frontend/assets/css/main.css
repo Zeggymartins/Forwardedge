@@ -51,9 +51,10 @@ START: Theme Default CSS
   /**
      @Font-Family Declaration
    */
-  --tj-ff-body: 'Mona Sans', sans-serif;;
-  --tj-ff-heading: 'Mona Sans', sans-serif;;
+  --tj-ff-body: 'Mona Sans', sans-serif;
+  --tj-ff-heading: 'Mona Sans', sans-serif;
   --tj-ff-fontawesome: "Font Awesome 6 Pro";
+
   /**
      @Font-weight Declaration
    */
@@ -67,6 +68,7 @@ START: Theme Default CSS
   --tj-fw-bold: 700;
   --tj-fw-ebold: 800;
   --tj-fw-black: 900;
+
   /**
      @Font-Size Declaration
    */
@@ -78,36 +80,62 @@ START: Theme Default CSS
   --tj-fs-h4: 24px;
   --tj-fs-h5: 20px;
   --tj-fs-h6: 18px;
+
   /**
      @Color Declaration
    */
   --tj-color-common-white: #ffffff;
   --tj-color-common-black: #000000;
+
+  /* Text Colors */
   --tj-color-heading-primary: #0c1e21;
   --tj-color-text-body: #364e52;
   --tj-color-text-body-2: #a9b8b8;
   --tj-color-text-body-3: #67787a;
   --tj-color-text-body-4: #18292c;
   --tj-color-text-body-5: rgba(255, 255, 255, 0.8);
+
+  /* Primary Blue Theme */
   --tj-color-theme-primary: #2c99d4;
-  --tj-color-theme-bg: #cfe2ea;
-  --tj-color-theme-bg-2: #ced8e0;
-  --tj-color-theme-bg-3: #202b30;
   --tj-color-theme-dark: #153f5d;
   --tj-color-theme-dark-2: #183f4d;
   --tj-color-theme-dark-3: #364e52;
   --tj-color-theme-dark-4: #67787a;
   --tj-color-theme-dark-5: #676e7a;
-  --tj-color-red-1: #ff0000;
+
+  /* Yellow Secondary Theme */
+  --tj-color-theme-secondary: #f4c430; /* Golden Yellow */
+  --tj-color-theme-secondary-dark: #d9a600;
+  --tj-color-theme-secondary-light: #fff4cc;
+
+  /* Backgrounds */
+  --tj-color-theme-bg: #cfe2ea;
+  --tj-color-theme-bg-2: #ced8e0;
+  --tj-color-theme-bg-3: #202b30;
+
+  /* UI Accents */
+  --tj-color-highlight: var(--tj-color-theme-secondary);
+  --tj-color-hover: var(--tj-color-theme-secondary-dark);
+  --tj-color-active: var(--tj-color-theme-primary);
+
+  /* States */
+  --tj-color-success: #25d366;
+  --tj-color-warning: var(--tj-color-theme-secondary);
+  --tj-color-danger: #ff4d4d;
+
+  /* Neutrals */
   --tj-color-grey-1: #ecf0f0;
   --tj-color-grey-2: #a9b8b8;
-  --tj-color-grey-3: rgba(255, 255, 255, 0.1019607843);
+  --tj-color-grey-3: rgba(255, 255, 255, 0.1);
+
+  /* Borders */
   --tj-color-border-1: #c9d1d1;
   --tj-color-border-2: #313d3d;
-  --tj-color-border-3: rgba(255, 255, 255, 0.1490196078);
+  --tj-color-border-3: rgba(255, 255, 255, 0.15);
   --tj-color-border-4: rgba(255, 255, 255, 0.2);
-  --tj-color-border-5: rgba(30, 138, 138, 0.1490196078);
+  --tj-color-border-5: rgba(30, 138, 138, 0.15);
 }
+
 
 * {
   margin: 0;
