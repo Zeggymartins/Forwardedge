@@ -15,7 +15,7 @@ class GalleryController extends Controller
     }
     public function getPhotos()
     {
-        $photos = Gallery::latest()->paginate(4);
+        $photos = Gallery::latest()->paginate(12);
         return view('user.pages.gallery', compact('photos'));
     }
     public function store(Request $request)
