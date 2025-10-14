@@ -6,8 +6,8 @@
 <section class="tj-service-section service-4 section-gap">
     <div class="container">
       <div class="row row-gap-4">
-  @forelse ($courses as $index => $course)
-    <div class="col-lg-4 col-md-6">
+  @forelse ($course as $index => $course)
+    <div class="col-lg-6 col-md-6">
       <div class="service-item style-4 wow fadeInUp" data-wow-delay=".{{ $index + 1 }}s">
         <div class="service-icon">
           {{-- You can map icons manually or store them in DB --}}

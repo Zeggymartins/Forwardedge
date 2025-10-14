@@ -28,7 +28,7 @@
             </div>
             <div class="banner-right-box">
                 <div class="banner-img">
-                    <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.jpg') }}" alt="">
+                    <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.png') }}" alt="">
                 </div>
                 <!-- <div class="box-area">
                                     <div class="customers-box">

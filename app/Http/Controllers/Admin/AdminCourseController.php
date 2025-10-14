@@ -266,7 +266,7 @@ class AdminCourseController extends Controller
     public function dashboard($id)
     {
         $course = Course::with([
-            'details' => function($q) { $q->orderBy('order'); },
+            'details' => function($q) { $q->orderBy('sort_order'); },
             'phases.topics',
             'schedules'
         ])->findOrFail($id);
