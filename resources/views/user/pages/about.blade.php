@@ -113,7 +113,57 @@
           </div>
         </section>
         <!-- end: Choose Section -->
+    <!-- start: Client Section -->
+        <section class="tj-client-section client-section-gap-2 wow fadeInUp" data-wow-delay=".4s">
+          <div class="container-fluid client-container">
+            <div class="row">
+              <div class="col-12">
+                <div class="client-content">
+                  <h5 class="sec-title">Join Over <span class="client-numbers">10+</span> Companies Partnering with
+                    <span class="client-text">ForwardEdge</span> Here
+                  </h5>
+                </div>
+                <div class="swiper client-slider client-slider-1">
+                  <div class="swiper-wrapper">
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client1.png')}}" alt="">
+                      </div>
+                    </div>
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client2.png')}}" alt="">
+                      </div>
+                    </div>
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client3.png')}}" alt="">
+                      </div>
+                    </div>
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client4.png')}}" alt="">
+                      </div>
+                    </div>
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client5.png')}}" alt="">
+                      </div>
+                    </div>
+                    <div class="swiper-slide client-item">
+                      <div class="">
+                        <img src="{{asset('frontend/assets/images/brands/client6.png')}}" alt="">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- end: Client Section -->
 
+    
         <!-- start: About Section -->
         <section class="tj-about-section-2 section-gap section-gap-x">
           <div class="container">

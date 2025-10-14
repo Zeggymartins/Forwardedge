@@ -1,133 +1,101 @@
 @extends('user.master_page')
 @section('title', ($course->name ?? 'Course Details') . ' | Forward Edge Consulting')
 @push('styles')
-    <style>
-        .image-box {
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+<style>
+  /* ===== Theme tokens (local to this view) ===== */
+  :root {
+    --tj-gold: #FDB714;
+    --tj-blue: #2c99d4;
+    --tj-grad: linear-gradient(135deg, var(--tj-gold) 0%, var(--tj-blue) 100%);
+    --tj-grad-rev: linear-gradient(135deg, var(--tj-blue) 0%, var(--tj-gold) 100%);
+    --tj-text-muted: #6c757d;
+    --tj-border: #edf2f7;
+  }
 
-        .image-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
+  /* ===== Cards & images ===== */
+  .image-box {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.1);
+    transition: all .3s ease;
+  }
+  .image-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,.15); }
+  .image-box img { width: 100%; height: 200px; object-fit: cover; display: block; transition: filter .3s ease-in-out; }
+  .image-box:hover img { filter: brightness(70%); }
 
-        .image-box img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-            transition: filter 0.3s ease-in-out;
-        }
+  /* Enroll button sits on image */
+  .image-box .enroll-btn{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    padding:12px 24px; background: var(--tj-grad);
+    color:#fff; font-weight:600; text-decoration:none; border-radius:25px;
+    opacity:0; transition:all .3s ease-in-out; border:none; cursor:pointer;
+    box-shadow: 0 8px 16px rgba(0,0,0,.15);
+  }
+  .image-box:hover .enroll-btn{ opacity:1; }
 
-        .image-box .enroll-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: #fff;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 25px;
-            opacity: 0;
-            transition: all 0.3s ease-in-out;
-            border: none;
-            cursor: pointer;
-        }
+  /* ===== Phase cards ===== */
+  .phase-card{
+    background:#fff; border-radius:12px; padding:25px; height:100%;
+    box-shadow:0 5px 15px rgba(0,0,0,.08); transition:all .3s ease; border:1px solid #f0f0f0;
+  }
+  .phase-card:hover{ transform:translateY(-5px); box-shadow:0 15px 35px rgba(0,0,0,.1); }
 
-        .image-box:hover .enroll-btn {
-            opacity: 1;
-        }
+  .phase-number{
+    display:inline-block; width:50px; height:50px;
+    background: var(--tj-grad);
+    color:#fff; border-radius:50%; text-align:center; line-height:50px; font-weight:bold; margin-bottom:20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.15);
+  }
 
-        .image-box:hover img {
-            filter: brightness(70%);
-        }
+  /* ===== Topic list ===== */
+  .topic-list li{ padding:8px 0; border-bottom:1px solid #f5f5f5; }
+  .topic-list li:last-child{ border-bottom:none; }
 
-        .phase-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 25px;
-            height: 100%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid #f0f0f0;
-        }
+  /* ===== Schedule card ===== */
+  .schedule-card{
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius:12px; padding:20px; margin:20px 0;
+    border-left:4px solid var(--tj-gold);
+  }
 
-        .phase-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
+  /* ===== Prices & stats ===== */
+  .price-tag{
+    background: var(--tj-grad);
+    color:#fff; padding:10px 20px; border-radius:25px; font-weight:600; display:inline-block;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  }
 
-        .phase-number {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 50px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+  .course-stats{ background:#f8f9fa; border-radius:12px; padding:30px; margin:30px 0; }
+  .stat-item{ text-align:center; padding:20px; }
+  .stat-number{ font-size:2rem; font-weight:bold; background: var(--tj-grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .stat-label{ color:var(--tj-text-muted); font-size:.9rem; text-transform:uppercase; letter-spacing:1px; }
 
-        .topic-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #f5f5f5;
-        }
+  /* ===== Two-column lists (responsive) ===== */
+  .twocol-list{
+    display:grid; grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:14px 28px; margin:8px 0 18px; padding:0; list-style:none;
+  }
+  .twocol-list li{
+    position:relative; padding:12px 16px 12px 44px; background:#fff;
+    border:1px solid var(--tj-border); border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.03); line-height:1.45;
+  }
+  .twocol-list li::before{
+    content:""; position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    width:14px; height:14px; border-radius:50%;
+    background: var(--tj-grad);
+    box-shadow: 0 0 0 4px rgba(253,183,20,.18);
+  }
+  @media (max-width: 767.98px){ .twocol-list{ grid-template-columns:1fr; } }
 
-        .topic-list li:last-child {
-            border-bottom: none;
-        }
-
-        .schedule-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 4px solid #007bff;
-        }
-
-        .price-tag {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .course-stats {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 30px 0;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-    </style>
+  /* ===== Optional: gradient badges, buttons you might reuse ===== */
+  .badge-gradient{ background: var(--tj-grad); color:#fff; }
+  .btn-gradient{ background: var(--tj-grad); border:none; color:#fff; }
+  .btn-gradient:hover{ background: var(--tj-grad-rev); color:#fff; }
+</style>
 @endpush
+
 @section('main')
     @include('user.partials.breadcrumb')
     <section class="tj-blog-section section-gap slidebar-stickiy-container">
@@ -228,21 +196,33 @@
                                                     {{ $phase->description ?? 'Comprehensive coverage of essential concepts and practical applications.' }}
                                                 </p>
 
-                                                @if ($phase->topics && $phase->topics->count() > 0)
-                                                    <ul class="topic-list list-unstyled">
-                                                        @foreach ($phase->topics->take(4) as $topic)
-                                                            <li>
-                                                                <i class="tji-check text-success me-2"></i>
-                                                                {{ $topic->title }}
-                                                            </li>
-                                                        @endforeach
-                                                        @if ($phase->topics->count() > 4)
-                                                            <li class="text-muted">
-                                                                <i class="tji-plus me-2"></i>
-                                                                {{ $phase->topics->count() - 4 }} more topics...
-                                                            </li>
-                                                        @endif
-                                                    </ul>
+                                               @php
+                                                    $topics = $phase->topics->values(); // already ordered by the relation
+                                                @endphp
+
+                                                @if($topics->count())
+                                                    <div class="topic-grid">
+                                                        @for ($i = 0; $i < $topics->count(); $i += 2)
+                                                            <div class="row align-items-start gy-2">
+                                                                <div class="col-12 col-md-6">
+                                                                    <div class="d-flex align-items-start">
+                                                                        <span class="badge bg-secondary me-2">{{ $topics[$i]->order }}</span>
+                                                                        <div>{{ $topics[$i]->title }}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6">
+                                                                    @if(isset($topics[$i+1]))
+                                                                        <div class="d-flex align-items-start">
+                                                                            <span class="badge bg-secondary me-2">{{ $topics[$i+1]->order }}</span>
+                                                                            <div>{{ $topics[$i+1]->title }}</div>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endfor
+                                                    </div>
+
+
                                                 @else
                                                     <ul class="topic-list list-unstyled">
                                                         <li><i class="tji-check text-success me-2"></i>Core concepts and
@@ -460,30 +440,39 @@
                                         </p>
 
                                         {{-- LISTS --}}
-                                    @elseif(in_array($detail->type, ['list', 'lists']))
+                                        {{-- LISTS (two-column, safe normalization) --}}
+                                    @elseif(in_array($detail->type, ['list', 'lists'], true))
                                         @php
-                                            $items = is_array($decoded) ? $decoded : explode("\n", $detail->content);
-                                            $items = array_filter(array_map('trim', $items));
-                                            $half = ceil(count($items) / 2);
+                                            // Normalize to array: content may be JSON array OR newline-separated string
+                                            $raw = $detail->content;
+                                            $decoded = is_string($raw)
+                                                ? json_decode($raw, true)
+                                                : (is_array($raw)
+                                                    ? $raw
+                                                    : null);
+                                            $items = [];
+                                            if (is_array($decoded)) {
+                                                $items = array_values(
+                                                    array_filter(array_map('trim', $decoded), fn($v) => $v !== ''),
+                                                );
+                                            } else {
+                                                $lines = preg_split("/\r\n|\n|\r/", (string) $raw);
+                                                $items = array_values(
+                                                    array_filter(array_map('trim', $lines), fn($v) => $v !== ''),
+                                                );
+                                            }
                                         @endphp
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <ul class="wow fadeInUp" data-wow-delay=".4s">
-                                                    @foreach (array_slice($items, 0, $half) as $item)
-                                                        <li><span><i class="tji-check"></i></span> {{ $item }}
-                                                        </li>
+
+                                        @if (count($items))
+                                            <div class="detail-section">
+                                                <ul class="twocol-list wow fadeInUp" data-wow-delay=".4s">
+                                                    @foreach ($items as $item)
+                                                        <li>{{ $item }}</li>
                                                     @endforeach
                                                 </ul>
                                             </div>
-                                            <div class="col-md-6">
-                                                <ul class="wow fadeInUp" data-wow-delay=".5s">
-                                                    @foreach (array_slice($items, $half) as $item)
-                                                        <li><span><i class="tji-check"></i></span> {{ $item }}
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        </div>
+                                        @endif
+
 
                                         {{-- IMAGES --}}
                                     @elseif(in_array($detail->type, ['image', 'images']))
@@ -494,7 +483,7 @@
                                             <div class="row">
                                                 @foreach ($images as $index => $img)
                                                     @if ($img)
-                                                        <div class="col-sm-6">
+                                                        <div class="col-sm-">
                                                             <div class="image-box wow fadeInUp"
                                                                 data-wow-delay=".{{ 6 + $index }}s">
                                                                 <img src="{{ asset('storage/' . $img) }}"
@@ -571,35 +560,34 @@
                                     @endif
                                 @endforeach
                             @else
-                     
-                            {{-- Fallback to default content if no details exist --}}
-                            <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">What You'll Learn</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <ul class="wow fadeInUp" data-wow-delay=".4s">
-                                        <li><span><i class="tji-check"></i></span>Complete digital marketing strategy
-                                            development</li>
-                                        <li><span><i class="tji-check"></i></span>Advanced social media marketing
-                                            techniques</li>
-                                        <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery
-                                        </li>
-                                        <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
-                                            practices</li>
-                                        <li><span><i class="tji-check"></i></span>Content marketing and storytelling
-                                        </li>
-                                    </ul>
+                                {{-- Fallback to default content if no details exist --}}
+                                <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">What You'll Learn</h3>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="wow fadeInUp" data-wow-delay=".4s">
+                                            <li><span><i class="tji-check"></i></span>Complete digital marketing strategy
+                                                development</li>
+                                            <li><span><i class="tji-check"></i></span>Advanced social media marketing
+                                                techniques</li>
+                                            <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery
+                                            </li>
+                                            <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
+                                                practices</li>
+                                            <li><span><i class="tji-check"></i></span>Content marketing and storytelling
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="wow fadeInUp" data-wow-delay=".5s">
+                                            <li><span><i class="tji-check"></i></span>Email marketing automation</li>
+                                            <li><span><i class="tji-check"></i></span>Analytics and performance tracking
+                                            </li>
+                                            <li><span><i class="tji-check"></i></span>Conversion rate optimization</li>
+                                            <li><span><i class="tji-check"></i></span>Marketing tools and platforms</li>
+                                            <li><span><i class="tji-check"></i></span>ROI measurement and reporting</li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <ul class="wow fadeInUp" data-wow-delay=".5s">
-                                        <li><span><i class="tji-check"></i></span>Email marketing automation</li>
-                                        <li><span><i class="tji-check"></i></span>Analytics and performance tracking
-                                        </li>
-                                        <li><span><i class="tji-check"></i></span>Conversion rate optimization</li>
-                                        <li><span><i class="tji-check"></i></span>Marketing tools and platforms</li>
-                                        <li><span><i class="tji-check"></i></span>ROI measurement and reporting</li>
-                                    </ul>
-                                </div>
-                            </div>
                             @endif
 
                             {{-- Course Highlights --}}

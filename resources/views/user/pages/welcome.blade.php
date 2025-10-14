@@ -630,7 +630,7 @@
                             <div class="call-box">
                                 <h4 class="title">Get Started Free Call? </h4>
                                 <span class="call-icon"><i class="tji-phone"></i></span>
-                                <a class="number" href="tel:18884521505"><span>1-888-452-1505</span></a>
+                                <a class="number" href="tel:+2347039955591"><span>+2347039955591</span></a>
                             </div>
                         </div>
                     </div>

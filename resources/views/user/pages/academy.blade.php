@@ -5,188 +5,104 @@
      <!-- start: Service Section -->
 <section class="tj-service-section service-4 section-gap">
     <div class="container">
-        <div class="row row-gap-4">
-            @foreach ($course as $index => $course)
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-item style-4 wow fadeInUp" data-wow-delay=".{{ $index + 1 }}s">
-                        <div class="service-icon">
-                            {{-- You can map icons manually or store them in DB --}}
-                            <i class="tji-service-{{ ($index % 6) + 1 }}"></i>
-                        </div>
-                        <div class="service-content">
-                            <h4 class="title">
-                                <a href="">
-                                    {{ $course->title }}
-                                </a>
-                            </h4>
-                            <p class="desc">{{ $course->description }}</p>
-                            <a class="text-btn" href="{{ route('course.show', $course->slug) }}">
-                                <span class="btn-text"><span>Go to Course</span></span>
-                                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+      <div class="row row-gap-4">
+  @forelse ($courses as $index => $course)
+    <div class="col-lg-4 col-md-6">
+      <div class="service-item style-4 wow fadeInUp" data-wow-delay=".{{ $index + 1 }}s">
+        <div class="service-icon">
+          {{-- You can map icons manually or store them in DB --}}
+          <i class="tji-service-{{ ($index % 6) + 1 }}"></i>
         </div>
+        <div class="service-content">
+          <h4 class="title">
+            <a href="{{ route('course.show', $course->slug) }}">{{ $course->title }}</a>
+          </h4>
+          <p class="desc">{{ Str::limit($course->description, 140) }}</p>
+          <a class="text-btn" href="{{ route('course.show', $course->slug) }}">
+            <span class="btn-text"><span>Go to Course</span></span>
+            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  @empty
+    <div class="col-12">
+      <div class="d-flex flex-column align-items-center text-center py-5" style="gap:20px;">
+        {{-- Empty state SVG: Happy person w/ confetti --}}
+        <svg width="340" height="220" viewBox="0 0 680 440" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-width: 80%; height: auto;">
+          <defs>
+            <linearGradient id="gradMain" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"  stop-color="var(--tj-gold, #FDB714)"/>
+              <stop offset="100%" stop-color="var(--tj-blue, #2c99d4)"/>
+            </linearGradient>
+            <linearGradient id="gradSoft" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"  stop-color="rgba(253,183,20,.25)"/>
+              <stop offset="100%" stop-color="rgba(44,153,212,.25)"/>
+            </linearGradient>
+            <clipPath id="clipRounded">
+              <rect x="0" y="0" width="680" height="440" rx="24"/>
+            </clipPath>
+          </defs>
+
+          <g clip-path="url(#clipRounded)">
+            <!-- Soft background blob -->
+            <ellipse cx="340" cy="360" rx="300" ry="60" fill="url(#gradSoft)"/>
+
+            <!-- Confetti -->
+            <g opacity=".9">
+              <circle cx="80"  cy="80"  r="6"  fill="url(#gradMain)"/>
+              <circle cx="620" cy="90"  r="5"  fill="url(#gradMain)"/>
+              <rect   x="120" y="60"  width="10" height="10" rx="2" fill="url(#gradMain)"/>
+              <rect   x="560" y="60"  width="10" height="10" rx="2" fill="url(#gradMain)"/>
+              <circle cx="520" cy="140" r="4"  fill="url(#gradMain)"/>
+              <circle cx="160" cy="140" r="4"  fill="url(#gradMain)"/>
+            </g>
+
+            <!-- Person w/ laptop -->
+            <!-- Body -->
+            <path d="M290 300 C290 260, 390 260, 390 300 L390 340 L290 340 Z" fill="url(#gradMain)" opacity=".95"/>
+            <!-- Head -->
+            <circle cx="340" cy="220" r="42" fill="#fff"/>
+            <circle cx="340" cy="220" r="40" fill="url(#gradSoft)"/>
+            <!-- Smile -->
+            <path d="M322 230 C334 245, 346 245, 358 230" stroke="url(#gradMain)" stroke-width="6" stroke-linecap="round" fill="none"/>
+            <!-- Eyes -->
+            <circle cx="326" cy="214" r="5" fill="url(#gradMain)"/>
+            <circle cx="354" cy="214" r="5" fill="url(#gradMain)"/>
+
+            <!-- Laptop -->
+            <rect x="280" y="280" width="120" height="70" rx="10" fill="#ffffff" stroke="url(#gradMain)" stroke-width="4"/>
+            <circle cx="340" cy="315" r="8" fill="url(#gradMain)"/>
+
+            <!-- Ground line -->
+            <rect x="120" y="360" width="440" height="8" rx="4" fill="url(#gradMain)" opacity=".2"/>
+          </g>
+        </svg>
+
+        <div>
+          <h3 class="mb-2" style="font-weight:800; letter-spacing:.2px;">
+            Bootcamps are coming soon 🎉
+          </h3>
+          <p class="mb-3" style="color:#6c757d; max-width:620px;">
+            We’re prepping new cohorts right now. Check back shortly—or get notified the moment enrollment opens.
+          </p>
+          <a href="{{ route('academy') }}"
+             class="btn btn-gradient px-4 py-2"
+             style="background: linear-gradient(135deg, var(--tj-gold,#FDB714), var(--tj-blue,#2c99d4)); color:#fff; border:none; border-radius:999px;">
+            Back to Academy
+          </a>
+          {{-- Optional notify button (remove if not needed) --}}
+          {{-- <a href="{{ route('notify.me') }}" class="btn btn-outline-dark ms-2 px-4 py-2" style="border-radius:999px;">Notify me</a> --}}
+        </div>
+      </div>
+    </div>
+  @endforelse
+</div>
+
     </div>
 </section>
 
 
-        <!-- end: Service Section -->
-
-        <!-- start: Contact Section -->
-        <section class="tj-contact-section section-gap section-gap-x">
-          <div class="container">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="global-map wow fadeInUp" data-wow-delay=".3s">
-                  <div class="global-map-img">
-                    <img src="{{asset('frontend/assets/images/bg/map.svg')}}" alt="Image">
-                    <div class="location-indicator loc-1">
-                      <div class="location-tooltip">
-                        <span>Head office:</span>
-                        <p>993 Renner Burg, West Rond, MT 94251-030, USA.</p>
-                        <a href="tel:10095447818">P: +1 (009) 544-7818</a>
-                        <a href="mailto:support@bexon.com">M: support@bexon.com</a>
-                      </div>
-                    </div>
-                    <div class="location-indicator loc-2">
-                      <div class="location-tooltip">
-                        <span>Regional office:</span>
-                        <p>Hessisch Lichtenau 37235, Kassel, Germany.</p>
-                        <a href="tel:10098801810">P: +1 (009) 880-1810</a>
-                        <a href="mailto:support@bexon.com">M: support@bexon.com</a>
-                      </div>
-                    </div>
-                    <div class="location-indicator loc-3">
-                      <div class="location-tooltip">
-                        <span>Regional office:</span>
-                        <p>32 Altamira, State of Pará, Brazil.</p>
-                        <a href="tel:10095447818">P: +1 (009) 544-7818</a>
-                        <a href="mailto:support@bexon.com">M: support@bexon.com</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="contact-form style-2 wow fadeInUp" data-wow-delay=".4s">
-                  <div class="sec-heading">
-                    <span class="sub-title text-white"><i class="tji-box"></i>Get in Touch</span>
-                    <h2 class="sec-title title-anim">Drop Us a <span>Line.</span></h2>
-                  </div>
-                  <form id="contact-form-2">
-                    <div class="row wow fadeInUp" data-wow-delay=".5s">
-                      <div class="col-sm-6">
-                        <div class="form-input">
-                          <input type="text" name="cfName2" placeholder="Full Name *">
-                        </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <div class="form-input">
-                          <input type="email" name="cfEmail2" placeholder="Email Address *">
-                        </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <div class="form-input">
-                          <input type="tel" name="cfPhone2" placeholder="Phone number *">
-                        </div>
-                      </div>
-                      <div class="col-sm-6">
-                        <div class="form-input">
-                          <div class="tj-nice-select-box">
-                            <div class="tj-select">
-                              <select name="cfSubject2">
-                                <option value="0">Chose a option</option>
-                                <option value="1">Business Strategy</option>
-                                <option value="2">Customer Experience</option>
-                                <option value="3">Sustainability and ESG</option>
-                                <option value="4">Training and Development</option>
-                                <option value="5">IT Support & Maintenance</option>
-                                <option value="6">Marketing Strategy</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-sm-12">
-                        <div class="form-input message-input">
-                          <textarea name="cfMessage2" id="message" placeholder="Type message *"></textarea>
-                        </div>
-                      </div>
-                      <div class="submit-btn">
-                        <button class="tj-primary-btn" type="submit">
-                          <span class="btn-text"><span>Send Message</span></span>
-                          <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="bg-shape-1">
-            <img src="{{asset('frontend/assets/images/shape/pattern-2.svg')}}" alt="">
-          </div>
-          <div class="bg-shape-2">
-            <img src="{{asset('frontend/assets/images/shape/pattern-3.svg')}}" alt="">
-          </div>
-        </section>
-        <!-- end: Contact Section -->
-
-
-
-        <!-- start: Client Section -->
-        <section class="tj-client-section client-section-gap-2 wow fadeInUp" data-wow-delay=".4s">
-          <div class="container-fluid client-container">
-            <div class="row">
-              <div class="col-12">
-                <div class="client-content">
-                  <h5 class="sec-title">Join Over <span class="client-numbers">1000+</span> Companies with
-                    <span class="client-text">Bexon</span> Here
-                  </h5>
-                </div>
-                <div class="swiper client-slider client-slider-1">
-                  <div class="swiper-wrapper">
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-1.webp')}}" alt="">
-                      </div>
-                    </div>
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-2.webp')}}" alt="">
-                      </div>
-                    </div>
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-3.webp')}}" alt="">
-                      </div>
-                    </div>
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-4.webp')}}" alt="">
-                      </div>
-                    </div>
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-5.webp')}}" alt="">
-                      </div>
-                    </div>
-                    <div class="swiper-slide client-item">
-                      <div class="client-logo">
-                        <img src="{{asset('frontend/assets/images/brands/brand-6.webp')}}" alt="">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <!-- end: Client Section -->
 
     
 @endsection
