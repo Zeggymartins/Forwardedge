@@ -19,7 +19,9 @@ class CourseController extends Controller
     public function showdetails($slug)
     {
         $course = Course::with([
-            'details',
+            'details' => function ($q) {
+                $q->reorder()->orderBy('sort_order'); // <- resets any previous "position" ordering
+            },
             'phases.topics',
             'schedules',
         ])->where('slug', $slug)->firstOrFail();

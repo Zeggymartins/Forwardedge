@@ -266,8 +266,9 @@ class AdminCourseController extends Controller
     public function dashboard($id)
     {
         $course = Course::with([
-            'details' => function($q) { $q->orderBy('sort_order'); },
-            'phases.topics',
+            'details' => function ($q) {
+                $q->reorder()->orderBy('sort_order'); // <- resets any previous "position" ordering
+            },
             'schedules'
         ])->findOrFail($id);
 

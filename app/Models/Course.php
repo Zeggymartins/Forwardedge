@@ -37,6 +37,6 @@ class Course extends Model
 
     public function details()
     {
-        return $this->hasMany(CourseDetails::class)->orderBy('position', 'asc');
+        return $this->hasMany(CourseDetails::class)->orderBy('sort_order', 'asc');
     }
 }
