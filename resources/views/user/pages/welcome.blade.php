@@ -815,9 +815,8 @@
     <!-- start: Blog Section -->
     <!-- start: Blog Section -->
     <!-- start: Blog Section -->
-  <section class="tj-blog-section section-gap">
+  {{-- <section class="tj-blog-section section-gap">
     <div class="container">
-        {{-- Heading --}}
         <div class="row">
             <div class="col-12">
                 <div class="sec-heading text-center">
@@ -891,7 +890,6 @@
 
         <div class="row row-gap-4 mt-4">
             @if ($cards->isEmpty())
-                {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
                 <div class="col-xl-4 col-md-6 mx-auto">
                     <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
                         <div class="blog-thumb d-flex align-items-center justify-content-center"
@@ -939,7 +937,6 @@
                     </div>
                 </div>
             @else
-                {{-- ONE unified row of event-style cards --}}
                 @foreach ($cards as $i => $c)
                     <div class="col-xl-4 col-md-6">
                         <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
@@ -974,7 +971,7 @@
         </div>
 
     </div>
-</section>
+</section> --}}
 
     <!-- end: Blog Section -->
 
