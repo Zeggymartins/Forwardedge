@@ -7,7 +7,7 @@
                             <div class="cta-content">
                                 <h2 class="title title-anim">Let’s Build A Future Together.</h2>
                                 <div class="cta-btn wow fadeInUp" data-wow-delay=".6s">
-                                    <a class="tj-primary-btn btn-dark" href="contact.html">
+                                    <a class="tj-primary-btn btn-dark" href="{{ route('contact') }}">
                                         <span class="btn-text"><span>Get Started Now</span></span>
                                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                                     </a>
@@ -50,17 +50,39 @@
                                 </div>
                             </div>
                             <div class="col-xl-3 col-lg-4 col-md-6">
-                                <div class="footer-widget widget-nav-menu wow fadeInUp" data-wow-delay=".3s">
-                                    <h5 class="title">Services</h5>
-                                    <ul>
-                                        <li><a href="#">Customer Experience</a></li>
-                                        <li><a href="#">Training Programs</a></li>
-                                        <li><a href="#">Business Strategy</a></li>
-                                        <li><a href="#">Training Program</a></li>
-                                        <li><a href="#">ESG Consulting</a></li>
-                                        <li><a href="#">Development Hub</a></li>
-                                    </ul>
-                                </div>
+                               <div class="footer-widget widget-nav-menu wow fadeInUp" data-wow-delay=".3s">
+    <h5 class="title">Services</h5>
+
+    @php
+        use App\Models\Service;
+
+        // tiny query; adjust filters/columns as needed
+        $footerServices = Service::query()
+            ->when(Schema::hasColumn('services','status'), fn($q) => $q->where('status', 'published'))
+            ->orderByRaw(Schema::hasColumn('services','order') ? '"order" asc' : 'title asc')
+            ->limit(6)
+            ->get(['title','slug']);
+    @endphp
+
+    @if($footerServices->isNotEmpty())
+        <ul>
+            @foreach ($footerServices as $svc)
+                <li>
+                    <a href="{{ route('services.show', $svc->slug) }}">{{ $svc->title }}</a>
+                </li>
+            @endforeach
+        </ul>
+
+        <a class="text-btn mt-2 d-inline-flex align-items-center" href="{{ route('services') }}">
+            <span class="btn-text"><span>View all services</span></span>
+            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+        </a>
+    @else
+        <ul>
+            <li><a href="{{ route('services') }}">Explore our services</a></li>
+        </ul>
+    @endif
+</div>
                             </div>
                             <div class="col-xl-2 col-lg-4 col-md-6">
                                 <div class="footer-widget widget-nav-menu wow fadeInUp" data-wow-delay=".5s">
@@ -110,7 +132,7 @@
                                             <li>
                                                 <a href="mailto:info@bexon.com">
                                                     <span class="icon"><i class="tji-envelop-2"></i></span>
-                                                    <span class="text">info@forwardedge.com</span>
+                                                    <span class="text">info@forwardedgeconsulting.com</span>
                                                 </a>
                                             </li>
                                         </ul>

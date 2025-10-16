@@ -28031,11 +28031,11 @@ START: Blog CSS
 .header-area.header-sticky {
   border-color: rgba(44,153,212,.15);
 }
-.header-area .main-menu > ul > li > a:hover,
+/* .header-area .main-menu > ul > li > a:hover,
 .header-area .main-menu > ul > li.active > a {
   color: var(--tj-color-theme-primary);
   border-color: var(--tj-color-theme-secondary);
-}
+} */
 
 /* Primary CTA button */
 .tj-primary-btn {
@@ -28051,30 +28051,13 @@ START: Blog CSS
   filter: brightness(0.97);
 }
 
-/* Secondary / outline buttons that used dark/grey before */
-.tj-primary-btn.transparent-btn {
-  border-color: var(--tj-color-theme-primary) !important;
-}
-.tj-primary-btn.transparent-btn .btn-text {
-  color: var(--tj-color-theme-primary) !important;
-}
+
 .tj-primary-btn.transparent-btn:hover {
   background: var(--tj-gradient-yellow-blue) !important;
   color:#fff !important;
   border-color: transparent !important;
 }
 
-/* Price tag chip → Gold with subtle depth */
-.price-tag {
-  background: linear-gradient(135deg, #FDB714 0%, #f9c443 100%) !important;
-  color:#0c1e21 !important;
-}
-
-/* Links & small interactive accents */
-a:hover, .text-btn:hover .btn-icon {
-  color: var(--tj-color-theme-secondary);
-  /* background-color: var(--tj-color-theme-primary); */
-}
 
 /* Cards & section accents */
 .phase-card:hover,
@@ -28089,16 +28072,7 @@ a:hover, .text-btn:hover .btn-icon {
   background: linear-gradient(180deg, rgba(44,153,212,.06) 0%, rgba(253,183,20,.06) 100%);
 }
 
-/* Feature number pills */
-.service-details-item .number {
-  color: whitesmoke;
-}
-.service-details-item .title {
-  color: #0c1e21;
-}
-.service-details-item .desc p {
-  color: #364e52;
-}
+
 
 /* Slider arrows, icon buttons */
 .slider-next:hover,
@@ -28109,11 +28083,6 @@ a:hover, .text-btn:hover .btn-icon {
   color:#fff !important;
 }
 
-/* Badges / small labels */
-.badge-primary, .label-primary {
-  background: var(--tj-gradient-yellow-blue) !important;
-  color:#fff !important;
-}
 
 /* Footer top strip */
 .footer-top,
@@ -28141,9 +28110,9 @@ a:hover, .text-btn:hover .btn-icon {
 .tj-primary-btn {
   background: var(--tj-gradient-primary);
 }
-.tj-primary-btn .btn-icon {
+/* .tj-primary-btn .btn-icon {
   background: var(--tj-gradient-primary);
-}
+} */
 .tj-primary-btn.btn-dark .btn-icon {
   background: var(--tj-color-theme-primary);
 }
@@ -28157,12 +28126,12 @@ a:hover, .text-btn:hover .btn-icon {
 }
 
 /* Icon-only round button */
-.tji-icon-btn {
+/* .tji-icon-btn {
   border-color: var(--tj-color-theme-primary);
 }
 .tji-icon-btn:hover {
   background: var(--tj-gradient-primary);
-}
+} */
 
 /* Header top ribbon */
 .header-top {
@@ -28177,38 +28146,6 @@ a:hover, .text-btn:hover .btn-icon {
 /* Mega menu call-to-action pill in the header */
 .mainmenu ul > li > .mega-menu-pages .feature-contact,
 .mobile_menu ul > li > .mega-menu-pages .feature-contact {
-  background: var(--tj-gradient-primary);
-}
-
-/* Generic places that used primary as background color */
-.badge-primary,
-.tag-primary,
-.pill-primary,
-.label-primary {
-  background: var(--tj-gradient-primary) !important;
-  border-color: var(--tj-color-theme-primary) !important;
-}
-
-/* Primary outlines/hover states */
-.btn-outline-primary:hover,
-.btn-outline-primary:focus {
-  background: var(--tj-gradient-primary);
-  border-color: var(--tj-color-theme-primary);
-  color: #fff;
-}
-
-/* Any “chip”/rounded small elements that relied on background-color: primary */
-[class*="chip-"].primary,
-[class*="badge-"].primary,
-[class*="tag-"].primary {
-  background: var(--tj-gradient-primary);
-}
-
-/* Cards/sections that used the primary as a block header background */
-.section-title .title-deco,
-.card-header.primary,
-.banner-primary,
-.hero-primary {
   background: var(--tj-gradient-primary);
 }
 
@@ -28232,40 +28169,5 @@ a:hover, .text-btn:hover .btn-icon {
   color: #fff;
 }
 
-/* Pagination active dot */
-.pagination .page-item.active .page-link {
-  background: var(--tj-gradient-primary);
-  border-color: var(--tj-color-theme-primary);
-}
 
-/* Any element that explicitly used background-color: var(--tj-color-theme-primary) */
-[class*="bg-"].primary,
-.bg-primary {
-  background: var(--tj-gradient-primary) !important;
-}
-/* Nav hover: keep text gold, no yellow background */
-.navbar .nav-link:hover,
-.navbar-nav .nav-link:hover,
-.main-menu ul li > a:hover,
-.header .nav-link:hover {
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--tj-color-accent-gold, #FDB714) !important;
-}
 
-/* Keep active/current item readable */
-.navbar .nav-link.active,
-.navbar-nav .nav-link.active,
-.main-menu ul li > a.active,
-.header .nav-link.active {
-  background: var(--tj-gradient-primary, linear-gradient(135deg, #FDB714 0%, #2c99d4 100%)) !important;
-  color: #fff !important;
-}
-/* If a yellow hover background comes from ::before/::after underlines/bubbles */
-.main-menu ul li > a:hover::before,
-.main-menu ul li > a:hover::after,
-.navbar .nav-link:hover::before,
-.navbar .nav-link:hover::after {
-  background: transparent !important;
-  background-color: transparent !important;
-}

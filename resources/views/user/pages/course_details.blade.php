@@ -1,99 +1,215 @@
 @extends('user.master_page')
 @section('title', ($course->name ?? 'Course Details') . ' | Forward Edge Consulting')
 @push('styles')
-<style>
-  /* ===== Theme tokens (local to this view) ===== */
-  :root {
-    --tj-gold: #FDB714;
-    --tj-blue: #2c99d4;
-    --tj-grad: linear-gradient(135deg, var(--tj-gold) 0%, var(--tj-blue) 100%);
-    --tj-grad-rev: linear-gradient(135deg, var(--tj-blue) 0%, var(--tj-gold) 100%);
-    --tj-text-muted: #6c757d;
-    --tj-border: #edf2f7;
-  }
+    <style>
+        /* ===== Theme tokens (local to this view) ===== */
+        :root {
+            --tj-gold: #FDB714;
+            --tj-blue: #2c99d4;
+            --tj-grad: linear-gradient(135deg, var(--tj-gold) 0%, var(--tj-blue) 100%);
+            --tj-grad-rev: linear-gradient(135deg, var(--tj-blue) 0%, var(--tj-gold) 100%);
+            --tj-text-muted: #6c757d;
+            --tj-border: #edf2f7;
+        }
 
-  /* ===== Cards & images ===== */
-  .image-box {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,.1);
-    transition: all .3s ease;
-  }
-  .image-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,.15); }
-  .image-box img { width: 100%; height: 200px; object-fit: cover; display: block; transition: filter .3s ease-in-out; }
-  .image-box:hover img { filter: brightness(70%); }
+        /* ===== Cards & images ===== */
+        .image-box {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .1);
+            transition: all .3s ease;
+        }
 
-  /* Enroll button sits on image */
-  .image-box .enroll-btn{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    padding:12px 24px; background: var(--tj-grad);
-    color:#fff; font-weight:600; text-decoration:none; border-radius:25px;
-    opacity:0; transition:all .3s ease-in-out; border:none; cursor:pointer;
-    box-shadow: 0 8px 16px rgba(0,0,0,.15);
-  }
-  .image-box:hover .enroll-btn{ opacity:1; }
+        .image-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .15);
+        }
 
-  /* ===== Phase cards ===== */
-  .phase-card{
-    background:#fff; border-radius:12px; padding:25px; height:100%;
-    box-shadow:0 5px 15px rgba(0,0,0,.08); transition:all .3s ease; border:1px solid #f0f0f0;
-  }
-  .phase-card:hover{ transform:translateY(-5px); box-shadow:0 15px 35px rgba(0,0,0,.1); }
+        .image-box img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            transition: filter .3s ease-in-out;
+        }
 
-  .phase-number{
-    display:inline-block; width:50px; height:50px;
-    background: var(--tj-grad);
-    color:#fff; border-radius:50%; text-align:center; line-height:50px; font-weight:bold; margin-bottom:20px;
-    box-shadow: 0 6px 16px rgba(0,0,0,.15);
-  }
+        .image-box:hover img {
+            filter: brightness(70%);
+        }
 
-  /* ===== Topic list ===== */
-  .topic-list li{ padding:8px 0; border-bottom:1px solid #f5f5f5; }
-  .topic-list li:last-child{ border-bottom:none; }
+        /* Enroll button sits on image */
+        .image-box .enroll-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 12px 24px;
+            background: var(--tj-grad);
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 25px;
+            opacity: 0;
+            transition: all .3s ease-in-out;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .15);
+        }
 
-  /* ===== Schedule card ===== */
-  .schedule-card{
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius:12px; padding:20px; margin:20px 0;
-    border-left:4px solid var(--tj-gold);
-  }
+        .image-box:hover .enroll-btn {
+            opacity: 1;
+        }
 
-  /* ===== Prices & stats ===== */
-  .price-tag{
-    background: var(--tj-grad);
-    color:#fff; padding:10px 20px; border-radius:25px; font-weight:600; display:inline-block;
-    box-shadow: 0 6px 16px rgba(0,0,0,.12);
-  }
+        /* ===== Phase cards ===== */
+        .phase-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            height: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+            transition: all .3s ease;
+            border: 1px solid #f0f0f0;
+        }
 
-  .course-stats{ background:#f8f9fa; border-radius:12px; padding:30px; margin:30px 0; }
-  .stat-item{ text-align:center; padding:20px; }
-  .stat-number{ font-size:2rem; font-weight:bold; background: var(--tj-grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .stat-label{ color:var(--tj-text-muted); font-size:.9rem; text-transform:uppercase; letter-spacing:1px; }
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        }
 
-  /* ===== Two-column lists (responsive) ===== */
-  .twocol-list{
-    display:grid; grid-template-columns: repeat(2, minmax(0,1fr));
-    gap:14px 28px; margin:8px 0 18px; padding:0; list-style:none;
-  }
-  .twocol-list li{
-    position:relative; padding:12px 16px 12px 44px; background:#fff;
-    border:1px solid var(--tj-border); border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.03); line-height:1.45;
-  }
-  .twocol-list li::before{
-    content:""; position:absolute; left:14px; top:50%; transform:translateY(-50%);
-    width:14px; height:14px; border-radius:50%;
-    background: var(--tj-grad);
-    box-shadow: 0 0 0 4px rgba(253,183,20,.18);
-  }
-  @media (max-width: 767.98px){ .twocol-list{ grid-template-columns:1fr; } }
+        .phase-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: var(--tj-grad);
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .15);
+        }
 
-  /* ===== Optional: gradient badges, buttons you might reuse ===== */
-  .badge-gradient{ background: var(--tj-grad); color:#fff; }
-  .btn-gradient{ background: var(--tj-grad); border:none; color:#fff; }
-  .btn-gradient:hover{ background: var(--tj-grad-rev); color:#fff; }
-</style>
+        /* ===== Topic list ===== */
+        .topic-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .topic-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* ===== Schedule card ===== */
+        .schedule-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--tj-gold);
+        }
+
+        /* ===== Prices & stats ===== */
+        .price-tag {
+            background: var(--tj-grad);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
+        }
+
+        .course-stats {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: var(--tj-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            color: var(--tj-text-muted);
+            font-size: .9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== Two-column lists (responsive) ===== */
+        .twocol-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px 28px;
+            margin: 8px 0 18px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .twocol-list li {
+            position: relative;
+            padding: 12px 16px 12px 44px;
+            background: #fff;
+            border: 1px solid var(--tj-border);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .03);
+            line-height: 1.45;
+        }
+
+        .twocol-list li::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--tj-grad);
+            box-shadow: 0 0 0 4px rgba(253, 183, 20, .18);
+        }
+
+        @media (max-width: 767.98px) {
+            .twocol-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== Optional: gradient badges, buttons you might reuse ===== */
+        .badge-gradient {
+            background: var(--tj-grad);
+            color: #fff;
+        }
+
+        .btn-gradient {
+            background: var(--tj-grad);
+            border: none;
+            color: #fff;
+        }
+
+        .btn-gradient:hover {
+            background: var(--tj-grad-rev);
+            color: #fff;
+        }
+        .service-details-item .desc {
+  overflow-wrap: anywhere;   /* modern */
+  word-break: break-word;    /* fallback */
+}
+.service-details-item .desc ul { margin-top: .5rem; }
+    </style>
 @endpush
 
 @section('main')
@@ -196,33 +312,33 @@
                                                     {{ $phase->description ?? 'Comprehensive coverage of essential concepts and practical applications.' }}
                                                 </p>
 
-                                               @php
+                                                @php
                                                     $topics = $phase->topics->values(); // already ordered by the relation
                                                 @endphp
 
-                                                @if($topics->count())
+                                                @if ($topics->count())
                                                     <div class="topic-grid">
                                                         @for ($i = 0; $i < $topics->count(); $i += 2)
                                                             <div class="row align-items-start gy-2">
                                                                 <div class="col-12 col-md-6">
                                                                     <div class="d-flex align-items-start">
-                                                                        <span class="badge bg-secondary me-2">{{ $topics[$i]->order }}</span>
+                                                                        <span
+                                                                            class="badge bg-secondary me-2">{{ $topics[$i]->order }}</span>
                                                                         <div>{{ $topics[$i]->title }}</div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-12 col-md-6">
-                                                                    @if(isset($topics[$i+1]))
+                                                                    @if (isset($topics[$i + 1]))
                                                                         <div class="d-flex align-items-start">
-                                                                            <span class="badge bg-secondary me-2">{{ $topics[$i+1]->order }}</span>
-                                                                            <div>{{ $topics[$i+1]->title }}</div>
+                                                                            <span
+                                                                                class="badge bg-secondary me-2">{{ $topics[$i + 1]->order }}</span>
+                                                                            <div>{{ $topics[$i + 1]->title }}</div>
                                                                         </div>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                         @endfor
                                                     </div>
-
-
                                                 @else
                                                     <ul class="topic-list list-unstyled">
                                                         <li><i class="tji-check text-success me-2"></i>Core concepts and
@@ -350,11 +466,16 @@
                             {{-- Schedule Information --}}
                             @if ($course->schedules && $course->schedules->count() > 0)
                                 <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Upcoming Schedule</h3>
+
                                 @foreach ($course->schedules->take(3) as $schedule)
-                                    <div class="schedule-card wow fadeInUp" data-wow-delay=".{{ 4 + $loop->iteration }}s">
+                                    <div class="schedule-card wow fadeInUp"
+                                        data-wow-delay=".{{ 4 + $loop->iteration }}s">
                                         <div class="row align-items-center">
                                             <div class="col-md-6">
-                                                <h5 class="mb-2">Batch {{ $loop->iteration }}</h5>
+                                                <h5 class="mb-2">
+                                                    {{ $schedule->title ? $schedule->title : 'Batch ' . $loop->iteration }}
+                                                </h5>
+
                                                 <p class="mb-1">
                                                     <i class="tji-calendar me-2"></i>
                                                     <strong>Start Date:</strong>
@@ -365,21 +486,44 @@
                                                     <strong>End Date:</strong>
                                                     {{ \Carbon\Carbon::parse($schedule->end_date)->format('M j, Y') }}
                                                 </p>
-                                                <p class="mb-0">
+                                                <p class="mb-1">
                                                     <i class="tji-location me-2"></i>
-                                                    <strong>Format:</strong> {{ ucfirst($schedule->type) ?? 'Online' }}
+                                                    <strong>Format:</strong> {{ ucfirst($schedule->type ?? 'online') }}
                                                 </p>
+
+                                                @if (!empty($schedule->tag))
+                                                    <p class="mb-1">
+                                                        <i class="tji-tag me-2"></i>
+                                                        <strong>Tag:</strong> {{ ucfirst($schedule->tag) }}
+                                                    </p>
+                                                @endif
+
+                                                @if (!empty($schedule->description))
+                                                    <p class="mb-0 text-muted">{!! nl2br(e($schedule->description)) !!}</p>
+                                                @endif
                                             </div>
-                                            <div class="col-md-6 text-md-end">
-                                                <div class="price-tag mb-3">
-                                                    ₦{{ number_format($schedule->price, 0) }}
-                                                </div>
-                                                <button class="tj-primary-btn enroll-btn"
-                                                    data-schedule-id="{{ $schedule->id }}"
-                                                    data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}">
-                                                    <span class="btn-text">Enroll Now</span>
-                                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                                </button>
+
+                                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                                @if ($schedule->isFree())
+                                                    <div class="price-tag mb-3">Free</div>
+                                                    {{-- keep JS-controlled button, just use a different data-* --}}
+                                                    <button class="tj-primary-btn enroll-btn"
+                                                        data-schedule-id="{{ $schedule->id }}"
+                                                        data-apply-url="{{ route('scholarships.apply', $schedule->id) }}">
+                                                        <span class="btn-text">Apply for Scholarship</span>
+                                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                    </button>
+                                                @else
+                                                    <div class="price-tag mb-3">
+                                                        ₦{{ number_format($schedule->price, 0) }}
+                                                    </div>
+                                                    <button class="tj-primary-btn enroll-btn"
+                                                        data-schedule-id="{{ $schedule->id }}"
+                                                        data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}">
+                                                        <span class="btn-text">Enroll Now</span>
+                                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -412,6 +556,7 @@
                                     </div>
                                 </div>
                             @endif
+
 
                             {{-- Replace the "What You'll Learn" section with this dynamic version --}}
 
@@ -501,25 +646,128 @@
                                         </div>
 
                                         {{-- FEATURES / BENEFITS --}}
-                                    @elseif(in_array($detail->type, ['benefits', 'features']))
+                                    @elseif (in_array($detail->type, ['benefits', 'features'], true))
                                         @php
-                                            $features = is_array($decoded) ? $decoded : [];
+                                            // 1) Decode $detail->content safely
+                                            $raw = $detail->content ?? '';
+                                            $data = null;
+
+                                            if (is_string($raw) && $raw !== '') {
+                                                $tmp = json_decode($raw, true);
+                                                if (json_last_error() === JSON_ERROR_NONE) {
+                                                    $data = $tmp;
+                                                }
+                                            } elseif (is_array($raw)) {
+                                                $data = $raw;
+                                            }
+
+                                            // Safe assoc check (works pre-PHP8.1 too)
+                                            $isAssoc = is_array($data) && array_values($data) !== $data;
+
+                                            // Helper to clean string list
+                                            $cleanList = function ($arr) {
+                                                if (!is_array($arr)) {
+                                                    return [];
+                                                }
+                                                $out = array_map(fn($v) => is_string($v) ? trim($v) : '', $arr);
+                                                return array_values(array_filter($out, fn($v) => $v !== ''));
+                                            };
                                         @endphp
+
                                         <div class="details-content-box">
                                             <div class="row row-gap-4">
-                                                @foreach ($features as $index => $feature)
-                                                    <div class="col-xl-4 col-md-6">
-                                                        <div class="service-details-item wow fadeInUp"
-                                                            data-wow-delay=".{{ 5 + $index * 2 }}s">
-                                                            <span
-                                                                class="number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}.</span>
-                                                            <h6 class="title">{{ $feature['heading'] ?? '' }}</h6>
-                                                            <div class="desc">
-                                                                <p>{{ $feature['description'] ?? '' }}</p>
+                                                {{-- NEW SHAPE: single features object {"heading","description","items":[]} --}}
+                                                @if ($isAssoc)
+                                                    @php
+                                                        $heading =
+                                                            isset($data['heading']) && is_string($data['heading'])
+                                                                ? trim($data['heading'])
+                                                                : null;
+                                                        $desc =
+                                                            isset($data['description']) &&
+                                                            is_string($data['description'])
+                                                                ? trim($data['description'])
+                                                                : null;
+                                                        $items = $cleanList($data['items'] ?? []);
+                                                    @endphp
+
+                                                    @if ($heading || $desc || count($items))
+                                                        <div class="col-xl-4 col-md-6">
+                                                            <div class="service-details-item wow fadeInUp"
+                                                                data-wow-delay=".5s">
+                                                                <span class="number">01.</span>
+                                                                <h6 class="title">{{ $heading ?: 'Features' }}</h6>
+
+                                                                <div class="desc">
+                                                                    @if (count($items))
+                                                                        @if ($desc)
+                                                                            <p class="mt-2">{{ $desc }}</p>
+                                                                        @endif
+                                                                        <ul class="list-unstyled mb-0">
+                                                                            @foreach ($items as $it)
+                                                                                <li><span><i class="tji-check"></i></span>
+                                                                                    {{ $it }}</li>
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    @elseif ($desc)
+                                                                        <p class="mb-0">{{ $desc }}</p>
+                                                                    @endif
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                @endforeach
+                                                    @endif
+
+                                                    {{-- LEGACY SHAPE: array of cards [{heading,description}|{heading,description[],items[]}, ...] --}}
+                                                @elseif (is_array($data))
+                                                    @foreach ($data as $index => $feature)
+                                                        @php
+                                                            $fHeading = isset($feature['heading'])
+                                                                ? trim((string) $feature['heading'])
+                                                                : '';
+                                                            $fDescRaw = $feature['description'] ?? null;
+                                                            $fItems = $feature['items'] ?? null;
+
+                                                            // Legacy quirk: description sometimes comes as an array => treat as items
+                                                            $items = [];
+                                                            if (is_array($fItems)) {
+                                                                $items = $cleanList($fItems);
+                                                            } elseif (is_array($fDescRaw)) {
+                                                                $items = $cleanList($fDescRaw);
+                                                                $fDescRaw = null; // clear text description if it was actually items
+                                                            }
+
+                                                            $fDesc = is_string($fDescRaw) ? trim($fDescRaw) : null;
+                                                            $delay = sprintf('.%ds', 5 + $index * 2);
+                                                            $number = str_pad($index + 1, 2, '0', STR_PAD_LEFT) . '.';
+                                                        @endphp
+
+                                                        @if ($fHeading || $fDesc || count($items))
+                                                            <div class="col-xl-4 col-md-6">
+                                                                <div class="service-details-item wow fadeInUp"
+                                                                    data-wow-delay="{{ $delay }}">
+                                                                    <span class="number">{{ $number }}</span>
+                                                                    <h6 class="title">{{ $fHeading ?: 'Feature' }}</h6>
+
+                                                                    <div class="desc">
+                                                                         @if ($fDesc)
+                                                                            <p class="mb-2">{!! nl2br(e($fDesc)) !!}</p>
+                                                                        @endif
+                                                                        {{-- list AFTER --}}
+                                                                        @if (count($items))
+                                                                            <ul class="mb-0">
+                                                                                @foreach ($items as $it)
+                                                                                    <li><span><i
+                                                                                                class="tji-check"></i></span>
+                                                                                        {{ $it }}</li>
+                                                                                @endforeach
+                                                                            </ul>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                @endif
                                             </div>
                                         </div>
 

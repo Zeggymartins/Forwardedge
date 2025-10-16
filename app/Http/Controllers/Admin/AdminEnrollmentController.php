@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
+use App\Models\ScholarshipApplication;
 use Illuminate\Http\Request;
 
 class AdminEnrollmentController extends Controller
@@ -29,5 +30,44 @@ class AdminEnrollmentController extends Controller
         $enrollment = Enrollment::with(['user', 'course', 'courseSchedule.course'])->findOrFail($id);
 
         return response()->json($enrollment);
+    }
+
+    public function approve(ScholarshipApplication $application)
+    {
+        if ($application->status !== 'pending') {
+            return back()->with('warning', 'Already processed');
+        }
+
+        // Create enrollment for free schedule
+        Enrollment::create([
+            'course_id'         => $application->course_id,
+            'course_schedule_id' => $application->course_schedule_id,
+            'user_id'           => $application->user_id,
+            'status'            => 'active', // or 'confirmed'
+            'price_paid'        => 0,
+            // add other fields as your Enrollment requires
+        ]);
+
+        $application->update([
+            'status'      => 'approved',
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Application approved & enrollment created.');
+    }
+
+    public function reject(Request $request, ScholarshipApplication $application)
+    {
+        if ($application->status !== 'pending') {
+            return back()->with('warning', 'Already processed');
+        }
+
+        $application->update([
+            'status'      => 'rejected',
+            'rejected_at' => now(),
+            'admin_notes' => $request->input('notes'),
+        ]);
+
+        return back()->with('success', 'Application rejected.');
     }
 }

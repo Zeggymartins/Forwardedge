@@ -17,8 +17,8 @@
                         <a class="banner-link" href="about.html">
                             <span><i class="tji-arrow-right-big"></i></span>
                         </a>
-                        <div class="banner-desc">Do you need expert guidance to transform your business
-                            with cutting-edge technology and ensure long-term security and growth?
+                        <div class="banner-desc">Cybersecurity, IT & Renewable Energy Solutions for a Secure and Resilient
+                            Future.
                         </div>
                     </div>
                 </div>
@@ -31,22 +31,22 @@
                     <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.png') }}" alt="">
                 </div>
                 <!-- <div class="box-area">
-                                    <div class="customers-box">
-                                      <div class="customers">
-                                        <ul>
-                                          <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
-                                              alt=""></li>
-                                          <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
-                                              alt=""></li>
-                                          <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
-                                              alt=""></li>
-                                          <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
-                                        </ul>
-                                      </div>
-                                      <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
-                                      <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
-                                    </div>
-                                  </div> -->
+                                                <div class="customers-box">
+                                                  <div class="customers">
+                                                    <ul>
+                                                      <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
+                                                          alt=""></li>
+                                                      <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
+                                                          alt=""></li>
+                                                      <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
+                                                          alt=""></li>
+                                                      <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
+                                                    </ul>
+                                                  </div>
+                                                  <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
+                                                  <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
+                                                </div>
+                                              </div> -->
             </div>
         </div>
         <div class="banner-scroll wow fadeInDown" data-wow-delay="2s">
@@ -161,39 +161,41 @@
                                     <img src="{{ asset('frontend/assets/images/brands/download5.png') }}" alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/download6.jpg') }}" alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/download7.png') }}" alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/download8.jpg') }}" alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/download9.png') }}" alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
-                                    <img src="{{ asset('frontend/assets/images/brands/download10.png') }}" alt="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download10.png') }}"
+                                        alt="">
                                 </div>
                             </div>
-                             <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/skyhigh11.jpg') }}" alt="">
                                 </div>
                             </div>
-                               <div class="swiper-slide client-item">
+                            <div class="swiper-slide client-item">
                                 <div class="">
-                                    <img src="{{ asset('frontend/assets/images/brands/download12.png') }}" alt="">
+                                    <img src="{{ asset('frontend/assets/images/brands/download12.png') }}"
+                                        alt="">
                                 </div>
                             </div>
                         </div>
@@ -252,16 +254,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <p class="desc"> At Forward Edge Consulting Ltd, we provide innovative and
-                                secure technology solutions to businesses of all sizes, across diverse
-                                industries. Whether you’re in finance, healthcare, education, government,
-                                retail, or any other sector, our expertise in digital transformation,
-                                cybersecurity, cloud computing, AI integration, and software development
-                                ensures that your organization stays ahead of the curve.
-
-                                No matter your industry, we help you harness the power of technology to
-                                enhance operations, protect critical data, and drive growth in an
-                                increasingly digital world.
+                            <p class="desc"> Forward Edge Consulting is a technology and security consulting firm helping
+                                organizations across Africa build resilience through cybersecurity, cloud solutions, AI
+                                integration, and enterprise IT infrastructure. In addition to our digital transformation
+                                services, we now provide renewable energy solutions — including solar and inverter
+                                installations — empowering businesses and communities to achieve both digital and energy
+                                resilience.
                             </p>
                             <div class="client-info-area">
 
@@ -269,12 +267,12 @@
                             </div>
                         </div>
                         <!-- <div class="video-img  wow fadeInUp" data-wow-delay=".9s">
-                                        <img src="assets/images/about/about-2.webp" alt="">
-                                        <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
-                                          href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
-                                          <span><i class="tji-play"></i></span>
-                                        </a>
-                                      </div> -->
+                                                    <img src="assets/images/about/about-2.webp" alt="">
+                                                    <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
+                                                      href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
+                                                      <span><i class="tji-play"></i></span>
+                                                    </a>
+                                                  </div> -->
                     </div>
                 </div>
             </div>
@@ -357,21 +355,20 @@
                             Projects</span>
                         <div class="heading-wrap-content">
                             <div class="sec-heading">
-                                <h2 class="sec-title title-anim">Breaking Boundaries, Building
-                                    <span>Dreams.</span>
+                                <h2 class="sec-title title-anim">Driving Impact Through Real
+                                    <span>Projects.</span>
                                 </h2>
                             </div>
-                            <p class="desc wow fadeInUp" data-wow-delay=".5s">We work closely with our
-                                clients to understand
-                                their
-                                unique needs and craft tailored
-                                solutions that address challenges.</p>
-                            <div class="btn-wrap wow fadeInUp" data-wow-delay=".6s">
+                            <p class="desc wow fadeInUp" data-wow-delay=".5s">Every project we deliver tells a story of
+                                resilience, transformation, and progress. From strengthening organizations against cyber
+                                threats to deploying renewable energy solutions and enabling digital transformation, we are
+                                proud to create lasting value for our clients and communities.</p>
+                            {{-- <div class="btn-wrap wow fadeInUp" data-wow-delay=".6s">
                                 <a class="tj-primary-btn" href="{{ route('gallery') }}">
                                     <span class="btn-text"><span>More Projects</span></span>
                                     <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                                 </a>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -383,11 +380,12 @@
                             <div class="project-img"
                                 data-bg-image="{{ asset('frontend/assets/images/project/event2.jpg') }}"></div>
                             <div class="project-content">
-                                <span class="categories"><a href="portfolio-details.html">Connect</a></span>
+                                <span class="categories">Connect</span>
                                 <div class="project-text">
-                                    <h4 class="title"><a href="portfolio-details.html">Event Management
-                                            Platform</a></h4>
-                                    <a class="project-btn" href="portfolio-details.html">
+                                    <h4 class="title"><a href="">Building Cyber Resilience </a></h4>
+                                    <p class="desc" style="color:white;">Helping organizations protect critical assets
+                                        and stay ahead of evolving threats.</p>
+                                    <a class="project-btn" href="">
                                         <i class="tji-arrow-right-long"></i>
                                     </a>
                                 </div>
@@ -397,11 +395,13 @@
                             <div class="project-img"
                                 data-bg-image="{{ asset('frontend/assets/images/project/picture.jpg') }}"></div>
                             <div class="project-content">
-                                <span class="categories"><a href="portfolio-details.html">Empower</a></span>
+                                <span class="categories"><a href="">Empower</a></span>
                                 <div class="project-text">
-                                    <h4 class="title"><a href="portfolio-details.html">Digital
-                                            Marketing Campaign</a></h4>
-                                    <a class="project-btn" href="portfolio-details.html">
+                                    <h4 class="title"><a href="">Developing the Cyber Workforce </a></h4>
+                                    <p class="desc" style="color:white;">Equipping professionals and teams with hands-on
+                                        training and compliance skills.
+                                    </p>
+                                    <a class="project-btn" href="">
                                         <i class="tji-arrow-right-long"></i>
                                     </a>
                                 </div>
@@ -411,11 +411,12 @@
                             <div class="project-img"
                                 data-bg-image="{{ asset('frontend/assets/images/project/picture3.jpg') }}"></div>
                             <div class="project-content">
-                                <span class="categories"><a href="portfolio-details.html">Support</a></span>
+                                <span class="categories"><a href="">Support</a></span>
                                 <div class="project-text">
-                                    <h4 class="title"><a href="portfolio-details.html">Interactive
-                                            Learning Platform</a></h4>
-                                    <a class="project-btn" href="portfolio-details.html">
+                                    <h4 class="title"><a href="">Enabling Digital Transformation </a></h4>
+                                    <p class="desc" style="color:white;">Delivering secure IT, infrastructure, and
+                                        technology solutions that drive efficiency.</p>
+                                    <a class="project-btn" href="">
                                         <i class="tji-arrow-right-long"></i>
                                     </a>
                                 </div>
@@ -425,11 +426,12 @@
                             <div class="project-img"
                                 data-bg-image="{{ asset('frontend/assets/images/project/eventbanner.jpg') }}"></div>
                             <div class="project-content">
-                                <span class="categories"><a href="portfolio-details.html">Business</a></span>
+                                <span class="categories"><a href="">Business</a></span>
                                 <div class="project-text">
-                                    <h4 class="title"><a href="portfolio-details.html">Environmental
-                                            Impact Dashboard</a></h4>
-                                    <a class="project-btn" href="portfolio-details.html">
+                                    <h4 class="title"><a href="">Expanding Renewable Energy Access</a></h4>
+                                    <p class="desc" style="color:white;">Providing solar and inverter systems that
+                                        ensure reliable and sustainable power.</p>
+                                    <a class="project-btn" href="">
                                         <i class="tji-arrow-right-long"></i>
                                     </a>
                                 </div>
@@ -750,7 +752,7 @@
                                 Touch</span>
                             <h2 class="sec-title title-anim">Drop Us a <span>Line.</span></h2>
                         </div>
-                       <form id="contact-form-2" action="{{ route('contact.store') }}" method="POST">
+                        <form id="contact-form-2" action="{{ route('contact.store') }}" method="POST">
                             @csrf
                             <div class="row wow fadeInUp" data-wow-delay=".5s">
                                 <div class="col-sm-6">
@@ -795,8 +797,8 @@
                                     </button>
                                 </div>
                             </div>
-                        </form> 
-                    
+                        </form>
+
                     </div>
                 </div>
             </div>
@@ -811,82 +813,174 @@
     <!-- end: Contact Section -->
 
     <!-- start: Blog Section -->
-    <section class="tj-blog-section section-gap">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="sec-heading text-center">
-                        <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                            <i class="tji-box"></i>Events & Insights & Ideas
-                        </span>
-                        <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
-                    </div>
+    <!-- start: Blog Section -->
+    <!-- start: Blog Section -->
+  <section class="tj-blog-section section-gap">
+    <div class="container">
+        {{-- Heading --}}
+        <div class="row">
+            <div class="col-12">
+                <div class="sec-heading text-center">
+                    <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+                        <i class="tji-box"></i>Events & Insights & Ideas
+                    </span>
+                    <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
                 </div>
             </div>
-
-            <div class="row row-gap-4">
-                {{-- Published Blogs --}}
-                @foreach ($blogs->take(3) as $blog)
-                    <div class="col-xl-4 col-md-6">
-                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
-                            <div class="blog-thumb">
-                                <a href="{{ route('blogs.show', $blog->id) }}">
-                                    <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->title }}">
-                                </a>
-                                <div class="blog-date">
-                                    <span class="date">{{ $blog->created_at->format('d') }}</span>
-                                    <span class="month">{{ $blog->created_at->format('M') }}</span>
-                                </div>
-                            </div>
-                            <div class="blog-content">
-                                <div class="blog-meta">
-                                    <span class="categories"><a href="#">Blog</a></span>
-                                    <span>By <a href="#">{{ $blog->author->name ?? 'Admin' }}</a></span>
-                                </div>
-                                <h4 class="title">
-                                    <a href="{{ route('blogs.show', $blog->id) }}">{{ $blog->title }}</a>
-                                </h4>
-                                <a class="text-btn" href="{{ route('blogs.show', $blog->id) }}">
-                                    <span class="btn-text"><span>Read More</span></span>
-                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-                {{-- Upcoming Events --}}
-                @foreach ($events->take(3) as $event)
-                    <div class="col-xl-4 col-md-6">
-                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
-                            <div class="blog-thumb">
-                                <a href="{{ route('events.show', $event->slug) }}">
-                                    <img src="{{ asset('storage/' . $event->banner_image) }}" alt="{{ $event->title }}">
-                                </a>
-                                <div class="blog-date">
-                                    <span class="date">{{ $event->start_date->format('d') }}</span>
-                                    <span class="month">{{ $event->start_date->format('M') }}</span>
-                                </div>
-                            </div>
-                            <div class="blog-content">
-                                <div class="blog-meta">
-                                    <span class="categories"><a href="#">Event</a></span>
-                                    <span>{{ $event->location ?? 'Online' }}</span>
-                                </div>
-                                <h4 class="title">
-                                    <a href="{{ route('events.show', $event->slug) }}">{{ $event->title }}</a>
-                                </h4>
-                                <a class="text-btn" href="{{ route('events.show', $event->slug) }}">
-                                    <span class="btn-text"><span>View Details</span></span>
-                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
         </div>
-    </section>
+
+        @php
+            // Take up to 3 from each source
+            $blogItems     = ($blogs ?? collect())->take(3);
+            $eventItems    = ($events ?? collect())->take(3);
+            $scheduleItems = ($upcomingSchedules ?? collect())->take(3);
+
+            // Build one unified "event-card" style list
+            $cards = collect();
+
+            // BLOGS
+            foreach ($blogItems as $blog) {
+                $cards->push([
+                    'type'       => 'blog',
+                    'img'        => $blog->thumbnail ? asset('storage/'.$blog->thumbnail) : asset('frontend/assets/images/blog/default.webp'),
+                    'date'       => optional($blog->created_at)->format('d'),
+                    'month'      => optional($blog->created_at)->format('M'),
+                    'badge'      => 'Blog',
+                    'meta_right' => $blog->author->name ?? 'Admin',
+                    'title'      => $blog->title,
+                    'url'        => route('blogs.show', $blog->slug ?? $blog->id),
+                    'cta'        => 'Read More',
+                ]);
+            }
+
+            // EVENTS
+            foreach ($eventItems as $event) {
+                $cards->push([
+                    'type'       => 'event',
+                    'img'        => $event->banner_image ? asset('storage/'.$event->banner_image) : asset('frontend/assets/images/project/project-6.webp'),
+                    'date'       => \Carbon\Carbon::parse($event->start_date)->format('d'),
+                    'month'      => \Carbon\Carbon::parse($event->start_date)->format('M'),
+                    'badge'      => 'Event',
+                    'meta_right' => $event->location ?? 'Online',
+                    'title'      => $event->title,
+                    'url'        => route('events.show', $event->slug),
+                    'cta'        => 'View Details',
+                ]);
+            }
+
+            // SCHEDULES (styled same as events)
+            foreach ($scheduleItems as $schedule) {
+                $course   = $schedule->course;
+                $thumb    = $course?->thumbnail ? asset('storage/'.$course->thumbnail) : asset('frontend/assets/images/service/service-1.webp');
+                $title    = $course?->title ?? 'Bootcamp';
+                $slug     = $course?->slug;
+
+                $cards->push([
+                    'type'       => 'schedule',
+                    'img'        => $thumb,
+                    'date'       => \Carbon\Carbon::parse($schedule->start_date)->format('d'),
+                    'month'      => \Carbon\Carbon::parse($schedule->start_date)->format('M'),
+                    'badge'      => ucfirst($schedule->type ?? 'virtual'),
+                    'meta_right' => $schedule->location ?? 'Online',
+                    'title'      => $title,
+                    'url'        => $slug ? route('course.show', $slug) : route('enroll.pricing', $schedule->id),
+                    'cta'        => $slug ? 'View Details' : 'Enroll Now',
+                ]);
+            }
+        @endphp
+
+        <div class="row row-gap-4 mt-4">
+            @if ($cards->isEmpty())
+                {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
+                <div class="col-xl-4 col-md-6 mx-auto">
+                    <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
+                        <div class="blog-thumb d-flex align-items-center justify-content-center"
+                             style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
+                            <svg width="100%" height="100%" viewBox="0 0 420 250" preserveAspectRatio="xMidYMid meet" aria-label="Fresh content coming soon">
+                                <defs>
+                                    <linearGradient id="gb-all" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#FDB714"/>
+                                        <stop offset="100%" stop-color="#2c99d4"/>
+                                    </linearGradient>
+                                    <linearGradient id="gb-all-soft" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#FDB714" stop-opacity=".15"/>
+                                        <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15"/>
+                                    </linearGradient>
+                                </defs>
+                                <ellipse cx="210" cy="205" rx="175" ry="42" fill="url(#gb-all-soft)"/>
+                                <!-- three tiles -->
+                                <g transform="translate(60,45)">
+                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
+                                    <rect x="15" y="24" width="60" height="10" rx="5" fill="url(#gb-all)" opacity=".25"/>
+                                    <rect x="15" y="44" width="60" height="10" rx="5" fill="#2c99d4" opacity=".2"/>
+                                </g>
+                                <g transform="translate(165,45)">
+                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
+                                    <rect y="24" width="90" height="24" fill="url(#gb-all)" opacity=".12"/>
+                                    <rect x="12" y="70" width="24" height="18" rx="5" fill="url(#gb-all)"/>
+                                    <rect x="42" y="70" width="24" height="18" rx="5" fill="url(#gb-all)" opacity=".6"/>
+                                    <rect x="12" y="96" width="54" height="10" rx="5" fill="#2c99d4" opacity=".25"/>
+                                </g>
+                                <g transform="translate(270,45)">
+                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
+                                    <rect x="12" y="30" width="66" height="12" rx="6" fill="url(#gb-all)" opacity=".3"/>
+                                    <rect x="12" y="50" width="52" height="10" rx="5" fill="#2c99d4" opacity=".25"/>
+                                    <circle cx="70" cy="110" r="12" fill="url(#gb-all)"/>
+                                </g>
+                                <text x="210" y="235" text-anchor="middle" font-family="Inter,ui-sans-serif" font-size="16" fill="#222">
+                                    New blogs, events & bootcamps coming soon
+                                </text>
+                            </svg>
+                        </div>
+                        <div class="blog-content text-center">
+                            <h4 class="title mb-1">Stay tuned</h4>
+                            <p class="m-0">We’re lining up fresh blogs, events, and bootcamps for you.</p>
+                        </div>
+                    </div>
+                </div>
+            @else
+                {{-- ONE unified row of event-style cards --}}
+                @foreach ($cards as $i => $c)
+                    <div class="col-xl-4 col-md-6">
+                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
+                            <div class="blog-thumb">
+                                <a href="{{ $c['url'] }}">
+                                    <img src="{{ $c['img'] }}"
+                                         alt="{{ $c['title'] }}"
+                                         style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                                </a>
+                                <div class="blog-date">
+                                    <span class="date">{{ $c['date'] }}</span>
+                                    <span class="month">{{ $c['month'] }}</span>
+                                </div>
+                            </div>
+                            <div class="blog-content">
+                                <div class="blog-meta">
+                                    <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
+                                    <span>{{ $c['meta_right'] }}</span>
+                                </div>
+                                <h4 class="title">
+                                    <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
+                                </h4>
+                                <a class="text-btn" href="{{ $c['url'] }}">
+                                    <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
+                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+
+    </div>
+</section>
+
+    <!-- end: Blog Section -->
+
+    <!-- end: Blog Section -->
+
+
 
     <!-- end: Blog Section -->
 

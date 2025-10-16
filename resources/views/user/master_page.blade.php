@@ -147,7 +147,7 @@
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Email</span>
-                            <a class="contact-link" href="mailto:info@forwardedge.com">info@forwardedge.com</a>
+                            <a class="contact-link" href="mailto:info@forwardedgeconsulting.com">info@forwardedgeconsulting.com</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Location</span>
@@ -670,36 +670,54 @@ $(document).on('click', '.woosw-item--remove', function(e) {
     $(this).closest('tr').fadeOut(200, function(){ $(this).remove(); });
 });
 
-        $(document).on('click', '.enroll-btn', function(e) {
-            e.preventDefault();
-            console.log('Enroll button clicked');
+   $(document).on('click', '.enroll-btn', function(e) {
+    e.preventDefault();
+    console.log('Enroll/Apply button clicked');
 
-            let enrollUrl = $(this).data('enroll-url');
-            let scheduleId = $(this).data('schedule-id');
+    const $btn = $(this);
+    const enrollUrl = $btn.data('enroll-url');   // paid flows
+    const applyUrl  = $btn.data('apply-url');    // scholarship (free) flows
+    const scheduleId = $btn.data('schedule-id');
 
-            console.log('Enroll URL:', enrollUrl, 'Schedule ID:', scheduleId);
+    console.log('Enroll URL:', enrollUrl, 'Apply URL:', applyUrl, 'Schedule ID:', scheduleId);
 
-            if (!enrollUrl && !scheduleId) {
-                console.error('Missing enrollment data on button');
-                toastr.error('Enrollment information missing');
-                return;
-            }
+    if (!enrollUrl && !applyUrl && !scheduleId) {
+        console.error('Missing enrollment/scholarship data on button');
+        toastr.error('Action information missing');
+        return;
+    }
 
-            @auth
-            if (enrollUrl) {
-                window.location.href = enrollUrl;
-            } else if (scheduleId) {
-                window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
-            }
-        @else
-            $('#pending_action').val('enroll');
-            $('#pending_payload').val(JSON.stringify({
-                schedule_id: scheduleId,
-                enroll_url: enrollUrl
-            }));
-            showAuthModal('Please login to enroll in this course');
-        @endauth
-        });
+    @auth
+        // If it's a scholarship (free) schedule, prefer applyUrl
+        if (applyUrl) {
+            window.location.href = applyUrl;
+            return;
+        }
+
+        // Otherwise paid enrollment
+        if (enrollUrl) {
+            window.location.href = enrollUrl;
+        } else if (scheduleId) {
+            window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
+        }
+    @else
+        // Save pending action based on which URL we have
+        const isScholarship = Boolean(applyUrl);
+        $('#pending_action').val(isScholarship ? 'apply_scholarship' : 'enroll');
+        $('#pending_payload').val(JSON.stringify({
+            schedule_id: scheduleId || null,
+            enroll_url: enrollUrl || null,
+            apply_url: applyUrl || null
+        }));
+
+        // Tailor the modal message
+        showAuthModal(isScholarship
+            ? 'Please login to apply for a scholarship'
+            : 'Please login to enroll in this course'
+        );
+    @endauth
+});
+
 
         // Auth Forms
         $('#registerForm').submit(function(e) {
@@ -779,43 +797,59 @@ $(document).on('click', '.woosw-item--remove', function(e) {
                 ));
         });
 
-        // Pending Actions
-        function retryPendingAction() {
-            try {
-                let action = $('#pending_action').val();
-                let payload = JSON.parse($('#pending_payload').val() || '{}');
+      function retryPendingAction() {
+    try {
+        const action  = $('#pending_action').val();
+        const payload = JSON.parse($('#pending_payload').val() || '{}');
 
-                console.log('Retrying pending action:', action, payload);
+        console.log('Retrying pending action:', action, payload);
 
-                switch (action) {
-                    case 'add_to_cart':
-                        if (payload.course_id) addToCart(payload.course_id, payload.quantity || 1);
-                        break;
-                    case 'add_to_wishlist':
-                        if (payload.course_id) addToWishlist(payload.course_id);
-                        break;
-                    case 'open_cart':
-                        openCart();
-                        break;
-                    case 'open_wishlist':
-                        openWishlist();
-                        break;
-                    case 'enroll':
-                        if (payload.enroll_url) {
-                            window.location.href = payload.enroll_url;
-                        } else if (payload.schedule_id) {
-                            window.location.href = "/enroll/price/" + payload.schedule_id;
-                        }
-                        break;
+        switch (action) {
+            case 'add_to_cart':
+                if (payload.course_id) addToCart(payload.course_id, payload.quantity || 1);
+                break;
+
+            case 'add_to_wishlist':
+                if (payload.course_id) addToWishlist(payload.course_id);
+                break;
+
+            case 'open_cart':
+                openCart();
+                break;
+
+            case 'open_wishlist':
+                openWishlist();
+                break;
+
+            case 'apply_scholarship': // NEW
+                if (payload.apply_url) {
+                    window.location.href = payload.apply_url;
+                } else if (payload.schedule_id) {
+                    // fallback if only schedule_id was stored
+                    window.location.href = "/scholarships/apply/" + payload.schedule_id;
+                } else {
+                    toastr.error('Could not resume scholarship application');
                 }
+                break;
 
-                $('#pending_action').val('');
-                $('#pending_payload').val('{}');
-            } catch (e) {
-                console.error('Error retrying pending action:', e);
-            }
+            case 'enroll':
+                if (payload.enroll_url) {
+                    window.location.href = payload.enroll_url;
+                } else if (payload.schedule_id) {
+                    window.location.href = "/enroll/price/" + payload.schedule_id;
+                } else {
+                    toastr.error('Could not resume enrollment');
+                }
+                break;
         }
 
+        // Clear pending
+        $('#pending_action').val('');
+        $('#pending_payload').val('{}');
+    } catch (e) {
+        console.error('Error retrying pending action:', e);
+    }
+}
         // Live counts
         function updateCartCount() {
             $.get("{{ route('user.cart.count') }}", function(data) {

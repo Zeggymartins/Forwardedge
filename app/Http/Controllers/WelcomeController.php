@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\CourseSchedule;
 use App\Models\Event;
 use App\Models\Faq;
 use App\Models\Service;
@@ -30,8 +31,14 @@ class WelcomeController extends Controller
             ->get();
 
 
-        $faqs = Faq::where('is_active', true)->latest()->take(5)->get();  
+        $faqs = Faq::where('is_active', true)->latest()->take(5)->get();
+        $upcomingSchedules = CourseSchedule::with(['course:id,title,slug,thumbnail,status'])
+            ->upcoming()
+            ->forPublishedCourses()
+            ->orderBy('start_date', 'asc')
+            ->take(12) // adjust how many you want to show
+            ->get();
 
-        return view('user.pages.welcome', compact('services', 'events', 'blogs','faqs'));
+        return view('user.pages.welcome', compact('services', 'events', 'blogs', 'faqs', 'upcomingSchedules'));
     }
 }

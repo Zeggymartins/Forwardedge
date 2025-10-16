@@ -20,8 +20,8 @@ class AdminCourseController extends Controller
     public function index()
     {
         $courses = Course::withCount(['contents', 'phases', 'schedules'])
-                         ->latest()
-                         ->get();
+            ->latest()
+            ->get();
         return view('admin.pages.courses.view_course', compact('courses'));
     }
 
@@ -32,7 +32,7 @@ class AdminCourseController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Validation: allow arrays where the form sends arrays
+        // 1) Validation
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'slug'        => 'nullable|string|max:255|unique:courses,slug',
@@ -40,47 +40,52 @@ class AdminCourseController extends Controller
             'thumbnail'   => 'nullable|file|mimes:jpg,jpeg,png,svg,webp|max:4096',
             'status'      => 'nullable|in:draft,published',
 
-            'details'                 => 'nullable|array',
-            'details.*.type'          => 'required|string|in:heading,paragraph,image,features,list',
-            // allow string OR array; we will normalize later
-            'details.*.content'       => 'nullable',
-            // heading is used as a title for features; keep string
-            'details.*.heading'       => 'nullable|string|max:255',
-            // allow string OR array for features description (your form uses [] inputs)
-            'details.*.description'   => 'nullable',
+            // Details
+            'details'                   => 'nullable|array',
+            'details.*.type'            => 'required|string|in:heading,paragraph,image,features,list',
+            'details.*.order'           => 'nullable|integer|min:1',
+            'details.*.content'         => 'nullable',                 // string or array (list)
+            'details.*.heading'         => 'nullable|string|max:255',  // for features title
+            'details.*.description'     => 'nullable',                 // string OR array (legacy items)
+            'details.*.items'           => 'nullable|array',           // NEW: features items[]
+            'details.*.items.*'         => 'nullable|string',
+            'details.*.file'            => 'nullable|file|mimes:jpg,jpeg,png,svg,webp|max:51200',
 
-            // phases and topics
-            'phases'                      => 'nullable|array',
-            'phases.*.title'              => 'required_with:phases|string|max:255',
-            'phases.*.description'        => 'nullable|string',
-            'phases.*.duration'           => 'nullable|integer|min:0',
-            'phases.*.topics'             => 'nullable|array',
-            'phases.*.topics.*.title'     => 'required_with:phases.*.topics|string|max:255',
-            'phases.*.topics.*.content'   => 'nullable|string',
+            // Phases & topics
+            'phases'                    => 'nullable|array',
+            'phases.*.title'            => 'required_with:phases|string|max:255',
+            'phases.*.description'      => 'nullable|string',
+            'phases.*.duration'         => 'nullable|integer|min:0',
+            'phases.*.topics'           => 'nullable|array',
+            'phases.*.topics.*'         => 'nullable|string',
 
-            // schedules
+            // Schedules
             'schedules'                 => 'nullable|array',
+            'schedules.*.title'         => 'nullable|string|max:255',
             'schedules.*.start_date'    => 'nullable|date',
             'schedules.*.end_date'      => 'nullable|date|after_or_equal:schedules.*.start_date',
             'schedules.*.location'      => 'nullable|string|max:255',
             'schedules.*.type'          => 'nullable|string|in:virtual,hybrid,physical',
             'schedules.*.price'         => 'nullable|numeric|min:0',
+            'schedules.*.price_usd'     => 'nullable|numeric|min:0',
+            'schedules.*.tag'           => 'nullable|string|in:free,paid,both',
+            'schedules.*.description'   => 'nullable|string',
         ]);
 
         try {
             return DB::transaction(function () use ($request, $validated) {
-                // Generate unique slug
+                // Slug
                 $slug = $validated['slug'] ?? Str::slug($validated['title']);
-                $originalSlug = $slug;
-                $counter = 1;
+                $base = $slug;
+                $i = 1;
                 while (Course::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $counter++;
+                    $slug = $base . '-' . ($i++);
                 }
 
-                // Handle thumbnail upload
-                $thumbnailPath = null;
+                // Thumbnail
+                $thumb = null;
                 if ($request->hasFile('thumbnail')) {
-                    $thumbnailPath = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+                    $thumb = $request->file('thumbnail')->store('courses/thumbnails', 'public');
                 }
 
                 // Create course
@@ -88,100 +93,72 @@ class AdminCourseController extends Controller
                     'title'       => $validated['title'],
                     'slug'        => $slug,
                     'description' => $validated['description'] ?? null,
-                    'thumbnail'   => $thumbnailPath,
+                    'thumbnail'   => $thumb,
                     'status'      => $validated['status'] ?? 'draft',
                 ]);
 
-                // 2) DETAILS — normalize into strings (or JSON strings) then save
+                // 2) DETAILS
                 $details = $request->input('details', []);
-                foreach ($details as $index => $detailData) {
-                    if (empty($detailData['type'])) continue;
+                foreach ($details as $idx => $d) {
+                    if (empty($d['type'])) continue;
 
-                    $type  = $detailData['type'];
-                    $order = (int) ($detailData['order'] ?? $index + 1);
+                    $type  = $d['type'];
+                    $order = (int)($d['order'] ?? $idx + 1);
 
-                    $contentString = null;
-                    $imagePath     = null;
+                    $content = null;
+                    $image   = null;
 
                     switch ($type) {
                         case 'heading':
-                            // expect a single string
-                            $contentString = isset($detailData['content']) && is_string($detailData['content'])
-                                ? $detailData['content']
-                                : null;
-                            break;
-
                         case 'paragraph':
-                            // expect a single string
-                            $contentString = isset($detailData['content']) && is_string($detailData['content'])
-                                ? $detailData['content']
-                                : null;
+                            $content = isset($d['content']) && is_string($d['content']) ? $d['content'] : null;
                             break;
 
                         case 'list':
-                            // accept array of strings (content[]). Encode to JSON string for storage.
-                            $items = $detailData['content'] ?? [];
-                            if (is_string($items)) {
-                                // if a single string slipped in, make it a one-item list
-                                $items = [$items];
-                            }
-                            if (is_array($items)) {
-                                // coerce everything to strings
-                                $items = array_values(array_filter(array_map('strval', $items)));
-                                $contentString = json_encode($items, JSON_UNESCAPED_UNICODE);
-                            }
+                            // store as JSON array of strings
+                            $items = $d['content'] ?? [];
+                            if (is_string($items)) $items = [$items];
+                            if (!is_array($items)) $items = [];
+                            $items = array_values(array_filter(array_map('strval', $items), fn($v) => $v !== ''));
+                            $content = $items ? json_encode($items, JSON_UNESCAPED_UNICODE) : null;
                             break;
 
                         case 'features':
-                            // Your admin form collects:
-                            //   details[i][heading] (string)
-                            //   details[i][description][] (array of strings)
-                            $title = $detailData['heading'] ?? null;
-                            $desc  = $detailData['description'] ?? [];
+                            // normalize new + legacy shapes into one object {heading, description, items[]}
+                            $heading = isset($d['heading']) && is_string($d['heading']) ? trim($d['heading']) : null;
 
-                            if (is_string($desc)) {
-                                // support comma-separated string as fallback
-                                $desc = array_map('trim', explode(',', $desc));
-                            }
-                            if (!is_array($desc)) $desc = [];
+                            $descRaw = $d['description'] ?? null;
+                            $descStr = is_string($descRaw) ? trim($descRaw) : null;
 
-                            // Convert each string into an object {heading: <text>, description: null}
-                            $features = [];
-                            foreach ($desc as $txt) {
-                                if ($txt === null || $txt === '') continue;
-                                $features[] = [
-                                    'heading'     => (string) $txt,
-                                    'description' => null,
-                                ];
+                            // NEW: items[]
+                            $itemsRaw = $d['items'] ?? [];
+
+                            // LEGACY: description as array => items
+                            if (is_array($descRaw) && empty($itemsRaw)) {
+                                $itemsRaw = $descRaw;
+                                $descStr = null;
                             }
 
-                            // If you want the features "heading" visible on the page as a section title,
-                            // you can create an extra 'heading' detail right before features:
-                            if ($title) {
-                                CourseDetails::create([
-                                    'course_id'  => $course->id,
-                                    'type'       => 'heading',
-                                    'sort_order' => $order,
-                                    'content'    => $title,   // simple string heading
-                                    'image'      => null,
-                                ]);
-                                $order++; // bump order so features come after title
+                            if (is_string($itemsRaw)) {
+                                $itemsRaw = array_map('trim', explode(',', $itemsRaw));
                             }
+                            $items = array_values(array_filter(array_map('strval', (array)$itemsRaw), fn($v) => $v !== ''));
 
-                            // Save features array as JSON string in content
-                            $contentString = json_encode($features, JSON_UNESCAPED_UNICODE);
+                            $payload = [
+                                'heading'     => $heading ?: null,
+                                'description' => $descStr ?: null,
+                                'items'       => $items,
+                            ];
+
+                            $content = json_encode($payload, JSON_UNESCAPED_UNICODE);
                             break;
 
                         case 'image':
-                            $fileKey = "details.{$index}.file";
-                            if ($request->hasFile($fileKey)) {
-                                $file = $request->file($fileKey);
-                                if ($file->isValid()) {
-                                    $imagePath = $file->store('courses/details/images', 'public');
-                                }
+                            $fileKey = "details.$idx.file";
+                            if ($request->hasFile($fileKey) && $request->file($fileKey)->isValid()) {
+                                $image = $request->file($fileKey)->store('courses/details/images', 'public');
                             }
-                            // Optional: you can also put alt text in content if you later add an alt field.
-                            $contentString = null;
+                            $content = null;
                             break;
                     }
 
@@ -189,62 +166,52 @@ class AdminCourseController extends Controller
                         'course_id'  => $course->id,
                         'type'       => $type,
                         'sort_order' => $order,
-                        'content'    => $contentString, // plain string or JSON string
-                        'image'      => $imagePath,
+                        'content'    => $content,
+                        'image'      => $image,
                     ]);
                 }
 
-                // 3) PHASES & TOPICS
+                // 3) PHASES + topics (titles only)
                 $phases = $request->input('phases', []);
-                foreach ($phases as $phaseIndex => $phaseData) {
-                    if (empty($phaseData['title'])) continue;
+                foreach ($phases as $pIndex => $p) {
+                    if (empty($p['title'])) continue;
 
-                    $phaseCreateData = [
+                    $phase = CoursePhases::create([
                         'course_id' => $course->id,
-                        'title'     => trim($phaseData['title']),
-                        'order'     => $phaseIndex + 1,
-                        'duration'  => !empty($phaseData['duration']) ? (int) $phaseData['duration'] : null,
-                        'content'   => $phaseData['description'] ?? null,
-                    ];
+                        'title'     => trim($p['title']),
+                        'order'     => $pIndex + 1,
+                        'duration'  => isset($p['duration']) ? (int)$p['duration'] : null,
+                        'content'   => $p['description'] ?? null,
+                    ]);
 
-                    $phaseImageKey = "phases.{$phaseIndex}.image";
-                    if ($request->hasFile($phaseImageKey)) {
-                        $phaseImage = $request->file($phaseImageKey);
-                        if ($phaseImage->isValid()) {
-                            $phaseCreateData['image'] = $phaseImage->store('courses/phases', 'public');
-                        }
-                    }
-
-                    $phase = CoursePhases::create($phaseCreateData);
-
-                    $topics = $phaseData['topics'] ?? [];
-                    // Your admin form posts topics as a flat array of titles: topics[].
-                    // Make them rows with title=string, content=null
-                    foreach ($topics as $topicIndex => $topicTitle) {
-                        if (!$topicTitle) continue;
+                    $topics = $p['topics'] ?? [];
+                    foreach ($topics as $tIndex => $tTitle) {
+                        if (!$tTitle) continue;
                         CourseTopics::create([
                             'course_phase_id' => $phase->id,
-                            'title'   => trim((string) $topicTitle),
+                            'title'   => trim((string)$tTitle),
                             'content' => null,
-                            'order'   => $topicIndex + 1,
+                            'order'   => $tIndex + 1,
                         ]);
                     }
                 }
 
                 // 4) SCHEDULES
                 $schedules = $request->input('schedules', []);
-                foreach ($schedules as $scheduleData) {
-                    if (empty($scheduleData['start_date']) && empty($scheduleData['end_date'])) continue;
+                foreach ($schedules as $s) {
+                    if (empty($s['start_date']) && empty($s['end_date'])) continue;
 
                     CourseSchedule::create([
-                        'course_id'  => $course->id,
-                        'start_date' => $scheduleData['start_date'] ?? null,
-                        'end_date'   => $scheduleData['end_date'] ?? null,
-                        'location'   => $scheduleData['location'] ?? null,
-                        'type'       => $scheduleData['type'] ?? null, // <— changed from 'bootcamp'/'null' to null
-                        'price'      => isset($scheduleData['price']) && $scheduleData['price'] !== ''
-                            ? (float) $scheduleData['price']
-                            : null,
+                        'course_id'   => $course->id,
+                        'title'       => $s['title'] ?? null,
+                        'start_date'  => $s['start_date'] ?? null,
+                        'end_date'    => $s['end_date'] ?? null,
+                        'location'    => $s['location'] ?? null,
+                        'type'        => $s['type'] ?? null,
+                        'price'       => (isset($s['price']) && $s['price'] !== '') ? (float)$s['price'] : null,
+                        'price_usd'   => (isset($s['price_usd']) && $s['price_usd'] !== '') ? (float)$s['price_usd'] : null,
+                        'tag'         => $s['tag'] ?? null,
+                        'description' => $s['description'] ?? null,
                     ]);
                 }
 
@@ -254,13 +221,12 @@ class AdminCourseController extends Controller
         } catch (\Exception $e) {
             Log::error('Course creation failed: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
-                'stack_trace'  => $e->getTraceAsString()
+                'stack'        => $e->getTraceAsString(),
             ]);
-
-            return back()->withErrors(['error' => 'Course creation failed: ' . $e->getMessage()])
-                ->withInput();
+            return back()->withErrors(['error' => 'Course creation failed: ' . $e->getMessage()])->withInput();
         }
     }
+
 
 
     public function dashboard($id)
@@ -302,7 +268,7 @@ class AdminCourseController extends Controller
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
-        
+
         if ($course->thumbnail) {
             Storage::disk('public')->delete($course->thumbnail);
         }
@@ -310,36 +276,39 @@ class AdminCourseController extends Controller
         $course->delete();
 
         return redirect()->route('admin.courses.index')
-                         ->with('success', 'Course deleted successfully!');
+            ->with('success', 'Course deleted successfully!');
     }
 
-    // Content Management
     public function storeDetails(Request $request, $id)
     {
         $course = Course::findOrFail($id);
 
         $validated = $request->validate([
-            'blocks' => 'required|array|min:1',
-            'blocks.*.type' => 'required|in:heading,paragraph,image,features,list',
-            'blocks.*.content' => 'nullable|string',
-            'blocks.*.file_path' => 'nullable|file|max:51200',
-            'blocks.*.order' => 'nullable|integer|min:1',
-            'blocks.*.features' => 'nullable|array',
-            'blocks.*.features.*.heading' => 'nullable|string',
-            'blocks.*.features.*.description' => 'nullable|string',
-            'blocks.*.list' => 'nullable|array',
-            'blocks.*.list.*' => 'nullable|string',
+            'blocks'                 => 'required|array|min:1',
+            'blocks.*.type'          => 'required|in:heading,paragraph,image,features,list',
+            'blocks.*.content'       => 'nullable|string',
+            'blocks.*.file_path'     => 'nullable|file|max:51200',
+            'blocks.*.order'         => 'nullable|integer|min:1',
+
+            // Features (your UI posts features[heading], features[description], features[items][])
+            'blocks.*.features'                  => 'nullable|array',
+            'blocks.*.features.heading'          => 'nullable|string|max:255',
+            'blocks.*.features.description'      => 'nullable|string',
+            'blocks.*.features.items'            => 'nullable|array',
+            'blocks.*.features.items.*'          => 'nullable|string',
+
+            // List
+            'blocks.*.list'          => 'nullable|array',
+            'blocks.*.list.*'        => 'nullable|string',
         ]);
 
         foreach ($validated['blocks'] as $index => $block) {
             $filePath = null;
 
-            // Handle file upload if present
-            if (isset($block['file_path'])) {
+            if (!empty($block['file_path'])) {
                 $filePath = $block['file_path']->store('courses/contents', 'public');
             }
 
-            // Determine content structure based on type
             $content = null;
 
             switch ($block['type']) {
@@ -348,32 +317,53 @@ class AdminCourseController extends Controller
                     $content = $block['content'] ?? null;
                     break;
 
-                case 'features':
-                    // Multiple features: heading + description
-                    $content = isset($block['features'])
-                        ? json_encode($block['features'])
-                        : null;
-                    break;
+                case 'features': {
+                        // Read from features[...] group (matches your admin UI)
+                        $heading = data_get($block, 'features.heading');
+                        $descRaw = data_get($block, 'features.description');
+                        $itemsRaw = data_get($block, 'features.items', []);
+
+                        if (is_string($itemsRaw)) {
+                            $itemsRaw = array_map('trim', explode(',', $itemsRaw));
+                        }
+
+                        $items = array_values(array_filter(
+                            array_map('strval', (array) $itemsRaw),
+                            fn($v) => $v !== ''
+                        ));
+
+                        $payload = [
+                            'heading'     => ($heading !== null && $heading !== '') ? trim($heading) : null,
+                            'description' => (is_string($descRaw) && $descRaw !== '') ? trim($descRaw) : null,
+                            'items'       => $items,
+                        ];
+
+                        $content = json_encode($payload, JSON_UNESCAPED_UNICODE);
+                        break;
+                    }
 
                 case 'list':
-                    // Multiple list items
-                    $content = isset($block['list'])
-                        ? json_encode($block['list'])
-                        : null;
+                    $list = $block['list'] ?? [];
+                    $list = array_values(array_filter(
+                        array_map(fn($v) => trim((string) $v), (array) $list),
+                        fn($v) => $v !== ''
+                    ));
+                    $content = $list ? json_encode($list, JSON_UNESCAPED_UNICODE) : null;
                     break;
 
                 case 'image':
-                    // Just reference uploaded file path
-                    $content = null;
+                    $content = null; // image path saved below
                     break;
             }
 
+            $nextOrder = $block['order'] ?? (($course->details()->max('sort_order') ?? 0) + 1);
+
             CourseDetails::create([
-                'course_id' => $course->id,
-                'type' => $block['type'],
-                'content' => $content,
-                'image' => $filePath,
-                'sort_order' => $block['order'] ?? ($course->details()->max('sort_order') + 1),
+                'course_id'  => $course->id,
+                'type'       => $block['type'],
+                'content'    => $content,
+                'image'      => $filePath,
+                'sort_order' => $nextOrder,
             ]);
         }
 
@@ -381,24 +371,38 @@ class AdminCourseController extends Controller
     }
 
 
+
     public function updateDetails(Request $request, $courseId, $contentId)
     {
         $content = CourseDetails::where('course_id', $courseId)->findOrFail($contentId);
 
+        // Accept BOTH flat fields (heading, description, items[]) and nested features[...] from the edit modal
         $validated = $request->validate([
-            'type' => 'required|in:heading,paragraph,image,features,list',
-            'content' => 'nullable|string',
-            'file_path' => 'nullable|file|max:51200',
-            'features' => 'nullable|array',
-            'features.*.heading' => 'nullable|string',
-            'features.*.description' => 'nullable|string',
-            'list' => 'nullable|array',
-            'list.*' => 'nullable|string',
-            'order' => 'nullable|integer|min:1',
+            'type'        => 'required|in:heading,paragraph,image,features,list',
+            'content'     => 'nullable|string',
+            'file_path'   => 'nullable|file|max:51200',
+            'order'       => 'nullable|integer|min:1',
+
+            // Flat (what your Blade currently sends)
+            'heading'     => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'items'       => 'nullable|array',
+            'items.*'     => 'nullable|string',
+
+            // Nested (legacy / future-proof)
+            'features'                 => 'nullable|array',
+            'features.heading'         => 'nullable|string|max:255',
+            'features.description'     => 'nullable|string',
+            'features.items'           => 'nullable|array',
+            'features.items.*'         => 'nullable|string',
+
+            // List
+            'list'        => 'nullable|array',
+            'list.*'      => 'nullable|string',
         ]);
 
+        // Image handling (keep old file unless a new one comes in)
         $filePath = $content->image;
-
         if ($request->hasFile('file_path')) {
             if ($filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
@@ -406,7 +410,7 @@ class AdminCourseController extends Controller
             $filePath = $request->file('file_path')->store('courses/contents', 'public');
         }
 
-        // Prepare content based on type
+        // Prepare content by type
         $contentValue = null;
 
         switch ($validated['type']) {
@@ -415,32 +419,58 @@ class AdminCourseController extends Controller
                 $contentValue = $validated['content'] ?? null;
                 break;
 
-            case 'features':
-                $contentValue = isset($validated['features'])
-                    ? json_encode($validated['features'])
-                    : null;
-                break;
+            case 'features': {
+                    // Prefer flat fields; fallback to nested features[...]
+                    $heading = $request->input('heading', $request->input('features.heading'));
+                    $descRaw = $request->input('description', $request->input('features.description'));
+
+                    // Items may be flat items[] or nested features[items][]
+                    $itemsRaw = $request->input('items', $request->input('features.items', []));
+
+                    if (is_string($itemsRaw)) {
+                        $itemsRaw = array_map('trim', explode(',', $itemsRaw));
+                    }
+
+                    $items = array_values(array_filter(
+                        array_map('strval', (array) $itemsRaw),
+                        fn($v) => trim($v) !== ''
+                    ));
+
+                    $payload = [
+                        'heading'     => (is_string($heading) && trim($heading) !== '') ? trim($heading) : null,
+                        'description' => (is_string($descRaw) && trim($descRaw) !== '') ? trim($descRaw) : null,
+                        'items'       => $items,
+                    ];
+
+                    $contentValue = json_encode($payload, JSON_UNESCAPED_UNICODE);
+                    break;
+                }
 
             case 'list':
-                $contentValue = isset($validated['list'])
-                    ? json_encode($validated['list'])
-                    : null;
+                $list = $validated['list'] ?? [];
+                $list = array_values(array_filter(
+                    array_map(static fn($v) => trim((string) $v), (array) $list),
+                    static fn($v) => $v !== ''
+                ));
+                $contentValue = $list ? json_encode($list, JSON_UNESCAPED_UNICODE) : null;
                 break;
 
             case 'image':
-                $contentValue = null;
+                $contentValue = null; // image path lives in $filePath
                 break;
         }
 
         $content->update([
-            'type' => $validated['type'],
-            'content' => $contentValue,
-            'image' => $filePath,
+            'type'       => $validated['type'],
+            'content'    => $contentValue,
+            'image'      => $filePath,
             'sort_order' => $validated['order'] ?? $content->sort_order,
         ]);
 
         return back()->with('success', 'Course detail updated successfully!');
     }
+
+
 
 
     public function destroyDetails($courseId, $contentId)
@@ -587,46 +617,74 @@ class AdminCourseController extends Controller
 
 
     // Schedule Management
+    // Schedule Management
     public function storeSchedule(Request $request, $id)
     {
         $course = Course::findOrFail($id);
 
         $validated = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'type' => 'nullable|string|max:100',
-            'price' => 'nullable|numeric|min:0',
+            'title'       => 'nullable|string|max:255',
+            'start_date'  => 'required|date',
+            'end_date'    => 'required|date|after_or_equal:start_date',
+            'location'    => 'nullable|string|max:255',
+            'type'        => 'nullable|string|in:virtual,hybrid,physical',
+            'price'       => 'nullable|numeric|min:0',
+            // NEW fields
+            'price_usd'   => 'nullable|numeric|min:0',
+            'tag'         => 'nullable|string|in:free,paid,both',
+            'description' => 'nullable|string',
         ]);
 
         CourseSchedule::create([
-            'course_id' => $course->id,
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'location' => $validated['location'] ?? null,
-            'type' => $validated['type'] ?? 'bootcamp',
-            'price' => $validated['price'] ?? null,
+            'course_id'   => $course->id,
+            'title'       => $validated['title'] ?? null,
+            'start_date'  => $validated['start_date'],
+            'end_date'    => $validated['end_date'],
+            'location'    => $validated['location'] ?? null,
+            'type'        => $validated['type'] ?? null,
+            'price'       => array_key_exists('price', $validated) ? (float)$validated['price'] : null,
+            'price_usd'   => array_key_exists('price_usd', $validated) ? (float)$validated['price_usd'] : null,
+            'tag'         => $validated['tag'] ?? null,
+            'description' => $validated['description'] ?? null,
         ]);
 
         return back()->with('success', 'Schedule added successfully!');
     }
+
 
     public function updateSchedule(Request $request, $courseId, $scheduleId)
     {
         $schedule = CourseSchedule::where('course_id', $courseId)->findOrFail($scheduleId);
 
         $validated = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'type' => 'nullable|string|max:100',
-            'price' => 'nullable|numeric|min:0',
+            'title'       => 'nullable|string|max:255',
+            'start_date'  => 'required|date',
+            'end_date'    => 'required|date|after_or_equal:start_date',
+            'location'    => 'nullable|string|max:255',
+            'type'        => 'nullable|string|in:virtual,hybrid,physical',
+            'price'       => 'nullable|numeric|min:0',
+            // NEW
+            'price_usd'   => 'nullable|numeric|min:0',
+            'tag'         => 'nullable|string|in:free,paid,both',
+            'description' => 'nullable|string',
         ]);
 
-        $schedule->update($validated);
+        // Ensure proper nulling of optional numerics if the field is omitted
+        $schedule->update([
+            'title'       => $validated['title'] ?? $schedule->title,
+            'start_date'  => $validated['start_date'],
+            'end_date'    => $validated['end_date'],
+            'location'    => $validated['location'] ?? null,
+            'type'        => $validated['type'] ?? null,
+            'price'       => array_key_exists('price', $validated) ? (float)$validated['price'] : null,
+            'price_usd'   => array_key_exists('price_usd', $validated) ? (float)$validated['price_usd'] : null,
+            'tag'         => $validated['tag'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
 
         return back()->with('success', 'Schedule updated successfully!');
     }
+
 
     public function destroySchedule($courseId, $scheduleId)
     {
@@ -636,9 +694,10 @@ class AdminCourseController extends Controller
 
         return back()->with('success', 'Schedule deleted successfully!');
     }
-    public function updateTopic($courseId, $phaseId, $topicId, Request $request){
+    public function updateTopic($courseId, $phaseId, $topicId, Request $request)
+    {
 
-    $topic =CourseTopics::where('course_phase_id', $phaseId)->findOrFail($topicId);
+        $topic = CourseTopics::where('course_phase_id', $phaseId)->findOrFail($topicId);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -696,7 +755,7 @@ class AdminCourseController extends Controller
             }
         }
 
-            CourseContent::create([
+        CourseContent::create([
             'course_id' => $request->course_id,
             'title' => $request->title,
             'type' => $request->type,

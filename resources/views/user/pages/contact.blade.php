@@ -30,7 +30,7 @@
                         </div>
                         <h3 class="contact-title">Email us</h3>
                         <ul class="contact-list">
-                            <li><a href="mailto:info@forwardedge.com">info@forwardedge.com</a></li>
+                            <li><a href="mailto:info@forwardedgeconsulting.com">info@forwardedgeconsulting.com</a></li>
                         </ul>
                     </div>
                 </div>

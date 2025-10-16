@@ -18,6 +18,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ScolarshipApplicationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\WishlistController;
@@ -108,6 +109,12 @@ Route::get('/reset-password', function () {
     return view('auth.reset');
 })->name('password.reset');
 
+    Route::get('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'Register'])
+        ->name('scholarships.apply');
+
+    // Submit application
+    Route::post('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'storeData'])
+        ->name('scholarships.apply.store');
 /*
 |--------------------------------------------------------------------------
 | Cart & Wishlist Routes (Public but require auth for backend)
@@ -154,7 +161,10 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::get('/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('pricing');
         Route::post('/store', [EnrollmentController::class, 'store'])->name('store');
     });
-
+    // Route::get('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'create'])
+    //     ->whereNumber('schedule')->name('scholarships.apply');
+    // Route::post('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'store'])
+    //     ->whereNumber('schedule')->name('scholarships.store');
     // Checkout/Order management
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::post('/store', [OrderController::class, 'store'])->name('store');
@@ -357,7 +367,26 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
             'update' => 'admin.gallery.update',
             'destroy' => 'admin.gallery.destroy',
         ]);
-});
+    Route::get('/scholarships', [ScolarshipApplicationController::class, 'index'])
+        ->name('scholarships.index');
+
+    Route::get('/scholarships/create', [ScolarshipApplicationController::class, 'create'])
+        ->name('scholarships.create');
+
+    Route::post('/scholarships', [ScolarshipApplicationController::class, 'store'])
+        ->name('scholarships.store');
+
+    Route::get('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'show'])
+        ->name('scholarships.show');
+
+    Route::get('/scholarships/{scholarship}/edit', [ScolarshipApplicationController::class, 'edit'])
+        ->name('scholarships.edit');
+
+    Route::put('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'update'])
+        ->name('scholarships.update');
+
+    Route::delete('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'destroy'])
+        ->name('scholarships.destroy');});
 
 /*
 |--------------------------------------------------------------------------

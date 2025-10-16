@@ -116,27 +116,49 @@ class CourseDetails extends Model
         }
 
         // ---------- Features: return JSON array of {heading, description} ----------
+        // ---------- Features: return UNIFIED OBJECT {"heading":?,"description":?,"items":[...]} ----------
         if ($type === 'features') {
             $d = $decode($value);
-            $norm = [];
+            $out = ['heading' => null, 'description' => null, 'items' => []];
 
             if (is_array($d)) {
-                foreach ($d as $feat) {
-                    if (is_array($feat)) {
-                        $norm[] = [
-                            'heading' => isset($feat['heading']) ? (string)$feat['heading'] : '',
-                            'description' => isset($feat['description']) ? (string)$feat['description'] : '',
-                        ];
-                    } elseif (is_string($feat)) {
-                        $norm[] = ['heading' => $feat, 'description' => ''];
+                if (array_is_list($d)) {
+                    // LEGACY array-of-objects or array-of-strings => derive heading/description/items
+                    $items = [];
+                    foreach ($d as $feat) {
+                        if (is_array($feat)) {
+                            $h = isset($feat['heading']) ? trim((string)$feat['heading']) : '';
+                            $desc = isset($feat['description']) ? (string)$feat['description'] : '';
+                            if ($out['heading'] === null && $h !== '') $out['heading'] = $h;
+                            if ($out['description'] === null && $desc !== '') $out['description'] = $desc;
+                            if ($h !== '') $items[] = $h;
+                        } elseif (is_string($feat)) {
+                            $feat = trim($feat);
+                            if ($out['heading'] === null && $feat !== '') $out['heading'] = $feat;
+                            if ($feat !== '') $items[] = $feat;
+                        }
                     }
+                    $out['items'] = array_values(array_filter(array_unique($items), fn($s) => $s !== ''));
+                } else {
+                    // New shape (preferred)
+                    $out['heading'] = isset($d['heading']) && is_string($d['heading']) ? trim($d['heading']) : null;
+                    $out['description'] = isset($d['description']) && is_string($d['description']) ? (string)$d['description'] : null;
+
+                    $itemsRaw = $d['items'] ?? [];
+                    if (is_string($itemsRaw)) $itemsRaw = array_map('trim', explode(',', $itemsRaw));
+                    if (!is_array($itemsRaw)) $itemsRaw = [];
+                    $out['items'] = array_values(array_filter(array_map('strval', $itemsRaw), fn($s) => trim($s) !== ''));
                 }
-            } elseif (is_string($value) && $value !== '') {
-                $norm[] = ['heading' => $value, 'description' => ''];
+            } elseif (is_string($value) && trim($value) !== '') {
+                // Plain string: treat as single-item list and heading if heading empty
+                $str = trim($value);
+                $out['heading'] = $str;
+                $out['items'] = [$str];
             }
 
-            return json_encode(array_values($norm), JSON_UNESCAPED_UNICODE);
+            return json_encode($out, JSON_UNESCAPED_UNICODE);
         }
+
 
         // Other / unknown types: return raw string
         return is_string($value) ? $value : '';

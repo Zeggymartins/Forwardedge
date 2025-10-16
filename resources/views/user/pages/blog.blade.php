@@ -47,7 +47,44 @@
                                 </div>
                             </article>
                         @empty
-                            <p class="text-center">No blog posts available yet.</p>
+                            <div class="empty-wrap my-5">
+                                <!-- BLOG SVG -->
+                                <svg class="empty-svg" viewBox="0 0 400 260" role="img"
+                                    aria-label="Blog posts coming soon">
+                                    <defs>
+                                        <linearGradient id="gb3" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" />
+                                            <stop offset="100%" stop-color="#2c99d4" />
+                                        </linearGradient>
+                                        <linearGradient id="gb3soft" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" stop-opacity=".15" />
+                                            <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15" />
+                                        </linearGradient>
+                                    </defs>
+                                    <ellipse cx="200" cy="170" rx="160" ry="70"
+                                        fill="url(#gb3soft)" />
+                                    <!-- notebook -->
+                                    <rect x="110" y="60" width="180" height="120" rx="10" fill="#fff"
+                                        stroke="url(#gb3)" stroke-width="3" />
+                                    <line x1="130" y1="90" x2="270" y2="90" stroke="#2c99d4"
+                                        stroke-width="2" opacity=".5" />
+                                    <line x1="130" y1="110" x2="240" y2="110" stroke="#2c99d4"
+                                        stroke-width="2" opacity=".5" />
+                                    <line x1="130" y1="130" x2="250" y2="130" stroke="#2c99d4"
+                                        stroke-width="2" opacity=".5" />
+                                    <!-- pen -->
+                                    <path d="M265 145l22 22-16 5-6-6z" fill="#FDB714" stroke="#c27e00" stroke-width="1.5" />
+                                    <circle cx="280" cy="160" r="4" fill="#2c99d4" />
+                                    <text x="200" y="210" text-anchor="middle" font-family="Inter, ui-sans-serif"
+                                        font-size="18" fill="#222">
+                                        Blog posts coming soon
+                                    </text>
+                                </svg>
+                                <p class="empty-text">We’re writing something great. Stay tuned!</p>
+                                <a href="{{ route('blog') }}" class="btn btn-gradient">Refresh</a>
+                            </div>
                         @endforelse
 
 

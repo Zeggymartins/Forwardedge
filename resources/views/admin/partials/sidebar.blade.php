@@ -113,6 +113,33 @@
                         <i class="bi bi-circle"></i><span>Enrollments</span>
                     </a>
                 </li>
+                   <li>
+                    <a href="">
+                        <i class="bi bi-circle"></i><span>Scholarships</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('scholarships.create') }}">
+                        <i class="bi bi-circle"></i><span>Create Scholarship Content </span>
+                    </a>
+                </li>
+                   <li>
+                    <a href="{{ route('scholarships.index') }}">
+                        <i class="bi bi-circle"></i><span>Scholarship Content </span>
+                    </a>
+                </li>
+
+                 <li>
+                    <a href="">
+                        <i class="bi bi-circle"></i><span>Testimonials </span>
+                    </a>
+                </li>
+
+                 <li>
+                    <a href="">
+                        <i class="bi bi-circle"></i><span>FAQs </span>
+                    </a>
+                </li>
             </ul>
         </li>
         <!-- Academy -->
