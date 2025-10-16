@@ -31,22 +31,22 @@
                     <img data-speed="0.8" src="{{ asset('frontend/assets/images/hero/banner.png') }}" alt="">
                 </div>
                 <!-- <div class="box-area">
-                                                <div class="customers-box">
-                                                  <div class="customers">
-                                                    <ul>
-                                                      <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
-                                                          alt=""></li>
-                                                      <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
-                                                          alt=""></li>
-                                                      <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
-                                                          alt=""></li>
-                                                      <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
-                                                    </ul>
-                                                  </div>
-                                                  <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
-                                                  <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
-                                                </div>
-                                              </div> -->
+                                                    <div class="customers-box">
+                                                      <div class="customers">
+                                                        <ul>
+                                                          <li class="wow fadeInLeft" data-wow-delay=".5s"><img src="assets/images/testimonial/client-1.webp"
+                                                              alt=""></li>
+                                                          <li class="wow fadeInLeft" data-wow-delay=".6s"><img src="assets/images/testimonial/client-2.webp"
+                                                              alt=""></li>
+                                                          <li class="wow fadeInLeft" data-wow-delay=".7s"><img src="assets/images/testimonial/client-3.webp"
+                                                              alt=""></li>
+                                                          <li class="wow fadeInLeft" data-wow-delay=".8s"><span><i class="tji-plus"></i></span></li>
+                                                        </ul>
+                                                      </div>
+                                                      <div class="customers-number wow fadeInUp" data-wow-delay=".5s">30K</div>
+                                                      <h6 class="customers-text wow fadeInUp" data-wow-delay=".5s">Happy customer we have world-wide.</h6>
+                                                    </div>
+                                                  </div> -->
             </div>
         </div>
         <div class="banner-scroll wow fadeInDown" data-wow-delay="2s">
@@ -267,12 +267,12 @@
                             </div>
                         </div>
                         <!-- <div class="video-img  wow fadeInUp" data-wow-delay=".9s">
-                                                    <img src="assets/images/about/about-2.webp" alt="">
-                                                    <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
-                                                      href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
-                                                      <span><i class="tji-play"></i></span>
-                                                    </a>
-                                                  </div> -->
+                                                        <img src="assets/images/about/about-2.webp" alt="">
+                                                        <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video" data-maxwidth="1200px"
+                                                          href="https://www.youtube.com/watch?v=MLpWrANjFbI&amp;ab_channel=eidelchteinadvogados">
+                                                          <span><i class="tji-play"></i></span>
+                                                        </a>
+                                                      </div> -->
                     </div>
                 </div>
             </div>
@@ -378,7 +378,7 @@
                     <div class="project-area tj-arrange-container">
                         <div class="project-item tj-arrange-item">
                             <div class="project-img"
-                                data-bg-image="{{ asset('frontend/assets/images/project/event2.jpg') }}"></div>
+                                data-bg-image="{{ asset('frontend/assets/images/project/pic1.jpg') }}"></div>
                             <div class="project-content">
                                 <span class="categories">Connect</span>
                                 <div class="project-text">
@@ -393,7 +393,7 @@
                         </div>
                         <div class="project-item tj-arrange-item">
                             <div class="project-img"
-                                data-bg-image="{{ asset('frontend/assets/images/project/picture.jpg') }}"></div>
+                                data-bg-image="{{ asset('frontend/assets/images/project/pic2.jpg') }}"></div>
                             <div class="project-content">
                                 <span class="categories"><a href="">Empower</a></span>
                                 <div class="project-text">
@@ -424,7 +424,7 @@
                         </div>
                         <div class="project-item tj-arrange-item">
                             <div class="project-img"
-                                data-bg-image="{{ asset('frontend/assets/images/project/eventbanner.jpg') }}"></div>
+                                data-bg-image="{{ asset('frontend/assets/images/project/solar.jpg') }}"></div>
                             <div class="project-content">
                                 <span class="categories"><a href="">Business</a></span>
                                 <div class="project-text">
@@ -528,74 +528,83 @@
                         <div class="swiper swiper-container testimonial-slider">
                             <div class="swiper-wrapper d-flex align-items-stretch"> <!-- flex here -->
 
-                                <div class="swiper-slide d-flex"> <!-- slide flex -->
-                                    <div
-                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-3 border rounded shadow-sm">
-                                        <span class="quote-icon"><i class="tji-quote"></i></span>
-                                        <div class="desc">
-                                            <p>Working with Forward Edge Consulting has been so rewarding.
-                                                About a year ago I needed to understand more about Crypto
-                                                Currencies and Stocks, I was well trained and shown
-                                                strategic ways on how to deal on these financial assets.</p>
-                                        </div>
-                                        <div class="testimonial-author mt-auto">
-                                            <div class="author-inner d-flex align-items-center">
-                                                <div class="author-img me-2">
-                                                    <img src="{{ asset('frontend/assets/images/testimonial/client-1.webp') }}"
-                                                        alt="">
-                                                </div>
-                                                <div class="author-header">
-                                                    <h4 class="title mb-0">Chris Davies</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
+                                <!-- Testimonial 1: Cybersecurity & Compliance -->
                                 <div class="swiper-slide d-flex">
                                     <div
-                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-3 border rounded shadow-sm">
-                                        <span class="quote-icon"><i class="tji-quote"></i></span>
-                                        <div class="desc">
-                                            <p>Attending a workshop organized by Forward Edge Consulting Ltd
-                                                changed my orientation about Real Estate and opened my eyes
-                                                to see and better opportunities in the industry.</p>
+                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-4 border border-info rounded-lg shadow-xl bg-gray-900 text-white">
+                                        <span class="quote-icon text-info"><i class="tji-quote"></i></span>
+                                        <div class="flex-grow-1 mb-3">
+                                            <p class="desc" style="color:black;">ForwardEdge completely transformed our security posture from reactive to
+                                                proactive. Their ZTA implementation and penetration testing uncovered gaps
+                                                we didn't know existed. We now have a truly resilient system integrated with
+                                                SIEM/SOAR, giving us confidence in our compliance and defense against
+                                                advanced threats.</p>
                                         </div>
                                         <div class="testimonial-author mt-auto">
                                             <div class="author-inner d-flex align-items-center">
                                                 <div class="author-img me-2">
-                                                    <img src="{{ asset('frontend/assets/images/testimonial/client-2.webp') }}"
-                                                        alt="">
-                                                </div>
-                                                <div class="author-header">
-                                                    <h4 class="title mb-0">Ebuwa Ahusimere</h4>
-                                                    <span class="designation">Petrokrafte Nigeria</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="swiper-slide d-flex">
-                                    <div
-                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-3 border rounded shadow-sm">
-                                        <span class="quote-icon"><i class="tji-quote"></i></span>
-                                        <div class="desc">
-                                            <p>Forward Edge Consulting really helped me understand so much
-                                                about Real Estate. I have been trying my best to get myself
-                                                in the industry but always felt it was so difficult and too
-                                                capital intensive. I took one of their Course and I have
-                                                started my journey with almost no money and it’s been a
-                                                great experience.</p>
-                                        </div>
-                                        <div class="testimonial-author mt-auto">
-                                            <div class="author-inner d-flex align-items-center">
-                                                <div class="author-img me-2">
-                                                    <img src="{{ asset('frontend/assets/images/testimonial/client-3.webp') }}"
-                                                        alt="">
+                                                    <img src="{{ asset('frontend/assets/images/testimonial/client1.jpeg') }}"
+                                                        alt="Client 1">
                                                 </div>
                                                 <div class="author-header">
                                                     <h4 class="title mb-0">Joshua Odubu</h4>
+                                                    {{-- <span class="designation text-secondary">CTO, FinTech
+                                                        Innovations</span> --}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Testimonial 2: Cloud & FinOps -->
+                                <div class="swiper-slide d-flex">
+                                    <div
+                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-4 border border-info rounded-lg shadow-xl bg-gray-900 text-white">
+                                        <span class="quote-icon text-info"><i class="tji-quote"></i></span>
+                                        <div class="desc flex-grow-1 mb-3">
+                                            <p style="color:black;">We challenged ForwardEdge to optimize our massive cloud spend. Their team
+                                                didn't just migrate us; they implemented a rigorous FinOps and IaC strategy,
+                                                resulting in a **35% reduction in monthly cloud costs** within six months.
+                                                The performance improvements and stability provided by their governance
+                                                model were equally impactful.</p>
+                                        </div>
+                                        <div class="testimonial-author mt-auto">
+                                            <div class="author-inner d-flex align-items-center">
+                                                <div class="author-img me-2">
+                                                    <img src="{{ asset('frontend/assets/images/testimonial/client2.jpeg') }}"
+                                                        alt="Client 2">
+                                                </div>
+                                                <div class="author-header">
+                                                    <h4 class="title mb-0">Chris Davies</h4>
+                                                    {{-- <span class="designation text-secondary">VP of Infrastructure, Global
+                                                        Manufacturing</span> --}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Testimonial 3: Software Development (Matching your selected text) -->
+                                <div class="swiper-slide d-flex">
+                                    <div
+                                        class="testimonial-item d-flex flex-column justify-content-between h-100 p-4 border border-info rounded-lg shadow-xl bg-gray-900 text-white">
+                                        <span class="quote-icon text-info"><i class="tji-quote"></i></span>
+                                        <div class="desc flex-grow-1 mb-3">
+                                            <p style="color:black;">The team’s expertise in **Domain-Driven Design** and **Microservices** was
+                                                clear from the start. They delivered a complex platform on time using their
+                                                hyper-transparent Agile process. The resulting product is incredibly
+                                                scalable and our in-house team is now better equipped, thanks to their focus
+                                                on High-Performance Engineering.</p>
+                                        </div>
+                                        <div class="testimonial-author mt-auto">
+                                            <div class="author-inner d-flex align-items-center">
+                                                <div class="author-img me-2">
+                                                    <img src="{{ asset('frontend/assets/images/testimonial/client3.jpeg') }}"
+                                                        alt="Client 3">
+                                                </div>
+                                                <div class="author-header">
+                                                    <h4 class="title mb-0">Ebuwa Ahusimer</h4>
+                                                    <span class="designation text-secondary">Petrokrafte Nigeria</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -815,166 +824,186 @@
     <!-- start: Blog Section -->
     <!-- start: Blog Section -->
     <!-- start: Blog Section -->
-  <section class="tj-blog-section section-gap">
-    <div class="container">
-        {{-- Heading --}}
-        <div class="row">
-            <div class="col-12">
-                <div class="sec-heading text-center">
-                    <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                        <i class="tji-box"></i>Events & Insights & Ideas
-                    </span>
-                    <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
+    <section class="tj-blog-section section-gap">
+        <div class="container">
+            {{-- Heading --}}
+            <div class="row">
+                <div class="col-12">
+                    <div class="sec-heading text-center">
+                        <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+                            <i class="tji-box"></i>Events & Insights & Ideas
+                        </span>
+                        <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        @php
-            // Take up to 3 from each source
-            $blogItems     = ($blogs ?? collect())->take(3);
-            $eventItems    = ($events ?? collect())->take(3);
-            $scheduleItems = ($upcomingSchedules ?? collect())->take(3);
+            @php
+                // Take up to 3 from each source
+                $blogItems = ($blogs ?? collect())->take(3);
+                $eventItems = ($events ?? collect())->take(3);
+                $scheduleItems = ($upcomingSchedules ?? collect())->take(3);
 
-            // Build one unified "event-card" style list
-            $cards = collect();
+                // Build one unified "event-card" style list
+                $cards = collect();
 
-            // BLOGS
-            foreach ($blogItems as $blog) {
-                $cards->push([
-                    'type'       => 'blog',
-                    'img'        => $blog->thumbnail ? asset('storage/'.$blog->thumbnail) : asset('frontend/assets/images/blog/default.webp'),
-                    'date'       => optional($blog->created_at)->format('d'),
-                    'month'      => optional($blog->created_at)->format('M'),
-                    'badge'      => 'Blog',
-                    'meta_right' => $blog->author->name ?? 'Admin',
-                    'title'      => $blog->title,
-                    'url'        => route('blogs.show', $blog->slug ?? $blog->id),
-                    'cta'        => 'Read More',
-                ]);
-            }
+                // BLOGS
+                foreach ($blogItems as $blog) {
+                    $cards->push([
+                        'type' => 'blog',
+                        'img' => $blog->thumbnail
+                            ? asset('storage/' . $blog->thumbnail)
+                            : asset('frontend/assets/images/blog/default.webp'),
+                        'date' => optional($blog->created_at)->format('d'),
+                        'month' => optional($blog->created_at)->format('M'),
+                        'badge' => 'Blog',
+                        'meta_right' => $blog->author->name ?? 'Admin',
+                        'title' => $blog->title,
+                        'url' => route('blogs.show', $blog->slug ?? $blog->id),
+                        'cta' => 'Read More',
+                    ]);
+                }
 
-            // EVENTS
-            foreach ($eventItems as $event) {
-                $cards->push([
-                    'type'       => 'event',
-                    'img'        => $event->banner_image ? asset('storage/'.$event->banner_image) : asset('frontend/assets/images/project/project-6.webp'),
-                    'date'       => \Carbon\Carbon::parse($event->start_date)->format('d'),
-                    'month'      => \Carbon\Carbon::parse($event->start_date)->format('M'),
-                    'badge'      => 'Event',
-                    'meta_right' => $event->location ?? 'Online',
-                    'title'      => $event->title,
-                    'url'        => route('events.show', $event->slug),
-                    'cta'        => 'View Details',
-                ]);
-            }
+                // EVENTS
+                foreach ($eventItems as $event) {
+                    $cards->push([
+                        'type' => 'event',
+                        'img' => $event->banner_image
+                            ? asset('storage/' . $event->banner_image)
+                            : asset('frontend/assets/images/project/project-6.webp'),
+                        'date' => \Carbon\Carbon::parse($event->start_date)->format('d'),
+                        'month' => \Carbon\Carbon::parse($event->start_date)->format('M'),
+                        'badge' => 'Event',
+                        'meta_right' => $event->location ?? 'Online',
+                        'title' => $event->title,
+                        'url' => route('events.show', $event->slug),
+                        'cta' => 'View Details',
+                    ]);
+                }
 
-            // SCHEDULES (styled same as events)
-            foreach ($scheduleItems as $schedule) {
-                $course   = $schedule->course;
-                $thumb    = $course?->thumbnail ? asset('storage/'.$course->thumbnail) : asset('frontend/assets/images/service/service-1.webp');
-                $title    = $course?->title ?? 'Bootcamp';
-                $slug     = $course?->slug;
+                // SCHEDULES (styled same as events)
+                foreach ($scheduleItems as $schedule) {
+                    $course = $schedule->course;
+                    $thumb = $course?->thumbnail
+                        ? asset('storage/' . $course->thumbnail)
+                        : asset('frontend/assets/images/service/service-1.webp');
+                    $title = $course?->title ?? 'Bootcamp';
+                    $slug = $course?->slug;
 
-                $cards->push([
-                    'type'       => 'schedule',
-                    'img'        => $thumb,
-                    'date'       => \Carbon\Carbon::parse($schedule->start_date)->format('d'),
-                    'month'      => \Carbon\Carbon::parse($schedule->start_date)->format('M'),
-                    'badge'      => ucfirst($schedule->type ?? 'virtual'),
-                    'meta_right' => $schedule->location ?? 'Online',
-                    'title'      => $title,
-                    'url'        => $slug ? route('course.show', $slug) : route('enroll.pricing', $schedule->id),
-                    'cta'        => $slug ? 'View Details' : 'Enroll Now',
-                ]);
-            }
-        @endphp
+                    $cards->push([
+                        'type' => 'schedule',
+                        'img' => $thumb,
+                        'date' => \Carbon\Carbon::parse($schedule->start_date)->format('d'),
+                        'month' => \Carbon\Carbon::parse($schedule->start_date)->format('M'),
+                        'badge' => ucfirst($schedule->type ?? 'virtual'),
+                        'meta_right' => $schedule->location ?? 'Online',
+                        'title' => $title,
+                        'url' => $slug ? route('course.show', $slug) : route('enroll.pricing', $schedule->id),
+                        'cta' => $slug ? 'View Details' : 'Enroll Now',
+                    ]);
+                }
+            @endphp
 
-        <div class="row row-gap-4 mt-4">
-            @if ($cards->isEmpty())
-                {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
-                <div class="col-xl-4 col-md-6 mx-auto">
-                    <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
-                        <div class="blog-thumb d-flex align-items-center justify-content-center"
-                             style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
-                            <svg width="100%" height="100%" viewBox="0 0 420 250" preserveAspectRatio="xMidYMid meet" aria-label="Fresh content coming soon">
-                                <defs>
-                                    <linearGradient id="gb-all" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="#FDB714"/>
-                                        <stop offset="100%" stop-color="#2c99d4"/>
-                                    </linearGradient>
-                                    <linearGradient id="gb-all-soft" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="#FDB714" stop-opacity=".15"/>
-                                        <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15"/>
-                                    </linearGradient>
-                                </defs>
-                                <ellipse cx="210" cy="205" rx="175" ry="42" fill="url(#gb-all-soft)"/>
-                                <!-- three tiles -->
-                                <g transform="translate(60,45)">
-                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
-                                    <rect x="15" y="24" width="60" height="10" rx="5" fill="url(#gb-all)" opacity=".25"/>
-                                    <rect x="15" y="44" width="60" height="10" rx="5" fill="#2c99d4" opacity=".2"/>
-                                </g>
-                                <g transform="translate(165,45)">
-                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
-                                    <rect y="24" width="90" height="24" fill="url(#gb-all)" opacity=".12"/>
-                                    <rect x="12" y="70" width="24" height="18" rx="5" fill="url(#gb-all)"/>
-                                    <rect x="42" y="70" width="24" height="18" rx="5" fill="url(#gb-all)" opacity=".6"/>
-                                    <rect x="12" y="96" width="54" height="10" rx="5" fill="#2c99d4" opacity=".25"/>
-                                </g>
-                                <g transform="translate(270,45)">
-                                    <rect width="90" height="140" rx="12" fill="#fff" stroke="url(#gb-all)" stroke-width="3"/>
-                                    <rect x="12" y="30" width="66" height="12" rx="6" fill="url(#gb-all)" opacity=".3"/>
-                                    <rect x="12" y="50" width="52" height="10" rx="5" fill="#2c99d4" opacity=".25"/>
-                                    <circle cx="70" cy="110" r="12" fill="url(#gb-all)"/>
-                                </g>
-                                <text x="210" y="235" text-anchor="middle" font-family="Inter,ui-sans-serif" font-size="16" fill="#222">
-                                    New blogs, events & bootcamps coming soon
-                                </text>
-                            </svg>
-                        </div>
-                        <div class="blog-content text-center">
-                            <h4 class="title mb-1">Stay tuned</h4>
-                            <p class="m-0">We’re lining up fresh blogs, events, and bootcamps for you.</p>
-                        </div>
-                    </div>
-                </div>
-            @else
-                {{-- ONE unified row of event-style cards --}}
-                @foreach ($cards as $i => $c)
-                    <div class="col-xl-4 col-md-6">
-                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
-                            <div class="blog-thumb">
-                                <a href="{{ $c['url'] }}">
-                                    <img src="{{ $c['img'] }}"
-                                         alt="{{ $c['title'] }}"
-                                         style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
-                                </a>
-                                <div class="blog-date">
-                                    <span class="date">{{ $c['date'] }}</span>
-                                    <span class="month">{{ $c['month'] }}</span>
-                                </div>
+            <div class="row row-gap-4 mt-4">
+                @if ($cards->isEmpty())
+                    {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
+                    <div class="col-xl-4 col-md-6 mx-auto">
+                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
+                            <div class="blog-thumb d-flex align-items-center justify-content-center"
+                                style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
+                                <svg width="100%" height="100%" viewBox="0 0 420 250"
+                                    preserveAspectRatio="xMidYMid meet" aria-label="Fresh content coming soon">
+                                    <defs>
+                                        <linearGradient id="gb-all" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" />
+                                            <stop offset="100%" stop-color="#2c99d4" />
+                                        </linearGradient>
+                                        <linearGradient id="gb-all-soft" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" stop-opacity=".15" />
+                                            <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15" />
+                                        </linearGradient>
+                                    </defs>
+                                    <ellipse cx="210" cy="205" rx="175" ry="42"
+                                        fill="url(#gb-all-soft)" />
+                                    <!-- three tiles -->
+                                    <g transform="translate(60,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect x="15" y="24" width="60" height="10" rx="5"
+                                            fill="url(#gb-all)" opacity=".25" />
+                                        <rect x="15" y="44" width="60" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".2" />
+                                    </g>
+                                    <g transform="translate(165,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect y="24" width="90" height="24" fill="url(#gb-all)" opacity=".12" />
+                                        <rect x="12" y="70" width="24" height="18" rx="5"
+                                            fill="url(#gb-all)" />
+                                        <rect x="42" y="70" width="24" height="18" rx="5"
+                                            fill="url(#gb-all)" opacity=".6" />
+                                        <rect x="12" y="96" width="54" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".25" />
+                                    </g>
+                                    <g transform="translate(270,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect x="12" y="30" width="66" height="12" rx="6"
+                                            fill="url(#gb-all)" opacity=".3" />
+                                        <rect x="12" y="50" width="52" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".25" />
+                                        <circle cx="70" cy="110" r="12" fill="url(#gb-all)" />
+                                    </g>
+                                    <text x="210" y="235" text-anchor="middle" font-family="Inter,ui-sans-serif"
+                                        font-size="16" fill="#222">
+                                        New blogs, events & bootcamps coming soon
+                                    </text>
+                                </svg>
                             </div>
-                            <div class="blog-content">
-                                <div class="blog-meta">
-                                    <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
-                                    <span>{{ $c['meta_right'] }}</span>
-                                </div>
-                                <h4 class="title">
-                                    <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
-                                </h4>
-                                <a class="text-btn" href="{{ $c['url'] }}">
-                                    <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
-                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                </a>
+                            <div class="blog-content text-center">
+                                <h4 class="title mb-1">Stay tuned</h4>
+                                <p class="m-0">We’re lining up fresh blogs, events, and bootcamps for you.</p>
                             </div>
                         </div>
                     </div>
-                @endforeach
-            @endif
-        </div>
+                @else
+                    {{-- ONE unified row of event-style cards --}}
+                    @foreach ($cards as $i => $c)
+                        <div class="col-xl-4 col-md-6">
+                            <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
+                                <div class="blog-thumb">
+                                    <a href="{{ $c['url'] }}">
+                                        <img src="{{ $c['img'] }}" alt="{{ $c['title'] }}"
+                                            style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                                    </a>
+                                    <div class="blog-date">
+                                        <span class="date">{{ $c['date'] }}</span>
+                                        <span class="month">{{ $c['month'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="blog-content">
+                                    <div class="blog-meta">
+                                        <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
+                                        <span>{{ $c['meta_right'] }}</span>
+                                    </div>
+                                    <h4 class="title">
+                                        <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
+                                    </h4>
+                                    <a class="text-btn" href="{{ $c['url'] }}">
+                                        <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
+                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
 
-    </div>
-</section>
+        </div>
+    </section>
 
     <!-- end: Blog Section -->
 
