@@ -39,4 +39,13 @@ class Course extends Model
     {
         return $this->hasMany(CourseDetails::class)->orderBy('sort_order', 'asc');
     }
+
+    public function testimonials()
+    {
+        return $this->hasMany(CourseTestimonials::class);
+    }
+    public function faqs()
+    {
+        return $this->hasMany(CourseFaq::class);
+    }
 }

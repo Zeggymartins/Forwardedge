@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseContent;
 use App\Models\CourseDetails;
+use App\Models\CourseFaq;
 use App\Models\CoursePhases;
 use App\Models\CourseTopics;
 use App\Models\CourseSchedule;
+use App\Models\CourseTestimonials;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -825,5 +827,117 @@ class AdminCourseController extends Controller
     {
         $course = Course::with('contents')->findOrFail($courseId);
         return view('admin.pages.courses.course_contents', compact('course'));
+    }
+
+    // TESTIMONIALS
+    public function testimonialsIndex(Course $course)
+    {
+        $items   = CourseTestimonials::latest()->paginate(20);
+        $courses = Course::orderBy('title')->get(['id', 'title']); // for the Add modal select
+        return view('admin.pages.courses.testimonials', compact('course', 'items', 'courses'));
+    }
+
+    public function testimonialsStore(Request $r) // global store (course selected in form)
+    {
+        $data = $r->validate([
+            'course_id'    => ['required', 'exists:courses,id'],
+            'name'         => ['required', 'string', 'max:120'],
+            'organization' => ['nullable', 'string', 'max:160'],
+            'body'         => ['required', 'string', 'max:2000'],
+            'image'        => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        if ($r->hasFile('image')) {
+            $data['image'] = $r->file('image')->store('testimonials', 'public');
+        }
+
+        $course = Course::findOrFail($data['course_id']);
+        $course->testimonials()->create($data);
+
+        return redirect()
+            ->route('admin.courses.testimonials.index', $course->id)
+            ->with('success', 'Testimonial created');
+    }
+
+    public function testimonialsUpdate(Request $r, Course $course, CourseTestimonials $testimonial)
+    {
+        abort_if($testimonial->course_id !== $course->id, 404);
+
+        $data = $r->validate([
+            'name'         => ['required', 'string', 'max:120'],
+            'organization' => ['nullable', 'string', 'max:160'],
+            'body'         => ['required', 'string', 'max:2000'],
+            'image'        => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        if ($r->hasFile('image')) {
+            if ($testimonial->image) Storage::disk('public')->delete($testimonial->image);
+            $data['image'] = $r->file('image')->store('testimonials', 'public');
+        }
+
+        $testimonial->update($data);
+
+        return redirect()
+            ->route('admin.courses.testimonials.index', $course->id)
+            ->with('success', 'Testimonial updated');
+    }
+
+    public function testimonialsDestroy(Course $course, CourseTestimonials $testimonial)
+    {
+        abort_if($testimonial->course_id !== $course->id, 404);
+
+        if ($testimonial->image) Storage::disk('public')->delete($testimonial->image);
+        $testimonial->delete();
+
+        return back()->with('success', 'Deleted');
+    }
+
+    public function faqsIndex(Course $course)
+    {
+        $items   = CourseFaq::orderByDesc('id')->paginate(30);
+        $courses = Course::orderBy('title')->get(['id', 'title']); // Add modal select
+        return view('admin.pages.courses.faq', compact('course', 'items', 'courses'));
+    }
+
+    public function faqsStore(Request $r) // global store
+    {
+        $data = $r->validate([
+            'course_id'  => ['required', 'exists:courses,id'],
+            'question'   => ['required', 'string', 'max:255'],
+            'answer'     => ['required', 'string'],
+            'sort_order' => ['nullable', 'integer', 'between:0,65535'],
+        ]);
+
+        $course = Course::findOrFail($data['course_id']);
+        $course->faqs()->create($data);
+
+        return redirect()
+            ->route('admin.courses.faqs.index', $course->id)
+            ->with('success', 'FAQ created');
+    }
+
+    public function faqsUpdate(Request $r, Course $course, CourseFaq $faq)
+    {
+        abort_if($faq->course_id !== $course->id, 404);
+
+        $data = $r->validate([
+            'question'   => ['required', 'string', 'max:255'],
+            'answer'     => ['required', 'string'],
+            'sort_order' => ['nullable', 'integer', 'between:0,65535'],
+        ]);
+
+        $faq->update($data);
+
+        return redirect()
+            ->route('admin.courses.faqs.index', $course->id)
+            ->with('success', 'FAQ updated');
+    }
+
+    public function faqsDestroy(Course $course, CourseFaq $faq)
+    {
+        abort_if($faq->course_id !== $course->id, 404);
+        $faq->delete();
+
+        return back()->with('success', 'Deleted');
     }
 }

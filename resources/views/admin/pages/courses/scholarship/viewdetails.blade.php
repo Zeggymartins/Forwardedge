@@ -101,16 +101,16 @@
 
   {{-- Hero --}}
   <div class="view-hero mb-4">
-    @if($item->hero_image)
-      <img class="hero-img" src="{{ asset('storage/'.$item->hero_image) }}" alt="Hero">
+    @if($item->image)
+      <img class="hero-img" src="{{ asset('storage/'.$item->image) }}" alt="Hero">
     @else
       <img class="hero-img" src="https://via.placeholder.com/1600x900?text=Scholarship+Hero" alt="Hero">
     @endif
     <div class="hero-overlay"></div>
     <div class="hero-text">
-      <h2 class="mb-1">{{ $item->hero_headline ?? 'Scholarship' }}</h2>
+      <h2 class="mb-1">{{ $item->headline ?? 'Scholarship' }}</h2>
       @if(!empty($item->hero_subtext))
-        <div class="lead-muted">{{ $item->hero_subtext }}</div>
+        <div class="lead-muted">{{ $item->subtext }}</div>
       @endif>
     </div>
   </div>

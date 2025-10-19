@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminCourseController;
+use App\Http\Controllers\Admin\AdminDashboard;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminEnrollmentController;
@@ -22,7 +23,10 @@ use App\Http\Controllers\ScolarshipApplicationController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\WishlistController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
+use App\Models\Scholarship;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,6 +119,16 @@ Route::get('/reset-password', function () {
     // Submit application
     Route::post('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'storeData'])
         ->name('scholarships.apply.store');
+   Route::get('/scholarships', [ScolarshipApplicationController::class, 'display'])
+        ->name('scholarships');
+// routes/web.php
+Route::get('/scholarships/thank-you', fn() => view('user.pages.thankyou', [
+    'course'   => session('thankyou.course'),   // optional: pass context
+    'schedule' => session('thankyou.schedule'),
+    'enrollUrl' => session('thankyou.enrollUrl'),
+    'specializationsUrl' => session('thankyou.specializationsUrl'),
+]))->name('scholarships.thankyou');
+
 /*
 |--------------------------------------------------------------------------
 | Cart & Wishlist Routes (Public but require auth for backend)
@@ -180,9 +194,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(function () {
 
     // Dashboard (Login Landing)
-    Route::get('/dashboard', function () {
-        return view('admin.pages.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
     // Profile management
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -313,6 +325,32 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::post('/{id}/schedules', [AdminCourseController::class, 'storeSchedule'])->name('schedules.store');
         Route::put('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'updateSchedule'])->name('schedules.update');
         Route::delete('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'destroySchedule'])->name('schedules.destroy');
+
+        // TESTIMONIALS (index is per-course; store is global with course_id in form)
+        Route::get('/testimonials', [AdminCourseController::class, 'testimonialsIndex'])
+            ->name('testimonials.index');
+
+        Route::post('testimonials', [AdminCourseController::class, 'testimonialsStore'])
+            ->name('testimonials.store');
+
+        Route::put('{course}/testimonials/{testimonial}', [AdminCourseController::class, 'testimonialsUpdate'])
+            ->name('testimonials.update');
+
+        Route::delete('{course}/testimonials/{testimonial}', [AdminCourseController::class, 'testimonialsDestroy'])
+            ->name('testimonials.destroy');
+
+        // FAQS (same idea)
+        Route::get('/faqs', [AdminCourseController::class, 'faqsIndex'])
+            ->name('faqs.index');
+
+        Route::post('faqs', [AdminCourseController::class, 'faqsStore'])
+            ->name('faqs.store');
+
+        Route::put('{course}/faqs/{faq}', [AdminCourseController::class, 'faqsUpdate'])
+            ->name('faqs.update');
+
+        Route::delete('{course}/faqs/{faq}', [AdminCourseController::class, 'faqsDestroy'])
+            ->name('faqs.destroy');
     });
 
     /*
@@ -386,7 +424,48 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         ->name('scholarships.update');
 
     Route::delete('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'destroy'])
-        ->name('scholarships.destroy');});
+        ->name('scholarships.destroy');
+
+    Route::put('/debug/scholarships/{scholarship}', function (Request $r, Scholarship $scholarship) {
+        $file = $r->file('hero_image');
+
+        dd([
+            // session / csrf
+            'session_id'        => $r->session()->getId(),
+            'has_cookie'        => $r->hasCookie(config('session.cookie')),
+            'cookie_name'       => config('session.cookie'),
+            'csrf_input'        => $r->input('_token'),
+            'csrf_header'       => $r->header('X-CSRF-TOKEN'),
+            'session_csrf'      => $r->session()->token(),
+
+            // request / headers
+            'method'            => $r->method(),
+            'content_length'    => $r->server('CONTENT_LENGTH'),
+            'content_type'      => $r->header('Content-Type'),
+            'referer'           => $r->header('Referer'),
+            'origin'            => $r->header('Origin'),
+            'host'              => $r->getHost(),
+            'full_url'          => $r->fullUrl(),
+
+            // inputs (avoid dumping huge arrays)
+            'keys'              => array_keys($r->all()),
+            'slug'              => $r->input('slug'),
+            'status'            => $r->input('status'),
+
+            // file info
+            'has_file'          => $r->hasFile('hero_image'),
+            'file_ok'           => $file ? $file->isValid() : null,
+            'file_name'         => $file?->getClientOriginalName(),
+            'file_mime'         => $file?->getMimeType(),
+            'file_size_bytes'   => $file?->getSize(),
+
+            // server limits (if accessible)
+            'ini_upload_max'    => ini_get('upload_max_filesize'),
+            'ini_post_max'      => ini_get('post_max_size'),
+        ]);
+    })->withoutMiddleware(VerifyCsrfToken::class)->name('debug.scholarships.update');
+});
+
 
 /*
 |--------------------------------------------------------------------------

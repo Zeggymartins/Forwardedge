@@ -1,647 +1,452 @@
-   @extends('admin.master_page')
+@extends('admin.master_page')
 
-   @section('main')
-   <div class="pagetitle">
-      <h1>Dashboard</h1>
-      <nav>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
-        </ol>
-      </nav>
-    </div><!-- End Page Title -->
+@section('main')
+    @php
+        use Illuminate\Support\Str;
+        // Split unified activity into two balanced columns (server-side, zero JS)
+        $totalActivity = isset($activity) ? $activity->count() : 0;
+        $splitPoint = (int) ceil($totalActivity / 2);
+        $leftActivity = isset($activity) ? $activity->slice(0, $splitPoint) : collect();
+        $rightActivity = isset($activity) ? $activity->slice($splitPoint) : collect();
+
+        // Small helper for status -> badge color
+        $statusBadge = function ($status) {
+            $s = strtolower((string) $status);
+            return match (true) {
+                str_contains($s, 'paid'), $s === 'success', $s === 'approved' => 'success',
+                $s === 'pending' => 'warning',
+                $s === 'failed', $s === 'rejected', $s === 'cancelled' => 'danger',
+                default => 'secondary',
+            };
+        };
+    @endphp
+
+    <style>
+        .glass-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .05);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f6f8ff;
+        }
+
+        .kpi-icon i {
+            font-size: 1.25rem;
+        }
+
+        .btn-ghost {
+            border: 1px solid #e9ecef;
+            background: #fff;
+        }
+
+        .list-clean .list-group-item {
+            border-left: 0;
+            border-right: 0;
+        }
+
+        .card-link {
+            transition: transform .08s ease, box-shadow .12s ease;
+        }
+
+        .card-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, .08);
+        }
+
+        .section-gap {
+            margin-top: 1.25rem;
+        }
+
+        .amount-fig {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .ref-col {
+            max-width: 68%;
+        }
+
+        .ref-col .text-truncate {
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Rock-solid alignment for amounts */
+        .amount-col {
+            min-width: 140px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .mono {
+            font-variant-numeric: tabular-nums;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+    </style>
+
+    <div class="pagetitle">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h1 class="mb-1">Dashboard</h1>
+                <nav>
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="flex-grow-1" style="max-width:560px;">
+                <form action="/admin/search" method="GET">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input name="q" class="form-control"
+                            placeholder="Search orders, payments, enrollments, messages…" />
+                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/admin/courses/create" class="btn btn-primary"><i class="bi bi-journal-plus me-1"></i> New
+                    Course</a>
+                <a href="/admin/events/create" class="btn btn-ghost"><i class="bi bi-broadcast me-1"></i> New Event</a>
+            </div>
+        </div>
+    </div>
 
     <section class="section dashboard">
-      <div class="row">
 
-        <!-- Left side columns -->
-        <div class="col-lg-8">
-          <div class="row">
-
-            <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-6">
-              <div class="card info-card sales-card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Sales <span>| Today</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-cart"></i>
+        {{-- KPI ROW --}}
+        <div class="row g-3 section-gap">
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-bag-check"></i></div>
+                        <div>
+                            <div class="text-muted small">Orders</div>
+                            <div class="h4 mb-0">{{ number_format($totals['orders'] ?? 0) }}</div>
+                            <div class="mt-1"><span class="badge bg-light text-dark">Today:
+                                    {{ $kpis['orders_today'] ?? 0 }}</span></div>
+                        </div>
                     </div>
-                    <div class="ps-3">
-                      <h6>145</h6>
-                      <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                    </div>
-                  </div>
                 </div>
-
-              </div>
-            </div><!-- End Sales Card -->
-
-            <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-6">
-              <div class="card info-card revenue-card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Revenue <span>| This Month</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-credit-card"></i></div>
+                        <div>
+                            <div class="text-muted small">Payments</div>
+                            <div class="h4 mb-0">{{ number_format($totals['payments'] ?? 0) }}</div>
+                            <div class="mt-1"><span class="badge bg-light text-dark">Today:
+                                    {{ $kpis['payments_today'] ?? 0 }}</span></div>
+                        </div>
                     </div>
-                    <div class="ps-3">
-                      <h6>$3,264</h6>
-                      <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                    </div>
-                  </div>
                 </div>
-
-              </div>
-            </div><!-- End Revenue Card -->
-
-            <!-- Customers Card -->
-            <div class="col-xxl-4 col-xl-12">
-
-              <div class="card info-card customers-card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Customers <span>| This Year</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-people"></i>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-mortarboard"></i></div>
+                        <div>
+                            <div class="text-muted small">Enrollments</div>
+                            <div class="h4 mb-0">{{ number_format($totals['enrollments'] ?? 0) }}</div>
+                            <div class="mt-1"><span class="badge bg-light text-dark">This week:
+                                    {{ $kpis['enrollments_week'] ?? 0 }}</span></div>
+                        </div>
                     </div>
-                    <div class="ps-3">
-                      <h6>1244</h6>
-                      <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
-
-                    </div>
-                  </div>
-
                 </div>
-              </div>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-calendar2-check"></i></div>
+                        <div>
+                            <div class="text-muted small">Event Reg.</div>
+                            <div class="h4 mb-0">{{ number_format($totals['event_registrations'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-chat-dots"></i></div>
+                        <div>
+                            <div class="text-muted small">Messages</div>
+                            <div class="h4 mb-0">{{ number_format($totals['messages'] ?? 0) }}</div>
+                            <div class="mt-1"><span class="badge bg-light text-dark">Unread:
+                                    {{ $kpis['messages_unread'] ?? 0 }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="kpi-icon"><i class="bi bi-stack"></i></div>
+                        <div>
+                            <div class="text-muted small">Order Items</div>
+                            <div class="h4 mb-0">{{ number_format($totals['order_items'] ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            </div><!-- End Customers Card -->
-
-            <!-- Reports -->
+        {{-- QUEUES ROW --}}
+        <div class="row g-3 section-gap">
             <div class="col-12">
-              <div class="card">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                <div class="row g-3 row-cols-2 row-cols-md-4">
+                    <div class="col">
+                        <a class="glass-card p-3 d-block card-link text-decoration-none"
+                            href="/admin/enrollments?tag=free&status=pending">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small">Scholarships Pending</div>
+                                    <div class="h4 mb-0">{{ $queues['scholarship_pending'] ?? 0 }}</div>
+                                </div>
+                                <i class="bi bi-mortarboard fs-3"></i>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a class="glass-card p-3 d-block card-link text-decoration-none"
+                            href="/admin/enrollments?status=pending">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small">Pending Enrollments</div>
+                                    <div class="h4 mb-0">{{ $queues['pending_enrollments'] ?? 0 }}</div>
+                                </div>
+                                <i class="bi bi-clipboard-check fs-3"></i>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a class="glass-card p-3 d-block card-link text-decoration-none"
+                            href="/admin/payments?status=pending">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small">Payments to Review</div>
+                                    <div class="h4 mb-0">{{ $queues['payments_pending'] ?? 0 }}</div>
+                                </div>
+                                <i class="bi bi-exclamation-diamond fs-3"></i>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a class="glass-card p-3 d-block card-link text-decoration-none"
+                            href="/admin/messages?filter=unread">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small">Unread Messages</div>
+                                    <div class="h4 mb-0">{{ $queues['messages_unread'] ?? 0 }}</div>
+                                </div>
+                                <i class="bi bi-envelope-open fs-3"></i>
+                            </div>
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="card-body">
-                  <h5 class="card-title">Reports <span>/Today</span></h5>
-
-                  <!-- Line Chart -->
-                  <div id="reportsChart"></div>
-
-                  <script>
-                    document.addEventListener("DOMContentLoaded", () => {
-                      new ApexCharts(document.querySelector("#reportsChart"), {
-                        series: [{
-                          name: 'Sales',
-                          data: [31, 40, 28, 51, 42, 82, 56],
-                        }, {
-                          name: 'Revenue',
-                          data: [11, 32, 45, 32, 34, 52, 41]
-                        }, {
-                          name: 'Customers',
-                          data: [15, 11, 32, 18, 9, 24, 11]
-                        }],
-                        chart: {
-                          height: 350,
-                          type: 'area',
-                          toolbar: {
-                            show: false
-                          },
-                        },
-                        markers: {
-                          size: 4
-                        },
-                        colors: ['#4154f1', '#2eca6a', '#ff771d'],
-                        fill: {
-                          type: "gradient",
-                          gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
-                            stops: [0, 90, 100]
-                          }
-                        },
-                        dataLabels: {
-                          enabled: false
-                        },
-                        stroke: {
-                          curve: 'smooth',
-                          width: 2
-                        },
-                        xaxis: {
-                          type: 'datetime',
-                          categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-                        },
-                        tooltip: {
-                          x: {
-                            format: 'dd/MM/yy HH:mm'
-                          },
-                        }
-                      }).render();
-                    });
-                  </script>
-                  <!-- End Line Chart -->
-
+        {{-- CONTENT ROWS --}}
+        <div class="row g-3 section-gap">
+            {{-- Left: Recent Orders --}}
+            <div class="col-12 col-xl-8">
+                <div class="glass-card p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="mb-0">Recent Orders</h5>
+                        <a href="/admin/orders" class="btn btn-sm btn-ghost">View all</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentOrders as $order)
+                                    <tr>
+                                        <td><a href="/admin/orders/{{ $order->id }}">#{{ $order->id }}</a></td>
+                                        <td>{{ $order->customer_name ?? '—' }}</td>
+                                        <td>
+                                            @php $currency = $order->currency ?? '₦'; @endphp
+                                            <strong>{{ $currency }}{{ number_format($order->total_amount ?? 0, 2) }}</strong>
+                                        </td>
+                                        <td><span
+                                                class="badge bg-{{ $statusBadge($order->status) }}">{{ ucfirst($order->status ?? 'unknown') }}</span>
+                                        </td>
+                                        <td>{{ optional($order->created_at)->format('d M Y, H:i') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">No orders yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
-              </div>
-            </div><!-- End Reports -->
-
-            <!-- Recent Sales -->
-            <div class="col-12">
-              <div class="card recent-sales overflow-auto">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body">
-                  <h5 class="card-title">Recent Sales <span>| Today</span></h5>
-
-                  <table class="table table-borderless datatable">
-                    <thead>
-                      <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Customer</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row"><a href="#">#2457</a></th>
-                        <td>Brandon Jacob</td>
-                        <td><a href="#" class="text-primary">At praesentium minu</a></td>
-                        <td>$64</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#">#2147</a></th>
-                        <td>Bridie Kessler</td>
-                        <td><a href="#" class="text-primary">Blanditiis dolor omnis similique</a></td>
-                        <td>$47</td>
-                        <td><span class="badge bg-warning">Pending</span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#">#2049</a></th>
-                        <td>Ashleigh Langosh</td>
-                        <td><a href="#" class="text-primary">At recusandae consectetur</a></td>
-                        <td>$147</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#">#2644</a></th>
-                        <td>Angus Grady</td>
-                        <td><a href="#" class="text-primar">Ut voluptatem id earum et</a></td>
-                        <td>$67</td>
-                        <td><span class="badge bg-danger">Rejected</span></td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#">#2644</a></th>
-                        <td>Raheem Lehner</td>
-                        <td><a href="#" class="text-primary">Sunt similique distinctio</a></td>
-                        <td>$165</td>
-                        <td><span class="badge bg-success">Approved</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                </div>
-
-              </div>
-            </div><!-- End Recent Sales -->
-
-            <!-- Top Selling -->
-            <div class="col-12">
-              <div class="card top-selling overflow-auto">
-
-                <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                  <h5 class="card-title">Top Selling <span>| Today</span></h5>
-
-                  <table class="table table-borderless">
-                    <thead>
-                      <tr>
-                        <th scope="col">Preview</th>
-                        <th scope="col">Product</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Sold</th>
-                        <th scope="col">Revenue</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-1.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Ut inventore ipsa voluptas nulla</a></td>
-                        <td>$64</td>
-                        <td class="fw-bold">124</td>
-                        <td>$5,828</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-2.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Exercitationem similique doloremque</a></td>
-                        <td>$46</td>
-                        <td class="fw-bold">98</td>
-                        <td>$4,508</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-3.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Doloribus nisi exercitationem</a></td>
-                        <td>$59</td>
-                        <td class="fw-bold">74</td>
-                        <td>$4,366</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-4.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Officiis quaerat sint rerum error</a></td>
-                        <td>$32</td>
-                        <td class="fw-bold">63</td>
-                        <td>$2,016</td>
-                      </tr>
-                      <tr>
-                        <th scope="row"><a href="#"><img src="assets/img/product-5.jpg" alt=""></a></th>
-                        <td><a href="#" class="text-primary fw-bold">Sit unde debitis delectus repellendus</a></td>
-                        <td>$79</td>
-                        <td class="fw-bold">41</td>
-                        <td>$3,239</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                </div>
-
-              </div>
-            </div><!-- End Top Selling -->
-
-          </div>
-        </div><!-- End Left side columns -->
-
-        <!-- Right side columns -->
-        <div class="col-lg-4">
-
-          <!-- Recent Activity -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
             </div>
 
-            <div class="card-body">
-              <h5 class="card-title">Recent Activity <span>| Today</span></h5>
+            {{-- Right: Payments + Messages --}}
+            <div class="col-12 col-xl-4">
+                <div class="glass-card p-3 mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="mb-0">Recent Payments</h5>
+                        <a href="/admin/payments" class="btn btn-sm btn-ghost">View all</a>
+                    </div>
+                    <ul class="list-group list-group-flush list-clean">
+                        @forelse($recentPayments as $p)
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                @php
+                                    // --- LEFT: Short, readable reference + meta
+                                    $ref = $p->reference ?? 'Ref #' . $p->id;
+                                    // middle-ellipsis: first 6 … last 6
+                                    $shortRef = strlen($ref) > 16 ? substr($ref, 0, 6) . '…' . substr($ref, -6) : $ref;
 
-              <div class="activity">
+                                    // --- RIGHT: Clean, aligned amount
+                                    $currency = strtoupper($p->currency ?? 'NGN');
+                                    $symbol = match ($currency) {
+                                        'NGN' => '₦',
+                                        'USD' => '$',
+                                        'EUR' => '€',
+                                        'GBP' => '£',
+                                        default => '',
+                                    };
 
-                <div class="activity-item d-flex">
-                  <div class="activite-label">32 min</div>
-                  <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
-                  <div class="activity-content">
-                    Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
-                  </div>
-                </div><!-- End activity item-->
+                                    $raw = is_numeric($p->amount) ? (float) $p->amount : 0.0;
+                                    // Assume gateways store minor units for these currencies
+                                    $amount = in_array($currency, ['NGN', 'USD', 'EUR', 'GBP']) ? $raw / 100 : $raw;
+                                @endphp
 
-                <div class="activity-item d-flex">
-                  <div class="activite-label">56 min</div>
-                  <i class='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
-                  <div class="activity-content">
-                    Voluptatem blanditiis blanditiis eveniet
-                  </div>
-                </div><!-- End activity item-->
+                                <div class="ref-col">
+                                    <div class="fw-semibold text-truncate">{{ $shortRef }}</div>
+                                    <small class="text-muted">
+                                        {{ ucfirst($p->status ?? 'unknown') }} •
+                                        {{ optional($p->created_at)->diffForHumans() }}
+                                    </small>
+                                </div>
 
-                <div class="activity-item d-flex">
-                  <div class="activite-label">2 hrs</div>
-                  <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
-                  <div class="activity-content">
-                    Voluptates corrupti molestias voluptatem
-                  </div>
-                </div><!-- End activity item-->
+                                <div class="amount-col">
+                                    <span class="fw-bold mono">{{ $symbol }}{{ number_format($amount, 2) }}</span>
+                                    @if (!$symbol)
+                                        <span class="text-muted small ms-1">{{ $currency }}</span>
+                                    @endif
+                                </div>
+                            </li>
 
-                <div class="activity-item d-flex">
-                  <div class="activite-label">1 day</div>
-                  <i class='bi bi-circle-fill activity-badge text-info align-self-start'></i>
-                  <div class="activity-content">
-                    Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
-                  </div>
-                </div><!-- End activity item-->
-
-                <div class="activity-item d-flex">
-                  <div class="activite-label">2 days</div>
-                  <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
-                  <div class="activity-content">
-                    Est sit eum reiciendis exercitationem
-                  </div>
-                </div><!-- End activity item-->
-
-                <div class="activity-item d-flex">
-                  <div class="activite-label">4 weeks</div>
-                  <i class='bi bi-circle-fill activity-badge text-muted align-self-start'></i>
-                  <div class="activity-content">
-                    Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
-                  </div>
-                </div><!-- End activity item-->
-
-              </div>
-
-            </div>
-          </div><!-- End Recent Activity -->
-
-          <!-- Budget Report -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">Budget Report <span>| This Month</span></h5>
-
-              <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
-
-              <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                    legend: {
-                      data: ['Allocated Budget', 'Actual Spending']
-                    },
-                    radar: {
-                      // shape: 'circle',
-                      indicator: [{
-                          name: 'Sales',
-                          max: 6500
-                        },
-                        {
-                          name: 'Administration',
-                          max: 16000
-                        },
-                        {
-                          name: 'Information Technology',
-                          max: 30000
-                        },
-                        {
-                          name: 'Customer Support',
-                          max: 38000
-                        },
-                        {
-                          name: 'Development',
-                          max: 52000
-                        },
-                        {
-                          name: 'Marketing',
-                          max: 25000
-                        }
-                      ]
-                    },
-                    series: [{
-                      name: 'Budget vs spending',
-                      type: 'radar',
-                      data: [{
-                          value: [4200, 3000, 20000, 35000, 50000, 18000],
-                          name: 'Allocated Budget'
-                        },
-                        {
-                          value: [5000, 14000, 28000, 26000, 42000, 21000],
-                          name: 'Actual Spending'
-                        }
-                      ]
-                    }]
-                  });
-                });
-              </script>
-
-            </div>
-          </div><!-- End Budget Report -->
-
-          <!-- Website Traffic -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">Website Traffic <span>| Today</span></h5>
-
-              <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-
-              <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                  echarts.init(document.querySelector("#trafficChart")).setOption({
-                    tooltip: {
-                      trigger: 'item'
-                    },
-                    legend: {
-                      top: '5%',
-                      left: 'center'
-                    },
-                    series: [{
-                      name: 'Access From',
-                      type: 'pie',
-                      radius: ['40%', '70%'],
-                      avoidLabelOverlap: false,
-                      label: {
-                        show: false,
-                        position: 'center'
-                      },
-                      emphasis: {
-                        label: {
-                          show: true,
-                          fontSize: '18',
-                          fontWeight: 'bold'
-                        }
-                      },
-                      labelLine: {
-                        show: false
-                      },
-                      data: [{
-                          value: 1048,
-                          name: 'Search Engine'
-                        },
-                        {
-                          value: 735,
-                          name: 'Direct'
-                        },
-                        {
-                          value: 580,
-                          name: 'Email'
-                        },
-                        {
-                          value: 484,
-                          name: 'Union Ads'
-                        },
-                        {
-                          value: 300,
-                          name: 'Video Ads'
-                        }
-                      ]
-                    }]
-                  });
-                });
-              </script>
-
-            </div>
-          </div><!-- End Website Traffic -->
-
-          <!-- News & Updates Traffic -->
-          <div class="card">
-            <div class="filter">
-              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li class="dropdown-header text-start">
-                  <h6>Filter</h6>
-                </li>
-
-                <li><a class="dropdown-item" href="#">Today</a></li>
-                <li><a class="dropdown-item" href="#">This Month</a></li>
-                <li><a class="dropdown-item" href="#">This Year</a></li>
-              </ul>
-            </div>
-
-            <div class="card-body pb-0">
-              <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
-
-              <div class="news">
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-1.jpg" alt="">
-                  <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                  <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">No payments recorded.</li>
+                        @endforelse
+                    </ul>
                 </div>
 
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-2.jpg" alt="">
-                  <h4><a href="#">Quidem autem et impedit</a></h4>
-                  <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
+                <div class="glass-card p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="mb-0">Latest Messages</h5>
+                        <a href="/admin/messages" class="btn btn-sm btn-ghost">View all</a>
+                    </div>
+                    <div class="list-group">
+                        @forelse($recentMessages as $m)
+                            <a href="/admin/messages/{{ $m->id }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ $m->subject ?? 'Message #' . $m->id }}</h6>
+                                    <small class="text-muted">{{ optional($m->created_at)->diffForHumans() }}</small>
+                                </div>
+                                <p class="mb-1 text-truncate">
+                                    {{ Str::limit(strip_tags($m->body ?? ($m->message ?? '')), 120) }}</p>
+                                <small class="text-muted">From: {{ $m->name ?? ($m->email ?? 'Unknown') }}</small>
+                            </a>
+                        @empty
+                            <div class="text-muted">No messages yet.</div>
+                        @endforelse
+                    </div>
                 </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-3.jpg" alt="">
-                  <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
-                  <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
-                </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-4.jpg" alt="">
-                  <h4><a href="#">Laborum corporis quo dara net para</a></h4>
-                  <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
-                </div>
-
-                <div class="post-item clearfix">
-                  <img src="assets/img/news-5.jpg" alt="">
-                  <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
-                  <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
-                </div>
-
-              </div><!-- End sidebar recent posts-->
-
             </div>
-          </div><!-- End News & Updates -->
+        </div>
 
-        </div><!-- End Right side columns -->
+        {{-- UPCOMING + RECENT ACTIVITY (TWO COLUMNS) --}}
+        <div class="row g-3 section-gap">
+            <div class="col-12 col-xl-6">
+                <div class="glass-card p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="mb-0">Upcoming (7 days)</h5>
+                        <a href="/admin/events" class="btn btn-sm btn-ghost">View all</a>
+                    </div>
+                    <ul class="list-group list-group-flush list-clean">
+                        @forelse($upcomingEvents as $er)
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">{{ $er->event->title ?? 'Event #' . $er->event_id }}</div>
+                                    <small
+                                        class="text-muted">{{ optional($er->event->start_at)->format('D, d M Y · H:i') }}</small>
+                                </div>
+                                <span class="badge bg-secondary">{{ $er->event->location ?? 'Online' }}</span>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">Nothing scheduled.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
 
-      </div>
+            <div class="col-12 col-xl-6">
+                <div class="glass-card p-3 h-100">
+                    <h5 class="mb-2">Recent Activity</h5>
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                @forelse($leftActivity as $a)
+                                    <li class="d-flex align-items-center mb-3">
+                                        <i class="bi {{ $a['icon'] }} me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <a href="{{ $a['url'] }}"
+                                                class="fw-semibold text-decoration-none">{{ $a['text'] }}</a>
+                                            <div class="text-muted small">{{ optional($a['ts'])->diffForHumans() }}</div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="text-muted">No activity.</li>
+                                @endforelse
+                            </ul>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                @forelse($rightActivity as $a)
+                                    <li class="d-flex align-items-center mb-3">
+                                        <i class="bi {{ $a['icon'] }} me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <a href="{{ $a['url'] }}"
+                                                class="fw-semibold text-decoration-none">{{ $a['text'] }}</a>
+                                            <div class="text-muted small">{{ optional($a['ts'])->diffForHumans() }}</div>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="text-muted">No activity.</li>
+                                @endforelse
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
-    @endsection
+@endsection

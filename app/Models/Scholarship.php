@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Str;
 
 class Scholarship extends Model
 {
@@ -12,7 +14,7 @@ class Scholarship extends Model
         'status',
         'headline',
         'subtext',
-        'image',
+        'image',              // store hero image here
         'text',
         'cta_url',
         'about',
@@ -31,17 +33,40 @@ class Scholarship extends Model
         'program_includes' => 'array',
         'who_can_apply'    => 'array',
         'how_to_apply'     => 'array',
-        'opens_at'         => 'date',
-        'closes_at'        => 'date',
+        'opens_at'         => 'datetime',
+        'closes_at'        => 'datetime',
     ];
 
+    // Scopes
     public function scopePublished($q)
     {
         return $q->where('status', 'published');
     }
 
+    // Relations
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    // Accessors
+    public function imageUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            $path = $this->image;
+            if (!$path) return null;
+
+            return Str::startsWith($path, ['http://', 'https://', '/'])
+                ? $path
+                : asset('storage/' . $path);
+        });
+    }
+
+    public function closingUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            // prefer closing_cta_url; fall back to cta_url; else contact
+            return $this->closing_cta_url ?: ($this->cta_url ?: url('contact'));
+        });
     }
 }

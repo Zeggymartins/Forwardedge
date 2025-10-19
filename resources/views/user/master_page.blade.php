@@ -160,12 +160,16 @@
                 <h5 class="hamburger-title">Follow Us</h5>
                 <div class="social-links style-3">
                     <ul>
-                        <li><a href="https://www.facebook.com/" target="_blank"><i
+                        <li><a href="https://facebook.com/forwardedgeconsulting/
+
+" target="_blank"><i
                                     class="fa-brands fa-facebook-f"></i></a></li>
-                        <li><a href="https://www.instagram.com/" target="_blank"><i
+                        <li><a href="https://www.instagram.com/forwardedge_consultingltd
+" target="_blank"><i
                                     class="fa-brands fa-instagram"></i></a></li>
-                        <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
-                        <li><a href="https://www.linkedin.com/" target="_blank"><i
+                        <li><a href="https://x.com/ForwardEdgeNg" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
+                        <li><a href="https://www.linkedin.com/company/forward-edge-consulting-ltd/
+" target="_blank"><i
                                     class="fa-brands fa-linkedin-in"></i></a></li>
                     </ul>
                 </div>
@@ -197,15 +201,15 @@
                     <div class="contact-info">
                         <div class="contact-item">
                             <span class="subtitle">Phone</span>
-                            <a class="contact-link" href="tel:8089091313">808-909-1313</a>
+                            <a class="contact-link" href="tel:+2347039955591">+234 703 995 5591</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Email</span>
-                            <a class="contact-link" href="mailto:info@bexon.com">info@bexon.com</a>
+                            <a class="contact-link" href="mailto:info@forwardedgeconsulting.com">info@forwardedgeconsulting.com</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Location</span>
-                            <span class="contact-link">993 Renner Burg, West Rond, MT 94251-030</span>
+                            <span class="contact-link">Iwaya Road, 58 Iwaya Rd, Yaba, Lagos State</span>
                         </div>
                     </div>
                 </div>
@@ -214,12 +218,16 @@
                 <h5 class="hamburger-title">Follow Us</h5>
                 <div class="social-links style-3">
                     <ul>
-                        <li><a href="https://www.facebook.com/" target="_blank"><i
+                        <li><a href="https://facebook.com/forwardedgeconsulting/
+
+" target="_blank"><i
                                     class="fa-brands fa-facebook-f"></i></a></li>
-                        <li><a href="https://www.instagram.com/" target="_blank"><i
+                        <li><a href="https://www.instagram.com/forwardedge_consultingltd
+" target="_blank"><i
                                     class="fa-brands fa-instagram"></i></a></li>
-                        <li><a href="https://x.com/" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
-                        <li><a href="https://www.linkedin.com/" target="_blank"><i
+                        <li><a href="https://x.com/ForwardEdgeNg" target="_blank"><i class="fa-brands fa-x-twitter"></i></a></li>
+                        <li><a href="https://www.linkedin.com/company/forward-edge-consulting-ltd/
+" target="_blank"><i
                                     class="fa-brands fa-linkedin-in"></i></a></li>
                     </ul>
                 </div>
@@ -239,9 +247,9 @@
                 <div class="modal-body">
                     {{-- Nav tabs --}}
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
-                                href="#loginTab">Login</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
+                                href="#loginTab">Login</a></li>
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
                                 href="#registerTab">Register</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#otpTab">OTP</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#forgotTab">Forgot</a>
@@ -325,9 +333,9 @@
             </div>
         </div>
     </div>
-
+@if (!View::hasSection('hide_header'))
     @include('user.partials.header')
-
+@endif
     <div id="smooth-wrapper">
         <div id="smooth-content">
             <main id="primary" class="site-main">

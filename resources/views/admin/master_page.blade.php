@@ -11,7 +11,11 @@
 
   <link href="{{ asset('frontend/assets/images/fav.png') }}" rel="icon">
   <link href="{{ asset('backend/assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+      {{-- ✅ CSRF meta for forms & AJAX --}}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  {{-- (Optional) If you ALWAYS serve from the same host/path, you can help relative URLs --}}
+  {{-- <base href="/"> --}}
   <link href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 <!-- iziToast CSS -->
@@ -91,6 +95,31 @@
   <script src="{{ asset('backend/assets/vendor/php-email-form/validate.js') }}"></script>
 
   <script src="{{ asset('backend/assets/js/main.js') }}"></script>
+  <script>
+  (function () {
+    var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!token) return;
+
+    // axios (if present)
+    if (window.axios && window.axios.defaults) {
+      window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+      window.axios.defaults.withCredentials = true;
+    }
+
+    // fetch wrapper (optional safety net)
+    if (!window.csrfFetch) {
+      window.csrfFetch = function (input, init) {
+        init = init || {};
+        init.headers = init.headers || {};
+        if (!('X-CSRF-TOKEN' in init.headers)) init.headers['X-CSRF-TOKEN'] = token;
+        // Keep cookies (session) on same-origin calls
+        if (!('credentials' in init)) init.credentials = 'same-origin';
+        return fetch(input, init);
+      };
+    }
+  })();
+</script>
+
 @if ($errors->any())
     <script>
         @foreach ($errors->all() as $error)

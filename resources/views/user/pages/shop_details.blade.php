@@ -124,11 +124,14 @@
                                 <!-- Share -->
                                 <div class="tj-product-details-share">
                                     <h6>Share:</h6>
-                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}"
+                                    <a href="https://facebook.com/forwardedgeconsulting/
+
+sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}"
                                         title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                                    <a href="https://x.com/intent/tweet?url={{ urlencode(request()->fullUrl()) }}"
+                                    <a href="https://x.com/ForwardEdgeNgintent/tweet?url={{ urlencode(request()->fullUrl()) }}"
                                         title="Twitter"><i class="fab fa-x-twitter"></i></a>
-                                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ urlencode(request()->fullUrl()) }}"
+                                    <a href="https://www.linkedin.com/company/forward-edge-consulting-ltd/
+shareArticle?mini=true&url={{ urlencode(request()->fullUrl()) }}"
                                         title="Linkedin"><i class="fa-brands fa-linkedin-in"></i></a>
                                     <a href="https://pinterest.com/pin/create/button/?url={{ urlencode(request()->fullUrl()) }}"
                                         title="Pinterest"><i class="fa-brands fa-pinterest-p"></i></a>

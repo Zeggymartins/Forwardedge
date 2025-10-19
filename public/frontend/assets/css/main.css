@@ -28094,7 +28094,7 @@ START: Blog CSS
 /* ==== PRIMARY THEME REWIRE (appended by assistant) ==== */
 :root {
   /* Keep solid color for text/borders */
-  --tj-color-theme-primary: #FDB714; /* Gold */
+  --tj-color-theme-primary: #2c99d4; /* Gold */
 
   /* Single place to control the gradient look */
   --tj-gradient-primary: linear-gradient(135deg, #2c99d4 0%, #FDB714 100%);

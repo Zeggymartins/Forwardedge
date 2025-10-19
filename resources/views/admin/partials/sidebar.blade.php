@@ -130,13 +130,13 @@
                 </li>
 
                  <li>
-                    <a href="">
+                    <a href="{{ route('admin.courses.testimonials.index') }}">
                         <i class="bi bi-circle"></i><span>Testimonials </span>
                     </a>
                 </li>
 
                  <li>
-                    <a href="">
+                    <a href="{{ route('admin.courses.faqs.index') }}">
                         <i class="bi bi-circle"></i><span>FAQs </span>
                     </a>
                 </li>
