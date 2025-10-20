@@ -11,9 +11,10 @@ class Message extends Model
         'email',
         'phone',
         'service_id',
-        'message'
+        'message',
+        'read_at'
     ];
-
+    protected $casts = ['read_at' => 'datetime'];
     public function service()
     {
         return $this->belongsTo(Service::class);
