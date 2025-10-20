@@ -92,11 +92,11 @@ class AdminDashboard extends Controller
                     ])
             )
             ->merge(
-                Message::select('id', 'subject', 'created_at')->latest()->take(10)->get()
+                Message::select('id', 'message','created_at')->latest()->take(10)->get()
                     ->map(fn($m) => [
                         'ts'   => $m->created_at,
                         'icon' => 'bi-chat-dots',
-                        'text' => "Message: " . ($m->subject ?: 'No subject'),
+                        'text' => "Message: " . ($m->message ?: 'No subject'),
                         'url'  => "/admin/messages/{$m->id}",
                     ])
             )
