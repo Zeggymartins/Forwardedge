@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\OrderItem;
 use App\Models\Orders;
 use App\Models\Payment;
+use App\Models\ScholarshipApplication;
 use Illuminate\Http\Request;
 
 class AdminDashboard extends Controller
@@ -37,7 +38,7 @@ class AdminDashboard extends Controller
         // Queues that need attention
         $queues = [
             'pending_enrollments' => Enrollment::where('status', 'pending')->count(),
-            'scholarship_pending' => Enrollment::where('tag', 'free')->where('status', 'pending')->count(), // adjust if your schema differs
+            'scholarship_pending' => ScholarshipApplication::where('status', 'pending')->count(), // adjust if your schema differs
             'payments_pending' => Payment::whereIn('status', ['pending', 'failed'])->count(),
             'messages_unread' => $kpis['messages_unread'],
         ];

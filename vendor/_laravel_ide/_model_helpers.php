@@ -6895,6 +6895,7 @@ namespace App\Models {
     /**
      * App\Models\Message
      *
+     * @property string|null $read_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property string $message
@@ -6912,6 +6913,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message whereMessage($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message whereReadAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Message>|Message query()
