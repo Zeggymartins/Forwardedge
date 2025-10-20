@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminDashboard;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminEnrollmentController;
+use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\AdminTransactionsController;
 use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
@@ -464,6 +465,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
             'ini_post_max'      => ini_get('post_max_size'),
         ]);
     })->withoutMiddleware(VerifyCsrfToken::class)->name('debug.scholarships.update');
+
+
+    Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{message}/json', [AdminMessageController::class, 'showJson'])->name('messages.json');
+    Route::post('/messages/{message}/reply', [AdminMessageController::class, 'reply'])->name('messages.reply');
 });
 
 

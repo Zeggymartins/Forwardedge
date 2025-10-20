@@ -277,12 +277,12 @@
         <!-- Contact Us -->
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#contact-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-layout-text-window-reverse"></i><span>Contact Us</span><i class="bi bi-chevron-down ms-auto"></i>
+                <i class="bi bi-layout-text-window-reverse"></i><span>Messages</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="contact-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="tables-general">
-                        <i class="bi bi-circle"></i><span>Add Contact</span>
+                    <a href="{{ route('messages.index') }}">
+                        <i class="bi bi-circle"></i><span>View Messages</span>
                     </a>
                 </li>
             </ul>

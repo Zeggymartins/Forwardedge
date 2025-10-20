@@ -31,11 +31,17 @@ class CourseController extends Controller
 
     public function shop(Request $request)
     {
-        $query = Course::where('status', 'published');
+        // ===== Base: published + HAS CONTENT =====
+        // Content = (has phases with topics) OR (has details)
+        $base = Course::query()
+            ->where('status', 'published')
+            ->whereHas('contents');
 
-        // Handle sorting
+        // We'll reuse this base for other queries
+        $query = (clone $base);
+
+        // ===== Sorting =====
         $orderby = $request->get('orderby', 'date');
-
         switch ($orderby) {
             case 'title':
                 $query->orderBy('title', 'asc');
@@ -52,7 +58,7 @@ class CourseController extends Controller
                 break;
         }
 
-        // Handle price filtering
+        // ===== Price filter (applies to listables only) =====
         if ($request->has('min_price') && $request->has('max_price')) {
             $minPrice = $request->get('min_price');
             $maxPrice = $request->get('max_price');
@@ -63,17 +69,21 @@ class CourseController extends Controller
             });
         }
 
+        // ===== Results =====
         $course = $query->paginate(6)->withQueryString();
-        $latestCourse = Course::where('status', 'published')->latest()->take(3)->get();
 
-        // Get price range for filter
-        $priceRange = Course::where('status', 'published')
+        // Latest (respect same "has content" rule)
+        $latestCourse = (clone $base)->latest()->take(3)->get();
+
+        // Price range (respect same "has content" rule)
+        $priceRange = (clone $base)
             ->selectRaw('MIN(COALESCE(discount_price, price)) as min_price')
             ->selectRaw('MAX(COALESCE(discount_price, price)) as max_price')
             ->first();
 
         return view('user.pages.shop', compact('course', 'latestCourse', 'priceRange'));
     }
+
 
     public function shopDetails($slug)
     {

@@ -190,7 +190,7 @@
                 <div class="col-xl-4 col-lg-6 order-lg-1 order-2">
                     <div class="about-img-area style-2 wow fadeInLeft" data-wow-delay=".3s">
                         <div class="about-img overflow-hidden">
-                            <img data-speed=".8" src="{{ asset('frontend/assets/images/about/pic1.jpg') }}"
+                            <img data-speed=".8" src="{{ asset('frontend/assets/images/project/picture3.jpg') }}"
                                 alt="">
                         </div>
                         <div class="box-area style-2">

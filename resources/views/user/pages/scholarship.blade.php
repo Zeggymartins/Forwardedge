@@ -10,7 +10,7 @@
     <title>Scholarship</title>
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/assets/images/fav.png') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"> --}}
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/font-awesome-pro.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/animate.min.css') }}">
@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/venobox.min.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/odometer-theme-default.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/meanmenu.css') }}">
-    <link rel="stylesheet" href="{{ asset('frontend/assets/css/shop.css') }}" />
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/main.css') }}" />
 </head>
 
@@ -109,6 +108,7 @@
 
     // ABOUT
     $about       = (string)($scholarship->about ?? '');
+    $text =(string)($scholarship->text ?? '');
     $aboutKicker = $course->title ?? 'Forward Edge';
     $ctaText     = $scholarship->closing_cta_text ?: 'Apply Now';
     $aboutImage  = asset('frontend/assets/images/service/service7.jpeg');
@@ -128,7 +128,7 @@
 
     // WHY / NOTES / CLOSING
     $whyHeading       = 'Why Apply';
-    $whyText          = Str::limit(strip_tags($about), 220)
+    $whyText          = Str::limit(strip_tags($text), 220)
                         ?: 'Gain hands-on experience, expert mentorship, and access to opportunities that accelerate your growth.';
     $important_note   = (string)($scholarship->important_note ?? '');
     $closing_headline = $scholarship->closing_headline ?: 'Ready to take the next step?';
@@ -515,43 +515,160 @@
     </section>
 
     {{-- ========== Blog (CTAs point to closing URL) ========== --}}
-    <section class="tj-blog-section h6-blog section-gap">
+     <section class="tj-blog-section section-gap">
         <div class="container">
+            {{-- Heading --}}
             <div class="row">
                 <div class="col-12">
-                    <div class="sec-heading style-2 style-6 text-center">
+                    <div class="sec-heading text-center">
                         <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                            <i class="tji-box"></i>Insights & Ideas
+                            <i class="tji-box"></i>Events & Insights & Ideas
                         </span>
-                        <h2 class="sec-title title-anim">The Ultimate Resource.</h2>
+                        <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
                     </div>
                 </div>
             </div>
 
-            <div class="row row-gap-4 h6-blog-wrapper">
-                @foreach ([1,2,3] as $i)
-                    <div class="col-xl-4 col-md-6">
-                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
-                            <div class="blog-thumb">
-                                <a href="{{ $closingUrl }}">
-                                    <img src="{{ asset("frontend/assets/images/blog/blog-$i.webp") }}" alt="">
-                                </a>
-                                <div class="blog-date"><span class="date">28</span><span class="month">Feb</span></div>
+            @php
+                // Take up to 3 from each source
+                $blogItems = ($blogs ?? collect())->take(3);
+                $eventItems = ($events ?? collect())->take(3);
+
+                // Build one unified "event-card" style list
+                $cards = collect();
+
+                // BLOGS
+                foreach ($blogItems as $blog) {
+                    $cards->push([
+                        'type' => 'blog',
+                        'img' => $blog->thumbnail
+                            ? asset('storage/' . $blog->thumbnail)
+                            : asset('frontend/assets/images/blog/default.webp'),
+                        'date' => optional($blog->created_at)->format('d'),
+                        'month' => optional($blog->created_at)->format('M'),
+                        'badge' => 'Blog',
+                        'meta_right' => $blog->author->name ?? 'Admin',
+                        'title' => $blog->title,
+                        'url' => route('blogs.show', $blog->slug ?? $blog->id),
+                        'cta' => 'Read More',
+                    ]);
+                }
+
+                // EVENTS
+                foreach ($eventItems as $event) {
+                    $cards->push([
+                        'type' => 'event',
+                        'img' => $event->banner_image
+                            ? asset('storage/' . $event->banner_image)
+                            : asset('frontend/assets/images/project/project-6.webp'),
+                        'date' => \Carbon\Carbon::parse($event->start_date)->format('d'),
+                        'month' => \Carbon\Carbon::parse($event->start_date)->format('M'),
+                        'badge' => 'Event',
+                        'meta_right' => $event->location ?? 'Online',
+                        'title' => $event->title,
+                        'url' => route('events.show', $event->slug),
+                        'cta' => 'View Details',
+                    ]);
+                }
+
+              
+            @endphp
+            <div class="row row-gap-4 mt-4">
+                @if ($cards->isEmpty())
+                    {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
+                    <div class="col-xl-4 col-md-6 mx-auto">
+                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
+                            <div class="blog-thumb d-flex align-items-center justify-content-center"
+                                style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
+                                <svg width="100%" height="100%" viewBox="0 0 420 250"
+                                    preserveAspectRatio="xMidYMid meet" aria-label="Fresh content coming soon">
+                                    <defs>
+                                        <linearGradient id="gb-all" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" />
+                                            <stop offset="100%" stop-color="#2c99d4" />
+                                        </linearGradient>
+                                        <linearGradient id="gb-all-soft" x1="0" y1="0" x2="1"
+                                            y2="1">
+                                            <stop offset="0%" stop-color="#FDB714" stop-opacity=".15" />
+                                            <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15" />
+                                        </linearGradient>
+                                    </defs>
+                                    <ellipse cx="210" cy="205" rx="175" ry="42"
+                                        fill="url(#gb-all-soft)" />
+                                    <!-- three tiles -->
+                                    <g transform="translate(60,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect x="15" y="24" width="60" height="10" rx="5"
+                                            fill="url(#gb-all)" opacity=".25" />
+                                        <rect x="15" y="44" width="60" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".2" />
+                                    </g>
+                                    <g transform="translate(165,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect y="24" width="90" height="24" fill="url(#gb-all)" opacity=".12" />
+                                        <rect x="12" y="70" width="24" height="18" rx="5"
+                                            fill="url(#gb-all)" />
+                                        <rect x="42" y="70" width="24" height="18" rx="5"
+                                            fill="url(#gb-all)" opacity=".6" />
+                                        <rect x="12" y="96" width="54" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".25" />
+                                    </g>
+                                    <g transform="translate(270,45)">
+                                        <rect width="90" height="140" rx="12" fill="#fff"
+                                            stroke="url(#gb-all)" stroke-width="3" />
+                                        <rect x="12" y="30" width="66" height="12" rx="6"
+                                            fill="url(#gb-all)" opacity=".3" />
+                                        <rect x="12" y="50" width="52" height="10" rx="5" fill="#2c99d4"
+                                            opacity=".25" />
+                                        <circle cx="70" cy="110" r="12" fill="url(#gb-all)" />
+                                    </g>
+                                    <text x="210" y="235" text-anchor="middle" font-family="Inter,ui-sans-serif"
+                                        font-size="16" fill="#222">
+                                        New blogs, events & bootcamps coming soon
+                                    </text>
+                                </svg>
                             </div>
-                            <div class="blog-content">
-                                <div class="blog-meta">
-                                    <span class="categories"><a href="{{ $closingUrl }}">Resource</a></span>
-                                    <span>By <a href="{{ $closingUrl }}">Team</a></span>
-                                </div>
-                                <h4 class="title"><a href="{{ $closingUrl }}">Helpful insight {{ $i }}</a></h4>
-                                <a class="text-btn" href="{{ $closingUrl }}">
-                                    <span class="btn-text"><span>Read More</span></span>
-                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                </a>
+                            <div class="blog-content text-center">
+                                <h4 class="title mb-1">Stay tuned</h4>
+                                <p class="m-0">We’re lining up fresh blogs, events, and bootcamps for you.</p>
                             </div>
                         </div>
                     </div>
-                @endforeach
+                @else
+                    {{-- ONE unified row of event-style cards --}}
+                    @foreach ($cards as $i => $c)
+                        <div class="col-xl-4 col-md-6">
+                            <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
+                                <div class="blog-thumb">
+                                    <a href="{{ $c['url'] }}">
+                                        <img src="{{ $c['img'] }}" alt="{{ $c['title'] }}"
+                                            style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                                    </a>
+                                    <div class="blog-date">
+                                        <span class="date">{{ $c['date'] }}</span>
+                                        <span class="month">{{ $c['month'] }}</span>
+                                    </div>
+                                </div>
+                                <div class="blog-content">
+                                    <div class="blog-meta">
+                                        <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
+                                        <span>{{ $c['meta_right'] }}</span>
+                                    </div>
+                                    <h4 class="title">
+                                        <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
+                                    </h4>
+                                    <a class="text-btn" href="{{ $c['url'] }}">
+                                        <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
+                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
 
         </div>
@@ -663,7 +780,7 @@
                             <div class="col-12">
                                 <div class="h6-footer-logo">
                                     <a href="index.html" class="wow fadeInUpBig" data-wow-delay=".3s">
-                                        <img src="{{ asset('frontend/assets/images/logos/logo-large.webp') }}"
+                                        <img src="{{ asset('frontend/assets/images/logos/logo-large.png') }}"
                                             alt="">
                                     </a>
                                 </div>
@@ -678,7 +795,7 @@
                                 <div class="copyright-content-area">
                                     <div class="copyright-text">
                                         <p>&copy; 2025 <a href="https://themeforest.net/user/theme-junction/portfolio"
-                                                target="_blank">Bexon</a>
+                                                target="_blank">ForwardEdge</a>
                                             All right reserved</p>
                                     </div>
                                     <div class="social-links style-3 style-6">

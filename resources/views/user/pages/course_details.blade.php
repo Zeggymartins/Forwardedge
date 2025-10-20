@@ -1,4 +1,5 @@
 @extends('user.master_page')
+
 @section('title', ($course->name ?? 'Course Details') . ' | Forward Edge Consulting')
 @push('styles')
     <style>
@@ -16,78 +17,85 @@
         .image-box {
             position: relative;
             overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, .1);
-            transition: all .3s ease;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .08);
+            transition: transform .25s ease, box-shadow .25s ease;
+            background: #fff;
         }
 
         .image-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, .15);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
         }
 
         .image-box img {
             width: 100%;
-            height: 200px;
+            height: 300px;
             object-fit: cover;
             display: block;
-            transition: filter .3s ease-in-out;
+            transition: filter .25s ease-in-out;
         }
 
         .image-box:hover img {
-            filter: brightness(70%);
+            filter: brightness(72%);
         }
 
-        /* Enroll button sits on image */
+        /* Enroll button sits on image and is keyboard accessible */
         .image-box .enroll-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 12px 24px;
+            padding: 12px 20px;
             background: var(--tj-grad);
             color: #fff;
             font-weight: 600;
             text-decoration: none;
-            border-radius: 25px;
+            border-radius: 999px;
             opacity: 0;
-            transition: all .3s ease-in-out;
+            transition: all .25s ease-in-out;
             border: none;
             cursor: pointer;
             box-shadow: 0 8px 16px rgba(0, 0, 0, .15);
         }
 
-        .image-box:hover .enroll-btn {
+        .image-box:hover .enroll-btn,
+        .image-box:focus-within .enroll-btn {
             opacity: 1;
+        }
+
+        .enroll-btn:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 3px;
         }
 
         /* ===== Phase cards ===== */
         .phase-card {
             background: #fff;
-            border-radius: 12px;
-            padding: 25px;
+            border-radius: 14px;
+            padding: 24px;
             height: 100%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
-            transition: all .3s ease;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, .06);
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
             border: 1px solid #f0f0f0;
         }
 
         .phase-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+            transform: translateY(-4px);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, .10);
+            border-color: #ececec;
         }
 
         .phase-number {
-            display: inline-block;
+            display: inline-grid;
+            place-items: center;
             width: 50px;
             height: 50px;
             background: var(--tj-grad);
             color: #fff;
             border-radius: 50%;
-            text-align: center;
-            line-height: 50px;
-            font-weight: bold;
-            margin-bottom: 20px;
+            font-weight: 800;
+            margin-bottom: 18px;
             box-shadow: 0 6px 16px rgba(0, 0, 0, .15);
         }
 
@@ -103,8 +111,8 @@
 
         /* ===== Schedule card ===== */
         .schedule-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%);
+            border-radius: 14px;
             padding: 20px;
             margin: 20px 0;
             border-left: 4px solid var(--tj-gold);
@@ -114,28 +122,30 @@
         .price-tag {
             background: var(--tj-grad);
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
         }
 
         .course-stats {
             background: #f8f9fa;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 30px 0;
+            border-radius: 14px;
+            padding: 24px;
+            margin: 28px 0;
         }
 
         .stat-item {
             text-align: center;
-            padding: 20px;
+            padding: 16px;
         }
 
         .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.9rem;
+            font-weight: 800;
             background: var(--tj-grad);
             -webkit-background-clip: text;
             background-clip: text;
@@ -144,9 +154,9 @@
 
         .stat-label {
             color: var(--tj-text-muted);
-            font-size: .9rem;
+            font-size: .86rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: .8px;
         }
 
         /* ===== Two-column lists (responsive) ===== */
@@ -188,7 +198,7 @@
             }
         }
 
-        /* ===== Optional: gradient badges, buttons you might reuse ===== */
+        /* ===== Optional: gradient badges, buttons ===== */
         .badge-gradient {
             background: var(--tj-grad);
             color: #fff;
@@ -204,117 +214,298 @@
             background: var(--tj-grad-rev);
             color: #fff;
         }
+
         .service-details-item .desc {
-  overflow-wrap: anywhere;   /* modern */
-  word-break: break-word;    /* fallback */
-}
-.service-details-item .desc ul { margin-top: .5rem; }
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .service-details-item .desc ul {
+            margin-top: .5rem;
+        }
+
+        /* Features grid (kept, though features will use your .service-details-item structure) */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+
+        .features-grid .feature-card {
+            grid-column: span 12;
+            position: relative;
+            border-radius: 12px;
+            padding: 22px 22px 18px;
+            background: #fff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+            display: flex;
+            flex-direction: column;
+            min-height: 230px;
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        @media (min-width: 768px) {
+            .features-grid .feature-card {
+                grid-column: span 6;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .features-grid .feature-card {
+                grid-column: span 4;
+            }
+        }
+
+        .feature-card .number {
+            font-weight: 800;
+            font-size: 18px;
+            line-height: 1;
+            opacity: .25;
+            margin-bottom: 8px;
+        }
+
+        .feature-card .title {
+            margin: 0 0 8px 0;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .feature-card .desc {
+            margin: 0 0 8px 0;
+            color: #576071;
+            line-height: 1.6;
+        }
+
+        .feature-card ul {
+            margin: 8px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .feature-card ul li {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            margin: 6px 0;
+            color: #2a3142;
+        }
+
+        .feature-card ul li>span {
+            margin-top: 2px;
+            display: inline-flex;
+        }
+
+        .features-grid .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, .10);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .image-box,
+            .phase-card {
+                transition: none;
+            }
+
+            .image-box img,
+            .enroll-btn {
+                transition: none;
+            }
+        }
+
+        /* === Features in rows (Bootstrap grid) === */
+        .fe-features {
+            margin-top: 24px;
+        }
+
+        .fe-card {
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .06);
+            padding: 20px 20px 16px;
+            transition: transform .25s ease, box-shadow .25s ease;
+            height: 100%;
+        }
+
+        .fe-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, .10);
+        }
+
+        .fe-num {
+            display: inline-block;
+            font-weight: 800;
+            font-size: 18px;
+            opacity: .28;
+            margin-bottom: 8px;
+        }
+
+        .fe-title {
+            margin: 0 0 8px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .fe-desc {
+            margin: 0 0 6px;
+            color: #576071;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
     </style>
 @endpush
 
 @section('main')
+    @php
+        use Illuminate\Support\Str;
+        use Illuminate\Support\Facades\Storage;
+        use Carbon\Carbon;
+
+        $schedules = $course->schedules ?? collect();
+        $firstSchedule = $schedules->first();
+        $phases = $course->phases ?? collect();
+        $details = $course->details ?? collect();
+
+        // Safely resolve thumbnail from public disk
+        $thumb =
+            !empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail)
+                ? asset('storage/' . $course->thumbnail)
+                : asset('frontend/assets/images/service/service-1.webp');
+
+        // Format helper
+        $fmt = function ($date) {
+            try {
+                return $date ? Carbon::parse($date)->format('M j, Y') : '—';
+            } catch (\Throwable $e) {
+                return '—';
+            }
+        };
+
+        $primaryPrice = optional($firstSchedule)->price;
+
+        // === Feature numbering state ===
+        // This counter increases across consecutive "features" blocks and resets to 0
+        // whenever a non-feature block (heading/paragraph/list/images/faq/unknown) appears.
+        $featureCounter = 0;
+        $resetFeatureCounter = function () use (&$featureCounter) {
+            $featureCounter = 0;
+        };
+    @endphp
+
     @include('user.partials.breadcrumb')
-    <section class="tj-blog-section section-gap slidebar-stickiy-container">
+
+    <section class="tj-blog-section section-gap slidebar-stickiy-container" aria-label="Course details">
         <div class="container">
             <div class="row row-gap-5">
                 <div class="col-lg-12">
                     <div class="post-details-wrapper">
+
                         {{-- Course Hero Image --}}
-                        <div class="blog-images wow fadeInUp" data-wow-delay=".1s">
-                            <img src="{{ $course->thumbnail && file_exists(storage_path('app/public/' . $course->thumbnail))
-                                ? asset('storage/' . $course->thumbnail)
-                                : asset('frontend/assets/images/service/service-1.webp') }}"
-                                alt="{{ $course->title ?? 'Course' }}" class="img-fluid"
-                                style="height: 400px; width: 100%; object-fit: cover; border-radius: 12px;">
-                        </div>
+                        <figure class="blog-images wow fadeInUp" data-wow-delay=".1s" style="margin:0">
+                            <img src="{{ $thumb }}" alt="{{ e($course->title ?? 'Course') }}" class="img-fluid"
+                                style="height: 420px; width: 100%; object-fit: cover; border-radius: 14px;">
+                        </figure>
 
                         {{-- Course Title and Basic Info --}}
-                        <div class="course-header mt-4">
-                            <h2 class="title title-anim">{{ $course->title ?? 'Digital Marketing Mastery Program' }}</h2>
+                        <header class="course-header mt-4">
+                            <h1 class="title title-anim h2 mb-2">{{ $course->title ?? 'Digital Marketing Mastery Program' }}
+                            </h1>
 
-                            <div class="course-meta d-flex flex-wrap align-items-center gap-4 mt-3">
-                                @if ($course->schedules && $course->schedules->count() > 0)
+                            <div class="course-meta d-flex flex-wrap align-items-center gap-3 mt-2">
+                                @if ($schedules->count() > 0)
                                     <div class="meta-item">
-                                        <span class="price-tag">
-                                            ₦{{ number_format($course->schedules->first()->price ?? 250000, 0) }}
+                                        <span class="price-tag" title="Current price">
+                                            @if (method_exists($firstSchedule, 'isFree') && $firstSchedule->isFree())
+                                                Free
+                                            @else
+                                                ₦{{ number_format($primaryPrice ?? 250000, 0) }}
+                                            @endif
                                         </span>
                                     </div>
                                 @endif
-                                <div class="meta-item">
-                                    <i class="tji-clock me-2"></i>
-                                    <span>{{ $course->duration ?? '12 Weeks' }}</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="tji-user me-2"></i>
-                                    <span>{{ $course->level ?? 'All Levels' }}</span>
-                                </div>
-                                <div class="meta-item">
-                                    <i class="tji-calendar me-2"></i>
-                                    <span>Next Batch: {{ $course->schedules->first()->start_date ?? 'Coming Soon' }}</span>
+
+                                @if (!empty($course->duration))
+                                    <div class="meta-item" aria-label="Duration">
+                                        <i class="tji-clock me-2" aria-hidden="true"></i>
+                                        <span>{{ $course->duration }}</span>
+                                    </div>
+                                @endif
+
+                                @if (!empty($course->level))
+                                    <div class="meta-item" aria-label="Level">
+                                        <i class="tji-user me-2" aria-hidden="true"></i>
+                                        <span>{{ $course->level }}</span>
+                                    </div>
+                                @endif
+
+                                <div class="meta-item" aria-label="Next batch">
+                                    <i class="tji-calendar me-2" aria-hidden="true"></i>
+                                    <span>Next Batch:
+                                        {{ $fmt(optional($firstSchedule)->start_date) ?: 'Coming Soon' }}</span>
                                 </div>
                             </div>
-                        </div>
+                        </header>
 
                         {{-- Course Overview --}}
                         <div class="blog-text mt-4">
-                            <p class="wow fadeInUp" data-wow-delay=".3s" style="font-size: 1.1rem; line-height: 1.7;">
-                                {{ $course->description ?? 'Unlock the power of digital marketing with our comprehensive program designed for professionals who want to master the latest strategies, tools, and techniques in today\'s digital landscape. This intensive course combines theoretical knowledge with hands-on practical experience to ensure you\'re ready to drive real results for any organization.' }}
+                            <p class="wow fadeInUp" data-wow-delay=".3s" style="font-size: 1.08rem; line-height: 1.7;">
+                                {{ $course->description ?? 'Unlock the power of digital marketing with our comprehensive program designed for professionals who want to master the latest strategies, tools, and techniques in today’s digital landscape. This intensive course combines theoretical knowledge with hands-on practical experience to ensure you’re ready to drive real results for any organization.' }}
                             </p>
 
                             {{-- Course Stats --}}
-                            <div class="course-stats wow fadeInUp" data-wow-delay=".4s">
-                                <div class="row">
-                                    <div class="col-md-3">
+                            <section class="course-stats wow fadeInUp" data-wow-delay=".35s" aria-label="Course statistics">
+                                <div class="row g-3 g-md-2">
+                                    <div class="col-6 col-md-3">
                                         <div class="stat-item">
-                                            <div class="stat-number">{{ $course->phases->count() ?: '4' }}</div>
+                                            <div class="stat-number">{{ $phases->count() ?: '4' }}</div>
                                             <div class="stat-label">Learning Phases</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-md-3">
                                         <div class="stat-item">
                                             <div class="stat-number">
-                                                {{ $course->phases->sum(function ($phase) {return $phase->topics->count();}) ?:'24' }}
+                                                {{ $phases->sum(fn($p) => optional($p->topics)->count()) ?: '24' }}
                                             </div>
                                             <div class="stat-label">Topics Covered</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-md-3">
                                         <div class="stat-item">
                                             <div class="stat-number">95%</div>
                                             <div class="stat-label">Success Rate</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-6 col-md-3">
                                         <div class="stat-item">
                                             <div class="stat-number">500+</div>
                                             <div class="stat-label">Graduates</div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
                             {{-- Course Phases --}}
-                            <h3 class="wow fadeInUp" data-wow-delay=".5s">Course Curriculum</h3>
-                            <p class="wow fadeInUp" data-wow-delay=".6s">
+                            <h2 class="wow fadeInUp h4 mt-4" data-wow-delay=".45s">Course Curriculum</h2>
+                            <p class="wow fadeInUp" data-wow-delay=".5s">
                                 Our structured learning path takes you from fundamentals to advanced implementation,
                                 ensuring you build solid expertise at each stage.
                             </p>
 
-                            <div class="row row-gap-4 mt-4">
-                                @if ($course->phases && $course->phases->count() > 0)
-                                    @foreach ($course->phases->sortBy('order') as $phase)
+                            <div class="row row-gap-4 mt-3">
+                                @if ($phases->count() > 0)
+                                    @foreach ($phases->sortBy('order') as $phase)
                                         <div class="col-xl-6 col-md-6">
-                                            <div class="phase-card wow fadeInUp"
-                                                data-wow-delay=".{{ 5 + $loop->iteration * 2 }}s">
-                                                <div class="phase-number">{{ $phase->order }}</div>
-                                                <h5 class="phase-title mb-3">{{ $phase->title }}</h5>
+                                            <article class="phase-card wow fadeInUp"
+                                                data-wow-delay=".{{ 5 + $loop->iteration * 2 }}s"
+                                                aria-label="Phase {{ $phase->order }}">
+                                                <div class="phase-number" aria-hidden="true">{{ $phase->order }}</div>
+                                                <h3 class="phase-title h6 mb-2">{{ $phase->title }}</h3>
                                                 <p class="phase-description mb-3">
                                                     {{ $phase->description ?? 'Comprehensive coverage of essential concepts and practical applications.' }}
                                                 </p>
 
-                                                @php
-                                                    $topics = $phase->topics->values(); // already ordered by the relation
-                                                @endphp
+                                                @php $topics = optional($phase->topics)->values() ?? collect(); @endphp
 
                                                 @if ($topics->count())
                                                     <div class="topic-grid">
@@ -340,7 +531,7 @@
                                                         @endfor
                                                     </div>
                                                 @else
-                                                    <ul class="topic-list list-unstyled">
+                                                    <ul class="topic-list list-unstyled mb-0">
                                                         <li><i class="tji-check text-success me-2"></i>Core concepts and
                                                             fundamentals</li>
                                                         <li><i class="tji-check text-success me-2"></i>Practical exercises
@@ -354,146 +545,46 @@
 
                                                 <div class="phase-duration mt-3">
                                                     <small class="text-muted">
-                                                        <i class="tji-clock me-1"></i>
+                                                        <i class="tji-clock me-1" aria-hidden="true"></i>
                                                         Duration: {{ $phase->duration ?? '3 weeks' }}
                                                     </small>
                                                 </div>
-                                            </div>
+                                            </article>
                                         </div>
                                     @endforeach
-                                @else
-                                    {{-- Dummy Phases --}}
-                                    @for ($i = 1; $i <= 4; $i++)
-                                        <div class="col-xl-6 col-md-6">
-                                            <div class="phase-card wow fadeInUp" data-wow-delay=".{{ 5 + $i * 2 }}s">
-                                                <div class="phase-number">{{ $i }}</div>
-                                                <h5 class="phase-title mb-3">
-                                                    @switch($i)
-                                                        @case(1)
-                                                            Foundation & Strategy
-                                                        @break
-
-                                                        @case(2)
-                                                            Content & Social Media
-                                                        @break
-
-                                                        @case(3)
-                                                            Paid Advertising & Analytics
-                                                        @break
-
-                                                        @case(4)
-                                                            Advanced Tactics & Optimization
-                                                        @break
-                                                    @endswitch
-                                                </h5>
-                                                <p class="phase-description mb-3">
-                                                    @switch($i)
-                                                        @case(1)
-                                                            Build your foundation with digital marketing fundamentals, strategy
-                                                            development, and market analysis.
-                                                        @break
-
-                                                        @case(2)
-                                                            Master content creation, social media marketing, and community
-                                                            engagement strategies.
-                                                        @break
-
-                                                        @case(3)
-                                                            Learn paid advertising platforms, conversion tracking, and data-driven
-                                                            decision making.
-                                                        @break
-
-                                                        @case(4)
-                                                            Implement advanced techniques, automation, and continuous optimization
-                                                            strategies.
-                                                        @break
-                                                    @endswitch
-                                                </p>
-
-                                                <ul class="topic-list list-unstyled">
-                                                    @switch($i)
-                                                        @case(1)
-                                                            <li><i class="tji-check text-success me-2"></i>Digital Marketing
-                                                                Landscape</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Target Audience Research
-                                                            </li>
-                                                            <li><i class="tji-check text-success me-2"></i>Competitive Analysis</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Strategic Planning</li>
-                                                        @break
-
-                                                        @case(2)
-                                                            <li><i class="tji-check text-success me-2"></i>Content Marketing
-                                                                Strategy</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Social Media Platforms
-                                                            </li>
-                                                            <li><i class="tji-check text-success me-2"></i>Community Building</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Influencer Partnerships
-                                                            </li>
-                                                        @break
-
-                                                        @case(3)
-                                                            <li><i class="tji-check text-success me-2"></i>Google Ads Mastery</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Facebook & Instagram Ads
-                                                            </li>
-                                                            <li><i class="tji-check text-success me-2"></i>Analytics & Tracking</li>
-                                                            <li><i class="tji-check text-success me-2"></i>ROI Optimization</li>
-                                                        @break
-
-                                                        @case(4)
-                                                            <li><i class="tji-check text-success me-2"></i>Marketing Automation</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Advanced SEO Techniques
-                                                            </li>
-                                                            <li><i class="tji-check text-success me-2"></i>Conversion Rate
-                                                                Optimization</li>
-                                                            <li><i class="tji-check text-success me-2"></i>Growth Hacking Strategies
-                                                            </li>
-                                                        @break
-                                                    @endswitch
-                                                </ul>
-
-                                                <div class="phase-duration mt-3">
-                                                    <small class="text-muted">
-                                                        <i class="tji-clock me-1"></i>
-                                                        Duration: 3 weeks
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endfor
                                 @endif
                             </div>
 
                             {{-- Schedule Information --}}
-                            @if ($course->schedules && $course->schedules->count() > 0)
-                                <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Upcoming Schedule</h3>
+                            @if ($schedules->count() > 0)
+                                <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">Upcoming Schedule</h2>
 
-                                @foreach ($course->schedules->take(3) as $schedule)
-                                    <div class="schedule-card wow fadeInUp"
-                                        data-wow-delay=".{{ 4 + $loop->iteration }}s">
+                                @foreach ($schedules as $schedule)
+                                    <section class="schedule-card wow fadeInUp"
+                                        data-wow-delay=".{{ 4 + $loop->iteration }}s"
+                                        aria-label="Schedule {{ $loop->iteration }}">
                                         <div class="row align-items-center">
                                             <div class="col-md-6">
-                                                <h5 class="mb-2">
-                                                    {{ $schedule->title ? $schedule->title : 'Batch ' . $loop->iteration }}
-                                                </h5>
+                                                <h3 class="h6 mb-2">
+                                                    {{ $schedule->title ? e($schedule->title) : 'Batch ' . $loop->iteration }}
+                                                </h3>
 
                                                 <p class="mb-1">
-                                                    <i class="tji-calendar me-2"></i>
-                                                    <strong>Start Date:</strong>
-                                                    {{ \Carbon\Carbon::parse($schedule->start_date)->format('M j, Y') }}
+                                                    <i class="tji-calendar me-2" aria-hidden="true"></i>
+                                                    <strong>Start Date:</strong> {{ $fmt($schedule->start_date) }}
                                                 </p>
                                                 <p class="mb-1">
-                                                    <i class="tji-calendar me-2"></i>
-                                                    <strong>End Date:</strong>
-                                                    {{ \Carbon\Carbon::parse($schedule->end_date)->format('M j, Y') }}
+                                                    <i class="tji-calendar me-2" aria-hidden="true"></i>
+                                                    <strong>End Date:</strong> {{ $fmt($schedule->end_date) }}
                                                 </p>
                                                 <p class="mb-1">
-                                                    <i class="tji-location me-2"></i>
+                                                    <i class="tji-location me-2" aria-hidden="true"></i>
                                                     <strong>Format:</strong> {{ ucfirst($schedule->type ?? 'online') }}
                                                 </p>
 
                                                 @if (!empty($schedule->tag))
                                                     <p class="mb-1">
-                                                        <i class="tji-tag me-2"></i>
+                                                        <i class="tji-tag me-2" aria-hidden="true"></i>
                                                         <strong>Tag:</strong> {{ ucfirst($schedule->tag) }}
                                                     </p>
                                                 @endif
@@ -504,91 +595,93 @@
                                             </div>
 
                                             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                                                @if ($schedule->isFree())
-                                                    <div class="price-tag mb-3">Free</div>
-                                                    {{-- keep JS-controlled button, just use a different data-* --}}
-                                                    <button class="tj-primary-btn enroll-btn"
+                                                @if (method_exists($schedule, 'isFree') && $schedule->isFree())
+                                                    <span class="price-tag mb-3">Free</span><br>
+                                                    <button class="tj-primary-btn btn-gradient enroll-btn"
                                                         data-schedule-id="{{ $schedule->id }}"
-                                                        data-apply-url="{{ route('scholarships.apply', $schedule->id) }}">
+                                                        data-apply-url="{{ route('scholarships.apply', $schedule->id) }}"
+                                                        type="button"
+                                                        aria-label="Apply for scholarship for {{ $schedule->title ?? 'Batch ' . $loop->iteration }}">
                                                         <span class="btn-text">Apply for Scholarship</span>
-                                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                        <span class="btn-icon"><i class="tji-arrow-right-long"
+                                                                aria-hidden="true"></i></span>
                                                     </button>
                                                 @else
-                                                    <div class="price-tag mb-3">
-                                                        ₦{{ number_format($schedule->price, 0) }}
-                                                    </div>
-                                                    <button class="tj-primary-btn enroll-btn"
+                                                    <span class="price-tag mb-3">
+                                                        ₦{{ number_format($schedule->price ?? 0, 0) }}
+                                                    </span><br>
+                                                    <button class="tj-primary-btn btn-gradient enroll-btn"
                                                         data-schedule-id="{{ $schedule->id }}"
-                                                        data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}">
+                                                        data-enroll-url="{{ route('enroll.pricing', $schedule->id) }}"
+                                                        type="button"
+                                                        aria-label="Enroll for {{ $schedule->title ?? 'Batch ' . $loop->iteration }}">
                                                         <span class="btn-text">Enroll Now</span>
-                                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                        <span class="btn-icon"><i class="tji-arrow-right-long"
+                                                                aria-hidden="true"></i></span>
                                                     </button>
                                                 @endif
                                             </div>
                                         </div>
-                                    </div>
+                                    </section>
                                 @endforeach
                             @else
-                                <div class="schedule-card wow fadeInUp" data-wow-delay=".4s">
+                                <section class="schedule-card wow fadeInUp" data-wow-delay=".4s">
                                     <div class="row align-items-center">
                                         <div class="col-md-6">
-                                            <h5 class="mb-2">Next Batch</h5>
+                                            <h3 class="h6 mb-2">Next Batch</h3>
                                             <p class="mb-1">
-                                                <i class="tji-calendar me-2"></i>
+                                                <i class="tji-calendar me-2" aria-hidden="true"></i>
                                                 <strong>Start Date:</strong> {{ now()->addWeeks(2)->format('M j, Y') }}
                                             </p>
                                             <p class="mb-1">
-                                                <i class="tji-calendar me-2"></i>
+                                                <i class="tji-calendar me-2" aria-hidden="true"></i>
                                                 <strong>End Date:</strong> {{ now()->addWeeks(14)->format('M j, Y') }}
                                             </p>
                                             <p class="mb-0">
-                                                <i class="tji-location me-2"></i>
+                                                <i class="tji-location me-2" aria-hidden="true"></i>
                                                 <strong>Format:</strong> Hybrid (Online + In-person)
                                             </p>
                                         </div>
                                         <div class="col-md-6 text-md-end">
-                                            <div class="price-tag mb-3">₦250,000</div>
-                                            <button class="tj-primary-btn enroll-btn" data-schedule-id="1">
+                                            <span class="price-tag mb-3">₦250,000</span><br>
+                                            <button class="tj-primary-btn btn-gradient enroll-btn" type="button"
+                                                data-schedule-id="1">
                                                 <span class="btn-text">Enroll Now</span>
-                                                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                <span class="btn-icon"><i class="tji-arrow-right-long"
+                                                        aria-hidden="true"></i></span>
                                             </button>
                                         </div>
                                     </div>
-                                </div>
+                                </section>
                             @endif
 
-
-                            {{-- Replace the "What You'll Learn" section with this dynamic version --}}
-
-                            @if ($course->details && $course->details->count() > 0)
-                                @foreach ($course->details->sortBy('sort_order') as $detail)
+                            {{-- Dynamic Details (Headings, Paragraphs, Lists, Images, Features, FAQ) --}}
+                            @if ($details->count() > 0)
+                                @foreach ($details->sortBy('sort_order') as $detail)
                                     @php
                                         $decoded = null;
                                         if (!empty($detail->content)) {
                                             $decoded = json_decode($detail->content, true);
                                             if (json_last_error() !== JSON_ERROR_NONE) {
-                                                $decoded = null; // Invalid JSON
+                                                $decoded = null;
                                             }
                                         }
                                     @endphp
 
-                                    {{-- HEADINGS --}}
+                                    {{-- HEADINGS (break → reset counter) --}}
                                     @if ($detail->type === 'heading')
-                                        <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">
-                                            {{ $detail->content }}
-                                        </h3>
+                                        @php $resetFeatureCounter(); @endphp
+                                        <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">{{ $detail->content }}</h2>
 
-                                        {{-- PARAGRAPHS --}}
-                                    @elseif($detail->type === 'paragraph')
-                                        <p class="wow fadeInUp" data-wow-delay=".4s">
-                                            {{ $detail->content }}
-                                        </p>
+                                        {{-- PARAGRAPHS (break → reset counter) --}}
+                                    @elseif ($detail->type === 'paragraph')
+                                        @php $resetFeatureCounter(); @endphp
+                                        <p class="wow fadeInUp" data-wow-delay=".4s">{{ $detail->content }}</p>
 
-                                        {{-- LISTS --}}
-                                        {{-- LISTS (two-column, safe normalization) --}}
-                                    @elseif(in_array($detail->type, ['list', 'lists'], true))
+                                        {{-- LISTS (break → reset counter) --}}
+                                    @elseif (in_array($detail->type, ['list', 'lists'], true))
                                         @php
-                                            // Normalize to array: content may be JSON array OR newline-separated string
+                                            $resetFeatureCounter();
                                             $raw = $detail->content;
                                             $decoded = is_string($raw)
                                                 ? json_decode($raw, true)
@@ -618,53 +711,66 @@
                                             </div>
                                         @endif
 
-
-                                        {{-- IMAGES --}}
-                                    @elseif(in_array($detail->type, ['image', 'images']))
+                                        {{-- IMAGES (break → reset counter) --}}
+                                    @elseif (in_array($detail->type, ['image', 'images']))
                                         @php
-                                            $images = is_array($decoded) ? $decoded : [$detail->image ?? null];
+                                            $resetFeatureCounter();
+                                            $images = is_array($decoded)
+                                                ? $decoded
+                                                : array_filter([(string) ($detail->image ?? '')]);
                                         @endphp
-                                        <div class="images-wrap mt-5">
-                                            <div class="row">
-                                                @foreach ($images as $index => $img)
-                                                    @if ($img)
-                                                        <div class="col-sm-">
-                                                            <div class="image-box wow fadeInUp"
-                                                                data-wow-delay=".{{ 6 + $index }}s">
-                                                                <img src="{{ asset('storage/' . $img) }}"
-                                                                    alt="Course Image" style="height: 300px;">
-                                                                <button class="enroll-btn"
-                                                                    data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}"
-                                                                    data-enroll-url="{{ $course->schedules->first() ? route('enroll.pricing', $course->schedules->first()->id) : '#' }}">
-                                                                    Start Learning
-                                                                </button>
+                                        @if (count($images))
+                                            <div class="images-wrap mt-5">
+                                                <div class="row g-3">
+                                                    @foreach ($images as $index => $img)
+                                                        @if (!empty($img))
+                                                            <div class="col-sm-10 col-md-6">
+                                                                <div class="image-box wow fadeInUp"
+                                                                    data-wow-delay=".{{ 6 + $index }}s">
+                                                                    <img src="{{ asset('storage/' . $img) }}"
+                                                                        alt="Course image {{ $index + 1 }}">
+                                                                    <button class="enroll-btn btn-gradient"
+                                                                        data-schedule-id="{{ optional($firstSchedule)->id ?? '1' }}"
+                                                                        @if ($firstSchedule) data-enroll-url="{{ route('enroll.pricing', $firstSchedule->id) }}" @endif
+                                                                        type="button">
+                                                                        Start Learning
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
+                                                        @endif
+                                                    @endforeach
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endif
 
-                                        {{-- FEATURES / BENEFITS --}}
+                                        {{-- FEATURES / BENEFITS (numbering continues; resets only when a break happened above) --}}
                                     @elseif (in_array($detail->type, ['benefits', 'features'], true))
                                         @php
-                                            // 1) Decode $detail->content safely
+                                            // Accepts:
+                                            //  A) Assoc: {"heading": "...", "description": "...", "items": ["...","..."]}
+                                            //  B) Array of objects: [{"heading","description","items[]"}, ...]
+                                            //  C) Flat array of strings: ["Feature A","Feature B", ...] -> single card with list
                                             $raw = $detail->content ?? '';
-                                            $data = null;
-
-                                            if (is_string($raw) && $raw !== '') {
-                                                $tmp = json_decode($raw, true);
-                                                if (json_last_error() === JSON_ERROR_NONE) {
-                                                    $data = $tmp;
-                                                }
-                                            } elseif (is_array($raw)) {
-                                                $data = $raw;
+                                            $data =
+                                                is_string($raw) && $raw !== ''
+                                                    ? json_decode($raw, true)
+                                                    : (is_array($raw)
+                                                        ? $raw
+                                                        : null);
+                                            if (
+                                                is_string($raw) &&
+                                                $raw !== '' &&
+                                                json_last_error() !== JSON_ERROR_NONE
+                                            ) {
+                                                $data = [
+                                                    'heading' => $detail->title ?? 'Key Features',
+                                                    'description' => $raw,
+                                                    'items' => [],
+                                                ];
                                             }
 
-                                            // Safe assoc check (works pre-PHP8.1 too)
                                             $isAssoc = is_array($data) && array_values($data) !== $data;
 
-                                            // Helper to clean string list
                                             $cleanList = function ($arr) {
                                                 if (!is_array($arr)) {
                                                     return [];
@@ -672,359 +778,492 @@
                                                 $out = array_map(fn($v) => is_string($v) ? trim($v) : '', $arr);
                                                 return array_values(array_filter($out, fn($v) => $v !== ''));
                                             };
+
+                                            // Normalize to array of feature objects
+                                            $features = [];
+                                            if ($isAssoc) {
+                                                $features[] = [
+                                                    'heading' =>
+                                                        (string) ($data['heading'] ?? ($detail->title ?? 'Feature')),
+                                                    'description' =>
+                                                        isset($data['description']) && is_string($data['description'])
+                                                            ? trim($data['description'])
+                                                            : null,
+                                                    'items' => $cleanList($data['items'] ?? []),
+                                                ];
+                                            } elseif (is_array($data)) {
+                                                $looksLikeObjects = count($data) && is_array($data[0] ?? null);
+                                                if ($looksLikeObjects) {
+                                                    foreach ($data as $obj) {
+                                                        $descRaw = $obj['description'] ?? null;
+                                                        $itemsRaw = $obj['items'] ?? null;
+                                                        $items = is_array($itemsRaw)
+                                                            ? $cleanList($itemsRaw)
+                                                            : (is_array($descRaw)
+                                                                ? $cleanList($descRaw)
+                                                                : []);
+                                                        $desc = is_string($descRaw) ? trim($descRaw) : null;
+
+                                                        $features[] = [
+                                                            'heading' =>
+                                                                (string) ($obj['heading'] ??
+                                                                    ($detail->title ?? 'Feature')),
+                                                            'description' => $desc,
+                                                            'items' => $items,
+                                                        ];
+                                                    }
+                                                } else {
+                                                    // Flat list → one card with list
+                                                    $features[] = [
+                                                        'heading' => (string) ($detail->title ?? 'Features'),
+                                                        'description' => null,
+                                                        'items' => $cleanList($data),
+                                                    ];
+                                                }
+                                            }
                                         @endphp
 
-                                        <div class="details-content-box">
-                                            <div class="row row-gap-4">
-                                                {{-- NEW SHAPE: single features object {"heading","description","items":[]} --}}
-                                                @if ($isAssoc)
-                                                    @php
-                                                        $heading =
-                                                            isset($data['heading']) && is_string($data['heading'])
-                                                                ? trim($data['heading'])
-                                                                : null;
-                                                        $desc =
-                                                            isset($data['description']) &&
-                                                            is_string($data['description'])
-                                                                ? trim($data['description'])
-                                                                : null;
-                                                        $items = $cleanList($data['items'] ?? []);
-                                                    @endphp
-
-                                                    @if ($heading || $desc || count($items))
-                                                        <div class="col-xl-4 col-md-6">
-                                                            <div class="service-details-item wow fadeInUp"
-                                                                data-wow-delay=".5s">
-                                                                <span class="number">01.</span>
-                                                                <h6 class="title">{{ $heading ?: 'Features' }}</h6>
-
-                                                                <div class="desc">
-                                                                    @if (count($items))
-                                                                        @if ($desc)
-                                                                            <p class="mt-2">{{ $desc }}</p>
-                                                                        @endif
-                                                                        <ul class="list-unstyled mb-0">
-                                                                            @foreach ($items as $it)
-                                                                                <li><span><i class="tji-check"></i></span>
-                                                                                    {{ $it }}</li>
-                                                                            @endforeach
-                                                                        </ul>
-                                                                    @elseif ($desc)
-                                                                        <p class="mb-0">{{ $desc }}</p>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-
-                                                    {{-- LEGACY SHAPE: array of cards [{heading,description}|{heading,description[],items[]}, ...] --}}
-                                                @elseif (is_array($data))
-                                                    @foreach ($data as $index => $feature)
+                                        @if (count($features))
+                                            <div class="fe-features">
+                                                <div class="row g-4">
+                                                    @foreach ($features as $f)
                                                         @php
-                                                            $fHeading = isset($feature['heading'])
-                                                                ? trim((string) $feature['heading'])
-                                                                : '';
-                                                            $fDescRaw = $feature['description'] ?? null;
-                                                            $fItems = $feature['items'] ?? null;
-
-                                                            // Legacy quirk: description sometimes comes as an array => treat as items
-                                                            $items = [];
-                                                            if (is_array($fItems)) {
-                                                                $items = $cleanList($fItems);
-                                                            } elseif (is_array($fDescRaw)) {
-                                                                $items = $cleanList($fDescRaw);
-                                                                $fDescRaw = null; // clear text description if it was actually items
-                                                            }
-
-                                                            $fDesc = is_string($fDescRaw) ? trim($fDescRaw) : null;
-                                                            $delay = sprintf('.%ds', 5 + $index * 2);
-                                                            $number = str_pad($index + 1, 2, '0', STR_PAD_LEFT) . '.';
+                                                            // keep counting across consecutive feature blocks
+                                                            // (you reset this in other branches when a break occurs)
+                                                            $featureCounter = isset($featureCounter)
+                                                                ? $featureCounter + 1
+                                                                : 1;
+                                                            $num = str_pad($featureCounter, 2, '0', STR_PAD_LEFT) . '.';
                                                         @endphp
 
-                                                        @if ($fHeading || $fDesc || count($items))
-                                                            <div class="col-xl-4 col-md-6">
-                                                                <div class="service-details-item wow fadeInUp"
-                                                                    data-wow-delay="{{ $delay }}">
-                                                                    <span class="number">{{ $number }}</span>
-                                                                    <h6 class="title">{{ $fHeading ?: 'Feature' }}</h6>
+                                                        <div class="col-xl-4 col-md-6">
+                                                            <div class="fe-card wow fadeInUp"
+                                                                data-wow-delay=".{{ 5 + ($loop->index % 3) * 2 }}s">
+                                                                <span class="fe-num">{{ $num }}</span>
+                                                                <h6 class="fe-title">{{ $f['heading'] }}</h6>
 
-                                                                    <div class="desc">
-                                                                         @if ($fDesc)
-                                                                            <p class="mb-2">{!! nl2br(e($fDesc)) !!}</p>
-                                                                        @endif
-                                                                        {{-- list AFTER --}}
-                                                                        @if (count($items))
-                                                                            <ul class="mb-0">
-                                                                                @foreach ($items as $it)
-                                                                                    <li><span><i
-                                                                                                class="tji-check"></i></span>
-                                                                                        {{ $it }}</li>
-                                                                                @endforeach
-                                                                            </ul>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
+                                                                @if (!empty($f['description']))
+                                                                    <p class="fe-desc">{{ $f['description'] }}</p>
+                                                                @endif
+
+                                                                @if (!empty($f['items']))
+                                                                    <ul class="fe-list mb-0">
+                                                                        @foreach ($f['items'] as $it)
+                                                                            <li><span><i
+                                                                                        class="tji-check"></i></span>{{ $it }}
+                                                                            </li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
                                                             </div>
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        {{-- FAQ --}}
-                                    @elseif(in_array($detail->type, ['faq', 'faqs']))
-                                        @php
-                                            $faqs = is_array($decoded) ? $decoded : [];
-                                        @endphp
-                                        <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Frequently Asked Questions</h3>
-                                        <div class="accordion tj-faq style-2" id="faqOne">
-                                            @foreach ($faqs as $index => $faq)
-                                                <div class="accordion-item {{ $index === 0 ? 'active' : '' }} wow fadeInUp"
-                                                    data-wow-delay=".{{ 4 + $index }}s">
-                                                    <button class="faq-title {{ $index > 0 ? 'collapsed' : '' }}"
-                                                        type="button" data-bs-toggle="collapse"
-                                                        data-bs-target="#faq-{{ $index }}"
-                                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
-                                                        {{ $faq['question'] ?? '' }}
-                                                    </button>
-                                                    <div id="faq-{{ $index }}"
-                                                        class="collapse {{ $index === 0 ? 'show' : '' }}"
-                                                        data-bs-parent="#faqOne">
-                                                        <div class="accordion-body faq-text">
-                                                            <p>{{ $faq['answer'] ?? '' }}</p>
                                                         </div>
-                                                    </div>
+                                                    @endforeach
                                                 </div>
-                                            @endforeach
-                                        </div>
-
-                                        {{-- UNKNOWN TYPES --}}
-                                    @else
-                                        <p class="text-muted small">⚠️ Unknown or empty detail type: {{ $detail->type }}
-                                        </p>
-                                        @if ($detail->content)
-                                            <pre class="bg-light p-2 small">{{ Str::limit($detail->content, 300) }}</pre>
                                         @endif
-                                    @endif
+                        </div>
+
+                        {{-- FAQ (break → reset counter) --}}
+                    @elseif (in_array($detail->type, ['faq', 'faqs']))
+                        @php
+                            $resetFeatureCounter();
+                            $faqs = is_array($decoded) ? $decoded : [];
+                        @endphp
+                        @if (count($faqs))
+                            <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">Frequently Asked Questions</h2>
+                            <div class="accordion tj-faq style-2" id="faqDynamic">
+                                @foreach ($faqs as $index => $faq)
+                                    <div class="accordion-item {{ $index === 0 ? 'active' : '' }} wow fadeInUp"
+                                        data-wow-delay=".{{ 4 + $index }}s">
+                                        <button class="faq-title {{ $index > 0 ? 'collapsed' : '' }}" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faqd-{{ $index }}"
+                                            aria-expanded="{{ $index === 0 ? 'true' : 'false' }}">
+                                            {{ $faq['question'] ?? '' }}
+                                        </button>
+                                        <div id="faqd-{{ $index }}"
+                                            class="collapse {{ $index === 0 ? 'show' : '' }}"
+                                            data-bs-parent="#faqDynamic">
+                                            <div class="accordion-body faq-text">
+                                                <p>{{ $faq['answer'] ?? '' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endforeach
-                            @else
-                                {{-- Fallback to default content if no details exist --}}
-                                <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">What You'll Learn</h3>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="wow fadeInUp" data-wow-delay=".4s">
-                                            <li><span><i class="tji-check"></i></span>Complete digital marketing strategy
-                                                development</li>
-                                            <li><span><i class="tji-check"></i></span>Advanced social media marketing
-                                                techniques</li>
-                                            <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery
-                                            </li>
-                                            <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
-                                                practices</li>
-                                            <li><span><i class="tji-check"></i></span>Content marketing and storytelling
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="wow fadeInUp" data-wow-delay=".5s">
-                                            <li><span><i class="tji-check"></i></span>Email marketing automation</li>
-                                            <li><span><i class="tji-check"></i></span>Analytics and performance tracking
-                                            </li>
-                                            <li><span><i class="tji-check"></i></span>Conversion rate optimization</li>
-                                            <li><span><i class="tji-check"></i></span>Marketing tools and platforms</li>
-                                            <li><span><i class="tji-check"></i></span>ROI measurement and reporting</li>
-                                        </ul>
+                            </div>
+                        @endif
+
+                        {{-- UNKNOWN TYPES (break → reset counter) --}}
+                    @else
+                        @php $resetFeatureCounter(); @endphp
+                        <p class="text-muted small">⚠️ Unknown or empty detail type: {{ $detail->type }}</p>
+                        @if ($detail->content)
+                            <pre class="bg-light p-2 small">{{ Str::limit($detail->content, 300) }}</pre>
+                        @endif
+                        @endif
+                        @endforeach
+                    @else
+                        {{-- Fallback to default content if no details exist --}}
+                        <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">What You'll Learn</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="wow fadeInUp" data-wow-delay=".4s">
+                                    <li><span><i class="tji-check"></i></span>Complete digital marketing strategy
+                                        development</li>
+                                    <li><span><i class="tji-check"></i></span>Advanced social media marketing techniques
+                                    </li>
+                                    <li><span><i class="tji-check"></i></span>Pay-per-click advertising mastery</li>
+                                    <li><span><i class="tji-check"></i></span>Search engine optimization (SEO) best
+                                        practices</li>
+                                    <li><span><i class="tji-check"></i></span>Content marketing and storytelling</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="wow fadeInUp" data-wow-delay=".5s">
+                                    <li><span><i class="tji-check"></i></span>Email marketing automation</li>
+                                    <li><span><i class="tji-check"></i></span>Analytics and performance tracking</li>
+                                    <li><span><i class="tji-check"></i></span>Conversion rate optimization</li>
+                                    <li><span><i class="tji-check"></i></span>Marketing tools and platforms</li>
+                                    <li><span><i class="tji-check"></i></span>ROI measurement and reporting</li>
+                                </ul>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Course Highlights --}}
+                        <div class="images-wrap mt-5">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="image-box wow fadeInUp" data-wow-delay=".6s">
+                                        <img src="{{ asset('frontend/assets/images/service/pic.jpg') }}"
+                                            alt="Hands-on learning">
+                                        <button class="enroll-btn btn-gradient"
+                                            data-schedule-id="{{ optional($firstSchedule)->id ?? '1' }}" type="button">
+                                            Start Learning
+                                        </button>
                                     </div>
                                 </div>
-                            @endif
-
-                            {{-- Course Highlights --}}
-                            <div class="images-wrap mt-5">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <div class="image-box wow fadeInUp" data-wow-delay=".6s">
-                                            <img src="{{ asset('frontend/assets/images/service/pic.jpg') }}"
-                                                alt="Hands-on Learning" style="height: 300px;">
-                                            <button class="enroll-btn"
-                                                data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
-                                                Start Learning
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="image-box wow fadeInUp" data-wow-delay=".7s">
-                                            <img src="{{ asset('frontend/assets/images/service/pic3.jpg') }}"
-                                                alt="Expert Instruction" style="height: 300px;">
-                                            <button class="enroll-btn"
-                                                data-schedule-id="{{ $course->schedules->first()->id ?? '1' }}">
-                                                Start Learning
-                                            </button>
-                                        </div>
+                                <div class="col-sm-6">
+                                    <div class="image-box wow fadeInUp" data-wow-delay=".7s">
+                                        <img src="{{ asset('frontend/assets/images/service/pic3.jpg') }}"
+                                            alt="Expert instruction">
+                                        <button class="enroll-btn btn-gradient"
+                                            data-schedule-id="{{ optional($firstSchedule)->id ?? '1' }}" type="button">
+                                            Start Learning
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {{-- Course Benefits --}}
-                            <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Why Choose This Course?</h3>
-                            <p class="wow fadeInUp" data-wow-delay=".4s">
-                                Our comprehensive approach combines theoretical knowledge with practical application,
-                                ensuring you're ready to implement what you learn immediately in your professional
-                                environment.
-                            </p>
+                        {{-- Course Benefits (static demo block) --}}
+                        <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">Why Choose This Course?</h2>
+                        <p class="wow fadeInUp" data-wow-delay=".4s">
+                            Our comprehensive approach combines theoretical knowledge with practical application,
+                            ensuring you're ready to implement what you learn immediately in your professional environment.
+                        </p>
 
-                            <div class="details-content-box">
-                                <div class="row row-gap-4">
-                                    <div class="col-xl-4 col-md-6">
-                                        <div class="service-details-item wow fadeInUp" data-wow-delay=".5s">
-                                            <span class="number">01.</span>
-                                            <h6 class="title">Expert-Led Training</h6>
-                                            <div class="desc">
-                                                <p>Learn from industry professionals with over 10 years of digital marketing
-                                                    experience and proven track records.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-4 col-md-6">
-                                        <div class="service-details-item wow fadeInUp" data-wow-delay=".7s">
-                                            <span class="number">02.</span>
-                                            <h6 class="title">Hands-On Projects</h6>
-                                            <div class="desc">
-                                                <p>Work on real client projects and build a portfolio that demonstrates your
-                                                    skills to potential employers.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-4 col-md-6">
-                                        <div class="service-details-item wow fadeInUp" data-wow-delay=".9s">
-                                            <span class="number">03.</span>
-                                            <h6 class="title">Certification & Support</h6>
-                                            <div class="desc">
-                                                <p>Receive industry-recognized certification and ongoing career support to
-                                                    help you advance professionally.</p>
-                                            </div>
+                        <div class="details-content-box">
+                            <div class="row row-gap-4">
+                                <div class="col-xl-4 col-md-6">
+                                    <div class="service-details-item wow fadeInUp" data-wow-delay=".5s">
+                                        <span class="number">01.</span>
+                                        <h6 class="title">Expert-Led Training</h6>
+                                        <div class="desc">
+                                            <p>Learn from industry professionals with 10+ years experience and proven track
+                                                records.</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Performance Stats --}}
-                            <div class="countup-wrap">
-                                <div class="countup-item">
-                                    <div class="inline-content">
-                                        <span class="odometer countup-number" data-count="95"></span>
-                                        <span class="count-plus">%</span>
-                                    </div>
-                                    <span class="count-text">Job Placement Rate</span>
-                                    <span class="count-separator"
-                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
-                                </div>
-                                <div class="countup-item">
-                                    <div class="inline-content">
-                                        <span class="odometer countup-number" data-count="500"></span>
-                                        <span class="count-plus">+</span>
-                                    </div>
-                                    <span class="count-text">Successful Graduates</span>
-                                    <span class="count-separator"
-                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
-                                </div>
-                                <div class="countup-item">
-                                    <div class="inline-content">
-                                        <span class="odometer countup-number" data-count="4.8"></span>
-                                        <span class="count-plus">/5</span>
-                                    </div>
-                                    <span class="count-text">Student Rating</span>
-                                    <span class="count-separator"
-                                        data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
-                                </div>
-                                <div class="countup-item">
-                                    <div class="inline-content">
-                                        <span class="odometer countup-number"
-                                            data-count="24</span>
-                                        <span class="count-plus">/7</span>
-                                    </div>
-                                    <span class="count-text">Learning Support</span>
-                                </div>
-                            </div>
-
-                            {{-- FAQ Section --}}
-                            <h3 class="wow fadeInUp mt-5" data-wow-delay=".3s">Frequently Asked Questions</h3>
-                            <div class="accordion tj-faq style-2" id="faqOne">
-                                <div class="accordion-item active wow fadeInUp" data-wow-delay=".4s">
-                                    <button class="faq-title" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#faq-1" aria-expanded="true">
-                                        What are the prerequisites for this course?
-                                    </button>
-                                    <div id="faq-1" class="collapse show" data-bs-parent="#faqOne">
-                                        <div class="accordion-body faq-text">
-                                            <p>No prior digital marketing experience is required. Basic computer literacy
-                                                and internet familiarity are helpful but not mandatory. We start from
-                                                fundamentals and build up to advanced concepts.</p>
+                                <div class="col-xl-4 col-md-6">
+                                    <div class="service-details-item wow fadeInUp" data-wow-delay=".7s">
+                                        <span class="number">02.</span>
+                                        <h6 class="title">Hands-On Projects</h6>
+                                        <div class="desc">
+                                            <p>Work on real client projects and build a portfolio that showcases measurable
+                                                outcomes.</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="accordion-item wow fadeInUp" data-wow-delay=".5s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#faq-2" aria-expanded="false">
-                                        What support is available during the course?
-                                    </button>
-                                    <div id="faq-2" class="collapse" data-bs-parent="#faqOne">
-                                        <div class="accordion-body faq-text">
-                                            <p>You'll have access to dedicated instructors, peer collaboration forums,
-                                                weekly office hours, and our comprehensive learning management system. Plus,
-                                                career counseling and job placement assistance.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item wow fadeInUp" data-wow-delay=".6s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#faq-3" aria-expanded="false">
-                                        Are there flexible payment options available?
-                                    </button>
-                                    <div id="faq-3" class="collapse" data-bs-parent="#faqOne">
-                                        <div class="accordion-body faq-text">
-                                            <p>Yes! We offer both full payment and installment plans. You can pay 70%
-                                                upfront and the remaining 30% during the course. Scholarships and corporate
-                                                training discounts are also available.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item wow fadeInUp" data-wow-delay=".7s">
-                                    <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#faq-4" aria-expanded="false">
-                                        What certification will I receive upon completion?
-                                    </button>
-                                    <div id="faq-4" class="collapse" data-bs-parent="#faqOne">
-                                        <div class="accordion-body faq-text">
-                                            <p>You'll receive a Forward Edge Consulting Digital Marketing Professional
-                                                Certificate, plus preparation for industry certifications like Google Ads,
-                                                Facebook Blueprint, and HubSpot Content Marketing.</p>
+                                <div class="col-xl-4 col-md-6">
+                                    <div class="service-details-item wow fadeInUp" data-wow-delay=".9s">
+                                        <span class="number">03.</span>
+                                        <h6 class="title">Certification & Support</h6>
+                                        <div class="desc">
+                                            <p>Earn an industry-recognized certificate and get ongoing career support.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Navigation --}}
-                        <div class="tj-post__navigation mb-0 wow fadeInUp" data-wow-delay=".3s">
-                            <div class="tj-nav__post previous">
-                                <div class="tj-nav-post__nav prev_post">
-                                    <a href="{{ route('academy') }}"><span><i class="tji-arrow-left"></i></span>All
-                                        Courses</a>
+                        {{-- Performance Stats --}}
+                        <div class="countup-wrap mt-3">
+                            <div class="countup-item">
+                                <div class="inline-content">
+                                    <span class="odometer countup-number" data-count="95"></span>
+                                    <span class="count-plus">%</span>
+                                </div>
+                                <span class="count-text">Job Placement Rate</span>
+                                <span class="count-separator"
+                                    data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                            </div>
+                            <div class="countup-item">
+                                <div class="inline-content">
+                                    <span class="odometer countup-number" data-count="500"></span>
+                                    <span class="count-plus">+</span>
+                                </div>
+                                <span class="count-text">Successful Graduates</span>
+                                <span class="count-separator"
+                                    data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                            </div>
+                            <div class="countup-item">
+                                <div class="inline-content">
+                                    <span class="odometer countup-number" data-count="4.8"></span>
+                                    <span class="count-plus">/5</span>
+                                </div>
+                                <span class="count-text">Student Rating</span>
+                                <span class="count-separator"
+                                    data-bg-image="{{ asset('frontend/assets/images/shape/separator.svg') }}"></span>
+                            </div>
+                            <div class="countup-item">
+                                <div class="inline-content">
+                                    <span class="odometer countup-number" data-count="24"></span>
+                                    <span class="count-plus">/7</span>
+                                </div>
+                                <span class="count-text">Learning Support</span>
+                            </div>
+                        </div>
+                        {{-- start: Testimonial Section (renders only if course has testimonials) --}}
+                        @if (optional($course->testimonials)->count())
+                            <section id="course-testimonials" class="tj-testimonial-section section-gap section-gap-x">
+                                <div class="container">
+                                    <div class="row justify-content-between">
+                                        <div class="col-12">
+                                            <div class="sec-heading-wrap">
+                                                <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+                                                    <i class="tji-box"></i>Clients Feedback
+                                                </span>
+                                                <div class="heading-wrap-content">
+                                                    <div class="sec-heading">
+                                                        <h2 class="sec-title title-anim">Success <span>Stories</span> Fuel
+                                                            our Innovation.</h2>
+                                                    </div>
+                                                    <div class="slider-navigation d-inline-flex wow fadeInUp"
+                                                        data-wow-delay=".4s">
+                                                        <div class="slider-prev" id="course-testimonials-prev">
+                                                            <span class="anim-icon"><i class="tji-arrow-left"></i><i
+                                                                    class="tji-arrow-left"></i></span>
+                                                        </div>
+                                                        <div class="slider-next" id="course-testimonials-next">
+                                                            <span class="anim-icon"><i class="tji-arrow-right"></i><i
+                                                                    class="tji-arrow-right"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="testimonial-wrapper wow fadeInUp" data-wow-delay=".5s">
+                                                <div class="swiper swiper-container testimonial-slider"
+                                                    id="course-testimonials-swiper">
+                                                    <div class="swiper-wrapper d-flex align-items-stretch">
+                                                        @foreach ($course->testimonials as $t)
+                                                            @php
+                                                                // Safe fields with fallbacks
+                                                                $quote = trim((string) ($t->body ?? ''));
+                                                                $author = trim((string) ($t->name ?? 'Anonymous'));
+                                                                $role = trim((string) ($t->organization ?? ''));
+                                                                $photo = $t->image ?? null;
+
+                                                                // Try to resolve stored photo on public disk; else use a placeholder
+                                                                $photoUrl = null;
+                                                                try {
+                                                                    if (
+                                                                        $photo &&
+                                                                        \Illuminate\Support\Facades\Storage::disk(
+                                                                            'public',
+                                                                        )->exists($photo)
+                                                                    ) {
+                                                                        $photoUrl = asset('storage/' . $photo);
+                                                                    }
+                                                                } catch (\Throwable $e) {
+                                                                }
+                                                                $photoUrl =
+                                                                    $photoUrl ?:
+                                                                    asset(
+                                                                        'frontend/assets/images/testimonial/default-avatar.png',
+                                                                    );
+
+                                                                // Clean stray markdown bold (**text**) so it doesn’t render literally
+                                                                $quote = preg_replace('/\*\*(.*?)\*\*/', '$1', $quote);
+                                                            @endphp
+
+                                                            <div class="swiper-slide d-flex">
+                                                                <div class="testimonial-item d-flex flex-column justify-content-between h-100 p-4 rounded-3 shadow-sm"
+                                                                    style="background:#ffffff;border:1px solid #e9ecef;">
+                                                                    <span class="quote-icon" style="color:#2c99d4;"><i
+                                                                            class="tji-quote"></i></span>
+
+                                                                    <div class="flex-grow-1 mb-3">
+                                                                        <p class="desc mb-0" style="color:#222;">
+                                                                            {!! nl2br(e($quote)) !!}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    <div class="testimonial-author mt-auto pt-2">
+                                                                        <div
+                                                                            class="author-inner d-flex align-items-center">
+                                                                            <div class="author-img me-2"
+                                                                                style="width:44px;height:44px;border-radius:50%;overflow:hidden;">
+                                                                                <img src="{{ $photoUrl }}"
+                                                                                    alt="{{ $author }}"
+                                                                                    style="width:100%;height:100%;object-fit:cover;">
+                                                                            </div>
+                                                                            <div class="author-header">
+                                                                                <h4 class="title mb-0"
+                                                                                    style="font-size:1rem;color:#111;">
+                                                                                    {{ $author }}</h4>
+                                                                                @if ($role)
+                                                                                    <span class="designation"
+                                                                                        style="font-size:.875rem;color:#6c757d;">{{ $role }}</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                    <div class="swiper-pagination-area">
+                                                        <div class="swiper-pagination"
+                                                            id="course-testimonials-pagination"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-shape-1">
+                                    <img src="{{ asset('frontend/assets/images/shape/pattern-2.svg') }}" alt="">
+                                </div>
+                                <div class="bg-shape-2">
+                                    <img src="{{ asset('frontend/assets/images/shape/pattern-3.svg') }}" alt="">
+                                </div>
+                            </section>
+                        @endif
+                        {{-- end: Testimonial Section --}}
+
+                        {{-- Static FAQ --}}
+                        <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">Frequently Asked Questions</h2>
+                        <div class="accordion tj-faq style-2" id="faqOne">
+                            <div class="accordion-item active wow fadeInUp" data-wow-delay=".4s">
+                                <button class="faq-title" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq-1" aria-expanded="true">
+                                    What are the prerequisites for this course?
+                                </button>
+                                <div id="faq-1" class="collapse show" data-bs-parent="#faqOne">
+                                    <div class="accordion-body faq-text">
+                                        <p>No prior experience required. We start from fundamentals and build up to advanced
+                                            concepts.</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="tj-nav-post__grid">
-                                <a href="{{ route('academy') }}"><i class="tji-window"></i></a>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay=".5s">
+                                <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq-2" aria-expanded="false">
+                                    What support is available during the course?
+                                </button>
+                                <div id="faq-2" class="collapse" data-bs-parent="#faqOne">
+                                    <div class="accordion-body faq-text">
+                                        <p>Access to instructors, forums, weekly office hours, and career counseling.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="tj-nav__post next">
-                                <div class="tj-nav-post__nav next_post">
-                                    <a href="{{ route('shop') }}">Browse Shop<span><i
-                                                class="tji-arrow-right"></i></span></a>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay=".6s">
+                                <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq-3" aria-expanded="false">
+                                    Are there flexible payment options available?
+                                </button>
+                                <div id="faq-3" class="collapse" data-bs-parent="#faqOne">
+                                    <div class="accordion-body faq-text">
+                                        <p>Yes, full and installment plans; scholarships and corporate discounts available.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item wow fadeInUp" data-wow-delay=".7s">
+                                <button class="faq-title collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#faq-4" aria-expanded="false">
+                                    What certification will I receive upon completion?
+                                </button>
+                                <div id="faq-4" class="collapse" data-bs-parent="#faqOne">
+                                    <div class="accordion-body faq-text">
+                                        <p>Forward Edge Consulting Digital Marketing Professional Certificate + exam prep
+                                            tracks.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Navigation --}}
+                    <nav class="tj-post__navigation mb-0 wow fadeInUp" data-wow-delay=".3s" aria-label="Post navigation">
+                        <div class="tj-nav__post previous">
+                            <div class="tj-nav-post__nav prev_post">
+                                <a href="{{ route('academy') }}"><span><i class="tji-arrow-left"
+                                            aria-hidden="true"></i></span>All Courses</a>
+                            </div>
+                        </div>
+                        <div class="tj-nav-post__grid">
+                            <a href="{{ route('academy') }}" aria-label="Courses grid"><i class="tji-window"
+                                    aria-hidden="true"></i></a>
+                        </div>
+                        <div class="tj-nav__post next">
+                            <div class="tj-nav-post__nav next_post">
+                                <a href="{{ route('shop') }}">Browse Shop<span><i class="tji-arrow-right"
+                                            aria-hidden="true"></i></span></a>
+                            </div>
+                        </div>
+                    </nav>
+
                 </div>
             </div>
         </div>
+        </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        // Lightweight handler for enroll buttons; respects both paid and free flows
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.enroll-btn');
+            if (!btn) return;
+
+            const applyUrl = btn.getAttribute('data-apply-url');
+            const enrollUrl = btn.getAttribute('data-enroll-url');
+
+            if (applyUrl) {
+                window.location.href = applyUrl;
+                return;
+            }
+            if (enrollUrl) {
+                window.location.href = enrollUrl;
+                return;
+            }
+
+            // Fallback: scroll to schedules section if no URL wired
+            const sc = document.querySelector('.schedule-card');
+            if (sc) sc.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, {
+            passive: true
+        });
+    </script>
+@endpush
