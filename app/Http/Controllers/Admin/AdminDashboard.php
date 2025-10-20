@@ -49,9 +49,9 @@ class AdminDashboard extends Controller
                 $q->select('id', 'title', 'start_at', 'location');
             }])
             ->whereHas('event', function ($q) {
-                $q->whereBetween('start_at', [now(), now()->addDays(7)]);
+                $q->whereBetween('start_date', [now(), now()->addDays(7)]);
             })
-            ->latest('start_at')
+            ->latest('start_date')
             ->take(8)
             ->get();
 
