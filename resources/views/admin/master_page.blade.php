@@ -71,9 +71,9 @@
 
 <body>
 
-  @include('admin.partials.header'); 
+  @include('admin.partials.header')
 
-   @include('admin.partials.sidebar'); 
+   @include('admin.partials.sidebar')
 
   <main id="main" class="main">
     <div class="container">
@@ -82,7 +82,7 @@
   </main>@include('admin.partials.footer')
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  @yield('scripts')
+
   <!-- iziToast JS -->
 <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
   <script src="{{ asset('backend/assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
@@ -95,6 +95,7 @@
   <script src="{{ asset('backend/assets/vendor/php-email-form/validate.js') }}"></script>
 
   <script src="{{ asset('backend/assets/js/main.js') }}"></script>
+    @stack('scripts')
   <script>
   (function () {
     var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');

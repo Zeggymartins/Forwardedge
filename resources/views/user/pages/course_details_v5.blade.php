@@ -158,9 +158,6 @@
               {{ $course->description ?? 'Unlock the power of digital marketing with our comprehensive program designed for professionals who want to master the latest strategies, tools, and techniques in today’s digital landscape. This intensive course combines theoretical knowledge with hands-on practical experience.' }}
             </p>
 
-            {{-- >>> INSERT: Price inline after Overview --}}
-            @include('user.partials.price_inline', ['label' => 'Program Tuition'])
-
             {{-- Stats --}}
             <section class="course-stats wow fadeInUp" data-wow-delay=".35s" aria-label="Course statistics">
               <div class="row g-3 g-md-2">
@@ -194,9 +191,6 @@
             {{-- Curriculum --}}
             <h2 class="wow fadeInUp h4 mt-4" data-wow-delay=".45s">Course Curriculum</h2>
             <p class="wow fadeInUp" data-wow-delay=".5s">Our structured learning path takes you from fundamentals to advanced implementation.</p>
-
-            {{-- >>> INSERT: Price inline after Curriculum intro --}}
-            @include('user.partials.price_inline', ['label' => 'Curriculum Tuition'])
 
             <div class="row row-gap-4 mt-3">
               @if ($phases->count() > 0)
@@ -296,9 +290,6 @@
                   </div>
                 </section>
               @endforeach
-
-              {{-- >>> OPTIONAL: Recap price inline after schedules --}}
-              @include('user.partials.price_inline', ['label' => 'Tuition Recap'])
             @else
               <section class="schedule-card wow fadeInUp" data-wow-delay=".4s">
                 <div class="row align-items-center">
@@ -372,9 +363,6 @@
                           @endforeach
                         </ul>
                       </div>
-
-                      {{-- >>> INSERT: Price inline after a list section (optional) --}}
-                      @include('user.partials.price_inline', ['label' => 'Section Tuition'])
                     @endif
                   @break
 
@@ -406,9 +394,6 @@
                           @endforeach
                         </div>
                       </div>
-
-                      {{-- >>> INSERT: Price inline after images (optional) --}}
-                      @include('user.partials.price_inline', ['label' => 'Next Step Tuition'])
                     @endif
                   @break
 
@@ -489,9 +474,6 @@
                           @endforeach
                         </div>
                       </div>
-
-                      {{-- >>> INSERT: Price inline after Features section --}}
-                      @include('user.partials.price_inline', ['label' => 'Features Section Tuition'])
                     @endif
                   @break
 
@@ -577,9 +559,6 @@
                 </div>
               </div>
             </div>
-
-            {{-- >>> OPTIONAL: Price inline after static highlights --}}
-            @include('user.partials.price_inline', ['label' => 'Next Step Tuition'])
 
             {{-- Static FAQ --}}
             <h2 class="wow fadeInUp h4 mt-5" data-wow-delay=".3s">Frequently Asked Questions</h2>

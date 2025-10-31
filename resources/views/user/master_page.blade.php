@@ -147,7 +147,8 @@
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Email</span>
-                            <a class="contact-link" href="mailto:info@forwardedgeconsulting.com">info@forwardedgeconsulting.com</a>
+                            <a class="contact-link"
+                                href="mailto:info@forwardedgeconsulting.com">info@forwardedgeconsulting.com</a>
                         </div>
                         <div class="contact-item">
                             <span class="subtitle">Location</span>
@@ -247,48 +248,48 @@
                 <div class="modal-body">
                     {{-- Nav tabs --}}
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
-                                href="#loginTab">Login</a></li>
                         <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
                                 href="#registerTab">Register</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
+                                href="#loginTab">Login</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#otpTab">OTP</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#forgotTab">Forgot</a>
                         </li>
                     </ul>
 
                     <div class="tab-content mt-3">
-                        {{-- Login --}}
-                        <div class="tab-pane fade show active" id="loginTab">
-                            <form id="loginForm">@csrf
-                                <input type="email" name="email" class="form-control mb-2" placeholder="Email"
-                                    required>
-                                <input type="password" name="password" class="form-control mb-2"
-                                    placeholder="Password" required>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" name="remember" value="1">
-                                    <label class="form-check-label">Remember me</label>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">Login</button>
-                            </form>
-                        </div>
+           {{-- Login --}}
+<div class="tab-pane fade show active" id="loginTab">
+  <form id="loginForm">@csrf
+    <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+    <input type="password" name="password" class="form-control mb-2"
+           placeholder="Password (your phone number)" required>
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" name="remember" value="1" id="rememberMe">
+      <label class="form-check-label" for="rememberMe">Remember me</label>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Login</button>
+  </form>
+  <small class="text-muted d-block mt-2">
+    Tip: your initial password is your phone number (e.g. <code>+2348031234567</code>).
+  </small>
+</div>
 
-                        {{-- Register --}}
-                        <div class="tab-pane fade" id="registerTab">
-                            <form id="registerForm">@csrf
-                                <input type="text" name="name" class="form-control mb-2"
-                                    placeholder="Full Name" required>
-                                <input type="email" name="email" class="form-control mb-2" placeholder="Email"
-                                    required>
-                                <input type="text" name="phone" class="form-control mb-2" placeholder="Phone">
-                                <input type="text" name="address" class="form-control mb-2"
-                                    placeholder="Address">
-                                <input type="password" name="password" class="form-control mb-2"
-                                    placeholder="Password" required>
-                                <input type="password" name="password_confirmation" class="form-control mb-2"
-                                    placeholder="Confirm Password" required>
-                                <button type="submit" class="btn btn-success w-100">Register</button>
-                            </form>
-                        </div>
+{{-- Register --}}
+<div class="tab-pane fade" id="registerTab">
+  <form id="registerForm">@csrf
+    <input type="text" name="name" class="form-control mb-2" placeholder="Full Name" required>
+    <input type="email" name="email" class="form-control mb-2" placeholder="Email" required>
+    <input type="text" name="phone" class="form-control mb-2" placeholder="Phone (e.g. +2348031234567)" required>
+    <input type="text" name="address" class="form-control mb-2" placeholder="Address">
+    {{-- No password fields --}}
+    <button type="submit" class="btn btn-success w-100">Register</button>
+  </form>
+  <small class="text-muted d-block mt-2">
+    We’ll set your initial password to your phone number (you can change it later).
+  </small>
+</div>
+
 
                         {{-- OTP --}}
                         <div class="tab-pane fade" id="otpTab">
@@ -334,130 +335,129 @@
         </div>
     </div>
 @if (!View::hasSection('hide_header'))
-    @include('user.partials.header')
-@endif
+    @include('user.partials.header') @endif
     <div id="smooth-wrapper">
-        <div id="smooth-content">
-            <main id="primary" class="site-main">
-                <div class="space-for-header"></div>
+                                <div id="smooth-content">
+                                    <main id="primary" class="site-main">
+                                        <div class="space-for-header"></div>
 
-                @yield('main')
-                @include('user.partials.footer')
-            </main>
-        </div>
-    </div>
+                                        @yield('main')
+                                        @include('user.partials.footer')
+                                    </main>
+                                </div>
+                        </div>
 
-    <input type="hidden" id="pending_action" value="">
-    <input type="hidden" id="pending_payload" value="{}">
+                        <input type="hidden" id="pending_action" value="">
+                        <input type="hidden" id="pending_payload" value="{}">
 
-    <!-- JS here -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+                        <!-- JS here -->
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/ScrollSmoother.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/gsap-scroll-to-plugin.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/gsap-scroll-trigger.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/gsap-split-text.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/jquery.nice-select.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/swiper.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/odometer.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/venobox.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/appear.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/wow.min.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/meanmenu.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/range-slider.js') }}"></script>
-    <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/ScrollSmoother.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/gsap-scroll-to-plugin.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/gsap-scroll-trigger.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/gsap-split-text.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/jquery.nice-select.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/swiper.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/odometer.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/venobox.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/appear.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/wow.min.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/meanmenu.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/range-slider.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
 
-    <script>
-        // Setup
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+                        <script>
+                            // Setup
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                }
+                            });
 
-        // Toastr defaults
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-top-right",
-            timeOut: "7000"
-        };
+                            // Toastr defaults
+                            toastr.options = {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-top-right",
+                                timeOut: "7000"
+                            };
 
-        // Modal helper function
-        function showAuthModal(message = 'Please login to continue') {
-            console.log('Showing auth modal:', message);
-            toastr.info(message);
-            $('#authModal').modal('show');
-        }
-        $(document).on('click', '.open-cart-btn', function(e) {
-            e.preventDefault();
-            openCart();
-        });
+                            // Modal helper function
+                            function showAuthModal(message = 'Please login to continue') {
+                                console.log('Showing auth modal:', message);
+                                toastr.info(message);
+                                $('#authModal').modal('show');
+                            }
+                            $(document).on('click', '.open-cart-btn', function(e) {
+                                e.preventDefault();
+                                openCart();
+                            });
 
-        $(document).on('click', '.open-wishlist-btn', function(e) {
-            e.preventDefault();
-            openWishlist();
-        });
+                            $(document).on('click', '.open-wishlist-btn', function(e) {
+                                e.preventDefault();
+                                openWishlist();
+                            });
 
-        function openCart() {
-            $.get("{{ route('user.cart.index') }}")
-                .done(res => {
-                    // Authenticated → redirect to cart page
-                    window.location.href = "{{ route('user.cart.index') }}";
-                })
-                .fail(xhr => {
-                    console.log('Open cart failed:', xhr.status, xhr.responseJSON);
-                    if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
-                            'auth_required')) {
-                        $('#pending_action').val('open_cart');
-                        $('#pending_payload').val('{}');
-                        showAuthModal(xhr.responseJSON?.message || 'Please login to view your cart');
-                        return;
-                    }
-                    toastr.error('Could not load cart');
-                });
-        }
+                            function openCart() {
+                                $.get("{{ route('user.cart.index') }}")
+                                    .done(res => {
+                                        // Authenticated → redirect to cart page
+                                        window.location.href = "{{ route('user.cart.index') }}";
+                                    })
+                                    .fail(xhr => {
+                                        console.log('Open cart failed:', xhr.status, xhr.responseJSON);
+                                        if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
+                                                'auth_required')) {
+                                            $('#pending_action').val('open_cart');
+                                            $('#pending_payload').val('{}');
+                                            showAuthModal(xhr.responseJSON?.message || 'Please login to view your cart');
+                                            return;
+                                        }
+                                        toastr.error('Could not load cart');
+                                    });
+                            }
 
-        function openWishlist() {
-            $.get("{{ route('user.wishlist.index') }}")
-                .done(res => {
-                    // Authenticated → redirect to wishlist page
-                    window.location.href = "{{ route('user.wishlist.index') }}";
-                })
-                .fail(xhr => {
-                    console.log('Open wishlist failed:', xhr.status, xhr.responseJSON);
-                    if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
-                            'auth_required')) {
-                        $('#pending_action').val('open_wishlist');
-                        $('#pending_payload').val('{}');
-                        showAuthModal(xhr.responseJSON?.message || 'Please login to view your wishlist');
-                        return;
-                    }
-                    toastr.error('Could not load wishlist');
-                });
-        }
-
-
+                            function openWishlist() {
+                                $.get("{{ route('user.wishlist.index') }}")
+                                    .done(res => {
+                                        // Authenticated → redirect to wishlist page
+                                        window.location.href = "{{ route('user.wishlist.index') }}";
+                                    })
+                                    .fail(xhr => {
+                                        console.log('Open wishlist failed:', xhr.status, xhr.responseJSON);
+                                        if (xhr.status === 401 || xhr.status === 403 || (xhr.responseJSON && xhr.responseJSON.status ===
+                                                'auth_required')) {
+                                            $('#pending_action').val('open_wishlist');
+                                            $('#pending_payload').val('{}');
+                                            showAuthModal(xhr.responseJSON?.message || 'Please login to view your wishlist');
+                                            return;
+                                        }
+                                        toastr.error('Could not load wishlist');
+                                    });
+                            }
 
 
 
-        // UI Updaters
-        function updateCartUI(cart) {
-            if (!Array.isArray(cart)) cart = Object.values(cart);
-            document.querySelectorAll('#cart-count').forEach(el => el.innerText = cart.length);
 
-            let dropdown = document.querySelector('.cart-dropdown .custom-scroll');
-            if (!dropdown) return;
-            dropdown.innerHTML = '';
 
-            let total = 0;
-            cart.forEach(item => {
-                total += (item.price * item.quantity);
-                dropdown.innerHTML += `
+                            // UI Updaters
+                            function updateCartUI(cart) {
+                                if (!Array.isArray(cart)) cart = Object.values(cart);
+                                document.querySelectorAll('#cart-count').forEach(el => el.innerText = cart.length);
+
+                                let dropdown = document.querySelector('.cart-dropdown .custom-scroll');
+                                if (!dropdown) return;
+                                dropdown.innerHTML = '';
+
+                                let total = 0;
+                                cart.forEach(item => {
+                                    total += (item.price * item.quantity);
+                                    dropdown.innerHTML += `
                     <li class="d-flex align-items-center mb-2">
                         <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
                         <div>
@@ -466,31 +466,31 @@
                         </div>
                         <button class="btn btn-sm btn-link ms-auto" onclick="removeFromCart(${item.course_id})"><i class="fas fa-times"></i></button>
                     </li>`;
-            });
+                                });
 
-            let container = document.querySelector('.cart-dropdown .cart-btn');
-            if (container) {
-                container.innerHTML = `
+                                let container = document.querySelector('.cart-dropdown .cart-btn');
+                                if (container) {
+                                    container.innerHTML = `
                     <div class="p-2">
                         <div class="mb-2"><strong>Total:</strong> ₦${Number(total).toLocaleString()}</div>
                         <a href="{{ route('user.cart.index') }}" class="btn btn-primary btn-sm w-100">View cart</a>
                     </div>`;
-            }
-        }
+                                }
+                            }
 
-        function updateWishlistUI(wishlist) {
-            if (!Array.isArray(wishlist)) wishlist = Object.values(wishlist);
-            document.querySelectorAll('#wishlist-count').forEach(el => el.innerText = wishlist.length);
+                            function updateWishlistUI(wishlist) {
+                                if (!Array.isArray(wishlist)) wishlist = Object.values(wishlist);
+                                document.querySelectorAll('#wishlist-count').forEach(el => el.innerText = wishlist.length);
 
-            let dropdown = document.querySelector('.wishlist-dropdown .custom-scroll');
-            if (!dropdown) return;
-            dropdown.innerHTML = '';
+                                let dropdown = document.querySelector('.wishlist-dropdown .custom-scroll');
+                                if (!dropdown) return;
+                                dropdown.innerHTML = '';
 
-            if (wishlist.length === 0) {
-                dropdown.innerHTML = `<li class="text-center p-3">Your wishlist is empty</li>`;
-            } else {
-                wishlist.forEach(item => {
-                    dropdown.innerHTML += `
+                                if (wishlist.length === 0) {
+                                    dropdown.innerHTML = `<li class="text-center p-3">Your wishlist is empty</li>`;
+                                } else {
+                                    wishlist.forEach(item => {
+                                        dropdown.innerHTML += `
                         <li class="d-flex align-items-center mb-2">
                             <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
                             <div>
@@ -499,413 +499,519 @@
                             </div>
                             <button class="btn btn-sm btn-link ms-auto" onclick="removeFromWishlist(${item.course_id})"><i class="fas fa-times"></i></button>
                         </li>`;
-                });
+                                    });
 
-                let container = document.querySelector('.wishlist-dropdown .cart-btn');
-                if (container) {
-                    container.innerHTML =
-                        `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
-                }
-            }
-        }
+                                    let container = document.querySelector('.wishlist-dropdown .cart-btn');
+                                    if (container) {
+                                        container.innerHTML =
+                                            `<a href="{{ route('user.wishlist.index') }}" class="btn btn-primary btn-sm w-100">View wishlist</a>`;
+                                    }
+                                }
+                            }
 
-        // Core actions
-        function addToCart(courseId, quantity = 1) {
-            console.log('Adding to cart:', courseId, quantity);
+                            // Core actions
+                            function addToCart(courseId, quantity = 1) {
+                                console.log('Adding to cart:', courseId, quantity);
 
-            $.post("{{ route('user.cart.add') }}", {
-                    course_id: courseId,
-                    quantity: quantity
-                })
-                .done(res => {
-                    toastr.success(res.message || 'Added to cart');
-                    updateCartUI(res.cart);
-                    updateCartCount();
-                })
-                .fail(xhr => {
-                    console.log('Cart add failed:', xhr.status, xhr.responseJSON);
-                    if (xhr.status === 401 || xhr.status === 403) {
-                        $('#pending_action').val('add_to_cart');
-                        $('#pending_payload').val(JSON.stringify({
-                            course_id: courseId,
-                            quantity: quantity
-                        }));
-                        showAuthModal('Please login to add items to cart');
-                        return;
-                    }
-                    toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
-                });
-        }
+                                $.post("{{ route('user.cart.add') }}", {
+                                        course_id: courseId,
+                                        quantity: quantity
+                                    })
+                                    .done(res => {
+                                        toastr.success(res.message || 'Added to cart');
+                                        updateCartUI(res.cart);
+                                        updateCartCount();
+                                    })
+                                    .fail(xhr => {
+                                        console.log('Cart add failed:', xhr.status, xhr.responseJSON);
+                                        if (xhr.status === 401 || xhr.status === 403) {
+                                            $('#pending_action').val('add_to_cart');
+                                            $('#pending_payload').val(JSON.stringify({
+                                                course_id: courseId,
+                                                quantity: quantity
+                                            }));
+                                            showAuthModal('Please login to add items to cart');
+                                            return;
+                                        }
+                                        toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+                                    });
+                            }
 
-        function removeFromCart(courseId) {
-            $.post("{{ route('user.cart.remove') }}", {
-                    course_id: courseId
-                })
-                .done(res => {
-                    toastr.success(res.message || 'Removed from cart');
-                    updateCartUI(res.cart);
-                    updateCartCount();
-                })
-                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
-        }
+                            function removeFromCart(courseId) {
+                                $.post("{{ route('user.cart.remove') }}", {
+                                        course_id: courseId
+                                    })
+                                    .done(res => {
+                                        toastr.success(res.message || 'Removed from cart');
+                                        updateCartUI(res.cart);
+                                        updateCartCount();
+                                    })
+                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
+                            }
 
-        function addToWishlist(courseId) {
-            console.log('Adding to wishlist:', courseId);
+                            function addToWishlist(courseId) {
+                                console.log('Adding to wishlist:', courseId);
 
-            $.post("{{ route('user.wishlist.add') }}", {
-                    course_id: courseId
-                })
-                .done(res => {
-                    toastr.success(res.message || 'Added to wishlist');
-                    updateWishlistUI(res.wishlist);
-                    updateWishlistCount();
-                })
-                .fail(xhr => {
-                    console.log('Wishlist add failed:', xhr.status, xhr.responseJSON);
-                    if (xhr.status === 401 || xhr.status === 403) {
-                        $('#pending_action').val('add_to_wishlist');
-                        $('#pending_payload').val(JSON.stringify({
-                            course_id: courseId
-                        }));
-                        showAuthModal('Please login to add items to wishlist');
-                        return;
-                    }
-                    toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
-                });
-        }
+                                $.post("{{ route('user.wishlist.add') }}", {
+                                        course_id: courseId
+                                    })
+                                    .done(res => {
+                                        toastr.success(res.message || 'Added to wishlist');
+                                        updateWishlistUI(res.wishlist);
+                                        updateWishlistCount();
+                                    })
+                                    .fail(xhr => {
+                                        console.log('Wishlist add failed:', xhr.status, xhr.responseJSON);
+                                        if (xhr.status === 401 || xhr.status === 403) {
+                                            $('#pending_action').val('add_to_wishlist');
+                                            $('#pending_payload').val(JSON.stringify({
+                                                course_id: courseId
+                                            }));
+                                            showAuthModal('Please login to add items to wishlist');
+                                            return;
+                                        }
+                                        toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
+                                    });
+                            }
 
-        function removeFromWishlist(courseId) {
-            $.post("{{ route('user.wishlist.remove') }}", {
-                    course_id: courseId
-                })
-                .done(res => {
-                    toastr.success(res.message || 'Removed from wishlist');
-                    updateWishlistUI(res.wishlist);
-                    updateWishlistCount();
-                })
-                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
-        }
+                            function removeFromWishlist(courseId) {
+                                $.post("{{ route('user.wishlist.remove') }}", {
+                                        course_id: courseId
+                                    })
+                                    .done(res => {
+                                        toastr.success(res.message || 'Removed from wishlist');
+                                        updateWishlistUI(res.wishlist);
+                                        updateWishlistCount();
+                                    })
+                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
+                            }
 
-        // Event Handlers
+                            // Event Handlers
 
-        // Add to cart from wishlist
-$(document).on('click', '.wishlist-add-to-cart', function(e) {
-    e.preventDefault(); // stop navigation
-    let courseId = $(this).data('course-id');
-    if (!courseId) return toastr.error('Course ID not found');
+                            // Add to cart from wishlist
+                            $(document).on('click', '.wishlist-add-to-cart', function(e) {
+                                e.preventDefault(); // stop navigation
+                                let courseId = $(this).data('course-id');
+                                if (!courseId) return toastr.error('Course ID not found');
 
-    console.log('Adding to cart from wishlist:', courseId);
+                                console.log('Adding to cart from wishlist:', courseId);
 
-    $.post("{{ route('user.cart.add') }}", { course_id: courseId, quantity: 1 })
-        .done(res => {
-            toastr.success(res.message || 'Added to cart');
+                                $.post("{{ route('user.cart.add') }}", {
+                                        course_id: courseId,
+                                        quantity: 1
+                                    })
+                                    .done(res => {
+                                        toastr.success(res.message || 'Added to cart');
 
-            // Update cart UI
-            updateCartUI(res.cart);
-            updateCartCount();
+                                        // Update cart UI
+                                        updateCartUI(res.cart);
+                                        updateCartCount();
 
-            // Remove from wishlist UI
-            removeFromWishlist(courseId);
-        })
-        .fail(xhr => {
-            console.log('Failed to add from wishlist:', xhr.status, xhr.responseJSON);
-            if (xhr.status === 401 || xhr.status === 403) {
-                $('#pending_action').val('add_to_cart');
-                $('#pending_payload').val(JSON.stringify({ course_id: courseId }));
-                showAuthModal('Please login to add items to cart');
-                return;
-            }
-            toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
-        });
-});
+                                        // Remove from wishlist UI
+                                        removeFromWishlist(courseId);
+                                    })
+                                    .fail(xhr => {
+                                        console.log('Failed to add from wishlist:', xhr.status, xhr.responseJSON);
+                                        if (xhr.status === 401 || xhr.status === 403) {
+                                            $('#pending_action').val('add_to_cart');
+                                            $('#pending_payload').val(JSON.stringify({
+                                                course_id: courseId
+                                            }));
+                                            showAuthModal('Please login to add items to cart');
+                                            return;
+                                        }
+                                        toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+                                    });
+                            });
 
-        $(document).on('click', '.cart-button', function(e) {
-            e.preventDefault();
-            console.log('Cart button clicked');
+                            $(document).on('click', '.cart-button', function(e) {
+                                e.preventDefault();
+                                console.log('Cart button clicked');
 
-            let courseId = $(this).data('course-id');
-            let quantity = $(this).data('quantity') || 1;
+                                let courseId = $(this).data('course-id');
+                                let quantity = $(this).data('quantity') || 1;
 
-            console.log('Course ID:', courseId, 'Quantity:', quantity);
+                                console.log('Course ID:', courseId, 'Quantity:', quantity);
 
-            if (!courseId) {
-                console.error('Course ID not found on cart button');
-                toastr.error('Course ID not found');
-                return;
-            }
+                                if (!courseId) {
+                                    console.error('Course ID not found on cart button');
+                                    toastr.error('Course ID not found');
+                                    return;
+                                }
 
-            addToCart(courseId, quantity);
-        });
+                                addToCart(courseId, quantity);
+                            });
 
-        $(document).on('click', '.product-add-wishlist-btn button', function(e) {
-            e.preventDefault();
-            console.log('Wishlist button clicked');
+                            $(document).on('click', '.product-add-wishlist-btn button', function(e) {
+                                e.preventDefault();
+                                console.log('Wishlist button clicked');
 
-            // Find course ID from the product container
-            let courseId = $(this).closest('.tj-product').find('[data-course-id]').data('course-id');
+                                // Find course ID from the product container
+                                let courseId = $(this).closest('.tj-product').find('[data-course-id]').data('course-id');
 
-            console.log('Course ID for wishlist:', courseId);
+                                console.log('Course ID for wishlist:', courseId);
 
-            if (!courseId) {
-                console.error('Course ID not found for wishlist');
-                toastr.error('Course ID not found');
-                return;
-            }
+                                if (!courseId) {
+                                    console.error('Course ID not found for wishlist');
+                                    toastr.error('Course ID not found');
+                                    return;
+                                }
 
-            addToWishlist(courseId);
-        });
-// Remove from cart table
-$(document).on('click', '.woocommerce-cart-form__cart-item .product-remove .remove', function(e) {
-    e.preventDefault();
-    let courseId = $(this).data('course-id');
-    if (!courseId) return toastr.error('Course ID not found');
+                                addToWishlist(courseId);
+                            });
+                            // Remove from cart table
+                            $(document).on('click', '.woocommerce-cart-form__cart-item .product-remove .remove', function(e) {
+                                e.preventDefault();
+                                let courseId = $(this).data('course-id');
+                                if (!courseId) return toastr.error('Course ID not found');
 
-    removeFromCart(courseId);
+                                removeFromCart(courseId);
 
-    // Remove row from table immediately
-    $(this).closest('tr').fadeOut(200, function(){ $(this).remove(); });
-});
+                                // Remove row from table immediately
+                                $(this).closest('tr').fadeOut(200, function() {
+                                    $(this).remove();
+                                });
+                            });
 
-// Remove from wishlist table
-$(document).on('click', '.woosw-item--remove', function(e) {
-    e.preventDefault();
-    let courseId = $(this).data('course-id');
-    if (!courseId) return toastr.error('Course ID not found');
+                            // Remove from wishlist table
+                            $(document).on('click', '.woosw-item--remove', function(e) {
+                                e.preventDefault();
+                                let courseId = $(this).data('course-id');
+                                if (!courseId) return toastr.error('Course ID not found');
 
-    removeFromWishlist(courseId);
+                                removeFromWishlist(courseId);
 
-    // Remove row from table immediately
-    $(this).closest('tr').fadeOut(200, function(){ $(this).remove(); });
-});
+                                // Remove row from table immediately
+                                $(this).closest('tr').fadeOut(200, function() {
+                                    $(this).remove();
+                                });
+                            });
 
-   $(document).on('click', '.enroll-btn', function(e) {
-    e.preventDefault();
-    console.log('Enroll/Apply button clicked');
+                            $(document).on('click', '.enroll-btn', function(e) {
+                                e.preventDefault();
+                                console.log('Enroll/Apply button clicked');
 
-    const $btn = $(this);
-    const enrollUrl = $btn.data('enroll-url');   // paid flows
-    const applyUrl  = $btn.data('apply-url');    // scholarship (free) flows
-    const scheduleId = $btn.data('schedule-id');
+                                const $btn = $(this);
+                                const enrollUrl = $btn.data('enroll-url'); // paid flows
+                                const applyUrl = $btn.data('apply-url'); // scholarship (free) flows
+                                const scheduleId = $btn.data('schedule-id');
 
-    console.log('Enroll URL:', enrollUrl, 'Apply URL:', applyUrl, 'Schedule ID:', scheduleId);
+                                console.log('Enroll URL:', enrollUrl, 'Apply URL:', applyUrl, 'Schedule ID:', scheduleId);
 
-    if (!enrollUrl && !applyUrl && !scheduleId) {
-        console.error('Missing enrollment/scholarship data on button');
-        toastr.error('Action information missing');
-        return;
-    }
+                                if (!enrollUrl && !applyUrl && !scheduleId) {
+                                    console.error('Missing enrollment/scholarship data on button');
+                                    toastr.error('Action information missing');
+                                    return;
+                                }
 
-    @auth
-        // If it's a scholarship (free) schedule, prefer applyUrl
-        if (applyUrl) {
-            window.location.href = applyUrl;
-            return;
-        }
+                                @auth
+                                // If it's a scholarship (free) schedule, prefer applyUrl
+                                if (applyUrl) {
+                                    window.location.href = applyUrl;
+                                    return;
+                                }
 
-        // Otherwise paid enrollment
-        if (enrollUrl) {
-            window.location.href = enrollUrl;
-        } else if (scheduleId) {
-            window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
-        }
-    @else
-        // Save pending action based on which URL we have
-        const isScholarship = Boolean(applyUrl);
-        $('#pending_action').val(isScholarship ? 'apply_scholarship' : 'enroll');
-        $('#pending_payload').val(JSON.stringify({
-            schedule_id: scheduleId || null,
-            enroll_url: enrollUrl || null,
-            apply_url: applyUrl || null
-        }));
+                                // Otherwise paid enrollment
+                                if (enrollUrl) {
+                                    window.location.href = enrollUrl;
+                                } else if (scheduleId) {
+                                    window.location.href = "{{ url('/enroll/price') }}/" + scheduleId;
+                                }
+                            @else
+                                // Save pending action based on which URL we have
+                                const isScholarship = Boolean(applyUrl);
+                                $('#pending_action').val(isScholarship ? 'apply_scholarship' : 'enroll');
+                                $('#pending_payload').val(JSON.stringify({
+                                    schedule_id: scheduleId || null,
+                                    enroll_url: enrollUrl || null,
+                                    apply_url: applyUrl || null
+                                }));
 
-        // Tailor the modal message
-        showAuthModal(isScholarship
-            ? 'Please login to apply for a scholarship'
-            : 'Please login to enroll in this course'
-        );
-    @endauth
-});
+                                // Tailor the modal message
+                                showAuthModal(isScholarship ?
+                                    'Please login to apply for a scholarship' :
+                                    'Please login to enroll in this course'
+                                );
+                            @endauth
+                            });
 
 
-        // Auth Forms
-        $('#registerForm').submit(function(e) {
-            e.preventDefault();
-            $.post("{{ route('ajax.register') }}", $(this).serialize())
-                .done(res => {
-                    toastr.success(res.message);
-                    $('#authModal').modal('hide');
-                    retryPendingAction();
-                    updateCartCount();
-                    updateWishlistCount();
-                })
-                .fail(xhr => {
-                    let message = xhr.responseJSON?.message || 'Registration failed';
-                    if (xhr.responseJSON?.errors) {
-                        message = Object.values(xhr.responseJSON.errors).flat().join(', ');
-                    }
-                    toastr.error(message);
-                });
-        });
+                            // Auth Forms
+                            $('#registerForm').submit(function(e) {
+                                e.preventDefault();
+                                $.post("{{ route('ajax.register') }}", $(this).serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#authModal').modal('hide');
+                                        retryPendingAction();
+                                        updateCartCount();
+                                        updateWishlistCount();
+                                    })
+                                    .fail(xhr => {
+                                        let message = xhr.responseJSON?.message || 'Registration failed';
+                                        if (xhr.responseJSON?.errors) {
+                                            message = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                                        }
+                                        toastr.error(message);
+                                    });
+                            });
 
-        $('#loginForm').submit(function(e) {
-            e.preventDefault();
-            $.post("{{ route('ajax.login') }}", $(this).serialize())
-                .done(res => {
-                    toastr.success(res.message);
-                    $('#authModal').modal('hide');
-                    retryPendingAction();
-                    updateCartCount();
-                    updateWishlistCount();
-                })
-                .fail(xhr => {
-                    let message = xhr.responseJSON?.message || 'Login failed';
-                    toastr.error(message);
-                });
-        });
+                            $('#loginForm').submit(function(e) {
+                                e.preventDefault();
+                                $.post("{{ route('ajax.login') }}", $(this).serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#authModal').modal('hide');
+                                        retryPendingAction();
+                                        updateCartCount();
+                                        updateWishlistCount();
+                                    })
+                                    .fail(xhr => {
+                                        let message = xhr.responseJSON?.message || 'Login failed';
+                                        toastr.error(message);
+                                    });
+                            });
 
-        $('#sendOtpBtn').click(function() {
-            $.post("{{ route('ajax.sendOtp') }}", $('#otpForm').serialize())
-                .done(res => {
-                    toastr.success(res.message);
-                    $('#otpMessage').html(`<div class="text-success small">${res.message}</div>`);
-                })
-                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
-        });
+                            $('#sendOtpBtn').click(function() {
+                                $.post("{{ route('ajax.sendOtp') }}", $('#otpForm').serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#otpMessage').html(`<div class="text-success small">${res.message}</div>`);
+                                    })
+                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
+                            });
 
-        $('#otpForm').submit(function(e) {
-            e.preventDefault();
-            $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
-                .done(res => {
-                    toastr.success(res.message);
-                    $('#authModal').modal('hide');
-                    retryPendingAction();
-                    updateCartCount();
-                    updateWishlistCount();
-                })
-                .fail(xhr => toastr.error(xhr.responseJSON?.message || 'OTP verification failed'));
-        });
+                            $('#otpForm').submit(function(e) {
+                                e.preventDefault();
+                                $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#authModal').modal('hide');
+                                        retryPendingAction();
+                                        updateCartCount();
+                                        updateWishlistCount();
+                                    })
+                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'OTP verification failed'));
+                            });
 
-        $('#forgotForm').submit(function(e) {
-            e.preventDefault();
-            $.post("{{ route('password.email') }}", $(this).serialize())
-                .done(res => $('#forgotPasswordMessage').html(
-                    `<div class="text-success small">${res.message}</div>`))
-                .fail(xhr => $('#forgotPasswordMessage').html(
-                    `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
-                ));
-        });
+                            $('#forgotForm').submit(function(e) {
+                                e.preventDefault();
+                                $.post("{{ route('password.email') }}", $(this).serialize())
+                                    .done(res => $('#forgotPasswordMessage').html(
+                                        `<div class="text-success small">${res.message}</div>`))
+                                    .fail(xhr => $('#forgotPasswordMessage').html(
+                                        `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
+                                    ));
+                            });
 
-        $('#resetPasswordForm').submit(function(e) {
-            e.preventDefault();
-            $.post("{{ route('password.update') }}", $(this).serialize())
-                .done(res => $('#resetPasswordMessage').html(
-                    `<div class="text-success small">${res.message}</div>`))
-                .fail(xhr => $('#resetPasswordMessage').html(
-                    `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
-                ));
-        });
+                            $('#resetPasswordForm').submit(function(e) {
+                                e.preventDefault();
+                                $.post("{{ route('password.update') }}", $(this).serialize())
+                                    .done(res => $('#resetPasswordMessage').html(
+                                        `<div class="text-success small">${res.message}</div>`))
+                                    .fail(xhr => $('#resetPasswordMessage').html(
+                                        `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
+                                    ));
+                            });
 
-      function retryPendingAction() {
-    try {
-        const action  = $('#pending_action').val();
-        const payload = JSON.parse($('#pending_payload').val() || '{}');
+                            function retryPendingAction() {
+                                try {
+                                    const action = $('#pending_action').val();
+                                    const payload = JSON.parse($('#pending_payload').val() || '{}');
 
-        console.log('Retrying pending action:', action, payload);
+                                    console.log('Retrying pending action:', action, payload);
 
-        switch (action) {
-            case 'add_to_cart':
-                if (payload.course_id) addToCart(payload.course_id, payload.quantity || 1);
-                break;
+                                    switch (action) {
+                                        case 'add_to_cart':
+                                            if (payload.course_id) addToCart(payload.course_id, payload.quantity || 1);
+                                            break;
 
-            case 'add_to_wishlist':
-                if (payload.course_id) addToWishlist(payload.course_id);
-                break;
+                                        case 'add_to_wishlist':
+                                            if (payload.course_id) addToWishlist(payload.course_id);
+                                            break;
 
-            case 'open_cart':
-                openCart();
-                break;
+                                        case 'open_cart':
+                                            openCart();
+                                            break;
 
-            case 'open_wishlist':
-                openWishlist();
-                break;
+                                        case 'open_wishlist':
+                                            openWishlist();
+                                            break;
 
-            case 'apply_scholarship': // NEW
-                if (payload.apply_url) {
-                    window.location.href = payload.apply_url;
-                } else if (payload.schedule_id) {
-                    // fallback if only schedule_id was stored
-                    window.location.href = "/scholarships/apply/" + payload.schedule_id;
-                } else {
-                    toastr.error('Could not resume scholarship application');
-                }
-                break;
+                                        case 'apply_scholarship': // NEW
+                                            if (payload.apply_url) {
+                                                window.location.href = payload.apply_url;
+                                            } else if (payload.schedule_id) {
+                                                // fallback if only schedule_id was stored
+                                                window.location.href = "/scholarships/apply/" + payload.schedule_id;
+                                            } else {
+                                                toastr.error('Could not resume scholarship application');
+                                            }
+                                            break;
 
-            case 'enroll':
-                if (payload.enroll_url) {
-                    window.location.href = payload.enroll_url;
-                } else if (payload.schedule_id) {
-                    window.location.href = "/enroll/price/" + payload.schedule_id;
-                } else {
-                    toastr.error('Could not resume enrollment');
-                }
-                break;
-        }
+                                        case 'enroll':
+                                            if (payload.enroll_url) {
+                                                window.location.href = payload.enroll_url;
+                                            } else if (payload.schedule_id) {
+                                                window.location.href = "/enroll/price/" + payload.schedule_id;
+                                            } else {
+                                                toastr.error('Could not resume enrollment');
+                                            }
+                                            break;
+                                    }
 
-        // Clear pending
-        $('#pending_action').val('');
-        $('#pending_payload').val('{}');
-    } catch (e) {
-        console.error('Error retrying pending action:', e);
-    }
-}
-        // Live counts
-        function updateCartCount() {
-            $.get("{{ route('user.cart.count') }}", function(data) {
-                if (data.cart_count !== undefined) {
-                    $('#cart-count').text(data.cart_count);
-                }
-            }).fail(function() {
-                console.log('Failed to update cart count');
-            });
-        }
+                                    // Clear pending
+                                    $('#pending_action').val('');
+                                    $('#pending_payload').val('{}');
+                                } catch (e) {
+                                    console.error('Error retrying pending action:', e);
+                                }
+                            }
+                            // Live counts
+                            function updateCartCount() {
+                                $.get("{{ route('user.cart.count') }}", function(data) {
+                                    if (data.cart_count !== undefined) {
+                                        $('#cart-count').text(data.cart_count);
+                                    }
+                                }).fail(function() {
+                                    console.log('Failed to update cart count');
+                                });
+                            }
 
-        function updateWishlistCount() {
-            $.get("{{ route('user.wishlist.count') }}", function(data) {
-                if (data.wishlist_count !== undefined) {
-                    $('#wishlist-count').text(data.wishlist_count);
-                }
-            }).fail(function() {
-                console.log('Failed to update wishlist count');
-            });
-        }
+                            function updateWishlistCount() {
+                                $.get("{{ route('user.wishlist.count') }}", function(data) {
+                                    if (data.wishlist_count !== undefined) {
+                                        $('#wishlist-count').text(data.wishlist_count);
+                                    }
+                                }).fail(function() {
+                                    console.log('Failed to update wishlist count');
+                                });
+                            }
 
-        // Initialize
-        $(document).ready(function() {
-            console.log('Document ready, initializing...');
-            updateCartCount();
-            updateWishlistCount();
-        });
+                            // Initialize
+                            $(document).ready(function() {
+                                console.log('Document ready, initializing...');
+                                updateCartCount();
+                                updateWishlistCount();
+                            });
 
-        // Dropdown fix
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof bootstrap === 'undefined') {
-                console.warn('Bootstrap JS not found. Dropdowns will not work.');
-                return;
-            }
-            document.querySelectorAll('.header-button .dropdown-toggle').forEach(function(toggle) {
-                const menu = toggle.nextElementSibling;
-                if (menu) menu.style.zIndex = 3000;
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const instance = bootstrap.Dropdown.getOrCreateInstance(toggle);
-                    instance.toggle();
-                });
-            });
-        });
-    </script>
+                            // Dropdown fix
+                            document.addEventListener('DOMContentLoaded', function() {
+                                if (typeof bootstrap === 'undefined') {
+                                    console.warn('Bootstrap JS not found. Dropdowns will not work.');
+                                    return;
+                                }
+                                document.querySelectorAll('.header-button .dropdown-toggle').forEach(function(toggle) {
+                                    const menu = toggle.nextElementSibling;
+                                    if (menu) menu.style.zIndex = 3000;
+                                    toggle.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const instance = bootstrap.Dropdown.getOrCreateInstance(toggle);
+                                        instance.toggle();
+                                    });
+                                });
+                            });
 
-    @stack('scripts')
+                            (function() {
+                                // Paths we want to intercept (enrollment) vs paths we allow (scholarships)
+                                const ENROLL_PREFIXES = ['/enroll']; // e.g. /enroll/price/123
+                                const SCHOLARSHIP_ALLOW = ['/scholarship', '/scholarships']; // e.g. /scholarships/apply/123
+
+                                // Utility: normalize href to a pathname (works for absolute & relative URLs)
+                                function getPathname(href) {
+                                    try {
+                                        // Absolute or protocol-relative
+                                        if (/^https?:\/\//i.test(href)) return new URL(href).pathname;
+                                        if (href.startsWith('//')) return new URL(window.location.protocol + href).pathname;
+                                        // Relative or root-relative
+                                        const a = document.createElement('a');
+                                        a.href = href;
+                                        return a.pathname || href;
+                                    } catch {
+                                        return href;
+                                    }
+                                }
+
+                                function startsWithAny(path, prefixes) {
+                                    return prefixes.some(p => path.toLowerCase().startsWith(p.toLowerCase()));
+                                }
+
+                                function containsAny(path, parts) {
+                                    return parts.some(p => path.toLowerCase().includes(p.toLowerCase()));
+                                }
+
+                                // Extract schedule id from routes like /enroll/price/{schedule}
+                                function parseScheduleIdFromUrl(path) {
+                                    // matches: /enroll/price/123 or /enroll/price/123?x=1
+                                    const m = path.match(/\/enroll\/price\/(\d+)/i);
+                                    return m ? parseInt(m[1], 10) : null;
+                                }
+
+                                // Delegated click for all <a> tags
+                                document.addEventListener('click', function(e) {
+                                    const a = e.target.closest('a[href]');
+                                    if (!a) return;
+
+                                    // Respect new-tab / download / middle-click
+                                    if (a.target === '_blank' || a.hasAttribute('download') || e.metaKey || e.ctrlKey || e
+                                        .shiftKey || e.button === 1) {
+                                        return;
+                                    }
+
+                                    const href = a.getAttribute('href') || '';
+                                    const path = getPathname(href);
+
+                                    // Ignore if not an enroll link
+                                    if (!startsWithAny(path, ENROLL_PREFIXES)) return;
+
+                                    // Allow any scholarship paths through untouched
+                                    if (containsAny(path, SCHOLARSHIP_ALLOW)) return;
+
+                                    // If authenticated, let it proceed
+                                    if (window.IS_AUTH) return;
+
+                                    // Guest: stop navigation and show auth modal; store pending action
+                                    e.preventDefault();
+
+                                    const scheduleId = parseScheduleIdFromUrl(path);
+                                    const payload = {
+                                        schedule_id: scheduleId,
+                                        enroll_url: href, // preserve full href to resume exactly
+                                    };
+
+                                    // These hidden fields are already used by your retryPendingAction()
+                                    const $pendingAction = document.getElementById('pending_action');
+                                    const $pendingPayload = document.getElementById('pending_payload');
+                                    if ($pendingAction && $pendingPayload) {
+                                        $pendingAction.value = 'enroll';
+                                        $pendingPayload.value = JSON.stringify(payload);
+                                    }
+
+                                    // Reuse your existing modal helper
+                                    if (typeof showAuthModal === 'function') {
+                                        showAuthModal('Please login to enroll in this course');
+                                    } else {
+                                        // Fallback if helper isn’t in scope
+                                        if (window.toastr) toastr.info('Please login to enroll in this course');
+                                        const modalEl = document.getElementById('authModal');
+                                        if (modalEl && window.bootstrap?.Modal) {
+                                            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                                        }
+                                    }
+                                }, {
+                                    capture: true
+                                }); // capture helps catch early navigation
+
+                                console.log('✅ Quick-register href guard active for /enroll*, scholarships allowed');
+                            })();
+                        </script>
+                        <script>
+                            window.IS_AUTH = @json(auth()->check()); // true/false from server
+                        </script>
+
+
+                        @stack('scripts')
 </body>
 
 </html>

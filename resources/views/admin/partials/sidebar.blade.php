@@ -118,18 +118,9 @@
                         <i class="bi bi-circle"></i><span>Scholarships</span>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('scholarships.create') }}">
-                        <i class="bi bi-circle"></i><span>Create Scholarship Content </span>
-                    </a>
-                </li>
-                   <li>
-                    <a href="{{ route('scholarships.index') }}">
-                        <i class="bi bi-circle"></i><span>Scholarship Content </span>
-                    </a>
-                </li>
+                
 
-                 <li>
+                 {{-- <li>
                     <a href="{{ route('admin.courses.testimonials.index') }}">
                         <i class="bi bi-circle"></i><span>Testimonials </span>
                     </a>
@@ -139,7 +130,7 @@
                     <a href="{{ route('admin.courses.faqs.index') }}">
                         <i class="bi bi-circle"></i><span>FAQs </span>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </li>
         <!-- Academy -->
@@ -216,7 +207,23 @@
         </li>
         <!-- Events and Training -->
         <!-- Events and Training -->
-
+<li class="nav-item">
+    <a class="nav-link collapsed" data-bs-target="#pagebuilder-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-file-earmark-richtext"></i><span>Page Builder</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="pagebuilder-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+            <a href="{{ route('pb.pages') }}">
+                <i class="bi bi-circle"></i><span>All Pages</span>
+            </a>
+        </li>
+        {{-- <li>
+            <a href="">
+                <i class="bi bi-circle"></i><span>Create Page</span>
+            </a>
+        </li> --}}
+    </ul>
+</li>
         <!-- Gallery -->
         <!-- Gallery -->
         <li class="nav-item">

@@ -36,12 +36,7 @@
                     <i class="bi bi-info-circle me-2"></i> Overview
                 </a>
             </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link d-flex align-items-center px-4 py-2" id="contents-tab" data-bs-toggle="tab"
-                    href="#contents" role="tab">
-                    <i class="bi bi-file-earmark-text me-2"></i> Contents
-                </a>
-            </li>
+      
             <li class="nav-item" role="presentation">
                 <a class="nav-link d-flex align-items-center px-4 py-2" id="schedule-tab" data-bs-toggle="tab"
                     href="#schedule" role="tab">
@@ -131,163 +126,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Contents -->
-            <div class="tab-pane fade" id="contents">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Event Contents</h5>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContentModal">
-                        <i class="bi bi-plus-lg"></i> Add Content
-                    </button>
-                </div>
-
-                <!-- List Existing Contents -->
-                <div class="row">
-                    @foreach ($event->contents as $content)
-                        <div class="col-md-6 mb-4">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-body p-4">
-                                    <h6 class="text-muted text-uppercase small mb-3">{{ ucfirst($content->type) }}</h6>
-
-                                    {{-- Render content by type --}}
-                                    @if ($content->type === 'list')
-                                        @php
-                                            $items = is_array($content->content)
-                                                ? $content->content
-                                                : json_decode($content->content, true);
-                                        @endphp
-                                        <ul class="ps-3 mb-3">
-                                            @foreach ($items as $item)
-                                                <li>{{ $item }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @elseif($content->type === 'image')
-                                        @php
-                                            $images = json_decode($content->content, true);
-                                            $images = is_array($images) ? $images : [$content->content];
-                                        @endphp
-                                        @foreach ($images as $img)
-                                            <img src="{{ asset('storage/' . $img) }}"
-                                                class="img-fluid rounded shadow-sm mb-3"
-                                                style="max-height: 180px; object-fit: cover;" alt="Event image">
-                                        @endforeach
-                                    @else
-                                        <p class="mb-3">{{ $content->content }}</p>
-                                    @endif
-
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <!-- Edit -->
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#editContentModal{{ $content->id }}">
-                                            <i class="bi bi-pencil"></i> Edit
-                                        </button>
-
-                                        <!-- Delete -->
-                                        <form
-                                            action="{{ route('admin.events.contents.destroy', [$event->id, $content->id]) }}"
-                                            method="POST" onsubmit="return confirm('Delete this content?')">
-                                            @csrf @method('DELETE')
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Edit Modal -->
-                        <div class="modal fade" id="editContentModal{{ $content->id }}" tabindex="-1">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <form action="{{ route('admin.events.contents.update', $content->id) }}"
-                                        method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        @method('PUT')
-
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit {{ ucfirst($content->type) }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-
-                                            {{-- Heading --}}
-                                            @if ($content->type === 'heading')
-                                                <input type="text" name="content" value="{{ $content->content }}"
-                                                    class="form-control" required>
-
-                                                {{-- Paragraph --}}
-                                            @elseif($content->type === 'paragraph')
-                                                <textarea name="content" class="form-control" rows="4" required>{{ $content->content }}</textarea>
-
-                                                {{-- List --}}
-                                            @elseif($content->type === 'list')
-                                                @php $items = is_array($content->content) ? $content->content : json_decode($content->content, true); @endphp
-                                                <div id="editListContainer{{ $content->id }}">
-                                                    @foreach ($items as $item)
-                                                        <div class="input-group mb-2">
-                                                            <input type="text" name="list_items[]"
-                                                                value="{{ $item }}" class="form-control"
-                                                                required>
-                                                            <button type="button"
-                                                                class="btn btn-outline-danger removeListItem">-</button>
-                                                        </div>
-                                                    @endforeach
-                                                    <button type="button" class="btn btn-outline-secondary addListItem">+
-                                                        Add Item</button>
-                                                </div>
-
-                                                {{-- Image --}}
-                                            @elseif($content->type === 'image')
-                                                @php
-                                                    $images = json_decode($content->content, true);
-                                                    $images = is_array($images) ? $images : [$content->content];
-                                                @endphp
-                                                @foreach ($images as $img)
-                                                    <img src="{{ asset('storage/' . $img) }}"
-                                                        class="img-fluid mb-3 rounded shadow-sm"
-                                                        style="max-height: 150px;">
-                                                @endforeach
-                                                <input type="file" name="image" class="form-control"
-                                                    accept="image/*">
-
-                                                {{-- Feature --}}
-                                            @elseif($content->type === 'feature')
-                                                @php
-                                                    $data = json_decode($content->content, true);
-                                                @endphp
-                                                <input type="text" name="feature_title" class="form-control mb-2"
-                                                    value="{{ $data['title'] ?? '' }}" placeholder="Feature title"
-                                                    required>
-                                                <textarea name="feature_description" class="form-control mb-2" rows="3" placeholder="Feature description"
-                                                    required>{{ $data['description'] ?? '' }}</textarea>
-                                                <input type="text" name="feature_icon" class="form-control"
-                                                    value="{{ $data['icon'] ?? '' }}"
-                                                    placeholder="Feature icon (optional)">
-                                            @endif
-
-                                            <div class="mt-3">
-                                                <label class="form-label">Position</label>
-                                                <input type="number" name="position" class="form-control"
-                                                    value="{{ $content->position }}" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-            </div>
-
-
-
 
             <!-- Schedule -->
             <div class="tab-pane fade" id="schedule">
@@ -762,7 +600,7 @@
 
         </div>
     </div>
-    <script>
+    {{-- <script>
         document.addEventListener("DOMContentLoaded", function() {
             const typeSelect = document.getElementById('contentType');
             const dynamicField = document.getElementById('dynamicContentField');
@@ -823,7 +661,7 @@
                 });
             });
         });
-    </script>
+    </script> --}}
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -1117,35 +955,7 @@
         </div>
     </div>
 </div>
-<!-- Add Content Modal -->
-<div class="modal fade" id="addContentModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form action="{{ route('admin.events.contents.store', $event->id) }}" method="POST"
-                enctype="multipart/form-data" id="eventContentForm">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Event Content</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
 
-                <div class="modal-body" id="contentBlocks" style="max-height:500px; overflow-y:auto;">
-                    <!-- Dynamic content blocks will be injected here -->
-                </div>
-
-                <div class="modal-footer d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-primary" id="addContentBlock">
-                        <i class="bi bi-plus-circle"></i> Add Content Block
-                    </button>
-                    <div>
-                        <button type="submit" class="btn btn-success">Save Content</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 
 

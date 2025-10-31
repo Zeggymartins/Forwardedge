@@ -116,4 +116,9 @@ class Event extends Model
     {
         return $this->max_attendees ? ($this->max_attendees - $this->current_attendees) : null;
     }
+
+    public function page()
+    {
+        return $this->morphOne(Page::class, 'pageable');
+    }
 }

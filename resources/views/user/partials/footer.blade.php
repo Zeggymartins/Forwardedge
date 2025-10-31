@@ -1,4 +1,5 @@
      <!-- start: Cta Section -->
+     @if (!request()->routeIs('page.show'))
      <section class="tj-cta-section">
          <div class="container">
              <div class="row">
@@ -21,6 +22,7 @@
              </div>
          </div>
      </section>
+     @endif
      <!-- end: Cta Section -->
      <!-- start: Footer Section -->
      <footer class="tj-footer-section footer-1 section-gap-x">

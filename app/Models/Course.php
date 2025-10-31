@@ -35,10 +35,6 @@ class Course extends Model
         return $this->hasMany(CourseSchedule::class);
     }
 
-    public function details()
-    {
-        return $this->hasMany(CourseDetails::class)->orderBy('sort_order', 'asc');
-    }
 
     public function testimonials()
     {
@@ -47,5 +43,10 @@ class Course extends Model
     public function faqs()
     {
         return $this->hasMany(CourseFaq::class);
+    }
+
+    public function page()
+    {
+        return $this->morphOne(Page::class, 'pageable');
     }
 }

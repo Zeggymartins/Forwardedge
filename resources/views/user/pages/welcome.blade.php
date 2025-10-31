@@ -881,126 +881,97 @@
                     ]);
                 }
 
-                // SCHEDULES (styled same as events)
-                foreach ($scheduleItems as $schedule) {
-                    $course = $schedule->course;
-                    $thumb = $course?->thumbnail
-                        ? asset('storage/' . $course->thumbnail)
-                        : asset('frontend/assets/images/service/service-1.webp');
-                    $title = $course?->title ?? 'Bootcamp';
-                    $slug = $course?->slug;
+            // $upcomingPerCourse should be from Option A in your controller
+            // ->whereHas('schedules', fn($q) => $q->where('start_date','>=',now()))
+            // ->with(['schedules' => fn($q) => $q->where('start_date','>=',now())->orderBy('start_date')->limit(1)])
+            // ->withMin(['schedules as next_start' => fn($q) => $q->where('start_date','>=',now())], 'start_date')
+            // ->orderBy('next_start','asc')->take(12)->get();
 
-                    $cards->push([
-                        'type' => 'schedule',
-                        'img' => $thumb,
-                        'date' => \Carbon\Carbon::parse($schedule->start_date)->format('d'),
-                        'month' => \Carbon\Carbon::parse($schedule->start_date)->format('M'),
-                        'badge' => ucfirst($schedule->type ?? 'virtual'),
-                        'meta_right' => $schedule->location ?? 'Online',
-                        'title' => $title,
-                        'url' => $slug ? route('course.show', $slug) : route('enroll.pricing', $schedule->id),
-                        'cta' => $slug ? 'View Details' : 'Enroll Now',
-                    ]);
-                }
-            @endphp
+    $cards = collect();
 
-            <div class="row row-gap-4 mt-4">
-                @if ($cards->isEmpty())
-                    {{-- SINGLE EMPTY STATE (only if all three are empty) --}}
-                    <div class="col-xl-4 col-md-6 mx-auto">
-                        <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
-                            <div class="blog-thumb d-flex align-items-center justify-content-center"
-                                style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
-                                <svg width="100%" height="100%" viewBox="0 0 420 250"
-                                    preserveAspectRatio="xMidYMid meet" aria-label="Fresh content coming soon">
-                                    <defs>
-                                        <linearGradient id="gb-all" x1="0" y1="0" x2="1"
-                                            y2="1">
-                                            <stop offset="0%" stop-color="#FDB714" />
-                                            <stop offset="100%" stop-color="#2c99d4" />
-                                        </linearGradient>
-                                        <linearGradient id="gb-all-soft" x1="0" y1="0" x2="1"
-                                            y2="1">
-                                            <stop offset="0%" stop-color="#FDB714" stop-opacity=".15" />
-                                            <stop offset="100%" stop-color="#2c99d4" stop-opacity=".15" />
-                                        </linearGradient>
-                                    </defs>
-                                    <ellipse cx="210" cy="205" rx="175" ry="42"
-                                        fill="url(#gb-all-soft)" />
-                                    <!-- three tiles -->
-                                    <g transform="translate(60,45)">
-                                        <rect width="90" height="140" rx="12" fill="#fff"
-                                            stroke="url(#gb-all)" stroke-width="3" />
-                                        <rect x="15" y="24" width="60" height="10" rx="5"
-                                            fill="url(#gb-all)" opacity=".25" />
-                                        <rect x="15" y="44" width="60" height="10" rx="5" fill="#2c99d4"
-                                            opacity=".2" />
-                                    </g>
-                                    <g transform="translate(165,45)">
-                                        <rect width="90" height="140" rx="12" fill="#fff"
-                                            stroke="url(#gb-all)" stroke-width="3" />
-                                        <rect y="24" width="90" height="24" fill="url(#gb-all)" opacity=".12" />
-                                        <rect x="12" y="70" width="24" height="18" rx="5"
-                                            fill="url(#gb-all)" />
-                                        <rect x="42" y="70" width="24" height="18" rx="5"
-                                            fill="url(#gb-all)" opacity=".6" />
-                                        <rect x="12" y="96" width="54" height="10" rx="5" fill="#2c99d4"
-                                            opacity=".25" />
-                                    </g>
-                                    <g transform="translate(270,45)">
-                                        <rect width="90" height="140" rx="12" fill="#fff"
-                                            stroke="url(#gb-all)" stroke-width="3" />
-                                        <rect x="12" y="30" width="66" height="12" rx="6"
-                                            fill="url(#gb-all)" opacity=".3" />
-                                        <rect x="12" y="50" width="52" height="10" rx="5" fill="#2c99d4"
-                                            opacity=".25" />
-                                        <circle cx="70" cy="110" r="12" fill="url(#gb-all)" />
-                                    </g>
-                                    <text x="210" y="235" text-anchor="middle" font-family="Inter,ui-sans-serif"
-                                        font-size="16" fill="#222">
-                                        New blogs, events & bootcamps coming soon
-                                    </text>
-                                </svg>
-                            </div>
-                            <div class="blog-content text-center">
-                                <h4 class="title mb-1">Stay tuned</h4>
-                                <p class="m-0">We’re lining up fresh blogs, events, and bootcamps for you.</p>
-                            </div>
-                        </div>
-                    </div>
-                @else
-                    {{-- ONE unified row of event-style cards --}}
-                    @foreach ($cards as $i => $c)
-                        <div class="col-xl-4 col-md-6">
-                            <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
-                                <div class="blog-thumb">
-                                    <a href="{{ $c['url'] }}">
-                                        <img src="{{ $c['img'] }}" alt="{{ $c['title'] }}"
-                                            style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
-                                    </a>
-                                    <div class="blog-date">
-                                        <span class="date">{{ $c['date'] }}</span>
-                                        <span class="month">{{ $c['month'] }}</span>
-                                    </div>
-                                </div>
-                                <div class="blog-content">
-                                    <div class="blog-meta">
-                                        <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
-                                        <span>{{ $c['meta_right'] }}</span>
-                                    </div>
-                                    <h4 class="title">
-                                        <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
-                                    </h4>
-                                    <a class="text-btn" href="{{ $c['url'] }}">
-                                        <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
-                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                @endif
+    foreach ($upcomingSchedules as $course) {
+        // nearest schedule per course (because you limited to 1 in the relation)
+        $schedule = optional($course->schedules)->first();
+        if (!$schedule) {
+            continue; // safety: only courses that truly have an upcoming schedule
+        }
+
+        // safe thumbnail (only if file exists on public disk)
+        $thumb = (!empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail))
+            ? asset('storage/' . $course->thumbnail)
+            : asset('frontend/assets/images/service/service-1.webp');
+
+        $title = $course->title ?? 'Bootcamp';
+        $slug  = $course->slug ?? null;
+
+        // Build card
+        $cards->push([
+            'type'       => 'schedule',
+            'img'        => $thumb,
+            'date'       => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('d') : '',
+            'month'      => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('M') : '',
+            'badge'      => ucfirst($schedule->type ?? 'virtual'),
+            'meta_right' => $schedule->location ?: 'Online',
+            // Prefer course details page; fall back to enroll link if needed
+            'title'      => $title,
+            'url'        => $slug ? route('shop.details', $slug) : route('enroll.pricing', $schedule->id),
+            'cta'        => $slug ? 'View Details' : 'Enroll Now',
+        ]);
+    }
+@endphp
+
+<div class="row row-gap-4 mt-4">
+    @if ($cards->isEmpty())
+        {{-- EMPTY STATE --}}
+        <div class="col-xl-4 col-md-6 mx-auto">
+            <div class="blog-item wow fadeInUp" data-wow-delay=".4s" style="height:100%;">
+                <div class="blog-thumb d-flex align-items-center justify-content-center"
+                     style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
+                    {{-- your SVG empty state --}}
+                    <span class="text-muted">New bootcamps coming soon</span>
+                </div>
+                <div class="blog-content text-center">
+                    <h4 class="title mb-1">Stay tuned</h4>
+                    <p class="m-0">We’re lining up the next batch of schedules for you.</p>
+                </div>
             </div>
+        </div>
+    @else
+        {{-- unified row of event-style cards --}}
+        @foreach ($cards as $i => $c)
+            <div class="col-xl-4 col-md-6">
+                <div class="blog-item wow fadeInUp" data-wow-delay=".4s">
+                    <div class="blog-thumb">
+                        <a href="{{ $c['url'] }}">
+                            <img src="{{ $c['img'] }}" alt="{{ $c['title'] }}"
+                                 style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                        </a>
+                        @if($c['date'] && $c['month'])
+                            <div class="blog-date">
+                                <span class="date">{{ $c['date'] }}</span>
+                                <span class="month">{{ $c['month'] }}</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="categories"><a href="#">{{ $c['badge'] }}</a></span>
+                            <span>{{ $c['meta_right'] }}</span>
+                        </div>
+                        <h4 class="title">
+                            <a href="{{ $c['url'] }}">{{ $c['title'] }}</a>
+                        </h4>
+                        <a class="text-btn" href="{{ $c['url'] }}">
+                            <span class="btn-text"><span>{{ $c['cta'] }}</span></span>
+                            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+</div>
+
 
         </div>
     </section>

@@ -34,17 +34,6 @@
                 </div>
             </div>
 
-            {{-- Contents --}}
-            <div class="card shadow-sm mb-4 p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-semibold">Course Details</h5>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="addContent">+ Add Content</button>
-                </div>
-                <div id="contentsContainer">
-                    <p class="text-muted" id="contentsHint">Add content blocks (text, video, pdf, quiz, assignment)</p>
-                </div>
-            </div>
-
             {{-- Phases --}}
             <div class="card shadow-sm mb-4 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -77,27 +66,7 @@
         </form>
     </div>
 
-    {{-- ===================== --}}
-    {{-- Templates --}}
-    {{-- ===================== --}}
-    <template id="contentTemplate">
-        <div class="content-block border rounded p-3 mb-3">
-            <div class="d-flex justify-content-between mb-2">
-                <label class="form-label fw-semibold">Detail Type</label>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-block">Remove</button>
-            </div>
-            <select class="form-select content-type" name="details[__INDEX__][type]" required>
-                <option value="" disabled selected>-- Select Type --</option>
-                <option value="heading">Heading</option>
-                <option value="paragraph">Paragraph</option>
-                <option value="image">Image</option>
-                <option value="features">Features</option>
-                <option value="list">List</option>
-            </select>
-            <div class="content-fields mt-3"></div>
-            <input type="hidden" name="details[__INDEX__][order]" value="__INDEX_PLUS__">
-        </div>
-    </template>
+
 
 
     <template id="phaseTemplate">
@@ -175,7 +144,8 @@
   </div>
 </template>
 
-    @section('scripts')
+@push('scripts')
+  
 <script>
 // =========================
 // Slug Generation
@@ -193,168 +163,7 @@ document.getElementById('title').addEventListener('input', function () {
 // =========================
 let contentIndex = 0, phaseIndex = 0, scheduleIndex = 0;
 
-// =========================
-// Add Content Block
-// =========================
-function addContentBlock(type = null, values = {}) {
-  let tpl = document.getElementById('contentTemplate').innerHTML
-    .replace(/__INDEX__/g, contentIndex)
-    .replace(/__INDEX_PLUS__/g, contentIndex + 1);
-  let div = document.createElement('div');
-  div.innerHTML = tpl;
-  let block = div.firstElementChild;
 
-  if (type) {
-    block.querySelector('.content-type').value = type;
-    renderContentFields(block, type, values);
-  }
-
-  document.getElementById('contentsContainer').appendChild(block);
-  document.getElementById('contentsHint').style.display = 'none';
-  contentIndex++;
-}
-
-// =========================
-// Render Fields for Content
-// =========================
-function renderContentFields(block, type, values = {}) {
-  let index = block.querySelector('.content-type').name.match(/\d+/)[0];
-  let fieldsDiv = block.querySelector('.content-fields');
-  fieldsDiv.innerHTML = '';
-
-  switch(type) {
-    case 'heading':
-      fieldsDiv.innerHTML = `<input type="text" class="form-control"
-        name="details[${index}][content]" placeholder="Heading" required>`;
-      if (values.content) fieldsDiv.querySelector('input').value = values.content;
-      break;
-
-    case 'paragraph':
-      fieldsDiv.innerHTML = `<textarea class="form-control" name="details[${index}][content]"
-        rows="3" placeholder="Paragraph" required></textarea>`;
-      if (values.content) fieldsDiv.querySelector('textarea').value = values.content;
-      break;
-
-    case 'image':
-      fieldsDiv.innerHTML = `<input type="file" class="form-control"
-        name="details[${index}][file]" accept="image/*" required>`;
-      break;
-
-case 'features':
-    fieldsDiv.innerHTML = `
-      <input type="text" class="form-control mb-2"
-        name="details[${index}][heading]" placeholder="Feature Heading" required>
-
-      <label class="form-label mt-2">Description (optional)</label>
-      <textarea class="form-control mb-2"
-        name="details[${index}][description]" rows="3" placeholder="Short paragraph (optional)"></textarea>
-
-      <label class="form-label mt-2">Items (optional)</label>
-      <div class="feature-items mb-2"></div>
-      <button type="button" class="btn btn-sm btn-outline-secondary addFeatureItem">+ Add Feature Item</button>
-    `;
-
-    // heading
-    if (values.heading) {
-      fieldsDiv.querySelector(`[name="details[${index}][heading]"]`).value = values.heading;
-    }
-
-    // description can be a string (new) OR an array (old data = items)
-    const featureItemsDiv = fieldsDiv.querySelector('.feature-items');
-
-    // if values.description is a string, put into textarea
-    if (values.description && typeof values.description === 'string') {
-      fieldsDiv.querySelector(`[name="details[${index}][description]"]`).value = values.description;
-    }
-
-    // items source can be values.items[] (new) OR values.description[] (legacy)
-    let itemsSource = [];
-    if (Array.isArray(values.items)) {
-      itemsSource = values.items;
-    } else if (Array.isArray(values.description)) { // legacy: used to store items under "description"
-      itemsSource = values.description;
-    } else if (values.items && typeof values.items === 'string') {
-      itemsSource = values.items.split(',').map(i => i.trim()).filter(Boolean);
-    } else if (values.description && typeof values.description === 'string' && values.description.includes(',')) {
-      // loose fallback when someone pasted a comma separated string in description
-      itemsSource = values.description.split(',').map(i => i.trim()).filter(Boolean);
-    }
-
-    itemsSource.forEach(i => addFeatureItem(featureItemsDiv, index, i));
-
-    fieldsDiv.querySelector('.addFeatureItem')
-      .addEventListener('click', () => addFeatureItem(featureItemsDiv, index));
-    break;
-    case 'list':
-      fieldsDiv.innerHTML = `
-        <div class="list-items mb-2"></div>
-        <button type="button" class="btn btn-sm btn-outline-secondary addListItem">+ Add List Item</button>
-      `;
-      const listItemsDiv = fieldsDiv.querySelector('.list-items');
-      if (values.content && Array.isArray(values.content)) {
-        values.content.forEach(i => addListItem(listItemsDiv, index, i));
-      } else if (values.content && typeof values.content === 'string') {
-        values.content.split(',').map(i => i.trim()).forEach(i => addListItem(listItemsDiv, index, i));
-      }
-      fieldsDiv.querySelector('.addListItem').addEventListener('click', () => addListItem(listItemsDiv, index));
-      break;
-  }
-}
-
-// =========================
-// Add Feature Item
-// =========================
-  function addFeatureItem(container, index, value = '') {
-    const div = document.createElement('div');
-    div.className = 'input-group mb-2';
-    div.innerHTML = `
-      <input type="text" class="form-control"
-        name="details[${index}][items][]" placeholder="Feature Item" value="${value}">
-      <button type="button" class="btn btn-outline-danger remove-item">X</button>
-    `;
-    container.appendChild(div);
-  }
-
-// =========================
-// Add List Item
-// =========================
-function addListItem(container, index, value = '') {
-  const div = document.createElement('div');
-  div.className = 'input-group mb-2';
-  div.innerHTML = `
-    <input type="text" class="form-control"
-      name="details[${index}][content][]" placeholder="List Item" value="${value}" required>
-    <button type="button" class="btn btn-outline-danger remove-item">X</button>
-  `;
-  container.appendChild(div);
-}
-
-// =========================
-/** Remove Dynamic Items (blocks, items, topics) */
-// =========================
-document.addEventListener('click', function(e){
-  if (e.target.classList.contains('remove-item')) {
-    e.target.closest('.input-group').remove();
-  }
-  if (e.target.classList.contains('remove-topic')) {
-    e.target.closest('.topic-block').remove();
-  }
-  if (e.target.classList.contains('remove-block')) {
-    e.target.closest('.phase-block, .content-block, .schedule-block').remove();
-  }
-});
-
-// =========================
-// Add / Remove Content Block
-// =========================
-document.getElementById('addContent').addEventListener('click', () => addContentBlock());
-
-document.addEventListener('change', function (e) {
-  if (e.target.classList.contains('content-type')) {
-    let block = e.target.closest('.content-block');
-    renderContentFields(block, e.target.value);
-  }
-});
 
 // =========================
 // Add Phase & Topic
@@ -540,56 +349,7 @@ document.getElementById('clearForm').addEventListener('click', () => {
   }
 });
 
-// =========================
-// Sample Course Data
-// =========================
-const sampleCourseData = {
-  title: "JavaScript & React Mastery",
-  description: "Learn JavaScript from scratch and master React with hands-on projects. This course covers fundamentals, advanced concepts, and modern web development best practices.",
-  status: "draft",
-  details: [
-    { type: "heading", content: "Welcome to JavaScript & React Mastery!" },
-    { type: "paragraph", content: "This course is designed to take you from beginner to advanced developer. You'll start with JavaScript basics, dive into ES6+, and then learn React for building modern web apps." },
-    { type: "features", heading: "Course Features", description: ["Hands-on Projects", "Expert Guidance", "Lifetime Access", "Community Support", "Quizzes & Assignments"] },
-    { type: "list", content: ["Modern JavaScript syntax", "DOM manipulation", "React components", "State & Props", "Hooks", "Context API", "Routing", "Redux", "Testing", "Deployment"] }
-  ],
-  phases: [
-    { title: "Phase 1: JavaScript Fundamentals", topics: ["Variables, Data Types, and Operators","Functions and Scope","Objects and Arrays","DOM Manipulation","ES6 Features: let/const, arrow functions, template strings"] },
-    { title: "Phase 2: Advanced JavaScript", topics: ["Asynchronous JavaScript: Callbacks, Promises, Async/Await","Event Loop and Concurrency","Modules and Imports/Exports","Error Handling and Debugging","JavaScript Patterns and Best Practices"] },
-    { title: "Phase 3: React Basics", topics: ["React Components & JSX","State and Props","Handling Events","Conditional Rendering","Lists and Keys"] },
-    { title: "Phase 4: Advanced React & State Management", topics: ["Hooks: useState, useEffect, useReducer","Context API","React Router for Navigation","Form Handling and Validation","Introduction to Redux"] },
-    { title: "Phase 5: Final Projects & Deployment", topics: ["Building a ToDo App","Building a Blog Platform","Unit Testing React Components","Optimizing Performance","Deploying to Netlify or Vercel"] }
-  ],
-  schedules: [
-    { start_date: "2025-10-10", end_date: "2025-11-10", location: "Online", type: "virtual", tag: "free", price: 0, price_usd: 0, description: "Scholarship-only batch" },
-    { start_date: "2025-11-15", end_date: "2025-12-15", location: "Lagos, Nigeria", type: "physical", tag: "paid", price: 15000, price_usd: 12.5, description: "On-site cohort in Lagos" }
-  ]
-};
-
-// =========================
-// Auto-Populate Form
-// =========================
-document.getElementById('populateForm').addEventListener('click', () => {
-  document.getElementById('title').value = sampleCourseData.title;
-  document.getElementById('slug').value = sampleCourseData.title.toLowerCase().replace(/\s+/g, '-');
-  document.querySelector('textarea[name="description"]').value = sampleCourseData.description;
-  document.querySelector('select[name="status"]').value = sampleCourseData.status;
-
-  // Clear existing blocks
-  document.getElementById('contentsContainer').innerHTML = "";
-  document.getElementById('phasesContainer').innerHTML = "";
-  document.getElementById('schedulesContainer').innerHTML = "";
-  contentIndex = phaseIndex = scheduleIndex = 0;
-
-  // Populate contents
-  sampleCourseData.details.forEach(d => addContentBlock(d.type, d));
-
-  // Populate phases
-  sampleCourseData.phases.forEach(p => addPhaseBlock(p.title, p.topics));
-
-  // Populate schedules (now includes tag/price_usd/description)
-  sampleCourseData.schedules.forEach(s => addScheduleBlock(s));
-});
 </script>
-@endsection
+@endpush
+
 @endsection

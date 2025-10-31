@@ -22768,7 +22768,7 @@ START: Blog CSS
 START: CTA CSS
 ----------------------------------------*/
 .h7-cta {
-  background: url("../images/cta/h7-cta-bg.webp") no-repeat center;
+  background: url("../images/cta/h7-cta-bg.png") no-repeat center;
   background-size: cover;
   position: relative;
   overflow: hidden;

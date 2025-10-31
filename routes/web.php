@@ -18,6 +18,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageBuilderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScolarshipApplicationController;
@@ -239,11 +240,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::delete('/{event}', [AdminEventController::class, 'destroy'])->name('destroy');
         Route::get('/registrations', [AdminEventController::class, 'Registrations'])->name('registrations');
 
-        // Event Contents
-        Route::post('/{event}/contents', [AdminEventController::class, 'storeContent'])->name('contents.store');
-        Route::put('/contents/{content}', [AdminEventController::class, 'updateContent'])->name('contents.update');
-        Route::delete('/contents/{content}', [AdminEventController::class, 'destroyContent'])->name('contents.destroy');
-
+    
         // Tickets
         Route::post('/{event}/tickets', [AdminEventController::class, 'storeTicket'])->name('tickets.store');
         Route::put('/tickets/{ticket}', [AdminEventController::class, 'updateTicket'])->name('tickets.update');
@@ -406,73 +403,38 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
             'update' => 'admin.gallery.update',
             'destroy' => 'admin.gallery.destroy',
         ]);
-    Route::get('/scholarships', [ScolarshipApplicationController::class, 'index'])
-        ->name('scholarships.index');
-
-    Route::get('/scholarships/create', [ScolarshipApplicationController::class, 'create'])
-        ->name('scholarships.create');
-
-    Route::post('/scholarships', [ScolarshipApplicationController::class, 'store'])
-        ->name('scholarships.store');
-
-    Route::get('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'show'])
-        ->name('scholarships.show');
-
-    Route::get('/scholarships/{scholarship}/edit', [ScolarshipApplicationController::class, 'edit'])
-        ->name('scholarships.edit');
-
-    Route::put('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'update'])
-        ->name('scholarships.update');
-
-    Route::delete('/scholarships/{scholarship}', [ScolarshipApplicationController::class, 'destroy'])
-        ->name('scholarships.destroy');
-
-    Route::put('/debug/scholarships/{scholarship}', function (Request $r, Scholarship $scholarship) {
-        $file = $r->file('hero_image');
-
-        dd([
-            // session / csrf
-            'session_id'        => $r->session()->getId(),
-            'has_cookie'        => $r->hasCookie(config('session.cookie')),
-            'cookie_name'       => config('session.cookie'),
-            'csrf_input'        => $r->input('_token'),
-            'csrf_header'       => $r->header('X-CSRF-TOKEN'),
-            'session_csrf'      => $r->session()->token(),
-
-            // request / headers
-            'method'            => $r->method(),
-            'content_length'    => $r->server('CONTENT_LENGTH'),
-            'content_type'      => $r->header('Content-Type'),
-            'referer'           => $r->header('Referer'),
-            'origin'            => $r->header('Origin'),
-            'host'              => $r->getHost(),
-            'full_url'          => $r->fullUrl(),
-
-            // inputs (avoid dumping huge arrays)
-            'keys'              => array_keys($r->all()),
-            'slug'              => $r->input('slug'),
-            'status'            => $r->input('status'),
-
-            // file info
-            'has_file'          => $r->hasFile('hero_image'),
-            'file_ok'           => $file ? $file->isValid() : null,
-            'file_name'         => $file?->getClientOriginalName(),
-            'file_mime'         => $file?->getMimeType(),
-            'file_size_bytes'   => $file?->getSize(),
-
-            // server limits (if accessible)
-            'ini_upload_max'    => ini_get('upload_max_filesize'),
-            'ini_post_max'      => ini_get('post_max_size'),
-        ]);
-    })->withoutMiddleware(VerifyCsrfToken::class)->name('debug.scholarships.update');
+   
 
 
     Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{message}/json', [AdminMessageController::class, 'showJson'])->name('messages.json');
     Route::post('/messages/{message}/reply', [AdminMessageController::class, 'reply'])->name('messages.reply');
+
+
+
+
+    Route::prefix('page-builder')->group(function () {
+        Route::get('/',                 [PageBuilderController::class, 'adminPages'])->name('pb.pages');
+        Route::get('/create',           [PageBuilderController::class, 'createPage'])->name('pb.pages.create');
+        Route::post('/store',           [PageBuilderController::class, 'storePage'])->name('pb.pages.store');
+        Route::get('/{page}/edit',      [PageBuilderController::class, 'editPage'])->name('pb.pages.edit');
+        Route::put('/{page}',           [PageBuilderController::class, 'updatePage'])->name('pb.pages.update');
+        Route::delete('/{page}',        [PageBuilderController::class, 'destroyPage'])->name('pb.pages.destroy');
+
+        // Blocks (the one-page screen uses this index)
+        Route::get('/{page}/blocks',    [PageBuilderController::class, 'adminBlocks'])->name('pb.blocks');
+        Route::post('/{page}/blocks',   [PageBuilderController::class, 'storeBlock'])->name('pb.blocks.store');
+
+        // Edit/save are still used by the one-page form when you click “Edit”
+        Route::put('/block/{block}',    [PageBuilderController::class, 'updateBlock'])->name('pb.blocks.update');
+        Route::delete('/block/{block}', [PageBuilderController::class, 'destroyBlock'])->name('pb.blocks.destroy');
+
+        // Drag-sort autosave
+        Route::post('/{page}/blocks/reorder', [PageBuilderController::class, 'reorderBlocks'])->name('pb.blocks.reorder');
+    });
 });
 
-
+Route::get('/p/{slug}', [PageBuilderController::class, 'show'])->name('page.show');
 /*
 |--------------------------------------------------------------------------
 | Laravel Breeze Auth Routes
