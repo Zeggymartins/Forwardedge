@@ -59,6 +59,8 @@ final class PageBlueprint
                 'banner_image' => $fileImg, // file upload (not URL)
                 'link_text'    => ['nullable', 'string', 'max:60'],
                 'link'         => ['nullable', 'url', 'max:2048'],
+                'link_text_secondary'    => ['nullable', 'string', 'max:60'],
+                'link_secondary'         => ['nullable', 'url', 'max:2048'],
             ],
 
             /* ================= OVERVIEW (alias used in your UI) ================= */

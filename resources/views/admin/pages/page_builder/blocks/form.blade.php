@@ -523,6 +523,14 @@
     <label class="form-label small-label">Link</label>
     <input class="form-control" name="data[link]" type="url">
   </div>
+  <div class="col-md-5">
+    <label class="form-label small-label">Secondary Link Text</label>
+    <input class="form-control" name="data[link_text_secondary]">
+  </div>
+  <div class="col-md-7">
+    <label class="form-label small-label">Secondary Link</label>
+    <input class="form-control" name="data[link_secondary]" type="url">
+  </div>
   <div class="col-12">
     <label class="form-label small-label">Sub Text</label>
     <textarea class="form-control" name="data[sub_text]" rows="3"></textarea>
@@ -1402,7 +1410,6 @@
                             alert(`Maximum ${max} items allowed`);
 
                             return;
-
                         }
 
 

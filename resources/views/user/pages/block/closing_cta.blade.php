@@ -21,7 +21,7 @@
             </h2>
 
             @if (!empty($d['subtitle']))
-              <p class="mb-4">
+              <p class="mb-4" style="color: #fff;">
                 {{ $d['subtitle'] }}
               </p>
             @endif
@@ -33,7 +33,7 @@
                   $text = $c['link_text'] ?? 'Learn more';
                 @endphp
                 <a class="tj-primary-btn" href="{{ $href }}">
-                  <span class="btn-text"><span>{{ $text }}</span></span>
+                  <span class="btn-text" >{{ $text }}</span>
                   <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                 </a>
               @endforeach
