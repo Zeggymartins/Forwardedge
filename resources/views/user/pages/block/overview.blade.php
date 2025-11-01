@@ -127,28 +127,20 @@
     --tj-text-muted:#6c757d; --tj-border:#edf2f7; --tj-surface:#fff;
   }
 
-  .h7-choose-item .choose-box{
-    /* border:1px solid var(--tj-border);
-    border-radius:16px; */
-    background:var(--tj-surface);
-    /* box-shadow:0 10px 30px rgba(0,0,0,.06); */
-    /* height:100%; */
-    transition:transform .2s ease, box-shadow .2s ease;
-  }
-  .h7-choose-item .choose-box:hover{
-    transform: translateY(-4px);
-    box-shadow:0 16px 44px rgba(0,0,0,.10);
-  }
+
   .choose-content{ padding:22px; }
 
-  .choose-icon{
-    width:56px; height:56px; border-radius:14px;
-    display:inline-flex; align-items:center; justify-content:center;
-    background: rgba(44,153,212,.08);
-    border:1px dashed rgba(44,153,212,.25);
-    margin-bottom:14px;
-  }
-  .choose-icon .bi{ font-size:26px; color:#2c99d4; line-height:1; }
+.choose-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.choose-icon .bi {
+  font-size: 32px;
+  color: #2c99d4;
+  line-height: 1;
+}
 
   .choose-content .title{
     font-weight:700; font-size:18px; margin: 4px 0 6px;
@@ -158,13 +150,13 @@
     overflow-wrap:anywhere; word-break:break-word;
   }
 
-  .text-btn{
+  /* .text-btn{
     display:inline-flex; align-items:center; gap:8px;
     font-weight:600; text-decoration:none;
   }
   .text-btn .btn-text span{ border-bottom:1px solid currentColor; }
   .text-btn .btn-icon{ opacity:.9; }
-  .text-btn:hover .btn-text span{ border-bottom-color: transparent; }
+  .text-btn:hover .btn-text span{ border-bottom-color: transparent; } */
 </style>
 @endpush
 
@@ -201,7 +193,7 @@
 
               <a class="text-btn" href="{{ $href }}">
                 <span class="btn-text"><span>{{ $label }}</span></span>
-                <span class="btn-icon"><i class="bi bi-arrow-right"></i></span>
+                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
               </a>
             </div>
           </div>

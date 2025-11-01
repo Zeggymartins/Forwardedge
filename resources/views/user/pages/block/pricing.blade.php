@@ -99,6 +99,7 @@
                       <div class="package-price">
                         <span class="package-currency">₦</span>
                         <span class="price-number">{{ $price }}</span>
+                        
                         {{-- <span class="package-period">{{ $period }}</span> --}}
                       </div>
                     </div>
