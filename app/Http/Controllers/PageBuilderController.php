@@ -62,6 +62,18 @@ class PageBuilderController extends Controller
             };
 
             if ($pageableClass && $pageableClass::find($data['owner_id'])) {
+                $already = Page::where('pageable_type', $pageableClass)
+                    ->where('pageable_id', $data['owner_id'])
+                    ->exists();
+
+                if ($already) {
+                    return back()
+                        ->withInput()
+                        ->withErrors([
+                            'owner_id' => 'That ' . strtolower($data['owner_type']) . ' already has a linked page.',
+                        ]);
+                }
+
                 $data['pageable_type'] = $pageableClass;
                 $data['pageable_id']   = $data['owner_id'];
             }
@@ -102,6 +114,19 @@ class PageBuilderController extends Controller
             };
 
             if ($pageableClass && $pageableClass::find($data['owner_id'])) {
+                $already = Page::where('pageable_type', $pageableClass)
+                    ->where('pageable_id', $data['owner_id'])
+                    ->where('id', '!=', $page->id)
+                    ->exists();
+
+                if ($already) {
+                    return back()
+                        ->withInput()
+                        ->withErrors([
+                            'owner_id' => 'That ' . strtolower($data['owner_type']) . ' already has a linked page.',
+                        ]);
+                }
+
                 $data['pageable_type'] = $pageableClass;
                 $data['pageable_id']   = $data['owner_id'];
             } else {
