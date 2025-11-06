@@ -10,6 +10,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use MailchimpMarketing\ApiException;
+use RuntimeException;
 
 class UpsertMember implements ShouldQueue
 {
@@ -27,13 +28,13 @@ class UpsertMember implements ShouldQueue
 
     public function handle(): void
     {
-        $listId    = $this->options['list_id'] ?? Mailchimp::listId();
-        $status    = ($this->options['double_opt_in'] ?? config('services.mailchimp.double_opt_in')) ? 'pending' : 'subscribed';
-        $tags      = Arr::wrap($this->options['tags'] ?? []);
-        $client    = Mailchimp::client();
-        $hash      = md5($this->email);
-
         try {
+            $listId    = $this->options['list_id'] ?? Mailchimp::listId();
+            $status    = ($this->options['double_opt_in'] ?? config('services.mailchimp.double_opt_in')) ? 'pending' : 'subscribed';
+            $tags      = Arr::wrap($this->options['tags'] ?? []);
+            $client    = Mailchimp::client();
+            $hash      = md5($this->email);
+
             $client->lists->setListMember($listId, $hash, [
                 'email_address' => $this->email,
                 'status'        => $status,
@@ -44,6 +45,13 @@ class UpsertMember implements ShouldQueue
             if (!empty($tags)) {
                 UpdateTags::dispatch($this->email, $tags, $listId)->onQueue($this->options['queue'] ?? null);
             }
+        } catch (RuntimeException $e) {
+            Log::error('Mailchimp member sync failed (config)', [
+                'email'   => $this->email,
+                'message' => $e->getMessage(),
+            ]);
+
+            throw $e;
         } catch (ApiException $e) {
             Log::error('Mailchimp member sync failed (api)', [
                 'email'   => $this->email,
