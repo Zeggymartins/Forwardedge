@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
 use MailchimpMarketing\ApiClient;
-use RuntimeException;
 
 class Mailchimp
 {
@@ -13,7 +13,7 @@ class Mailchimp
         $server = config('services.mailchimp.server_prefix');
 
         if (blank($apiKey) || blank($server)) {
-            throw new RuntimeException('Mailchimp credentials are missing. Please set MAILCHIMP_KEY and MAILCHIMP_SERVER_PREFIX.');
+            throw new InvalidArgumentException('Mailchimp credentials are missing. Please set MAILCHIMP_KEY and MAILCHIMP_SERVER_PREFIX.');
         }
 
         $mc = new ApiClient();
@@ -30,7 +30,7 @@ class Mailchimp
         $listId = (string) config('services.mailchimp.list_id', '');
 
         if (blank($listId)) {
-            throw new RuntimeException('Mailchimp list ID is missing. Please set MAILCHIMP_LIST_ID.');
+            throw new InvalidArgumentException('Mailchimp list ID is missing. Please set MAILCHIMP_LIST_ID.');
         }
 
         return $listId;

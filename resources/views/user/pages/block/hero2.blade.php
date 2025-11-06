@@ -34,6 +34,7 @@
         .fe-hero-two {
             background: radial-gradient(circle at top, rgba(6, 12, 35, 0.9), #030410 68%);
             position: relative;
+            padding:10px;
             overflow: hidden;
         }
 
@@ -237,13 +238,13 @@
                     <img src="{{ $heroImage }}" alt="Forward Edge">
                 </figure>
 
-                <div class="fe-hero-card">
+                {{-- <div class="fe-hero-card">
                     <span>Next cohort</span>
                     <strong>{{ $year }}</strong>
                     <p class="mb-0" style="font-size:.95rem; color:rgba(226,232,240,.85);">
                         Live bootcamps, career coaching & real-world cyber labs.
                     </p>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

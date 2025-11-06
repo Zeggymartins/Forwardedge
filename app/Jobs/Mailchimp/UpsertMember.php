@@ -4,13 +4,14 @@ namespace App\Jobs\Mailchimp;
 
 use App\Jobs\Mailchimp\UpdateTags;
 use App\Services\Mailchimp;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use MailchimpMarketing\ApiException;
-use RuntimeException;
 
 class UpsertMember implements ShouldQueue
 {
@@ -45,7 +46,7 @@ class UpsertMember implements ShouldQueue
             if (!empty($tags)) {
                 UpdateTags::dispatch($this->email, $tags, $listId)->onQueue($this->options['queue'] ?? null);
             }
-        } catch (RuntimeException $e) {
+        } catch (InvalidArgumentException $e) {
             Log::error('Mailchimp member sync failed (config)', [
                 'email'   => $this->email,
                 'message' => $e->getMessage(),
@@ -57,6 +58,14 @@ class UpsertMember implements ShouldQueue
                 'email'   => $this->email,
                 'message' => $e->getMessage(),
                 'body'    => $e->getResponseBody(),
+            ]);
+
+            throw $e;
+        } catch (GuzzleException $e) {
+            Log::error('Mailchimp member sync failed (http)', [
+                'email'   => $this->email,
+                'message' => $e->getMessage(),
+                'response' => method_exists($e, 'getResponse') ? (string) optional($e->getResponse())->getBody() : null,
             ]);
 
             throw $e;
