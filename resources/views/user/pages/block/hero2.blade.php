@@ -34,7 +34,7 @@
         .fe-hero-two {
             background: radial-gradient(circle at top, rgba(6, 12, 35, 0.9), #030410 68%);
             position: relative;
-            padding:10px;
+            padding:20px;
             overflow: hidden;
         }
 
