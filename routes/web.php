@@ -20,6 +20,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageBuilderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScolarshipApplicationController;
 use App\Http\Controllers\ServiceController;
@@ -60,6 +61,7 @@ Route::prefix('services')->name('services')->group(function () {
 
 Route::get('/contact', [MessageController::class, 'create'])->name('contact');
 Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
 
 /*
@@ -118,6 +120,9 @@ Route::get('/reset-password', function () {
     Route::get('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'Register'])
         ->name('scholarships.apply');
 
+    Route::get('/scholarships/apply/course/{course}', [ScolarshipApplicationController::class, 'registerForCourse'])
+        ->name('scholarships.apply.course');
+
     // Submit application
     Route::post('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'storeData'])
         ->name('scholarships.apply.store');
@@ -174,14 +179,10 @@ Route::prefix('payment')->name('payment.')->group(function () {
 Route::middleware(['auth', 'role:user'])->group(function () {
     // Course enrollment
     Route::prefix('enroll')->name('enroll.')->group(function () {
-        Route::get('/price/{schedule}', [EnrollmentController::class, 'pricingPage'])->name('pricing');
+        Route::get('/price', [EnrollmentController::class, 'pricingPage'])->name('pricing');
         Route::post('/store', [EnrollmentController::class, 'store'])->name('store');
     });
-    // Route::get('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'create'])
-    //     ->whereNumber('schedule')->name('scholarships.apply');
-    // Route::post('/scholarships/apply/{schedule}', [ScolarshipApplicationController::class, 'store'])
-    //     ->whereNumber('schedule')->name('scholarships.store');
-    // Checkout/Order management
+
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::post('/store', [OrderController::class, 'store'])->name('store');
     });
@@ -304,21 +305,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::put('/{id}', [AdminCourseController::class, 'update'])->name('update');
         Route::delete('/{id}', [AdminCourseController::class, 'destroy'])->name('destroy');
 
-        // Course Contents
-        Route::post('/{id}/details', [AdminCourseController::class, 'storeDetails'])->name('details.store');
-        Route::put('/{courseId}/contents/{contentId}', [AdminCourseController::class, 'updateDetails'])->name('details.update');
-        Route::delete('/{courseId}/contents/{contentId}', [AdminCourseController::class, 'destroyDetails'])->name('details.destroy');
+        Route::post('/{content}/phases', [AdminCourseController::class, 'storePhase'])
+            ->name('phases.store');
 
-        // Course Phases
-        Route::post('/{id}/phases', [AdminCourseController::class, 'storePhase'])->name('phases.store');
-        Route::put('/{courseId}/phases/{phaseId}', [AdminCourseController::class, 'updatePhase'])->name('phases.update');
-        Route::delete('/{courseId}/phases/{phaseId}', [AdminCourseController::class, 'destroyPhase'])->name('phases.destroy');
+        Route::put('/{content}/phases/{phase}', [AdminCourseController::class, 'updatePhase'])
+            ->name('phases.update');
 
-        // Course Topics
-        Route::post('/{courseId}/phases/{phaseId}/topics', [AdminCourseController::class, 'storeTopic'])->name('topics.store');
-        Route::put('/{courseId}/phases/{phaseId}/topics/{topicId}', [AdminCourseController::class, 'updateTopic'])->name('topics.update');
-        Route::delete('/{courseId}/phases/{phaseId}/topics/{topicId}', [AdminCourseController::class, 'destroyTopic'])->name('topics.destroy');
+        Route::delete('/{content}/phases/{phase}', [AdminCourseController::class, 'destroyPhase'])
+            ->name('phases.destroy');
 
+        // Topics under a specific Phase (which belongs to that Content)
+        Route::post('/{content}/phases/{phase}/topics', [AdminCourseController::class, 'storeTopic'])
+            ->name('topics.store');
+
+        Route::put('/{content}/phases/{phase}/topics/{topic}', [AdminCourseController::class, 'updateTopic'])
+            ->name('topics.update');
+
+        Route::delete('/{content}/phases/{phase}/topics/{topic}', [AdminCourseController::class, 'destroyTopic'])
+            ->name('topics.destroy');
         // Course Schedules
         Route::post('/{id}/schedules', [AdminCourseController::class, 'storeSchedule'])->name('schedules.store');
         Route::put('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'updateSchedule'])->name('schedules.update');

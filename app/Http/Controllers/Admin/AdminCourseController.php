@@ -42,16 +42,6 @@ class AdminCourseController extends Controller
             'thumbnail'   => 'nullable|file|mimes:jpg,jpeg,png,svg,webp|max:4096',
             'status'      => 'nullable|in:draft,published',
 
-           
-
-            // Phases & topics
-            'phases'                    => 'nullable|array',
-            'phases.*.title'            => 'required_with:phases|string|max:255',
-            'phases.*.description'      => 'nullable|string',
-            'phases.*.duration'         => 'nullable|integer|min:0',
-            'phases.*.topics'           => 'nullable|array',
-            'phases.*.topics.*'         => 'nullable|string',
-
             // Schedules
             'schedules'                 => 'nullable|array',
             'schedules.*.title'         => 'nullable|string|max:255',
@@ -89,33 +79,6 @@ class AdminCourseController extends Controller
                     'thumbnail'   => $thumb,
                     'status'      => $validated['status'] ?? 'draft',
                 ]);
-
-            
-
-                // 3) PHASES + topics (titles only)
-                $phases = $request->input('phases', []);
-                foreach ($phases as $pIndex => $p) {
-                    if (empty($p['title'])) continue;
-
-                    $phase = CoursePhases::create([
-                        'course_id' => $course->id,
-                        'title'     => trim($p['title']),
-                        'order'     => $pIndex + 1,
-                        'duration'  => isset($p['duration']) ? (int)$p['duration'] : null,
-                        'content'   => $p['description'] ?? null,
-                    ]);
-
-                    $topics = $p['topics'] ?? [];
-                    foreach ($topics as $tIndex => $tTitle) {
-                        if (!$tTitle) continue;
-                        CourseTopics::create([
-                            'course_phase_id' => $phase->id,
-                            'title'   => trim((string)$tTitle),
-                            'content' => null,
-                            'order'   => $tIndex + 1,
-                        ]);
-                    }
-                }
 
                 // 4) SCHEDULES
                 $schedules = $request->input('schedules', []);
@@ -201,84 +164,70 @@ class AdminCourseController extends Controller
 
     // Phase Management
 
-    public function storePhase(Request $request, $id)
+    /** ===================== PHASES ===================== */
+
+    public function storePhase(Request $request, CourseContent $content)
     {
-        $course = Course::findOrFail($id);
-
         try {
-            // Log the full incoming request for debugging
-            Log::info('storePhase Request data:', $request->all());
+            Log::info('storePhase payload', $request->all());
 
-            // Validate phase fields
             $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'content' => 'nullable|string',
-                'duration' => 'nullable|integer|min:0',
-                'image' => 'nullable|image|max:4096',
-                'order' => 'nullable|integer|min:1',
-                'topics' => 'nullable|array',
-                'topics.*.title' => 'required|string|max:255',
-                'topics.*.order' => 'nullable|integer|min:1',
+                'title'                 => 'required|string|max:255',
+                'content'               => 'nullable|string',
+                'duration'              => 'nullable|integer|min:0',
+                'image'                 => 'nullable|image|max:4096',
+                'order'                 => 'nullable|integer|min:1',
+                'topics'                => 'nullable|array',
+                'topics.*.title'        => 'required|string|max:255',
+                'topics.*.content'      => 'nullable|string',
+                'topics.*.order'        => 'nullable|integer|min:1',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log validation errors
-            Log::error('storePhase Validation failed:', $e->errors());
-
-            // Optionally: return back with the old input + errors
+            Log::error('storePhase validation', $e->errors());
             return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            // Catch any other exception
-            Log::error('storePhase Exception:', ['message' => $e->getMessage()]);
-            return back()->with('error', 'Something went wrong. Check logs.');
         }
 
-        // Handle phase image
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('courses/phases', 'public');
         }
 
-        // Create the phase
         $phase = CoursePhases::create([
-            'course_id' => $course->id,
-            'title' => $validated['title'],
-            'content' => $validated['content'] ?? null,
-            'duration' => $validated['duration'] ?? null,
-            'image' => $imagePath,
-            'order' => $validated['order'] ?? ($course->phases()->max('order') + 1),
+            'course_content_id' => $content->id,
+            'title'             => $validated['title'],
+            'content'           => $validated['content'] ?? null,
+            'duration'          => $validated['duration'] ?? null,
+            'image'             => $imagePath,
+            'order'             => $validated['order'] ?? (($content->phases()->max('order') ?? 0) + 1),
         ]);
 
-        // Create topics if any
+        // optional topics
         if (!empty($validated['topics'])) {
-            foreach ($validated['topics'] as $topicData) {
+            $nextOrder = ($phase->topics()->max('order') ?? 0);
+            foreach ($validated['topics'] as $t) {
+                $nextOrder = $t['order'] ?? ($nextOrder + 1);
                 CourseTopics::create([
                     'course_phase_id' => $phase->id,
-                    'title' => $topicData['title'],
-                    'order' => $topicData['order'] ?? ($phase->topics()->max('order') + 1),
+                    'title'           => $t['title'],
+                    'content'         => $t['content'] ?? null,
+                    'order'           => $nextOrder,
                 ]);
             }
         }
 
-        Log::info('Phase and topics created successfully', [
-            'phase_id' => $phase->id,
-            'topics' => $validated['topics'] ?? []
-        ]);
-
+        Log::info('storePhase ok', ['phase_id' => $phase->id]);
         return back()->with('success', 'Phase and topics added successfully!');
     }
 
-
-
-    public function updatePhase(Request $request, $courseId, $phaseId)
+    public function updatePhase(Request $request, CourseContent $content, CoursePhases $phase)
     {
-        $phase = CoursePhases::where('course_id', $courseId)->findOrFail($phaseId);
-
+        // With ->scopeBindings(), $phase already belongs to $content or 404.
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
+            'title'    => 'required|string|max:255',
+            'content'  => 'nullable|string',
             'duration' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|max:4096',
-            'order' => 'nullable|integer|min:1',
+            'image'    => 'nullable|image|max:4096',
+            'order'    => 'nullable|integer|min:1',
         ]);
 
         if ($request->hasFile('image')) {
@@ -293,41 +242,60 @@ class AdminCourseController extends Controller
         return back()->with('success', 'Phase updated successfully!');
     }
 
-    public function destroyPhase($courseId, $phaseId)
+    public function destroyPhase(CourseContent $content, CoursePhases $phase)
     {
-        $phase = CoursePhases::where('course_id', $courseId)->findOrFail($phaseId);
-
         if ($phase->image) {
             Storage::disk('public')->delete($phase->image);
         }
+
+        // Topics should cascade via FK. If not, uncomment the manual delete:
+        // $phase->topics()->delete();
 
         $phase->delete();
 
         return back()->with('success', 'Phase deleted successfully!');
     }
 
-    // Topic Management
-    public function storeTopic(Request $request, $courseId, $phaseId)
-    {
-        $phase = CoursePhases::where('course_id', $courseId)->findOrFail($phaseId);
 
+    /** ===================== TOPICS ===================== */
+
+    public function storeTopic(Request $request, CourseContent $content, CoursePhases $phase)
+    {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title'   => 'required|string|max:255',
             'content' => 'nullable|string',
-            'order' => 'nullable|integer|min:1',
+            'order'   => 'nullable|integer|min:1',
         ]);
 
         CourseTopics::create([
             'course_phase_id' => $phase->id,
-            'title' => $validated['title'],
-            'content' => $validated['content'] ?? null,
-            'order' => $validated['order'] ?? ($phase->topics()->max('order') + 1),
+            'title'           => $validated['title'],
+            'content'         => $validated['content'] ?? null,
+            'order'           => $validated['order'] ?? (($phase->topics()->max('order') ?? 0) + 1),
         ]);
 
         return back()->with('success', 'Topic added successfully!');
     }
 
+    public function updateTopic(Request $request, CourseContent $content, CoursePhases $phase, CourseTopics $topic)
+    {
+        // With ->scopeBindings(), $topic belongs to $phase which belongs to $content or 404.
+        $validated = $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'order'   => 'nullable|integer|min:1',
+        ]);
 
+        $topic->update($validated);
+
+        return back()->with('success', 'Topic updated successfully!');
+    }
+
+    public function destroyTopic(CourseContent $content, CoursePhases $phase, CourseTopics $topic)
+    {
+        $topic->delete();
+        return back()->with('success', 'Topic deleted successfully!');
+    }
 
     // Schedule Management
     // Schedule Management
@@ -407,47 +375,42 @@ class AdminCourseController extends Controller
 
         return back()->with('success', 'Schedule deleted successfully!');
     }
-    public function updateTopic($courseId, $phaseId, $topicId, Request $request)
-    {
 
-        $topic = CourseTopics::where('course_phase_id', $phaseId)->findOrFail($topicId);
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'order' => 'nullable|integer|min:1',
-        ]);
-
-        $topic->update($validated);
-
-        return back()->with('success', 'Topic updated successfully!');
-    }
-
-    public function destroyTopic($courseId, $phaseId, $topicId)
-    {
-        $topic = CourseTopics::where('course_id', $courseId)->findOrFail($topicId);
-        $topic->delete();
-
-        return back()->with('success', 'Topic deleted successfully!');
-    }
 
     public function courseContent()
     {
-        $contents = CourseContent::with('course')->latest()->get();
-        $courses = Course::all();
-        return view('admin.pages.courses.contents', compact('contents', 'courses'));
+        $courses = Course::with(['contents' => function ($query) {
+            $query->withCount('phases')->orderBy('order')->orderBy('created_at');
+        }])->withCount('contents')->latest()->get();
+
+        $allCourses = Course::orderBy('title')->get(['id', 'title']);
+
+        return view('admin.pages.courses.contents', [
+            'courses' => $courses,
+            'courseOptions' => $allCourses,
+        ]);
     }
 
     public function storeContent(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'title' => 'required|string|max:255',
             'type' => 'required|in:text,video,pdf,image,quiz,assignment',
             'content' => 'nullable|string',
             'file' => 'nullable|file|max:10240',
             'price' => 'nullable|numeric|min:0',
-            'discount_price' => 'nullable|numeric|min:0|lt:price'
+            'discount_price' => 'nullable|numeric|min:0|lt:price',
+            'phases' => 'nullable|array',
+            'phases.*.title' => 'required_with:phases|string|max:255',
+            'phases.*.order' => 'nullable|integer|min:1',
+            'phases.*.duration' => 'nullable|integer|min:0',
+            'phases.*.content' => 'nullable|string',
+            'phases.*.image' => 'nullable|image|max:4096',
+            'phases.*.topics' => 'nullable|array',
+            'phases.*.topics.*.title' => 'required_with:phases.*.topics|string|max:255',
+            'phases.*.topics.*.order' => 'nullable|integer|min:1',
+            'phases.*.topics.*.content' => 'nullable|string',
         ]);
 
 
@@ -468,13 +431,15 @@ class AdminCourseController extends Controller
             }
         }
 
-        CourseContent::create([
-            'course_id' => $request->course_id,
-            'title' => $request->title,
-            'type' => $request->type,
-            'content' => $request->content,
+        $nextOrder = (int) CourseContent::where('course_id', $validated['course_id'])->max('order') + 1;
+
+        $content = CourseContent::create([
+            'course_id' => $validated['course_id'],
+            'title' => $validated['title'],
+            'type' => $validated['type'],
+            'content' => $validated['type'] === 'text' ? $validated['content'] : null,
             'file_path' => $filePath,
-            'order' => CourseContent::where('course_id', $request->course_id)->count() + 1,
+            'order' => $nextOrder,
         ]);
 
         // ✅ Update course price & discount if provided
@@ -489,22 +454,50 @@ class AdminCourseController extends Controller
             $course->save();
         }
 
+        $phases = $request->input('phases', []);
+        foreach ($phases as $index => $phaseData) {
+            if (empty($phaseData['title'])) {
+                continue;
+            }
+
+            $phaseImage = $request->file("phases.$index.image");
+            $phaseImagePath = $phaseImage ? $phaseImage->store('courses/phases', 'public') : null;
+
+            $phase = CoursePhases::create([
+                'course_content_id' => $content->id,
+                'title' => $phaseData['title'],
+                'order' => $phaseData['order'] ?? ($index + 1),
+                'duration' => $phaseData['duration'] ?? null,
+                'content' => $phaseData['content'] ?? null,
+                'image' => $phaseImagePath,
+            ]);
+
+            $topics = $phaseData['topics'] ?? [];
+            foreach ($topics as $topicIndex => $topic) {
+                if (empty($topic['title'])) {
+                    continue;
+                }
+
+                CourseTopics::create([
+                    'course_phase_id' => $phase->id,
+                    'title' => $topic['title'],
+                    'content' => $topic['content'] ?? null,
+                    'order' => $topic['order'] ?? ($topicIndex + 1),
+                ]);
+            }
+        }
+
 
         return redirect()->back()->with('success', 'Course content added successfully!');
     }
     public function updateContent(Request $request, CourseContent $courseContent)
     {
-        $request->validate([
-            'file' => 'required|file|max:10240',
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'type'  => 'required|in:text,video,pdf,image,quiz,assignment',
+            'content' => 'nullable|string',
+            'file' => 'nullable|file|max:10240',
         ]);
-
-        // delete old file
-        if ($courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
-            Storage::disk('public')->delete($courseContent->file_path);
-        }
-
-        $ext = $request->file('file')->getClientOriginalExtension();
-        $type = $courseContent->type;
 
         $allowedMimes = [
             'video' => ['mp4', 'avi', 'mov', 'wmv'],
@@ -514,14 +507,47 @@ class AdminCourseController extends Controller
             'assignment' => ['pdf', 'doc', 'docx'],
         ];
 
-        if (!in_array($ext, $allowedMimes[$type] ?? [])) {
-            return back()->with('error', 'Invalid file type for this content.');
+        if ($data['type'] === 'text') {
+            $data['file_path'] = null;
         }
 
-        $filePath = $request->file('file')->store("courses/contents/{$type}", 'public');
-        $courseContent->update(['file_path' => $filePath]);
+        // delete old file
+        $typeChanged = $data['type'] !== $courseContent->type;
 
-        return back()->with('success', 'File updated successfully!');
+        if ($data['type'] === 'text' && $courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
+            Storage::disk('public')->delete($courseContent->file_path);
+            $courseContent->file_path = null;
+        }
+
+        if ($data['type'] !== 'text' && $typeChanged && !$request->hasFile('file') && !$courseContent->file_path) {
+            return back()->with('error', 'Please upload a file for the selected content type.');
+        }
+
+        if ($request->hasFile('file')) {
+            $ext = $request->file('file')->getClientOriginalExtension();
+            $type = $data['type'];
+
+            if (!in_array($ext, $allowedMimes[$type] ?? [])) {
+                return back()->with('error', 'Invalid file type for this content.');
+            }
+
+            if ($courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
+                Storage::disk('public')->delete($courseContent->file_path);
+            }
+
+            $data['file_path'] = $request->file('file')->store("courses/contents/{$type}", 'public');
+        } elseif ($data['type'] !== 'text' && empty($courseContent->file_path)) {
+            return back()->with('error', 'Please upload a file for this content type.');
+        }
+
+        $courseContent->update([
+            'title' => $data['title'],
+            'type' => $data['type'],
+            'content' => $data['type'] === 'text' ? $data['content'] : null,
+            'file_path' => $data['type'] === 'text' ? null : ($data['file_path'] ?? $courseContent->file_path),
+        ]);
+
+        return back()->with('success', 'Content updated successfully!');
     }
 
     public function destroyContent(CourseContent $courseContent)
@@ -536,8 +562,13 @@ class AdminCourseController extends Controller
 
     public function showContent($courseId)
     {
-        $course = Course::with('contents')->findOrFail($courseId);
-        return view('admin.pages.courses.course_contents', compact('course'));
+        $course = Course::with(['contents' => function ($query) {
+            $query->orderBy('order')->orderBy('created_at');
+        }, 'contents.phases.topics'])->findOrFail($courseId);
+
+        $courseOptions = Course::orderBy('title')->get(['id', 'title']);
+
+        return view('admin.pages.courses.course_contents', compact('course', 'courseOptions'));
     }
 
     // TESTIMONIALS

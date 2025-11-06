@@ -10,7 +10,9 @@
   if ($sch) {
       $isFree   = method_exists($sch, 'isFree') ? $sch->isFree() : ((int)($sch->price ?? 0) === 0);
       $priceNgn = $sch->price ?? null;
-      $applyUrl = route('scholarships.apply', $sch->id); // your real route
+      $applyUrl = isset($course)
+        ? route('scholarships.apply.course', $course->id)
+        : route('scholarships.apply', $sch->id);
       $enrlUrl  = route('enroll.pricing',    $sch->id);  // your real route
   }
 @endphp

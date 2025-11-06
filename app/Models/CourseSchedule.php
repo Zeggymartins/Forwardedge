@@ -11,16 +11,11 @@ class CourseSchedule extends Model
 {
     protected $fillable = [
         'course_id',
-        'title',
         'start_date',
         'end_date',
         'location',
         'type',
-        'price',
-        'description',
-        'tag',
-        'price_usd',
-        'features'
+   
     ];
 
     protected $casts = [

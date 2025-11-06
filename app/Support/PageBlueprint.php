@@ -18,6 +18,8 @@ final class PageBlueprint
             'hero3',
             'overview',
             'overview2',
+            'form_dark',
+            'form_light',
             'logo_slider',
             'about',
             'about2',
@@ -58,9 +60,9 @@ final class PageBlueprint
                 'sub_text'     => ['nullable', 'string', 'max:400'],
                 'banner_image' => $fileImg, // file upload (not URL)
                 'link_text'    => ['nullable', 'string', 'max:60'],
-                'link'         => ['nullable', 'url', 'max:2048'],
+                'link'         => self::linkRule(),
                 'link_text_secondary'    => ['nullable', 'string', 'max:60'],
-                'link_secondary'         => ['nullable', 'url', 'max:2048'],
+                'link_secondary'         => self::linkRule(),
             ],
 
             /* ================= OVERVIEW (alias used in your UI) ================= */
@@ -69,13 +71,13 @@ final class PageBlueprint
                 'title'             => ['required', 'string', 'max:160'],
                 'description'       => ['nullable', 'string', 'max:600'],
                 'link_text'         => ['nullable', 'string', 'max:60'],
-                'link'              => ['nullable', 'url', 'max:2048'],
+                'link'              => self::linkRule(),
                 'items'             => ['nullable', 'array', 'max:6'],
                 'items.*.icon'      => ['nullable', 'string', 'max:100'],
                 'items.*.subtitle'  => ['required_with:items', 'string', 'max:160'],
                 'items.*.text'      => ['nullable', 'string', 'max:400'],
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
             ],
 
             /* ================= HOW IT WORKS ================= */
@@ -91,7 +93,7 @@ final class PageBlueprint
                 'items.*.list.*'    => ['required_with:items.*.list', 'string', 'max:140'],
                 'items.*.image'     => $fileImg, // file upload
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
             ],
 
             'pricing' => [
@@ -99,20 +101,21 @@ final class PageBlueprint
                 'title'                => ['required', 'string', 'max:160'],
                 'desc'                 => ['nullable', 'string', 'max:600'],
                 'link_text'            => ['nullable', 'string', 'max:60'],
-                'link'                 => ['nullable', 'url', 'max:2048'],
+                'link'                 => self::linkRule(),
 
                 // Plans - require at least 1 non-empty plan
                 'plans'                => ['required', 'array', 'min:1', 'max:6'],
                 'plans.*.title'        => ['required', 'string', 'max:120'],
                 'plans.*.subtitle'     => ['nullable', 'string', 'max:160'],
                 'plans.*.price_naira'  => ['nullable', 'string', 'max:40'],
+                'plans.*.price_usd'    => ['nullable', 'string', 'max:40'],
 
                 // Features - array is optional, but if present items must be strings
                 'plans.*.features'     => ['nullable', 'array', 'max:30'],
                 'plans.*.features.*'   => ['string', 'max:140'], // Removed 'required_with'
 
                 'plans.*.link_text'    => ['nullable', 'string', 'max:60'],
-                'plans.*.link'         => ['nullable', 'url', 'max:2048'],
+                'plans.*.link'         => self::linkRule(),
             ],
 
             'about' => [
@@ -143,10 +146,10 @@ final class PageBlueprint
                 'tiles.*.bg'        => $fileImg,
                 'tiles.*.text'      => ['nullable', 'string', 'max:300'],
                 'tiles.*.link_text' => ['nullable', 'string', 'max:60'],
-                'tiles.*.link'      => ['nullable', 'url', 'max:2048'],
+                'tiles.*.link'      => self::linkRule(),
 
                 'cta.link_text'     => ['nullable', 'string', 'max:60'],
-                'cta.link'          => ['nullable', 'url', 'max:2048'],
+                'cta.link'          => self::linkRule(),
             ],
 
             'about2' => [
@@ -154,7 +157,7 @@ final class PageBlueprint
                 'title'        => ['required', 'string', 'max:180'],
                 'text'         => ['nullable', 'string', 'max:1500'],
                 'link_text'    => ['nullable', 'string', 'max:60'],
-                'link'         => ['nullable', 'url', 'max:2048'],
+                'link'         => self::linkRule(),
                 'about_image'  => $fileImg,
 
                 'columns'      => ['nullable', 'array', 'max:2'],
@@ -181,7 +184,7 @@ final class PageBlueprint
                 'items.*.text'      => ['nullable', 'string', 'max:600'],
                 'items.*.image'     => $fileImg,
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
                 'items.*.list'      => ['nullable', 'array', 'max:20'],
                 'items.*.list.*'    => ['string', 'max:140'], // Removed 'required_with'
             ],
@@ -191,7 +194,7 @@ final class PageBlueprint
                 'title'         => ['required', 'string', 'max:180'],
                 'desc'          => ['nullable', 'string', 'max:600'],
                 'link_text'     => ['nullable', 'string', 'max:60'],
-                'link'          => ['nullable', 'url', 'max:2048'],
+                'link'          => self::linkRule(),
 
                 'items'             => ['required', 'array', 'min:1', 'max:12'],
                 'items.*.icon'      => ['nullable', 'string', 'max:100'],
@@ -202,7 +205,7 @@ final class PageBlueprint
                 'items.*.list'      => ['nullable', 'array', 'max:20'],
                 'items.*.list.*'    => ['string', 'max:140'],
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
             ],
 
             'overview2' => [
@@ -215,7 +218,7 @@ final class PageBlueprint
                 'list.*'            => ['string', 'max:140'],
 
                 'link_text'         => ['nullable', 'string', 'max:60'],
-                'link'              => ['nullable', 'url', 'max:2048'],
+                'link'              => self::linkRule(),
 
                 'items'             => ['required', 'array', 'min:1', 'max:24'],
                 'items.*.title'     => ['required', 'string', 'max:140'],
@@ -223,8 +226,10 @@ final class PageBlueprint
                 'items.*.list'      => ['nullable', 'array', 'max:20'],
                 'items.*.list.*'    => ['string', 'max:140'],
                 'items.*.image'     => $fileImg,
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
             ],
+
+            'form_dark', 'form_light' => self::formBlockRules(),
 
 
 
@@ -234,12 +239,12 @@ final class PageBlueprint
                 'kicker'            => ['nullable', 'string', 'max:80'],
                 'section_title'     => ['required', 'string', 'max:180'],
                 'link_text'         => ['nullable', 'string', 'max:60'],
-                'link'              => ['nullable', 'url', 'max:2048'],
+                'link'              => self::linkRule(),
                 'items'             => ['required', 'array', 'min:1', 'max:16'],
                 'items.*.image'     => $fileImg,
                 'items.*.title'     => ['required', 'string', 'max:120'],
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
-                'items.*.link'      => ['nullable', 'url', 'max:2048'],
+                'items.*.link'      => self::linkRule(),
             ],
 
             /* ================= TESTIMONIAL ================= */
@@ -272,10 +277,10 @@ final class PageBlueprint
                 'ctas'            => ['nullable', 'array', 'max:3'],
                 // New schema
                 'ctas.*.link_text' => ['nullable', 'string', 'max:60'],
-                'ctas.*.link'     => ['nullable', 'url', 'max:2048'],
+                'ctas.*.link'     => self::linkRule(),
                 // Legacy compatibility
                 'ctas.*.text'     => ['nullable', 'string', 'max:60'],
-                'ctas.*.href'     => ['nullable', 'url', 'max:2048'],
+                'ctas.*.href'     => self::linkRule(),
             ],
 
             /* ================= MARQUEES ================= */
@@ -289,7 +294,7 @@ final class PageBlueprint
             'hero2' => [
                 'title'       => ['required', 'string', 'max:180'],
                 'link_text'   => ['nullable', 'string', 'max:60'],
-                'link'        => ['nullable', 'url', 'max:2048'],
+                'link'        => self::linkRule(),
                 'desc'        => ['nullable', 'string', 'max:400'],
                 // support either key; Blade prefers hero_image, also allow banner_image
                 'hero_image'  => $fileImg,
@@ -310,7 +315,7 @@ final class PageBlueprint
                 'kicker'        => ['nullable', 'string', 'max:80'],
                 'title'         => ['required', 'string', 'max:180'],
                 'link_text'     => ['nullable', 'string', 'max:60'],
-                'link'          => ['nullable', 'url', 'max:2048'],
+                'link'          => self::linkRule(),
 
                 // accept either "logos" or "brands"
                 'logos'         => ['nullable', 'array', 'max:40'],
@@ -318,11 +323,11 @@ final class PageBlueprint
 
                 'logos.*.image' => $fileImg,
                 'logos.*.alt'   => ['nullable', 'string', 'max:120'],
-                'logos.*.href'  => ['nullable', 'url', 'max:2048'],
+                'logos.*.href'  => self::linkRule(),
 
                 'brands.*.image' => $fileImg,
                 'brands.*.alt'  => ['nullable', 'string', 'max:120'],
-                'brands.*.href' => ['nullable', 'url', 'max:2048'],
+                'brands.*.href' => self::linkRule(),
             ],
 
   
@@ -342,5 +347,49 @@ final class PageBlueprint
         }
 
         return $prefixed;
+    }
+
+    private static function linkRule(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:2048',
+            function ($attribute, $value, $fail) {
+                if (blank($value)) {
+                    return;
+                }
+
+                if (filter_var($value, FILTER_VALIDATE_URL)) {
+                    return;
+                }
+
+                if (is_string($value) && str_starts_with($value, '/')) {
+                    return;
+                }
+
+                $fail('The ' . $attribute . ' must be a valid URL or an internal path starting with /.');
+            },
+        ];
+    }
+
+    private static function formBlockRules(): array
+    {
+        return [
+            'title'       => ['nullable', 'string', 'max:160'],
+            'subtitle'    => ['nullable', 'string', 'max:320'],
+            'action'      => self::linkRule(),
+            'method'      => ['nullable', Rule::in(['POST', 'GET'])],
+            'button_text' => ['nullable', 'string', 'max:40'],
+            'tags'        => ['nullable', 'string', 'max:255'],
+
+            'fields'                 => ['required', 'array', 'min:1', 'max:10'],
+            'fields.*.label'         => ['required', 'string', 'max:120'],
+            'fields.*.name'          => ['required', 'string', 'max:60', 'regex:/^[A-Za-z0-9_\\-]+$/'],
+            'fields.*.type'          => ['required', Rule::in(['text', 'email', 'tel', 'textarea'])],
+            'fields.*.placeholder'   => ['nullable', 'string', 'max:200'],
+            'fields.*.required'      => ['nullable', 'boolean'],
+            'fields.*.width'         => ['nullable', Rule::in(['full', 'half'])],
+        ];
     }
 }

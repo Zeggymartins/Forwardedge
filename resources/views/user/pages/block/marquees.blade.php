@@ -30,6 +30,24 @@ if (!isset($imgUrl)) {
 $slides = $slides ?? ($d['slides'] ?? []);
 @endphp
 @if(!empty($slides))
+@push('styles')
+    <style>
+        .{{ $uid }}.tj-marquee-section {
+            background: #02030d;
+            padding: 60px 0;
+        }
+
+        .{{ $uid }} .marquee-item {
+            color: #f8fafc;
+        }
+
+        .{{ $uid }} .marquee-text {
+            color: #f0f4ff;
+            letter-spacing: 0.08em;
+        }
+    </style>
+@endpush
+
 <section class="tj-marquee-section section-gap-x {{ $uid ?? '' }}">
   <div class="marquee-wrapper">
     <div class="swiper marquee-slider">

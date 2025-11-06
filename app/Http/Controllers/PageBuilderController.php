@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Page, Block, Course, Event};
+use App\Models\{Page, Block, Course, Event, CourseSchedule};
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\{DB, Storage, Log};
+use Illuminate\Support\Facades\{DB, Storage, Log, Route as RouteFacade};
 use App\Support\PageBlueprint;
 
 class PageBuilderController extends Controller
@@ -146,6 +146,8 @@ class PageBuilderController extends Controller
             'hero3'        => ['default'],
             'overview'     => ['cards', 'timeline'],
             'overview2'    => ['default'],
+            'form_dark'    => ['default'],
+            'form_light'   => ['default'],
             'about'        => ['default', 'split'],
             'about2'       => ['default'],
             'sections'     => ['default', 'carousel'],
@@ -159,7 +161,39 @@ class PageBuilderController extends Controller
             'closing_cta'  => ['default', 'split'],
         ];
 
-        return view('admin.pages.page_builder.blocks.form', compact('page', 'blocks', 'blockTypes', 'variants'));
+        $internalRoutes = collect(RouteFacade::getRoutes())
+            ->filter(fn($route) => $route->getName() && in_array('GET', $route->methods()))
+            ->map(function ($route) {
+                $uri  = $route->uri();
+                $path = '/' . ltrim($uri, '/');
+                if ($path === '//') {
+                    $path = '/';
+                }
+
+                preg_match_all('/\{([^}]+)\}/', $uri, $matches);
+                $placeholders = $matches[1] ?? [];
+
+                return [
+                    'name'         => $route->getName(),
+                    'uri'          => $uri,
+                    'path'         => $path,
+                    'needs_params' => !empty($placeholders),
+                    'placeholders' => $placeholders,
+                ];
+            })
+            ->sortBy('name')
+            ->values();
+
+        $routeBindingOptions = $this->buildRouteBindingOptions();
+
+        return view('admin.pages.page_builder.blocks.form', compact(
+            'page',
+            'blocks',
+            'blockTypes',
+            'variants',
+            'internalRoutes',
+            'routeBindingOptions'
+        ));
     }
 
     public function storeBlock(Request $request, Page $page)
@@ -313,6 +347,64 @@ class PageBuilderController extends Controller
 
     /* ===================== PRIVATE HELPER METHODS ===================== */
 
+    private function buildRouteBindingOptions(): array
+    {
+        $options = [];
+
+        $options['course'] = Course::query()
+            ->orderBy('title')
+            ->get(['id', 'title', 'slug'])
+            ->map(fn($course) => [
+                'value' => (string) $course->id,
+                'label' => $course->title ?: "Course #{$course->id}",
+                'hint'  => $course->slug ? "Slug: {$course->slug}" : null,
+            ])
+            ->all();
+
+        $options['schedule'] = CourseSchedule::query()
+            ->with('course:id,title')
+            ->orderBy('start_date')
+            ->get(['id', 'course_id', 'start_date', 'location'])
+            ->map(function ($schedule) {
+                $courseTitle = optional($schedule->course)->title ?: 'Course';
+                $startDate   = $schedule->start_date ? $schedule->start_date->format('M j, Y') : 'TBA';
+                $label       = trim("{$courseTitle} • {$startDate}");
+                $hintParts   = array_filter([
+                    $schedule->location ? "Location: {$schedule->location}" : null,
+                    "ID #{$schedule->id}",
+                ]);
+
+                return [
+                    'value' => (string) $schedule->id,
+                    'label' => $label,
+                    'hint'  => implode(' • ', $hintParts),
+                ];
+            })
+            ->all();
+
+        $options['event'] = Event::query()
+            ->orderBy('title')
+            ->get(['id', 'title'])
+            ->map(fn($event) => [
+                'value' => (string) $event->id,
+                'label' => $event->title ?: "Event #{$event->id}",
+                'hint'  => "ID #{$event->id}",
+            ])
+            ->all();
+
+        $options['page'] = Page::query()
+            ->orderBy('title')
+            ->get(['id', 'title', 'slug'])
+            ->map(fn($page) => [
+                'value' => (string) $page->id,
+                'label' => $page->title ?: "Page #{$page->id}",
+                'hint'  => $page->slug ? "Slug: {$page->slug}" : null,
+            ])
+            ->all();
+
+        return array_filter($options, fn($list) => !empty($list));
+    }
+
     /**
      * Clean and normalize block data before validation
      */
@@ -326,6 +418,8 @@ class PageBuilderController extends Controller
             'pricing'     => $this->cleanPricingData($data),
             'closing_cta' => $this->normalizeClosingCta($data),
             'hero3'       => $this->cleanHero3Data($data),
+            'form_dark',
+            'form_light'  => $this->normalizeFormFields($data),
             default       => $data,
         };
     }
@@ -417,6 +511,46 @@ class PageBuilderController extends Controller
         }
 
         $data['plans'] = array_values($cleanPlans);
+        return $data;
+    }
+
+    private function normalizeFormFields(array $data): array
+    {
+        if (!isset($data['fields']) || !is_array($data['fields'])) {
+            $data['fields'] = [];
+            return $data;
+        }
+
+        $normalized = [];
+
+        foreach ($data['fields'] as $field) {
+            $label = trim((string) ($field['label'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+
+            $name = trim((string) ($field['name'] ?? '')) ?: $label;
+            $slug = Str::slug($name, '_');
+            if ($slug === '') {
+                $slug = 'field_' . (count($normalized) + 1);
+            }
+
+            $type = in_array($field['type'] ?? '', ['text', 'email', 'tel', 'textarea'], true)
+                ? $field['type']
+                : 'text';
+
+            $normalized[] = [
+                'label'       => $label,
+                'name'        => $slug,
+                'type'        => $type,
+                'placeholder' => $field['placeholder'] ?? '',
+                'required'    => filter_var($field['required'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'width'       => ($field['width'] ?? 'full') === 'half' ? 'half' : 'full',
+            ];
+        }
+
+        $data['fields'] = array_values($normalized);
+
         return $data;
     }
 

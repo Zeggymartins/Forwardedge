@@ -51,6 +51,20 @@
             line-height: 1.55;
             color: var(--tj-text-muted, #6c757d);
         }
+
+        .h4-banner-content .banner-title {
+            margin-bottom: clamp(0.35rem, 1vw, 0.75rem);
+        }
+
+        .banner-desc-area {
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .banner-desc-area {
+                margin-top: 0.75rem;
+            }
+        }
     </style>
 @endpush
 <section class="h4-banner-section section-gap-x">
@@ -58,7 +72,7 @@
         <div class="h4-banner-content">
             <span class="sub-title wow fadeInUp" data-wow-delay=".2s">
                 <i class="tji-box"></i>
-                {{ $d['slug'] ?? 'bootcamp' }}
+                hero-banner
             </span>
 
             <h1 class="banner-title text-anim">{{ $d['title'] ?? 'Bootcamp' }}</h1>
@@ -90,7 +104,7 @@
                 <!-- Split paragraph: first bold+italic, second normal in a span -->
                 <p class="banner-desc mb-0">
                     @if ($firstPart !== '')
-                        <strong  style="color: #079bdbff; font-size: 25px; margin-bottomz: 10px;"><em>{{ $firstPart }}</em></strong> <br>
+                        <strong  style="color: #dbbf07ff; font-size: 25px; margin-bottomz: 10px;">{{ $firstPart }}</strong> <br>
                     @endif
                     @if ($secondPart !== '')
                       <span> {{ $secondPart }}</span>

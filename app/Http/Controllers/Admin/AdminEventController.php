@@ -144,7 +144,7 @@ class AdminEventController extends Controller
      */
     public function dashboard(Event $event)
     {
-        $event->load(['contents', 'tickets', 'speakers', 'schedules', 'sponsors']);
+        $event->load(['tickets', 'speakers', 'schedules', 'sponsors']);
         return view('admin.pages.events.dashboard', compact('event'));
     }
 

@@ -7,9 +7,8 @@
         <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" id="courseForm">
             @csrf
 
-            {{-- Course Info --}}
             <div class="card shadow-sm mb-4 p-4">
-                <h5 class="fw-semibold mb-3">Course Information</h5>
+                <h5 class="fw-semibold mb-3">Course Details</h5>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Title</label>
@@ -32,23 +31,10 @@
                         </select>
                     </div>
                 </div>
-            </div>
 
-            {{-- Phases --}}
-            <div class="card shadow-sm mb-4 p-4">
+                <hr class="my-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-semibold">Phases & Topics</h5>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPhase">+ Add Phase</button>
-                </div>
-                <div id="phasesContainer">
-                    <p class="text-muted" id="phasesHint">Add phases (modules) and topics</p>
-                </div>
-            </div>
-
-            {{-- Schedules --}}
-            <div class="card shadow-sm mb-4 p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-semibold">Schedules (optional)</h5>
+                    <h5 class="fw-semibold mb-0">Schedules (optional)</h5>
                     <button type="button" class="btn btn-sm btn-outline-primary" id="addSchedule">+ Add Schedule</button>
                 </div>
                 <div id="schedulesContainer">
@@ -56,42 +42,14 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <button type="button" class="btn btn-sm btn-outline-info mb-3" id="populateForm">Auto-Populate
-                    Course</button>
-                <button type="button" class="btn btn-outline-secondary" id="clearForm">Clear Draft</button>
+            <div class="text-end mb-5">
                 <button type="submit" class="btn btn-success px-4">Create Course</button>
-
             </div>
         </form>
     </div>
 
 
 
-
-    <template id="phaseTemplate">
-        <div class="phase-block border rounded p-3 mb-3">
-            <div class="d-flex justify-content-between mb-2">
-                <h6 class="fw-semibold">Phase</h6>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-block">Remove Phase</button>
-            </div>
-            <input type="text" class="form-control mb-2" name="phases[__INDEX__][title]" placeholder="Phase Title"
-                required>
-            <textarea class="form-control mb-2" name="phases[__INDEX__][description]" rows="2"
-                placeholder="Phase Description"></textarea>
-            <div class="topics"></div>
-            <button type="button" class="btn btn-sm btn-outline-secondary addTopic">+ Add Topic</button>
-        </div>
-    </template>
-
-
-    <template id="topicTemplate">
-        <div class="topic-block input-group mb-2">
-            <input type="text" class="form-control" name="phases[__PHASE__][topics][]" placeholder="Topic Title"
-                required>
-            <button type="button" class="btn btn-outline-danger remove-topic">X</button>
-        </div>
-    </template>
 
     <template id="scheduleTemplate">
   <div class="schedule-block border rounded p-3 mb-3">
@@ -147,208 +105,44 @@
 @push('scripts')
   
 <script>
-// =========================
-// Slug Generation
-// =========================
-document.getElementById('title').addEventListener('input', function () {
-  document.getElementById('slug').value = this.value
-    .trim()
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '') // strip non-word chars
-    .replace(/\s+/g, '-');
-});
-
-// =========================
-// Index Counters
-// =========================
-let contentIndex = 0, phaseIndex = 0, scheduleIndex = 0;
-
-
-
-// =========================
-// Add Phase & Topic
-// =========================
-function addPhaseBlock(title = null, topics = []) {
-  let tpl = document.getElementById('phaseTemplate').innerHTML.replace(/__INDEX__/g, phaseIndex);
-  let div = document.createElement('div'); div.innerHTML = tpl;
-  let block = div.firstElementChild;
-
-  if (title) block.querySelector('input[name^="phases"]').value = title;
-
-  let topicsDiv = block.querySelector('.topics');
-  topics.forEach(t => {
-    let tplT = document.getElementById('topicTemplate').innerHTML.replace(/__PHASE__/g, phaseIndex);
-    let divT = document.createElement('div'); divT.innerHTML = tplT;
-    divT.querySelector('input').value = t;
-    topicsDiv.appendChild(divT.firstElementChild);
+const slugInput = document.getElementById('slug');
+const titleInput = document.getElementById('title');
+if (titleInput && slugInput) {
+  titleInput.addEventListener('input', function () {
+    slugInput.value = this.value
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-');
   });
-
-  document.getElementById('phasesContainer').appendChild(block);
-  document.getElementById('phasesHint').style.display = 'none';
-  phaseIndex++;
 }
 
-document.getElementById('addPhase').addEventListener('click', () => addPhaseBlock());
+let scheduleIndex = 0;
 
-// Add topic (event delegation)
-document.addEventListener('click', function(e){
-  if (e.target.classList.contains('addTopic')) {
-    const phaseBlock = e.target.closest('.phase-block');
-    const idx = [...document.getElementById('phasesContainer').children].indexOf(phaseBlock);
-    const topicCount = phaseBlock.querySelectorAll('.topic-block').length;
-    const tpl = document.getElementById('topicTemplate').innerHTML
-      .replace(/__PHASE__/g, idx)
-      .replace(/__TOPIC__/g, topicCount);
-    const div = document.createElement('div'); div.innerHTML = tpl;
-    phaseBlock.querySelector('.topics').appendChild(div.firstElementChild);
-  }
-});
-
-// =========================
-// Add Schedule
-// =========================
 function addScheduleBlock(values = {}) {
-  let tpl = document.getElementById('scheduleTemplate').innerHTML.replace(/__INDEX__/g, scheduleIndex);
-  let div = document.createElement('div');
+  const tpl = document.getElementById('scheduleTemplate').innerHTML.replace(/__INDEX__/g, scheduleIndex);
+  const div = document.createElement('div');
   div.innerHTML = tpl;
-  let block = div.firstElementChild;
+  const block = div.firstElementChild;
 
-  const setIf = (name, v) => {
-    if (v !== undefined && v !== null) {
-      const input = block.querySelector(`[name="schedules[${scheduleIndex}][${name}]"]`);
-      if (input) input.value = v;
-    }
+  const fill = (name, v) => {
+    if (v === undefined || v === null) return;
+    const selector = `[name="schedules[${scheduleIndex}][${name}]"]`;
+    const el = block.querySelector(selector);
+    if (el) el.value = v;
   };
 
-  setIf('start_date', values.start_date);
-  setIf('end_date', values.end_date);
-  setIf('location', values.location);
-  setIf('type', values.type);
-  setIf('price', values.price);
-  // NEW: ensure we restore your extra schedule fields too
-  setIf('tag', values.tag);
-  setIf('price_usd', values.price_usd);
-  setIf('description', values.description);
+  ['start_date','end_date','location','type','price','tag','price_usd','description'].forEach(key => fill(key, values[key] ?? null));
 
   document.getElementById('schedulesContainer').appendChild(block);
   document.getElementById('schedulesHint').style.display = 'none';
   scheduleIndex++;
 }
 
-document.getElementById('addSchedule').addEventListener('click', () => addScheduleBlock());
-
-// =========================
-// Local Storage Save & Restore
-// =========================
-const form = document.getElementById('courseForm');
-const LS_KEY = "courseFormData";
-
-function saveForm() {
-  const data = {};
-  const fd = new FormData(form);
-  for (const [key, value] of fd.entries()) {
-    // skip files to avoid bloating localStorage
-    if (value instanceof File && value.name) continue;
-    if (key in data) {
-      if (!Array.isArray(data[key])) data[key] = [data[key]];
-      data[key].push(value);
-    } else {
-      data[key] = value;
-    }
-  }
-  localStorage.setItem(LS_KEY, JSON.stringify(data));
+const addScheduleBtn = document.getElementById('addSchedule');
+if (addScheduleBtn) {
+  addScheduleBtn.addEventListener('click', () => addScheduleBlock());
 }
-
-form.addEventListener('input', saveForm, { passive: true });
-form.addEventListener('change', saveForm);
-
-// ---------- Restore helpers ----------
-function toArray(val) {
-  return Array.isArray(val) ? val : (val !== undefined ? [val] : []);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem(LS_KEY);
-  if (!saved) return;
-
-  const data = JSON.parse(saved);
-
-  // restore simple fields
-  ['title','slug','description','status'].forEach(k=>{
-    const el = form.querySelector(`[name="${k}"]`);
-    if (data[k] && el) el.value = data[k];
-  });
-
-  // Restore details
-  const detailGroups = {};
-  Object.keys(data).forEach(k=>{
-    const m = k.match(/^details\[(\d+)]\[(.+)]$/);
-    if (m) {
-      const i = m[1], field = m[2];
-      detailGroups[i] = detailGroups[i] || {};
-      detailGroups[i][field] = data[k];
-    }
-  });
-
-  // Keep contentIndex consistent & render in numeric order
-  Object.entries(detailGroups)
-    .sort((a,b) => Number(a[0]) - Number(b[0]))
-    .forEach(([, d]) => {
-      // If list/feature items were stored as multiple inputs, normalize to array
-      if (d.content && !Array.isArray(d.content) && /\[\]$/.test('content')) {
-        d.content = toArray(d.content);
-      }
-      if (d.description && !Array.isArray(d.description) && /\[\]$/.test('description')) {
-        d.description = toArray(d.description);
-      }
-      addContentBlock(d.type, d);
-    });
-
-  // Restore phases
-  const phaseGroups = {};
-  Object.keys(data).forEach(k=>{
-    const m = k.match(/^phases\[(\d+)]\[(.+)]$/);
-    if (m) {
-      const i = m[1], field = m[2];
-      phaseGroups[i] = phaseGroups[i] || { topics: [] };
-      if (field === 'title') phaseGroups[i].title = data[k];
-      if (field === 'topics') phaseGroups[i].topics = toArray(data[k]);
-      if (field === 'description') phaseGroups[i].description = data[k]; // in case you add it later
-    }
-  });
-  Object.entries(phaseGroups)
-    .sort((a,b)=>Number(a[0])-Number(b[0]))
-    .forEach(([, p]) => addPhaseBlock(p.title, p.topics));
-
-  // Restore schedules (NOW includes tag, price_usd, description)
-  const scheduleGroups = {};
-  Object.keys(data).forEach(k=>{
-    const m = k.match(/^schedules\[(\d+)]\[(.+)]$/);
-    if (m) {
-      const i = m[1], field = m[2];
-      scheduleGroups[i] = scheduleGroups[i] || {};
-      scheduleGroups[i][field] = data[k];
-    }
-  });
-  Object.entries(scheduleGroups)
-    .sort((a,b)=>Number(a[0])-Number(b[0]))
-    .forEach(([, s]) => addScheduleBlock(s));
-});
-
-// =========================
-// Clear Form
-// =========================
-document.getElementById('clearForm').addEventListener('click', () => {
-  if (confirm("Clear all saved data?")) {
-    localStorage.removeItem(LS_KEY);
-    form.reset();
-    document.getElementById('contentsContainer').innerHTML = "<p class='text-muted' id='contentsHint'>Add detail blocks...</p>";
-    document.getElementById('phasesContainer').innerHTML = "<p class='text-muted' id='phasesHint'>Add phases...</p>";
-    document.getElementById('schedulesContainer').innerHTML = "<p class='text-muted' id='schedulesHint'>Add schedules...</p>";
-    contentIndex = phaseIndex = scheduleIndex = 0;
-  }
-});
-
 </script>
 @endpush
 

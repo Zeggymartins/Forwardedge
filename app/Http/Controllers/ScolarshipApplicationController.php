@@ -26,6 +26,20 @@ class ScolarshipApplicationController extends Controller
         return view('user.pages.scholarshipregistration', compact('schedule', 'course'));
     }
 
+    public function registerForCourse(Course $course)
+    {
+        $schedule = $course->schedules()
+            ->where(function ($q) {
+                $q->whereNull('price')->orWhere('price', '<=', 0);
+            })
+            ->orderBy('start_date')
+            ->first();
+
+        abort_if(!$schedule, 404, 'No scholarship-enabled cohort is available for this course yet.');
+
+        return $this->Register($schedule);
+    }
+
     public function storeData(Request $request, CourseSchedule $schedule)
     {
         abort_unless($schedule->isFree(), 404, 'This schedule is not available for scholarship application.');

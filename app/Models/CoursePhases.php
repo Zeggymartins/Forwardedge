@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CoursePhases extends Model
 {
     protected $fillable = [
-        'course_id',
+        'course_content_id',
         'title',
         'order',
         'duration',
@@ -27,9 +27,9 @@ class CoursePhases extends Model
         'duration' => null,
     ];
 
-    public function course()
+    public function content()   // parent content
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(CourseContent::class, 'course_content_id');
     }
 
     public function topics()

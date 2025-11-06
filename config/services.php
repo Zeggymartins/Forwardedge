@@ -41,5 +41,11 @@ return [
         'webhook_url' => env('PAYSTACK_WEBHOOK_URL', '/payment/webhook'),
     ],
 
-
+    'mailchimp' => [
+        'key'                => env('MAILCHIMP_KEY'),
+        'server_prefix'      => env('MAILCHIMP_SERVER_PREFIX'),
+        'list_id'            => env('MAILCHIMP_LIST_ID'),
+        'transactional_key'  => env('MAILCHIMP_TRANSACTIONAL_KEY'),
+        'double_opt_in'      => env('MAILCHIMP_DOUBLE_OPT_IN', false),
+    ],
 ];

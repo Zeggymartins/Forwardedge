@@ -121,46 +121,81 @@
 
 @push('styles')
 <style>
-  :root{
-    --tj-gold:#FDB714; --tj-blue:#2c99d4;
-    --tj-grad:linear-gradient(135deg,var(--tj-gold) 0%,var(--tj-blue) 100%);
-    --tj-text-muted:#6c757d; --tj-border:#edf2f7; --tj-surface:#fff;
+  .overview-section{
+    background: radial-gradient(circle at top,#f5f7fb 0%,#eef2f7 70%);
+    position: relative;
+    padding-block: clamp(3rem,7vw,5rem);
   }
 
-
-  .choose-content{ padding:22px; }
-
-.choose-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.choose-icon .bi {
-  font-size: 32px;
-  color: #2c99d4;
-  line-height: 1;
-}
-
-  .choose-content .title{
-    font-weight:700; font-size:18px; margin: 4px 0 6px;
-  }
-  .choose-content .desc{
-    color:var(--tj-text-muted); margin-bottom:14px;
-    overflow-wrap:anywhere; word-break:break-word;
+  .overview-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 1.75rem;
   }
 
-  /* .text-btn{
-    display:inline-flex; align-items:center; gap:8px;
-    font-weight:600; text-decoration:none;
+  .overview-card{
+    padding: 2rem 1.75rem;
+    border-radius: 28px;
+    background: #fff;
+    border: 1px solid rgba(148,163,184,.25);
+    box-shadow: 0 25px 60px rgba(15,23,42,.08);
+    color: #0f172a;
+    height: 100%;
+    position: relative;
+    transition: transform .25s ease, box-shadow .25s ease;
   }
-  .text-btn .btn-text span{ border-bottom:1px solid currentColor; }
-  .text-btn .btn-icon{ opacity:.9; }
-  .text-btn:hover .btn-text span{ border-bottom-color: transparent; } */
+
+  .overview-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 30px 70px rgba(15,23,42,.12);
+  }
+
+  .overview-card__icon{
+    width:64px;height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:1.25rem;
+    font-size:32px;
+    color:#fff;
+    background:linear-gradient(135deg,#0ea5e9,#6366f1);
+    box-shadow:0 12px 30px rgba(79,70,229,.35);
+  }
+
+  .overview-card__title{
+    font-size:1.1rem;
+    font-weight:700;
+    margin-bottom:.4rem;
+    color:#0f172a;
+  }
+
+  .overview-card__desc{
+    color:#475467;
+    margin-bottom:1.25rem;
+    line-height:1.6;
+  }
+
+  .overview-card__cta{
+    font-weight:600;
+    color:#0ea5e9;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+  }
+
+  .overview-card__cta .btn-icon{
+    transition:transform .2s ease;
+  }
+
+  .overview-card__cta:hover .btn-icon{
+    transform:translateX(4px);
+  }
 </style>
 @endpush
 
-<section id="choose" class="tj-choose-section h6-choose h7-choose section-gap">
+<section id="choose" class="tj-choose-section h6-choose h7-choose section-gap overview-section">
   <div class="container">
     <div class="row">
       <div class="col-12">
@@ -173,30 +208,26 @@
       </div>
     </div>
 
-    <div class="row rightSwipeWrap h7-choose-item-wrapper wow fadeInLeftBig" data-wow-delay=".4s">
+    <div class="overview-grid wow fadeInLeftBig" data-wow-delay=".4s">
       @foreach ($items as $i => $it)
         @php
-          $delay = 5 + $i; // .5s, .6s, .7s...
+          $delay = 5 + $i;
           $href  = $it['link'] ?? ($d['link'] ?? '#');
-          $label = $it['link_text'] ?? ($d['link_text'] ?? 'Get Started');
-          $biIcon = $pickIcon($it, $i);  // Bootstrap Icon class chosen
+          $label = $it['link_text'] ?? ($d['link_text'] ?? 'Learn More');
+          $biIcon = $pickIcon($it, $i);
         @endphp
 
-        <div class="col-lg-4 col-md-6 mb-4 h7-choose-item">
-          <div class="choose-box h6-choose-box h7-choose-box wow fadeInUp" data-wow-delay=".{{ $delay }}s">
-            <div class="choose-content">
-              <div class="choose-icon" aria-hidden="true">
-                <i class="bi {{ $biIcon }}"></i>
-              </div>
-              <h4 class="title">{{ $it['subtitle'] ?? '' }}</h4>
-              <p class="desc">{{ $it['text'] ?? '' }}</p>
-
-              <a class="text-btn" href="{{ $href }}">
-                <span class="btn-text"><span>{{ $label }}</span></span>
-                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-              </a>
-            </div>
+        <div class="overview-card wow fadeInUp" data-wow-delay=".{{ $delay }}s">
+          <div class="overview-card__icon" aria-hidden="true">
+            <i class="bi {{ $biIcon }}"></i>
           </div>
+          <h4 class="overview-card__title">{{ $it['subtitle'] ?? '' }}</h4>
+          <p class="overview-card__desc">{{ $it['text'] ?? '' }}</p>
+
+          <a class="overview-card__cta" href="{{ $href }}">
+            <span class="btn-text">{{ $label }}</span>
+            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+          </a>
         </div>
       @endforeach
     </div>

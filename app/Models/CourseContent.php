@@ -22,4 +22,9 @@ class CourseContent extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function phases()
+    {
+        return $this->hasMany(CoursePhases::class, 'course_content_id')->ordered();
+    }
 }

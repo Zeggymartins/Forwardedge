@@ -1644,6 +1644,8 @@ namespace App\Models {
      * @property int $course_id
      * @property int $id
      * @property-read \App\Models\Course $course
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CoursePhases> $phases
+     * @property-read int|null $phases_count
      * @method static \Illuminate\Database\Eloquent\Builder<CourseContent>|CourseContent whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CourseContent>|CourseContent whereCourseId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CourseContent>|CourseContent whereTitle($value)
@@ -2274,6 +2276,7 @@ namespace App\Models {
     /**
      * App\Models\CoursePhases
      *
+     * @property int|null $course_content_id
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property integer $duration
@@ -2281,14 +2284,12 @@ namespace App\Models {
      * @property string|null $content
      * @property integer $order
      * @property string $title
-     * @property int $course_id
      * @property int $id
      * @property-read mixed $image_url
-     * @property-read \App\Models\Course $course
+     * @property-read \App\Models\CourseContent $content
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CourseTopics> $topics
      * @property-read int|null $topics_count
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereCourseId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereTitle($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereOrder($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereContent($value)
@@ -2296,6 +2297,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereDuration($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereUpdatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases whereCourseContentId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases ordered()
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<CoursePhases>|CoursePhases newQuery()
@@ -2600,12 +2602,6 @@ namespace App\Models {
     /**
      * App\Models\CourseSchedule
      *
-     * @property array|null $features
-     * @property int|null $price_usd
-     * @property string $tag
-     * @property string|null $title
-     * @property string|null $description
-     * @property float|null $price
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property string $type
@@ -2626,12 +2622,6 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereType($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereCreatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule wherePrice($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereDescription($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereTitle($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereTag($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule wherePriceUsd($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule whereFeatures($value)
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule upcoming()
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule forPublishedCourses()
      * @method static \Illuminate\Database\Eloquent\Builder<CourseSchedule>|CourseSchedule newModelQuery()
@@ -4276,24 +4266,8 @@ namespace App\Models {
     /**
      * App\Models\EventContent
      *
-     * @property \Illuminate\Support\Carbon|null $updated_at
-     * @property \Illuminate\Support\Carbon|null $created_at
-     * @property int $sort_order
-     * @property int $position
-     * @property string $content
-     * @property string $type
-     * @property int $event_id
-     * @property int $id
      * @property-read mixed $decoded_content
      * @property-read \App\Models\Event $event
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereEventId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereContent($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent wherePosition($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereSortOrder($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<EventContent>|EventContent query()

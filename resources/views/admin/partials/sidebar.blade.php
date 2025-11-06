@@ -99,12 +99,12 @@
             <ul id="academy-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{ route('admin.courses.create') }}">
-                        <i class="bi bi-circle"></i><span>Add Course</span>
+                        <i class="bi bi-circle"></i><span>Create Academy Training</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.courses.index') }}">
-                        <i class="bi bi-circle"></i><span>View Courses</span>
+                        <i class="bi bi-circle"></i><span>View Training Programs</span>
                     </a>
                 </li>
 
@@ -263,7 +263,7 @@
         <!-- Blogs -->
         <!-- Blogs -->
 
-       <li class="nav-item">
+       {{-- <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-layout-text-window-reverse"></i><span>Courses</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
@@ -279,7 +279,7 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
         <!-- Contact Us -->
         <!-- Contact Us -->
         <li class="nav-item">

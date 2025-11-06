@@ -9,6 +9,8 @@
               'title'      => 'Basic Plan',
               'subtitle'   => 'Essential Business Services',
               'price_naira'=> '99,000',
+              'price_usd'=> '990',
+
               'period'     => '/per month',
               'features'   => [
                   'Access to core services',
@@ -72,11 +74,28 @@
               $isOpen   = $i === 0;
               $title    = $p['title'] ?? 'Plan';
               $subtitle = $p['subtitle'] ?? '';
-              $price    = $p['price_naira'] ?? '0';
-              // $period   = $p['period'] ?? '/per month';
-              $features = $p['features'] ?? [];
-              $link     = $p['link'] ?? '#';
-              $linkText = $p['link_text'] ?? 'Choose Plan';
+              $period   = $p['period'] ?? null;
+              $features = is_array($p['features'] ?? null) ? $p['features'] : [];
+
+              // Normalize numbers for reliable output
+              $priceNgnRaw = preg_replace('/[^\d.]/', '', (string)($p['price_naira'] ?? '0'));
+              $priceUsdRaw = preg_replace('/[^\d.]/', '', (string)($p['price_usd']   ?? ''));
+
+              // Nice display versions
+              $priceNgnDisp = $priceNgnRaw !== '' ? number_format((float)$priceNgnRaw, 0) : '0';
+              $priceUsdDisp = $priceUsdRaw !== '' ? number_format((float)$priceUsdRaw, 2) : null;
+
+              // HREF logic:
+              //  1) If editor set a 'link', use it.
+              //  2) Else, fall back to internal pricing page that reads page+block+plan.
+              $editorLink = trim((string)($p['link'] ?? ''));
+              $internal   = route('enroll.pricing', [
+                                'page'  => $page->id,
+                                'block' => $block->id,
+                                'plan'  => $i,
+                              ]);
+              $href       = $editorLink !== '' ? $editorLink : $internal;
+              $linkText   = $p['link_text'] ?? 'Choose Plan';
             @endphp
 
             <div class="accordion-item pricing-box wow fadeInUp {{ $isOpen ? 'active' : '' }}" data-wow-delay=".3s">
@@ -96,23 +115,32 @@
                         @if($subtitle)<p>{{ $subtitle }}</p>@endif
                       </div>
 
-                      <div class="package-price">
+                      {{-- NGN --}}
+                      <div class="package-price me-3">
                         <span class="package-currency">₦</span>
-                        <span class="price-number">{{ $price }}</span>
-                        
-                        {{-- <span class="package-period">{{ $period }}</span> --}}
+                        <span class="price-number">{{ $priceNgnDisp }}</span>
+                        @if($period)<span class="package-period">{{ $period }}</span>@endif
                       </div>
+
+                      {{-- USD (only if provided) --}}
+                      @if($priceUsdDisp !== null)
+                        <div class="package-price">
+                          <span class="package-currency">$</span>
+                          <span class="price-number">{{ $priceUsdDisp }}</span>
+                          @if($period)<span class="package-period">{{ $period }}</span>@endif
+                        </div>
+                      @endif
                     </div>
 
                     <div class="pricing-btn">
-                      <a class="text-btn" href="{{ $link }}">
+                      <a class="text-btn" href="{{ $href }}">
                         <span class="btn-text"><span>{{ $linkText }}</span></span>
                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                       </a>
                     </div>
                   </div>
 
-                  @if(!empty($features) && is_array($features))
+                  @if(!empty($features))
                     <div class="list-items">
                       <ul>
                         @foreach($features as $f)
