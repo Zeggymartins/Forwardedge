@@ -382,8 +382,9 @@
                                 <div class="feature-content">
                                     <h2 class="title">Stay Updated</h2>
                                     <span>Get Latest Insights</span>
-                                    <form class="newsletter-form" action="#" method="post">
+                                    <form class="newsletter-form" action="{{ route('newsletter.subscribe') }}" method="POST">
                                         @csrf
+                                        <input type="hidden" name="tags[]" value="BlogSidebar">
                                         <div class="form-input mb-3">
                                             <input type="email" name="email" placeholder="Your Email" required>
                                         </div>

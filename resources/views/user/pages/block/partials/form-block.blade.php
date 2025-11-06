@@ -230,9 +230,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: rgba(15, 23, 42, 0.65);
-                backdrop-filter: blur(4px);
-                z-index: 1090;
+                background: rgba(4, 6, 20, 0.75);
+                backdrop-filter: blur(6px);
+                z-index: 9999;
                 padding: 1.5rem;
             }
 
@@ -241,56 +241,72 @@
             }
 
             .dynamic-form-modal__dialog {
-                background: #fff;
-                border-radius: 24px;
-                padding: 2rem;
-                max-width: 420px;
+                background: #ffffff;
+                border-radius: 32px;
+                padding: clamp(2rem, 4vw, 3.25rem);
+                max-width: min(540px, 92vw);
                 width: 100%;
                 text-align: center;
-                box-shadow: 0 30px 80px rgba(15, 23, 42, .15);
+                box-shadow: 0 40px 90px rgba(15, 23, 42, .25);
                 position: relative;
             }
 
             .dynamic-form-modal__dialog--dark {
-                background: #030617;
+                background: radial-gradient(circle at top, rgba(9, 15, 38, 0.95), rgba(3, 5, 18, 0.98));
                 color: #f8fafc;
             }
 
             .dynamic-form-modal__close {
                 position: absolute;
-                top: 12px;
-                right: 12px;
+                top: 18px;
+                right: 18px;
                 border: none;
                 background: transparent;
                 color: inherit;
-                font-size: 1.25rem;
+                font-size: 1.5rem;
                 cursor: pointer;
+                opacity: .7;
+            }
+
+            .dynamic-form-modal__close:hover {
+                opacity: 1;
             }
 
             .dynamic-form-modal__icon {
-                width: 64px;
-                height: 64px;
-                border-radius: 20px;
+                width: 90px;
+                height: 90px;
+                border-radius: 28px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 28px;
-                margin-bottom: 1rem;
+                font-size: 34px;
+                margin-bottom: 1.25rem;
             }
 
             .dynamic-form-modal__icon.success {
-                background: rgba(16, 185, 129, .15);
+                background: rgba(16, 185, 129, .2);
                 color: #0f766e;
             }
 
             .dynamic-form-modal__icon.error {
-                background: rgba(248, 113, 113, .18);
+                background: rgba(248, 113, 113, .22);
                 color: #b91c1c;
             }
 
+            .dynamic-form-modal__title {
+                font-size: clamp(1.4rem, 3vw, 1.9rem);
+                font-weight: 700;
+                margin-bottom: .4rem;
+            }
+
             .dynamic-form-modal__message {
-                font-weight: 600;
-                line-height: 1.5;
+                font-weight: 500;
+                line-height: 1.7;
+                color: inherit;
+            }
+
+            body.dynamic-form-modal-open {
+                overflow: hidden;
             }
         </style>
     @endpush
@@ -380,9 +396,10 @@
                 modal.setAttribute('data-dynamic-form-modal', 'true');
                 modal.setAttribute('hidden', 'hidden');
                 modal.innerHTML = `
-  <div class="dynamic-form-modal__dialog">
-    <button type="button" class="dynamic-form-modal__close" data-modal-dismiss>&times;</button>
+  <div class="dynamic-form-modal__dialog" role="dialog" aria-modal="true">
+    <button type="button" class="dynamic-form-modal__close" data-modal-dismiss aria-label="Close">&times;</button>
     <div class="dynamic-form-modal__icon success" data-modal-icon>✔</div>
+    <h3 class="dynamic-form-modal__title" data-modal-title>All set!</h3>
     <p class="dynamic-form-modal__message" data-modal-message>Thanks for reaching out!</p>
     <div class="mt-3">
       <button type="button" class="tj-primary-btn" data-modal-dismiss>
@@ -412,6 +429,7 @@
                 const dialog = modal.querySelector('.dynamic-form-modal__dialog');
                 const icon = modal.querySelector('[data-modal-icon]');
                 const text = modal.querySelector('[data-modal-message]');
+                const title = modal.querySelector('[data-modal-title]');
 
                 if (icon) {
                     icon.classList.remove('success', 'error');
@@ -420,12 +438,18 @@
                 }
 
                 if (text) text.textContent = message;
+                if (title) {
+                    title.textContent = state === 'error'
+                        ? 'Something went wrong'
+                        : "You're in!";
+                }
 
                 if (dialog) {
                     dialog.classList.toggle('dynamic-form-modal__dialog--dark', document.body.classList.contains('dark-mode'));
                 }
 
                 modal.removeAttribute('hidden');
+                document.body.classList.add('dynamic-form-modal-open');
             }
 
             function closeNewsletterModal() {
@@ -433,6 +457,7 @@
                 if (modal) {
                     modal.setAttribute('hidden', 'hidden');
                 }
+                document.body.classList.remove('dynamic-form-modal-open');
             }
         </script>
     @endpush

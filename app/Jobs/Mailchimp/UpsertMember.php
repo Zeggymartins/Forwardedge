@@ -45,10 +45,18 @@ class UpsertMember implements ShouldQueue
                 UpdateTags::dispatch($this->email, $tags, $listId)->onQueue($this->options['queue'] ?? null);
             }
         } catch (ApiException $e) {
-            Log::error('Mailchimp member sync failed', [
+            Log::error('Mailchimp member sync failed (api)', [
                 'email'   => $this->email,
                 'message' => $e->getMessage(),
                 'body'    => $e->getResponseBody(),
+            ]);
+
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('Mailchimp member sync failed (client)', [
+                'email'     => $this->email,
+                'exception' => get_class($e),
+                'message'   => $e->getMessage(),
             ]);
 
             throw $e;

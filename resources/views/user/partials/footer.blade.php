@@ -111,12 +111,15 @@
                          <div class="footer-widget widget-subscribe wow fadeInUp" data-wow-delay=".7s">
                              <h3 class="title">Subscribe to Our Newsletter.</h3>
                              <div class="subscribe-form">
-                                 <form action="#">
-                                     <input type="email" name="email" placeholder="Enter email">
+                                 <form action="{{ route('newsletter.subscribe') }}" method="POST">
+                                     @csrf
+                                     <input type="hidden" name="tags[]" value="Footer">
+                                     <input type="email" name="email" placeholder="Enter email" required>
                                      <button type="submit"><i class="tji-plane"></i></button>
-                                     <label for="agree"><input id="agree" type="checkbox">Agree to
-                                         our <a href="#">Terms &
-                                             Condition?</a></label>
+                                     <label for="footer-agree">
+                                         <input id="footer-agree" type="checkbox" required>
+                                         Agree to our <a href="{{ url('/terms') }}">Terms & Condition?</a>
+                                     </label>
                                  </form>
                              </div>
                          </div>
