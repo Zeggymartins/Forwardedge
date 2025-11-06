@@ -223,6 +223,75 @@
                 background: rgba(248, 113, 113, .15);
                 color: #991b1b;
             }
+
+            .dynamic-form-modal {
+                position: fixed;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(15, 23, 42, 0.65);
+                backdrop-filter: blur(4px);
+                z-index: 1090;
+                padding: 1.5rem;
+            }
+
+            .dynamic-form-modal[hidden] {
+                display: none !important;
+            }
+
+            .dynamic-form-modal__dialog {
+                background: #fff;
+                border-radius: 24px;
+                padding: 2rem;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 30px 80px rgba(15, 23, 42, .15);
+                position: relative;
+            }
+
+            .dynamic-form-modal__dialog--dark {
+                background: #030617;
+                color: #f8fafc;
+            }
+
+            .dynamic-form-modal__close {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                border: none;
+                background: transparent;
+                color: inherit;
+                font-size: 1.25rem;
+                cursor: pointer;
+            }
+
+            .dynamic-form-modal__icon {
+                width: 64px;
+                height: 64px;
+                border-radius: 20px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                margin-bottom: 1rem;
+            }
+
+            .dynamic-form-modal__icon.success {
+                background: rgba(16, 185, 129, .15);
+                color: #0f766e;
+            }
+
+            .dynamic-form-modal__icon.error {
+                background: rgba(248, 113, 113, .18);
+                color: #b91c1c;
+            }
+
+            .dynamic-form-modal__message {
+                font-weight: 600;
+                line-height: 1.5;
+            }
         </style>
     @endpush
 @endonce
@@ -237,6 +306,11 @@
                 }
 
                 event.preventDefault();
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
 
                 if (form.dataset.submitting === '1') return;
                 form.dataset.submitting = '1';
@@ -295,6 +369,70 @@
                 el.textContent = message;
                 el.classList.remove('success', 'error', 'is-visible');
                 el.classList.add(state, 'is-visible');
+                openNewsletterModal(message, state);
+            }
+
+            function ensureNewsletterModal() {
+                let modal = document.querySelector('[data-dynamic-form-modal]');
+                if (modal) return modal;
+
+                modal = document.createElement('div');
+                modal.setAttribute('data-dynamic-form-modal', 'true');
+                modal.setAttribute('hidden', 'hidden');
+                modal.innerHTML = `
+  <div class="dynamic-form-modal__dialog">
+    <button type="button" class="dynamic-form-modal__close" data-modal-dismiss>&times;</button>
+    <div class="dynamic-form-modal__icon success" data-modal-icon>✔</div>
+    <p class="dynamic-form-modal__message" data-modal-message>Thanks for reaching out!</p>
+    <div class="mt-3">
+      <button type="button" class="tj-primary-btn" data-modal-dismiss>
+        <span class="btn-text"><span>Close</span></span>
+      </button>
+    </div>
+  </div>`;
+                document.body.appendChild(modal);
+
+                modal.addEventListener('click', (ev) => {
+                    if (ev.target === modal || ev.target.hasAttribute('data-modal-dismiss')) {
+                        closeNewsletterModal();
+                    }
+                });
+
+                document.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Escape') {
+                        closeNewsletterModal();
+                    }
+                });
+
+                return modal;
+            }
+
+            function openNewsletterModal(message, state) {
+                const modal = ensureNewsletterModal();
+                const dialog = modal.querySelector('.dynamic-form-modal__dialog');
+                const icon = modal.querySelector('[data-modal-icon]');
+                const text = modal.querySelector('[data-modal-message]');
+
+                if (icon) {
+                    icon.classList.remove('success', 'error');
+                    icon.classList.add(state === 'error' ? 'error' : 'success');
+                    icon.textContent = state === 'error' ? '✕' : '✔';
+                }
+
+                if (text) text.textContent = message;
+
+                if (dialog) {
+                    dialog.classList.toggle('dynamic-form-modal__dialog--dark', document.body.classList.contains('dark-mode'));
+                }
+
+                modal.removeAttribute('hidden');
+            }
+
+            function closeNewsletterModal() {
+                const modal = document.querySelector('[data-dynamic-form-modal]');
+                if (modal) {
+                    modal.setAttribute('hidden', 'hidden');
+                }
             }
         </script>
     @endpush

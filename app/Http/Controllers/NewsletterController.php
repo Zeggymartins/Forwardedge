@@ -101,10 +101,18 @@ class NewsletterController extends Controller
             ]);
         }
 
+        $emailValue = trim((string) $emailField['value']);
+
+        if (!filter_var($emailValue, FILTER_VALIDATE_EMAIL)) {
+            throw ValidationException::withMessages([
+                'fields' => 'Enter a valid email address.',
+            ]);
+        }
+
         $normalizedMerge = $this->buildMergeFields($fields);
 
         UpsertMember::dispatch(
-            strtolower(trim($emailField['value'])),
+            strtolower($emailValue),
             $normalizedMerge,
             [
                 'tags' => !empty($payload['tags']) ? $payload['tags'] : ['Newsletter'],

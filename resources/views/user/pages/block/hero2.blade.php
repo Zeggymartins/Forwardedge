@@ -42,7 +42,7 @@
           </a>
         </div>
 
-        <div class="h6-hero-bottom wow fadeInLeft" data-wow-delay=".9s">
+        <div class="h6-hero-bottom wow fadeInLeft mt-2" data-wow-delay=".9s">
           <div class="h6-hero-history">
             @if (!empty($year))
               <h4 class="h6-hero-history-title mt-3">{{ $year }}</h4>
