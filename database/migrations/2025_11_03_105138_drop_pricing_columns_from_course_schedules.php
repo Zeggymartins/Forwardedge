@@ -7,11 +7,48 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    protected function dropTagIndex(): void
+    {
+        $driver = Schema::getConnection()->getDriverName();
+
+        try {
+            if ($driver === 'sqlite') {
+                DB::statement('DROP INDEX IF EXISTS "course_schedules_tag_index"');
+            } elseif ($driver === 'mysql') {
+                DB::statement('DROP INDEX `course_schedules_tag_index` ON `course_schedules`');
+            } else {
+                Schema::table('course_schedules', function (Blueprint $table) {
+                    $table->dropIndex('course_schedules_tag_index');
+                });
+            }
+        } catch (\Throwable $e) {
+            // Index might already be gone; ignore.
+        }
+    }
+
+    protected function createTagIndex(): void
+    {
+        $driver = Schema::getConnection()->getDriverName();
+
+        try {
+            if ($driver === 'sqlite') {
+                DB::statement('CREATE INDEX IF NOT EXISTS "course_schedules_tag_index" ON "course_schedules" ("tag")');
+            } elseif ($driver === 'mysql') {
+                DB::statement('CREATE INDEX `course_schedules_tag_index` ON `course_schedules` (`tag`)');
+            } else {
+                Schema::table('course_schedules', function (Blueprint $table) {
+                    $table->index('tag', 'course_schedules_tag_index');
+                });
+            }
+        } catch (\Throwable $e) {
+            // Ignore if it already exists
+        }
+    }
+
     public function up(): void
     {
         // 1) Drop index on 'tag' if present (SQLite needs this BEFORE column drop)
-        // Default Laravel index name format: {table}_{column}_index
-        DB::statement('DROP INDEX IF EXISTS "course_schedules_tag_index"');
+        $this->dropTagIndex();
 
         // 2) Drop columns one-by-one (safer for SQLite)
         $cols = ['price', 'description', 'title', 'tag', 'price_usd', 'features'];
@@ -54,6 +91,6 @@ return new class extends Migration
         });
 
         // Recreate the index on tag (after the column exists)
-        DB::statement('CREATE INDEX IF NOT EXISTS "course_schedules_tag_index" ON "course_schedules" ("tag")');
+        $this->createTagIndex();
     }
 };
