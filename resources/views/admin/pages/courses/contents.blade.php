@@ -15,75 +15,7 @@
     ];
 @endphp
 
-<style>
-    .course-card {
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
 
-    .course-card .status-pill {
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .course-card .status-pill.published {
-        background: rgba(24, 188, 156, 0.15);
-        color: #0f5132;
-    }
-
-    .course-card .status-pill.draft {
-        background: rgba(255, 193, 7, 0.2);
-        color: #856404;
-    }
-
-    .content-line {
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 12px;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        background: #fff;
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .content-line:last-child {
-        margin-bottom: 0;
-    }
-
-    .content-line h6 {
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .content-line small {
-        color: #6c757d;
-    }
-
-    .phase-builder {
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 14px;
-        background: #f8fafc;
-    }
-
-    .content-phase-block {
-        border: 1px dashed rgba(15, 23, 42, 0.15);
-    }
-
-    .content-topic-block {
-        border: 1px dashed rgba(15, 23, 42, 0.15);
-        background: rgba(15, 23, 42, 0.02);
-    }
-</style>
 
 @section('main')
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">

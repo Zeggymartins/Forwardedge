@@ -1,133 +1,7 @@
 @extends('admin.master_page')
 @section('title', 'Page Builder • ' . $page->title)
 
-@push('styles')
-    <style>
-        /* Force scrollable modals (resists theme overrides) */
-        #blockModal .modal {
-            --bs-modal-margin: 1rem;
-        }
 
-        /* give space on small screens */
-        #blockModal .modal-dialog {
-            height: calc(100% - 2rem);
-            max-height: 100%;
-            margin: 1rem auto;
-            /* top & bottom margin */
-        }
-
-        #blockModal .modal-content {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            /* prevents flex children from forcing overflow */
-        }
-
-        #blockModal .modal-header,
-        #blockModal .modal-footer {
-            flex: 0 0 auto;
-        }
-
-        #blockModal .modal-body {
-            flex: 1 1 auto;
-            /* take remaining space */
-            overflow-y: auto;
-            /* scroll just the body */
-            min-height: 0;
-        }
-
-        /* Optional: if you want inner section to scroll independently */
-        /* #blockModal #fieldMount { max-height: none; } */
-
-        @media (max-width: 576px) {
-            #blockModal .modal-dialog {
-                height: calc(100% - 1rem);
-                margin: .5rem auto;
-            }
-        }
-
-        /* your other styles */
-        .rounded-12 {
-            border-radius: 12px
-        }
-
-        .shadow-soft {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .08)
-        }
-
-        .drag-handle {
-            cursor: grab;
-            user-select: none;
-            font-size: 18px;
-            padding: 6px 8px
-        }
-
-        .block-row[draggable="true"].dragging {
-            opacity: .6;
-            cursor: grabbing
-        }
-
-        .drop-marker {
-            height: 10px;
-            border-radius: 5px;
-            background: rgba(25, 135, 84, .25);
-            margin: 4px 0
-        }
-
-        .small-label {
-            font-size: .9rem;
-            font-weight: 600
-        }
-
-        .modal-lg {
-            --bs-modal-width: 900px;
-        }
-
-        .repeater-item {
-            position: relative;
-            transition: background-color .2s;
-        }
-
-        .repeater-item:hover {
-            background-color: rgba(0, 0, 0, .02);
-        }
-
-        .card-preview {
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: .5rem;
-            background: #f8f9fa;
-        }
-
-        .section-divider {
-            border-top: 2px solid #e9ecef;
-            margin: 1.5rem 0;
-            position: relative;
-        }
-
-        .section-divider-label {
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: white;
-            padding: 0 10px;
-            font-weight: 600;
-            font-size: .85rem;
-            color: #6c757d;
-        }
-
-        .link-picker {
-            background: #f9fbff;
-            border: 1px dashed #d5dbe5;
-        }
-
-        .link-picker .form-select-sm {
-            min-width: 180px;
-        }
-    </style>
-@endpush
 
 
 @section('main')
@@ -1008,6 +882,42 @@
     <label class="form-label small-label">Banner Image</label>
     <input class="form-control" type="file" name="banner_image" accept=".webp,.jpg,.jpeg,.png" data-file-key="banner_image">
     <div class="mt-2"><img data-preview-key="banner_image" style="max-width:100%;height:auto;display:none"></div>
+  </div>
+</div>`);
+
+                case 'hero4':
+                    return html(`
+<div class="row g-3">
+  <div class="col-md-4">
+    <label class="form-label small-label">Kicker</label>
+    <input class="form-control" name="data[kicker]">
+  </div>
+  <div class="col-md-8">
+    <label class="form-label small-label">Headline*</label>
+    <input class="form-control" name="data[title]" required>
+  </div>
+  <div class="col-12">
+    <label class="form-label small-label">Subtitle</label>
+    <input class="form-control" name="data[subtitle]">
+  </div>
+  <div class="col-12">
+    <label class="form-label small-label">Description</label>
+    <textarea class="form-control" name="data[description]" rows="3"></textarea>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label small-label">Primary Button Text</label>
+    <input class="form-control" name="data[primary_button_text]">
+  </div>
+  ${linkControl('data[primary_button_link]', 'Primary Button Link', 'col-md-6')}
+  <div class="col-md-6">
+    <label class="form-label small-label">Secondary Button Text</label>
+    <input class="form-control" name="data[secondary_button_text]">
+  </div>
+  ${linkControl('data[secondary_button_link]', 'Secondary Button Link', 'col-md-6')}
+  <div class="col-md-6">
+    <label class="form-label small-label">Hero Image</label>
+    <input class="form-control" type="file" name="hero_image" accept=".webp,.jpg,.jpeg,.png" data-file-key="hero_image">
+    <div class="mt-2"><img data-preview-key="hero_image" style="max-width:100%;height:auto;display:none"></div>
   </div>
 </div>`);
 

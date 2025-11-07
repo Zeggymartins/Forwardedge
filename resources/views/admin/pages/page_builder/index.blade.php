@@ -1,22 +1,6 @@
 @extends('admin.master_page')
 @section('title', 'Page Builder - Pages')
 
-@push('styles')
-<style>
-  .btn-group .btn { 
-    border-radius: 10px !important; 
-    min-width: 90px;
-  }
-  .btn-group .btn i { 
-    font-size: 14px; 
-    line-height: 1; 
-  }
-  .table-hover tbody tr:hover { 
-    background: rgba(44,153,212,.06); 
-  }
-</style>
-@endpush
-
 @section('main')
 <div class="container-fluid py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">

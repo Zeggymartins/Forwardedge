@@ -34,9 +34,11 @@ class MessageController extends Controller
             'message'    => $validated['cfMessage2'],
         ]);
 
-        // Send Email
-        Mail::send('emails.contact', ['messageData' => $message], function ($mail) use ($message) {
-            $mail->to('your@email.com') 
+        $recipient = config('mail.contact_recipient', config('mail.from.address'));
+
+        Mail::send('emails.contact', ['messageData' => $message], function ($mail) use ($message, $recipient) {
+            $mail->to($recipient)
+                ->replyTo($message->email, $message->name)
                 ->subject('New Contact Message from ' . $message->name);
         });
 

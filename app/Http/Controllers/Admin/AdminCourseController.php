@@ -42,17 +42,12 @@ class AdminCourseController extends Controller
             'thumbnail'   => 'nullable|file|mimes:jpg,jpeg,png,svg,webp|max:4096',
             'status'      => 'nullable|in:draft,published',
 
-            // Schedules
-            'schedules'                 => 'nullable|array',
-            'schedules.*.title'         => 'nullable|string|max:255',
-            'schedules.*.start_date'    => 'nullable|date',
-            'schedules.*.end_date'      => 'nullable|date|after_or_equal:schedules.*.start_date',
-            'schedules.*.location'      => 'nullable|string|max:255',
-            'schedules.*.type'          => 'nullable|string|in:virtual,hybrid,physical',
-            'schedules.*.price'         => 'nullable|numeric|min:0',
-            'schedules.*.price_usd'     => 'nullable|numeric|min:0',
-            'schedules.*.tag'           => 'nullable|string|in:free,paid,both',
-            'schedules.*.description'   => 'nullable|string',
+            // Single schedule payload
+            'schedule'              => 'nullable|array',
+            'schedule.start_date'   => 'nullable|date',
+            'schedule.end_date'     => 'nullable|date|after_or_equal:schedule.start_date',
+            'schedule.location'     => 'nullable|string|max:255',
+            'schedule.type'         => 'nullable|string|in:virtual,hybrid,physical',
         ]);
 
         try {
@@ -80,26 +75,23 @@ class AdminCourseController extends Controller
                     'status'      => $validated['status'] ?? 'draft',
                 ]);
 
-                // 4) SCHEDULES
-                $schedules = $request->input('schedules', []);
-                foreach ($schedules as $s) {
-                    if (empty($s['start_date']) && empty($s['end_date'])) continue;
+                // Schedule (single)
+                $scheduleData = $validated['schedule'] ?? null;
+                if (is_array($scheduleData)) {
+                    $hasValue = collect($scheduleData)->filter(fn($value) => !is_null($value) && $value !== '')->isNotEmpty();
 
-                    CourseSchedule::create([
-                        'course_id'   => $course->id,
-                        'title'       => $s['title'] ?? null,
-                        'start_date'  => $s['start_date'] ?? null,
-                        'end_date'    => $s['end_date'] ?? null,
-                        'location'    => $s['location'] ?? null,
-                        'type'        => $s['type'] ?? null,
-                        'price'       => (isset($s['price']) && $s['price'] !== '') ? (float)$s['price'] : null,
-                        'price_usd'   => (isset($s['price_usd']) && $s['price_usd'] !== '') ? (float)$s['price_usd'] : null,
-                        'tag'         => $s['tag'] ?? null,
-                        'description' => $s['description'] ?? null,
-                    ]);
+                    if ($hasValue) {
+                        CourseSchedule::create([
+                            'course_id'  => $course->id,
+                            'start_date' => $scheduleData['start_date'] ?? null,
+                            'end_date'   => $scheduleData['end_date'] ?? null,
+                            'location'   => $scheduleData['location'] ?? null,
+                            'type'       => $scheduleData['type'] ?? null,
+                        ]);
+                    }
                 }
 
-                return redirect()->route('admin.courses.create', $course->slug)
+                return redirect()->route('admin.courses.create')
                     ->with('success', 'Course created successfully.');
             });
         } catch (\Exception $e) {
@@ -301,32 +293,27 @@ class AdminCourseController extends Controller
     // Schedule Management
     public function storeSchedule(Request $request, $id)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::withCount('schedules')->findOrFail($id);
+
+        if ($course->schedules_count > 0) {
+            return back()->withErrors([
+                'schedule' => 'This course already has a schedule. Edit the existing one instead of creating another.',
+            ]);
+        }
 
         $validated = $request->validate([
-            'title'       => 'nullable|string|max:255',
-            'start_date'  => 'required|date',
-            'end_date'    => 'required|date|after_or_equal:start_date',
-            'location'    => 'nullable|string|max:255',
-            'type'        => 'nullable|string|in:virtual,hybrid,physical',
-            'price'       => 'nullable|numeric|min:0',
-            // NEW fields
-            'price_usd'   => 'nullable|numeric|min:0',
-            'tag'         => 'nullable|string|in:free,paid,both',
-            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date'   => 'nullable|date|after_or_equal:start_date',
+            'location'   => 'nullable|string|max:255',
+            'type'       => 'nullable|string|in:virtual,hybrid,physical',
         ]);
 
         CourseSchedule::create([
-            'course_id'   => $course->id,
-            'title'       => $validated['title'] ?? null,
-            'start_date'  => $validated['start_date'],
-            'end_date'    => $validated['end_date'],
-            'location'    => $validated['location'] ?? null,
-            'type'        => $validated['type'] ?? null,
-            'price'       => array_key_exists('price', $validated) ? (float)$validated['price'] : null,
-            'price_usd'   => array_key_exists('price_usd', $validated) ? (float)$validated['price_usd'] : null,
-            'tag'         => $validated['tag'] ?? null,
-            'description' => $validated['description'] ?? null,
+            'course_id'  => $course->id,
+            'start_date' => $validated['start_date'],
+            'end_date'   => $validated['end_date'] ?? null,
+            'location'   => $validated['location'] ?? null,
+            'type'       => $validated['type'] ?? null,
         ]);
 
         return back()->with('success', 'Schedule added successfully!');
@@ -338,29 +325,17 @@ class AdminCourseController extends Controller
         $schedule = CourseSchedule::where('course_id', $courseId)->findOrFail($scheduleId);
 
         $validated = $request->validate([
-            'title'       => 'nullable|string|max:255',
-            'start_date'  => 'required|date',
-            'end_date'    => 'required|date|after_or_equal:start_date',
-            'location'    => 'nullable|string|max:255',
-            'type'        => 'nullable|string|in:virtual,hybrid,physical',
-            'price'       => 'nullable|numeric|min:0',
-            // NEW
-            'price_usd'   => 'nullable|numeric|min:0',
-            'tag'         => 'nullable|string|in:free,paid,both',
-            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date'   => 'nullable|date|after_or_equal:start_date',
+            'location'   => 'nullable|string|max:255',
+            'type'       => 'nullable|string|in:virtual,hybrid,physical',
         ]);
 
-        // Ensure proper nulling of optional numerics if the field is omitted
         $schedule->update([
-            'title'       => $validated['title'] ?? $schedule->title,
-            'start_date'  => $validated['start_date'],
-            'end_date'    => $validated['end_date'],
-            'location'    => $validated['location'] ?? null,
-            'type'        => $validated['type'] ?? null,
-            'price'       => array_key_exists('price', $validated) ? (float)$validated['price'] : null,
-            'price_usd'   => array_key_exists('price_usd', $validated) ? (float)$validated['price_usd'] : null,
-            'tag'         => $validated['tag'] ?? null,
-            'description' => $validated['description'] ?? null,
+            'start_date' => $validated['start_date'],
+            'end_date'   => $validated['end_date'] ?? null,
+            'location'   => $validated['location'] ?? null,
+            'type'       => $validated['type'] ?? null,
         ]);
 
         return back()->with('success', 'Schedule updated successfully!');

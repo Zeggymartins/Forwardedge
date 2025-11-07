@@ -15,13 +15,7 @@
     ];
 @endphp
 
-<style>
-    .phase-builder {
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        background: #f8fafc;
-        border-radius: 16px;
-    }
-</style>
+
 
 @section('main')
     <div class="container py-4">
@@ -31,7 +25,7 @@
                 <p class="text-muted mb-0">Manage every module, phase, and topic inside this course.</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <a href="{{ route('admin.course_contents.index') }}" class="btn btn-outline-secondary rounded-pill">← All Courses</a>
+                <a href="{{ route('admin.course_contents.index') }}" class="btn btn-outline-secondary rounded-pill">← All Academy Training</a>
                 <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addContentModal" data-course="{{ $course->id }}">
                     + Add New Content
                 </button>
@@ -52,8 +46,8 @@
                                 <span class="text-muted small">Created {{ $content->created_at->format('d M, Y') }}</span>
                             </div>
                         </div>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewContentModal{{ $content->id }}">View</button>
+                        <div class="content-actions">
+                            <button class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#viewContentModal{{ $content->id }}">View</button>
                             @php
                                 $contentPayload = [
                                     'id'        => $content->id,
@@ -64,10 +58,10 @@
                                     'has_file'  => (bool) $content->file_path,
                                 ];
                             @endphp
-                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editContentModal" data-action="{{ route('admin.course_contents.update', $content->id) }}" data-content='@json($contentPayload)'>Edit</button>
-                            <form action="{{ route('admin.course_contents.destroy', $content->id) }}" method="POST" onsubmit="return confirm('Delete this content block?');">
+                            <button class="btn btn-sm btn-soft-neutral" data-bs-toggle="modal" data-bs-target="#editContentModal" data-action="{{ route('admin.course_contents.update', $content->id) }}" data-content='@json($contentPayload)'>Edit</button>
+                            <form action="{{ route('admin.course_contents.destroy', $content->id) }}" method="POST" class="content-action-form" onsubmit="return confirm('Delete this content block?');">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                <button class="btn btn-sm btn-soft-danger">Delete</button>
                             </form>
                         </div>
                     </div>

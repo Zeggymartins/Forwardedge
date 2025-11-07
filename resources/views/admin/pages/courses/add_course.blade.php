@@ -33,12 +33,37 @@
                 </div>
 
                 <hr class="my-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-semibold mb-0">Schedules (optional)</h5>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="addSchedule">+ Add Schedule</button>
-                </div>
-                <div id="schedulesContainer">
-                    <p class="text-muted" id="schedulesHint">Add start/end date, location etc (for bootcamps)</p>
+                <h5 class="fw-semibold mb-2">Schedule (optional)</h5>
+                <p class="text-muted small mb-4">
+                    Each course can carry one schedule. You can always edit it later from the course dashboard.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="schedule[start_date]" class="form-control"
+                            value="{{ old('schedule.start_date') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="schedule[end_date]" class="form-control"
+                            value="{{ old('schedule.end_date') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" name="schedule[location]" class="form-control"
+                            placeholder="e.g. Lagos / Remote" value="{{ old('schedule.location') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Delivery Type</label>
+                        <select name="schedule[type]" class="form-select">
+                            <option value="">Select type</option>
+                            @foreach (['virtual', 'hybrid', 'physical'] as $type)
+                                <option value="{{ $type }}" @selected(old('schedule.type') === $type)>
+                                    {{ ucfirst($type) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -48,59 +73,6 @@
         </form>
     </div>
 
-
-
-
-    <template id="scheduleTemplate">
-  <div class="schedule-block border rounded p-3 mb-3">
-    <div class="d-flex justify-content-between mb-2">
-      <h6 class="fw-semibold">Schedule</h6>
-      <button type="button" class="btn btn-sm btn-outline-danger remove-block">Remove</button>
-    </div>
-    <div class="row g-2">
-      <div class="col-md-6">
-        <input type="date" class="form-control" name="schedules[__INDEX__][start_date]" required>
-      </div>
-      <div class="col-md-6">
-        <input type="date" class="form-control" name="schedules[__INDEX__][end_date]" required>
-      </div>
-      <div class="col-md-6">
-        <input type="text" class="form-control" name="schedules[__INDEX__][location]" placeholder="Location">
-      </div>
-      <div class="col-md-6">
-        <select class="form-control" name="schedules[__INDEX__][type]" required>
-          <option value="">Select Type</option>
-          <option value="virtual">Virtual</option>
-          <option value="hybrid">Hybrid</option>
-          <option value="physical">Physical</option>
-        </select>
-      </div>
-
-      <!-- NEW fields laid out correctly -->
-      <div class="col-md-6">
-        <select name="schedules[__INDEX__][tag]" class="form-control">
-          <option value="">Tag (optional)</option>
-          <option value="free">Free</option>
-          <option value="paid">Paid</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
-      <div class="col-md-6">
-        <input type="number" name="schedules[__INDEX__][price_usd]" class="form-control"
-          placeholder="Price (USD)" min="0" step="0.01">
-      </div>
-      <div class="col-12">
-        <textarea name="schedules[__INDEX__][description]" class="form-control" rows="2"
-          placeholder="Short description (optional)"></textarea>
-      </div>
-
-      <div class="col-md-6">
-        <input type="number" class="form-control" name="schedules[__INDEX__][price]" placeholder="Price (NGN)"
-          min="0" step="0.01">
-      </div>
-    </div>
-  </div>
-</template>
 
 @push('scripts')
   
@@ -115,33 +87,6 @@ if (titleInput && slugInput) {
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-');
   });
-}
-
-let scheduleIndex = 0;
-
-function addScheduleBlock(values = {}) {
-  const tpl = document.getElementById('scheduleTemplate').innerHTML.replace(/__INDEX__/g, scheduleIndex);
-  const div = document.createElement('div');
-  div.innerHTML = tpl;
-  const block = div.firstElementChild;
-
-  const fill = (name, v) => {
-    if (v === undefined || v === null) return;
-    const selector = `[name="schedules[${scheduleIndex}][${name}]"]`;
-    const el = block.querySelector(selector);
-    if (el) el.value = v;
-  };
-
-  ['start_date','end_date','location','type','price','tag','price_usd','description'].forEach(key => fill(key, values[key] ?? null));
-
-  document.getElementById('schedulesContainer').appendChild(block);
-  document.getElementById('schedulesHint').style.display = 'none';
-  scheduleIndex++;
-}
-
-const addScheduleBtn = document.getElementById('addSchedule');
-if (addScheduleBtn) {
-  addScheduleBtn.addEventListener('click', () => addScheduleBlock());
 }
 </script>
 @endpush

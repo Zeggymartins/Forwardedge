@@ -2,16 +2,7 @@
 
 @section('title', 'Orders Management')
 
-<style>
 
-    .table-row-hover:hover {
-        background: #f8f9fa !important;
-        transition: 0.2s ease-in-out;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-</style>
 
 @section('main')
 <div class="container py-5">
@@ -21,7 +12,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient text-white" style="background: linear-gradient(90deg,#0d6efd,#6610f2);">
+                <thead class="bg-gradient-primary text-white">
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">User</th>
@@ -56,7 +47,7 @@
                         <div class="modal fade" id="viewOrderModal{{ $order->id }}" tabindex="-1">
                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-gradient text-white" style="background: linear-gradient(90deg,#0d6efd,#6610f2);">
+                                    <div class="modal-header bg-gradient-primary text-white">
                                         <h5 class="modal-title">Order #{{ $order->id }} Items</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>

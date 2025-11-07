@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Mailchimp\UpsertMember;
+use App\Mail\NewsletterWelcomeMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -42,6 +44,8 @@ class NewsletterController extends Controller
             'double_opt_in' => $data['double_optin'] ?? config('services.mailchimp.double_opt_in'),
             'tags'          => $data['tags'] ?? ['Website'],
         ]);
+
+        Mail::to($email)->queue(new NewsletterWelcomeMail($merge['FNAME'] ?: 'Subscriber'));
 
         $message = ($data['double_optin'] ?? config('services.mailchimp.double_opt_in'))
             ? 'Almost done! Please confirm the email we just sent you.'
@@ -119,6 +123,8 @@ class NewsletterController extends Controller
             ]
         );
 
+        Mail::to($emailValue)->queue(new NewsletterWelcomeMail($normalizedMerge['FNAME'] ?? 'Subscriber'));
+
         $message = 'Thanks for joining our newsletter! 🎉';
 
         if ($request->expectsJson()) {
@@ -186,6 +192,21 @@ class NewsletterController extends Controller
             'LNAME' => trim((string) ($last['value'] ?? '')),
             'PHONE' => trim((string) ($phone['value'] ?? '')),
         ];
+
+        if ($merge['FNAME'] === '') {
+            $full = $fields->first(function ($field) {
+                $name = strtolower($field['name'] ?? '');
+                $label = strtolower($field['label'] ?? '');
+                return Str::contains($name, ['full_name', 'fullname', 'full-name', 'name'])
+                    || Str::contains($label, ['full name', 'fullname']);
+            });
+
+            if ($full && filled($full['value'] ?? null)) {
+                $parts = preg_split('/\s+/', trim((string) $full['value']));
+                $merge['FNAME'] = $parts[0] ?? '';
+                $merge['LNAME'] = $merge['LNAME'] ?: (implode(' ', array_slice($parts, 1)) ?: '');
+            }
+        }
 
         $fields->each(function ($field, $index) use (&$merge) {
             $key = strtoupper(Str::limit(preg_replace('/[^A-Za-z0-9_]/', '', Str::snake($field['name'] ?? 'field')), 10, ''));

@@ -30,56 +30,20 @@
   <link href="{{ asset('backend/assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
 
   <link href="{{ asset('backend/assets/css/style.css') }}" rel="stylesheet">
-  <style>
-    /* Modern form styling */
-.modern-form .section-header {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #0d6efd; /* Bootstrap primary */
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 0.4rem;
-    margin-bottom: 1rem;
-}
-
-/* Inputs */
-.modern-form .form-control,
-.modern-form .form-select {
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid #dee2e6;
-    transition: all 0.2s ease-in-out;
-}
-
-.modern-form .form-control:focus,
-.modern-form .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13,110,253,.15);
-}
-
-/* Buttons */
-.modern-form .btn-primary {
-    background: linear-gradient(45deg, #0d6efd, #0a58ca);
-    border: none;
-    border-radius: 0.5rem;
-}
-.modern-form .btn-primary:hover {
-    background: linear-gradient(45deg, #0a58ca, #084298);
-}
-
- </style>
+  {{-- <link href="{{ asset('frontend/assets/css/main.css') }}" rel="stylesheet"> --}}
 </head>
 
-<body>
+<body class="fe-admin-body">
 
   @include('admin.partials.header')
+  @include('admin.partials.sidebar')
 
-   @include('admin.partials.sidebar')
-
-  <main id="main" class="main">
-    <div class="container">
+  <main id="main" class="main fe-admin-content">
+    <div class="container-fluid px-0">
     @yield('main')
     </div>
-  </main>@include('admin.partials.footer')
+  </main>
+  {{-- @include('admin.partials.footer') --}}
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

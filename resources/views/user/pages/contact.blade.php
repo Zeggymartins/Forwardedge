@@ -57,22 +57,26 @@
                 <div class="col-lg-6">
                     <div class="contact-form wow fadeInUp" data-wow-delay=".1s">
                         <h3 class="title">Feel Free to Get in Touch or Visit our Location.</h3>
+                        @include('user.partials.form-alerts')
                         <form id="contact-form" action="{{ route('contact.store') }}" method="POST">
                             @csrf
                             <div class="row wow fadeInUp" data-wow-delay=".5s">
                                 <div class="col-sm-6">
                                     <div class="form-input">
-                                        <input type="text" name="cfName2" placeholder="Full Name *">
+                                        <input type="text" name="cfName2" placeholder="Full Name *"
+                                            value="{{ old('cfName2') }}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-input">
-                                        <input type="email" name="cfEmail2" placeholder="Email Address *">
+                                        <input type="email" name="cfEmail2" placeholder="Email Address *"
+                                            value="{{ old('cfEmail2') }}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-input">
-                                        <input type="tel" name="cfPhone2" placeholder="Phone number *">
+                                        <input type="tel" name="cfPhone2" placeholder="Phone number"
+                                            value="{{ old('cfPhone2') }}">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
@@ -82,7 +86,9 @@
                                                 <select name="cfSubject2">
                                                     <option value="">Choose a service</option>
                                                     @foreach ($services as $service)
-                                                        <option value="{{ $service->id }}">{{ $service->title }}
+                                                        <option value="{{ $service->id }}"
+                                                            @selected(old('cfSubject2') == $service->id)>
+                                                            {{ $service->title }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -92,7 +98,7 @@
                                 </div>
                                 <div class="col-sm-12">
                                     <div class="form-input message-input">
-                                        <textarea name="cfMessage2" id="message" placeholder="Type message *"></textarea>
+                                        <textarea name="cfMessage2" id="message" placeholder="Type message *" required>{{ old('cfMessage2') }}</textarea>
                                     </div>
                                 </div>
                                 <div class="submit-btn">

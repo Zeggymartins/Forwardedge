@@ -1,17 +1,8 @@
 @extends('admin.master_page')
 
-@section('title', 'FAQ • ' . ($course->title ?? 'Course'))
+@section('title', 'FAQ • ' . ($course->title ?? 'Academy Training'))
 
-@push('styles')
-<style>
-  .table-row-hover:hover{background:rgba(13,202,240,.06)}
-  .bg-gradient{background:linear-gradient(90deg,#20c997,#0dcaf0);color:#fff}
-  .rounded-12{border-radius:12px}
-  .shadow-soft{box-shadow:0 6px 20px rgba(0,0,0,.08)}
-  .w-64{width:64px}
-  .nowrap{white-space:nowrap}
-</style>
-@endpush
+
 
 @section('main')
 <div class="container py-5">
@@ -23,7 +14,7 @@
     </div>
     <div class="d-flex gap-2">
       <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back to Courses
+        <i class="bi bi-arrow-left"></i> Back to Academy Training
       </a>
       <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addFaqModal">
         <i class="bi bi-plus-circle me-2"></i> Add FAQ

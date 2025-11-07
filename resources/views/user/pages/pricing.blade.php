@@ -165,39 +165,39 @@
     <script>
         $(function() {
             $('.choose-plan').on('click', function(e) {
-                e.preventDefault(); // stop page reload from <a href="#">
+                e.preventDefault();
 
-                console.log("✅ Choose plan clicked");
+                const $btn = $(this);
+                const planType = $btn.data('plan');
 
-                let scheduleId = $(this).data('schedule-id');
-                let plan = $(this).data('plan');
-
-                // give user feedback
-                $(this).find('.btn-text span').text('Processing...');
+                $btn.addClass('disabled');
+                const originalText = $btn.find('.btn-text span').text();
+                $btn.find('.btn-text span').text('Processing…');
 
                 $.ajax({
                     url: "{{ route('enroll.store') }}",
                     method: "POST",
                     data: {
-                        schedule_id: scheduleId,
-                        payment_plan: plan,
+                        plan_type: planType,
                         _token: "{{ csrf_token() }}"
                     },
                     success: function(response) {
-                        console.log("✅ Server response:", response);
                         if (response.authorization_url) {
                             window.location.href = response.authorization_url;
                         } else {
-                            alert('Unexpected response. Please try again.');
+                            alert(response.message || 'Unexpected response. Please try again.');
                         }
                     },
                     error: function(xhr) {
-                        console.error("❌ AJAX error:", xhr);
                         let msg = 'Something went wrong. Please try again.';
-                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                        if (xhr.responseJSON?.error) {
                             msg = xhr.responseJSON.error;
                         }
                         alert(msg);
+                    },
+                    complete: function() {
+                        $btn.removeClass('disabled');
+                        $btn.find('.btn-text span').text(originalText);
                     }
                 });
             });

@@ -3,17 +3,7 @@
 @section('title', 'Scholarships')
 
 @section('main')
-<style>
-  .card-clip { border-radius: 16px; overflow: hidden; }
-  .status-badge { font-size: .8rem; padding: .35rem .6rem; border-radius: 20px; }
-  .status-draft { background: #fff3cd; color:#856404; }
-  .status-published { background:#d1e7dd; color:#0f5132; }
-  .status-archived { background:#e2e3e5; color:#41464b; }
-  .table thead th { font-weight:600; color:#6c757d; text-transform: uppercase; font-size:.78rem; letter-spacing:.04em; }
-  .sch-headline { max-width: 480px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .actions .btn { padding: .35rem .6rem; }
-  .searchbar { max-width: 420px; }
-</style>
+
 
 <div class="container py-4">
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">

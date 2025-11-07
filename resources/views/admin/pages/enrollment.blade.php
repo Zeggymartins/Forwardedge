@@ -2,16 +2,6 @@
 
 @section('title', 'Course Enrollments')
 
-<style>
-    .table-row-hover:hover {
-        background: #f8f9fa !important;
-        transition: 0.2s ease-in-out;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-</style>
-
 @section('main')
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -21,7 +11,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient" style="background: linear-gradient(90deg,#0d6efd,#6610f2); color: #fff;">
+                <thead class="bg-gradient-primary">
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Student</th>
@@ -76,8 +66,7 @@
                         <div class="modal fade" id="viewEnrollmentModal{{ $enrollment->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                 <div class="modal-content border-0 rounded-4 shadow-lg">
-                                    <div class="modal-header bg-gradient text-white" 
-                                        style="background: linear-gradient(90deg,#0d6efd,#6610f2);">
+                                    <div class="modal-header bg-gradient-primary text-white">
                                         <h5 class="modal-title">Enrollment #{{ $enrollment->id }}</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>

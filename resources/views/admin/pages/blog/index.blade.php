@@ -1,21 +1,7 @@
 @extends('admin.master_page')
 
 @section('title', 'Blog Posts List')
-<style>
-    /* Styling for interactive table rows */
-    .table-row-hover:hover {
-        background: #f8f9fa !important;
-        transition: 0.2s ease-in-out;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-    /* Updated gradient for blog theme (using primary blue/teal combo) */
-    .blog-header-gradient {
-        background: linear-gradient(90deg, #0d6efd, #36b9cc);
-        color: #fff;
-    }
-</style>
+
 @section('main')
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">

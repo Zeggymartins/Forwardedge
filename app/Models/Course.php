@@ -28,7 +28,14 @@ class Course extends Model
     }
     public function phases()
     {
-        return $this->hasMany(CoursePhases::class)->orderBy('order');
+        return $this->hasManyThrough(
+            CoursePhases::class,
+            CourseContent::class,
+            'course_id',
+            'course_content_id',
+            'id',
+            'id'
+        )->orderBy('course_phases.order');
     }
     public function schedules()
     {

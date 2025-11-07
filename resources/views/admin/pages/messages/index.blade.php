@@ -1,17 +1,7 @@
 @extends('admin.master_page')
 @section('main')
 @php use Illuminate\Support\Str; @endphp
-<style>
-  .glass-card { background:#fff; border:1px solid rgba(0,0,0,.05); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
-  .btn-ghost { border:1px solid #e9ecef; background:#fff; }
-  .message-row { border-bottom:1px solid #f4f5f7; transition:background .12s ease; }
-  .message-row:hover { background:#fafbff; cursor:pointer; }
-  .is-unread .subject { font-weight:600; }
-  .pill { padding:.25rem .6rem; border-radius:9999px; font-size:.8rem; border:1px solid #e9ecef; }
-  .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .modal-lg { max-width: 920px; }
-  .reply-box { border:1px solid #e9ecef; border-radius:12px; }
-</style>
+
 
 <div class="pagetitle">
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">

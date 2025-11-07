@@ -2,31 +2,7 @@
 
 @section('title', 'Gallery Management')
 {{-- CSS for hover --}}
-<style>
-.fixed-size-img {
-    height: 400px;
-    width: 100%;
-    object-fit: cover;
-}
-.gallery-image-wrapper {
-    position: relative;
-}
-.gallery-image-wrapper .overlay {
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%; width: 100%;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity .3s ease;
-}
-.gallery-image-wrapper:hover .overlay {
-    opacity: 1;
-}
-</style>
+
 @section('main')
 <div class="container">
 

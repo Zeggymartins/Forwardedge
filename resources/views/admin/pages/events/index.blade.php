@@ -1,15 +1,7 @@
 @extends('admin.master_page')
 
 @section('title', 'Events List')
-<style>
-    .table-row-hover:hover {
-        background: #f8f9fa !important;
-        transition: 0.2s ease-in-out;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-</style>
+
 @section('main')
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,7 +16,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient" style="background: linear-gradient(90deg, #0d6efd, #6610f2); color: #fff;">
+                <thead class="bg-gradient-primary">
                     <tr>
                         <th scope="col" class="py-3 px-4">#</th>
                         <th scope="col" class="py-3 px-4">Event</th>

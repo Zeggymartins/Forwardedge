@@ -144,6 +144,7 @@ class PageBuilderController extends Controller
             'hero'         => ['default', 'minimal', 'with_video'],
             'hero2'        => ['default'],
             'hero3'        => ['default'],
+            'hero4'        => ['default'],
             'overview'     => ['cards', 'timeline'],
             'overview2'    => ['default'],
             'form_dark'    => ['default'],
@@ -161,8 +162,20 @@ class PageBuilderController extends Controller
             'closing_cta'  => ['default', 'split'],
         ];
 
+        $allowedRouteParams = ['course', 'schedule', 'event', 'event_id'];
+
         $internalRoutes = collect(RouteFacade::getRoutes())
             ->filter(fn($route) => $route->getName() && in_array('GET', $route->methods()))
+            ->reject(function ($route) {
+                $uri = ltrim($route->uri(), '/');
+                $name = $route->getName();
+
+                return Str::startsWith($uri, 'ctrl-panel-v2')
+                    || Str::startsWith($uri, 'admin')
+                    || Str::startsWith($name, 'admin.')
+                    || Str::startsWith($name, 'pb.')
+                    || Str::contains($name, 'admin');
+            })
             ->map(function ($route) {
                 $uri  = $route->uri();
                 $path = '/' . ltrim($uri, '/');
@@ -180,6 +193,14 @@ class PageBuilderController extends Controller
                     'needs_params' => !empty($placeholders),
                     'placeholders' => $placeholders,
                 ];
+            })
+            ->filter(function ($route) use ($allowedRouteParams) {
+                if (empty($route['placeholders'])) {
+                    return false;
+                }
+
+                return collect($route['placeholders'])
+                    ->every(fn($ph) => in_array($ph, $allowedRouteParams, true));
             })
             ->sortBy('name')
             ->values();
@@ -351,7 +372,7 @@ class PageBuilderController extends Controller
     {
         $options = [];
 
-        $options['course'] = Course::query()
+        $courseOptions = Course::query()
             ->orderBy('title')
             ->get(['id', 'title', 'slug'])
             ->map(fn($course) => [
@@ -360,6 +381,11 @@ class PageBuilderController extends Controller
                 'hint'  => $course->slug ? "Slug: {$course->slug}" : null,
             ])
             ->all();
+
+        $options['course'] = $courseOptions;
+        if (!empty($courseOptions)) {
+            $options['course_id'] = $courseOptions;
+        }
 
         $options['schedule'] = CourseSchedule::query()
             ->with('course:id,title')
@@ -382,7 +408,7 @@ class PageBuilderController extends Controller
             })
             ->all();
 
-        $options['event'] = Event::query()
+        $eventOptions = Event::query()
             ->orderBy('title')
             ->get(['id', 'title'])
             ->map(fn($event) => [
@@ -391,6 +417,11 @@ class PageBuilderController extends Controller
                 'hint'  => "ID #{$event->id}",
             ])
             ->all();
+
+        $options['event'] = $eventOptions;
+        if (!empty($eventOptions)) {
+            $options['event_id'] = $eventOptions;
+        }
 
         $options['page'] = Page::query()
             ->orderBy('title')
@@ -626,6 +657,7 @@ class PageBuilderController extends Controller
             'hero'   => ['banner_image' => 'blocks/hero'],
             'hero2'  => ['hero_image' => 'blocks/hero2', 'banner_image' => 'blocks/hero2'],
             'hero3'  => ['banner_image' => 'blocks/hero3', 'image' => 'blocks/hero3', 'hero_image' => 'blocks/hero3', 'verified_icon' => 'blocks/hero3'],
+            'hero4'  => ['hero_image' => 'blocks/hero4'],
             'about'  => ['banner_left' => 'blocks/about'],
             'about2' => ['about_image' => 'blocks/about2'],
         ];

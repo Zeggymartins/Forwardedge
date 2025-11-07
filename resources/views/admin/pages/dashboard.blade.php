@@ -21,82 +21,10 @@
         };
     @endphp
 
-    <style>
-        .glass-card {
-            background: #fff;
-            border: 1px solid rgba(0, 0, 0, .05);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
-        }
-
-        .kpi-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f6f8ff;
-        }
-
-        .kpi-icon i {
-            font-size: 1.25rem;
-        }
-
-        .btn-ghost {
-            border: 1px solid #e9ecef;
-            background: #fff;
-        }
-
-        .list-clean .list-group-item {
-            border-left: 0;
-            border-right: 0;
-        }
-
-        .card-link {
-            transition: transform .08s ease, box-shadow .12s ease;
-        }
-
-        .card-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, .08);
-        }
-
-        .section-gap {
-            margin-top: 1.25rem;
-        }
-
-        .amount-fig {
-            font-variant-numeric: tabular-nums;
-            white-space: nowrap;
-        }
-
-        .ref-col {
-            max-width: 68%;
-        }
-
-        .ref-col .text-truncate {
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Rock-solid alignment for amounts */
-        .amount-col {
-            min-width: 140px;
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .mono {
-            font-variant-numeric: tabular-nums;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        }
-    </style>
+    
 
     <div class="pagetitle">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-3">
             <div>
                 <h1 class="mb-1">Dashboard</h1>
                 <nav>
@@ -127,7 +55,7 @@
     <section class="section dashboard">
 
         {{-- KPI ROW --}}
-        <div class="row g-3 section-gap">
+        <div class="row g-3 ">
             <div class="col-6 col-md-4 col-xxl-2">
                 <div class="glass-card p-3 h-100">
                     <div class="d-flex align-items-center gap-3">

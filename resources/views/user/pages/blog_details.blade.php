@@ -382,15 +382,23 @@
                                 <div class="feature-content">
                                     <h2 class="title">Stay Updated</h2>
                                     <span>Get Latest Insights</span>
-                                    <form class="newsletter-form" action="{{ route('newsletter.subscribe') }}" method="POST">
+                                    <form class="newsletter-form js-newsletter-form" action="{{ route('newsletter.subscribe', [], false) }}" method="POST"
+                                        data-block-id="blog-newsletter"
+                                        data-tags='["BlogSidebar"]'>
                                         @csrf
-                                        <input type="hidden" name="tags[]" value="BlogSidebar">
+                                        <input type="hidden" name="form_tags" value="BlogSidebar">
                                         <div class="form-input mb-3">
-                                            <input type="email" name="email" placeholder="Your Email" required>
+                                            <input type="email" name="email" placeholder="Your Email" required
+                                                data-field-input
+                                                data-field-label="Email"
+                                                data-field-name="email"
+                                                data-field-type="email"
+                                                data-field-required="1">
                                         </div>
                                         <button type="submit" class="tj-primary-btn btn-sm">
                                             <span class="btn-text">Subscribe</span>
                                         </button>
+                                        <div class="dynamic-form-feedback" role="status" aria-live="polite"></div>
                                     </form>
                                 </div>
                             </div>

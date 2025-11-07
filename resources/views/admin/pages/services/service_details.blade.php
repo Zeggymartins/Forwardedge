@@ -2,57 +2,7 @@
 
 @section('title', $service->title . ' - Service Details')
 
-@push('styles')
-    <style>
-        .service-header {
-            background: #f8f9fa;
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 30px;
-            border: 1px solid #eaeaea;
-        }
 
-        .service-header h1 {
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .content-card {
-            border: 1px solid #eee;
-            border-radius: 14px;
-            transition: all 0.2s ease;
-            background: white;
-        }
-
-        .content-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
-        }
-
-        .content-type-badge {
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 50px;
-        }
-
-        .modal-content {
-            border-radius: 14px;
-            border: 1px solid #eee;
-        }
-
-        .modal-header {
-            background: #f8f9fa;
-            border-bottom: 1px solid #eaeaea;
-            border-radius: 14px 14px 0 0 !important;
-        }
-
-        .btn-outline-primary,
-        .btn-outline-danger {
-            border-radius: 50px !important;
-            font-weight: 500;
-        }
-    </style>
-@endpush
 
 @section('main')
     <div class="container py-5">

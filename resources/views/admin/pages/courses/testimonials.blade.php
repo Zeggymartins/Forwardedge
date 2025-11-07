@@ -1,31 +1,8 @@
 @extends('admin.master_page')
 
-@section('title', 'Testimonials • ' . ($course->title ?? 'Course'))
+@section('title', 'Testimonials • ' . ($course->title ?? 'Academy Training'))
 
-@push('styles')
-    <style>
-        .table-row-hover:hover { background: rgba(25, 135, 84, .06) }
-        .bg-gradient { background: linear-gradient(90deg, #198754, #20c997); color: #fff }
-        .rounded-12 { border-radius: 12px }
-        .shadow-soft { box-shadow: 0 6px 20px rgba(0, 0, 0, .08) }
-        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover }
-        .nowrap { white-space: nowrap }
 
-        /* Cards */
-        .avatar-lg { width: 64px; height: 64px; border-radius: 50%; object-fit: cover }
-        .testimonial-card { transition: transform .15s ease, box-shadow .15s ease; }
-        .testimonial-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.10) }
-        .line-clamp-4 {
-            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
-        }
-        .badge-subtle {
-            background: rgba(25, 135, 84, .08);
-            color: #198754;
-            border: 1px solid rgba(25,135,84,.15);
-        }
-        .card-actions .btn { border-radius: 999px }
-    </style>
-@endpush
 
 @section('main')
     <div class="container py-5">
@@ -37,7 +14,7 @@
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.courses.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to Courses
+                    <i class="bi bi-arrow-left"></i> Back to Academy Training
                 </a>
                 <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addTestimonialModal">
                     <i class="bi bi-plus-circle me-2"></i> Add Testimonial

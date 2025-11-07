@@ -1,41 +1,7 @@
 @extends('admin.master_page')
 
 @section('title', $blog->title . ' Dashboard')
-<style>
-    /* Modern Tab Style for Dashboard */
-    #blogTabs .nav-link {
-        border: none;
-        border-radius: 30px;
-        margin: 0.25rem;
-        font-weight: 500;
-        color: #6c757d;
-        transition: all 0.3s ease;
-    }
 
-    #blogTabs .nav-link:hover {
-        background-color: #e9ecef;
-        color: #0d6efd; /* Use primary color */
-    }
-
-    #blogTabs .nav-link.active {
-        /* Vibrant gradient for active state */
-        background: linear-gradient(90deg, #0d6efd, #36b9cc);
-        color: #fff !important;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-    }
-
-    .content-block {
-        border-left: 5px solid #0d6efd;
-        border-radius: 0.5rem;
-        transition: all 0.2s;
-    }
-
-    .content-block:hover {
-        border-left-color: #36b9cc;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-</style>
 
 @section('main')
     <div class="container py-4">
@@ -47,8 +13,7 @@
         </div>
 
         {{-- Navigation Tabs --}}
-        <ul class="nav nav-tabs nav-pills flex-wrap mb-4 shadow-sm rounded-3" id="blogTabs" role="tablist"
-            style="background: #f8f9fc;">
+        <ul class="nav nav-tabs nav-pills flex-wrap mb-4 shadow-sm rounded-3 fe-admin-tabs" id="blogTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active d-flex align-items-center px-4 py-2" id="overview-tab" data-bs-toggle="tab"
                     href="#overview" role="tab">
@@ -68,8 +33,7 @@
             <!-- Overview Tab (Main Blog Info) -->
             <div class="tab-pane fade show active" id="overview">
                 <div class="card shadow-md border-0 rounded-3">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white mb-4"
-                        style="background: linear-gradient(90deg,#0d6efd,#36b9cc);">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-gradient-cyan text-white mb-4">
                         <h5 class="mb-0">Blog Post Summary</h5>
                         <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editBlogModal">
                             <i class="bi bi-pencil-square me-1"></i> Edit Info
@@ -79,7 +43,7 @@
                         <div class="row g-4">
                             <div class="col-md-4 text-center">
                                 <img src="{{ $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : 'https://via.placeholder.com/300x200?text=Post+Thumbnail' }}"
-                                    class="img-fluid rounded shadow-sm mb-3" alt="Blog Thumbnail" style="height:350px; width:100%;">
+                                    class="img-fluid rounded shadow-sm mb-3 blog-thumb-lg" alt="Blog Thumbnail">
                                 <p><strong>Category:</strong> {{ $blog->category ?? 'N/A' }}</p>
                             </div>
                             <div class="col-md-8">
@@ -253,8 +217,7 @@
     <div class="modal fade" id="editBlogModal" tabindex="-1" aria-labelledby="editBlogModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg">
-                <div class="modal-header bg-gradient text-white"
-                    style="background: linear-gradient(90deg,#0d6efd,#36b9cc);">
+                <div class="modal-header bg-gradient-cyan text-white">
                     <h5 class="modal-title" id="editBlogModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit
                         Post Info</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

@@ -1,35 +1,13 @@
 @extends('admin.master_page')
 
 @section('title', $event->title . ' Dashboard')
-<style>
-    #eventTabs .nav-link {
-        border: none;
-        border-radius: 30px;
-        margin: 0.25rem;
-        font-weight: 500;
-        color: #6c757d;
-        transition: all 0.3s ease;
-    }
 
-    #eventTabs .nav-link:hover {
-        background-color: #e9ecef;
-        color: #4e73df;
-    }
-
-    #eventTabs .nav-link.active {
-        background: linear-gradient(90deg, #4e73df, #1c0876ff);
-        color: #fff !important;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
-    }
-</style>
 
 @section('main')
     <div class="container py-4">
         <h1>{{ $event->title }} <small class="text-muted">Dashboard</small></h1>
 
-        <ul class="nav nav-tabs nav-pills flex-wrap mb-4 shadow-sm rounded-3" id="eventTabs" role="tablist"
-            style="background: #f8f9fc;">
+        <ul class="nav nav-tabs nav-pills flex-wrap mb-4 shadow-sm rounded-3 fe-admin-tabs" id="eventTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active d-flex align-items-center px-4 py-2" id="overview-tab" data-bs-toggle="tab"
                     href="#overview" role="tab">
@@ -68,8 +46,7 @@
             <!-- Overview -->
             <div class="tab-pane fade show active" id="overview">
                 <div class="card shadow-md border-0 rounded-3">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-gradient text-white"
-                        style="background: linear-gradient(90deg,#4e73df,#1cc88a);">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-gradient-indigo text-white">
                         <h5 class="mb-0">Event Overview</h5>
                         <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal">
                             <i class="bi bi-pencil-square me-1"></i> Edit Info
@@ -498,8 +475,8 @@
                         <div class="col-md-4 mb-3">
                             <div class="card shadow-sm h-100">
                                 @if ($spn->logo)
-                                    <img src="{{ asset('storage/' . $spn->logo) }}" class="card-img-top p-3"
-                                        alt="{{ $spn->name }}" style="height: 150px; object-fit: contain;">
+                                    <img src="{{ asset('storage/' . $spn->logo) }}" class="card-img-top p-3 sponsor-logo"
+                                        alt="{{ $spn->name }}">
                                 @else
                                     <img src="https://via.placeholder.com/400x150?text=No+Logo" class="card-img-top p-3"
                                         alt="No Logo">
@@ -840,8 +817,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-lg">
-            <div class="modal-header bg-gradient text-white"
-                style="background: linear-gradient(90deg,#1cc88a,#36b9cc);">
+            <div class="modal-header bg-gradient-teal text-white">
                 <h5 class="modal-title" id="editEventModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit
                     Event Info</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

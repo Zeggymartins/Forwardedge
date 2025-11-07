@@ -16,6 +16,7 @@ final class PageBlueprint
             'hero',
             'hero2',
             'hero3',
+            'hero4',
             'overview',
             'overview2',
             'form_dark',
@@ -308,6 +309,18 @@ final class PageBlueprint
                 'banner_image'        => $fileImg,
                 'image'               => $fileImg,         // alias
                 'hero_image'          => $fileImg,         // alias
+            ],
+
+            'hero4' => [
+                'kicker'                => ['nullable', 'string', 'max:80'],
+                'title'                 => ['required', 'string', 'max:180'],
+                'subtitle'              => ['nullable', 'string', 'max:200'],
+                'description'           => ['nullable', 'string', 'max:600'],
+                'primary_button_text'   => ['nullable', 'string', 'max:60'],
+                'primary_button_link'   => self::linkRule(),
+                'secondary_button_text' => ['nullable', 'string', 'max:60'],
+                'secondary_button_link' => self::linkRule(),
+                'hero_image'            => $fileImg,
             ],
 
             /* ================= NEW: LOGO SLIDER ================= */

@@ -2,53 +2,6 @@
 
 @section('title', 'Services Management')
 
-@push('styles')
-<style>
-    .table-row-hover:hover {
-        background: linear-gradient(90deg, rgba(32, 201, 151, 0.05), rgba(13, 202, 240, 0.05));
-        transition: all 0.3s ease;
-    }
-
-    .bg-gradient {
-        background: linear-gradient(90deg, #20c997, #0dcaf0);
-        color: #fff;
-    }
-
-    .service-thumbnail-wrapper {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .service-thumbnail-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .modal-thumbnail-wrapper {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        overflow: hidden;
-        margin: 0 auto 15px auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-thumbnail-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-</style>
-@endpush
-
 @section('main')
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">

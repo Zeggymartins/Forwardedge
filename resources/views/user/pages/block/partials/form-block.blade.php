@@ -48,7 +48,7 @@
         $fields = collect($defaultFields);
     }
 
-    $action = route('newsletter.subscribe');
+    $action = route('newsletter.subscribe', [], false);
     $method = 'POST';
 
     $tags = collect($d['tags'] ?? ['Newsletter'])

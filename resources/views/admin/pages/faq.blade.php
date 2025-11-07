@@ -2,18 +2,7 @@
 
 @section('title', 'FAQ Management')
 
-@push('styles')
-<style>
-    .table-row-hover:hover {
-        background: rgba(13,202,240,0.05);
-        transition: all 0.3s ease;
-    }
-    .bg-gradient {
-        background: linear-gradient(90deg, #20c997, #0dcaf0);
-        color: #fff;
-    }
-</style>
-@endpush
+
 
 @section('main')
 <div class="container py-5">

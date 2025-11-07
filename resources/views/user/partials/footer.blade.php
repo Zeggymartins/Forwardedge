@@ -110,20 +110,30 @@
                      <div class="col-xl-4 col-lg-5 col-md-6">
                          <div class="footer-widget widget-subscribe wow fadeInUp" data-wow-delay=".7s">
                              <h3 class="title">Subscribe to Our Newsletter.</h3>
-                             <div class="subscribe-form">
-                                 <form action="{{ route('newsletter.subscribe') }}" method="POST">
-                                     @csrf
-                                     <input type="hidden" name="tags[]" value="Footer">
-                                     <input type="email" name="email" placeholder="Enter email" required>
-                                     <button type="submit"><i class="tji-plane"></i></button>
-                                     <label for="footer-agree">
-                                         <input id="footer-agree" type="checkbox" required>
-                                         Agree to our <a href="{{ url('/terms') }}">Terms & Condition?</a>
-                                     </label>
-                                 </form>
-                             </div>
-                         </div>
-                     </div>
+                            <div class="subscribe-form">
+                                <form class="newsletter-form js-newsletter-form"
+                                    action="{{ route('newsletter.subscribe', [], false) }}"
+                                    method="POST"
+                                    data-block-id="footer-newsletter"
+                                    data-tags='["Footer"]'>
+                                    @csrf
+                                    <input type="hidden" name="form_tags" value="Footer">
+                                    <input type="email" name="email" placeholder="Enter email" required
+                                        data-field-input
+                                        data-field-label="Email"
+                                        data-field-name="email"
+                                        data-field-type="email"
+                                        data-field-required="1">
+                                    <button type="submit"><i class="tji-plane"></i></button>
+                                    <label for="footer-agree">
+                                        <input id="footer-agree" type="checkbox" required>
+                                        Agree to our <a href="{{ url('/terms') }}">Terms & Condition?</a>
+                                    </label>
+                                    <div class="dynamic-form-feedback" role="status" aria-live="polite"></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                  </div>
              </div>
          </div>
