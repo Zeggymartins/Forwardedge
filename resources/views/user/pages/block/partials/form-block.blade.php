@@ -334,7 +334,8 @@
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const feedback = form.querySelector('.dynamic-form-feedback');
                 const blockId = form.dataset.blockId;
-                const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+                    || form.querySelector('input[name="_token"]')?.value;
 
                 const fields = Array.from(form.querySelectorAll('[data-field-input]')).map((input) => ({
                     label: input.dataset.fieldLabel || '',
@@ -359,8 +360,10 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                             ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}),
                         },
+                        credentials: 'same-origin',
                         body: JSON.stringify(payload),
                     });
 
@@ -448,14 +451,29 @@
                     dialog.classList.toggle('dynamic-form-modal__dialog--dark', document.body.classList.contains('dark-mode'));
                 }
 
+                if (modal.dataset.timerId) {
+                    clearTimeout(Number(modal.dataset.timerId));
+                    delete modal.dataset.timerId;
+                }
+
                 modal.removeAttribute('hidden');
                 document.body.classList.add('dynamic-form-modal-open');
+
+                const timeout = setTimeout(() => {
+                    closeNewsletterModal();
+                }, state === 'error' ? 8000 : 5000);
+
+                modal.dataset.timerId = timeout;
             }
 
             function closeNewsletterModal() {
                 const modal = document.querySelector('[data-dynamic-form-modal]');
                 if (modal) {
                     modal.setAttribute('hidden', 'hidden');
+                    if (modal.dataset.timerId) {
+                        clearTimeout(Number(modal.dataset.timerId));
+                        delete modal.dataset.timerId;
+                    }
                 }
                 document.body.classList.remove('dynamic-form-modal-open');
             }
