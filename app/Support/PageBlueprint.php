@@ -17,6 +17,7 @@ final class PageBlueprint
             'hero2',
             'hero3',
             'hero4',
+            'program_overview',
             'overview',
             'overview2',
             'form_dark',
@@ -68,6 +69,19 @@ final class PageBlueprint
 
             /* ================= OVERVIEW (alias used in your UI) ================= */
             'overview' => [
+                'kicker'            => ['nullable', 'string', 'max:80'],
+                'title'             => ['required', 'string', 'max:160'],
+                'description'       => ['nullable', 'string', 'max:600'],
+                'link_text'         => ['nullable', 'string', 'max:60'],
+                'link'              => self::linkRule(),
+                'items'             => ['nullable', 'array', 'max:6'],
+                'items.*.icon'      => ['nullable', 'string', 'max:100'],
+                'items.*.subtitle'  => ['required_with:items', 'string', 'max:160'],
+                'items.*.text'      => ['nullable', 'string', 'max:400'],
+                'items.*.link_text' => ['nullable', 'string', 'max:60'],
+                'items.*.link'      => self::linkRule(),
+            ],
+            'program_overview' => [
                 'kicker'            => ['nullable', 'string', 'max:80'],
                 'title'             => ['required', 'string', 'max:160'],
                 'description'       => ['nullable', 'string', 'max:600'],

@@ -145,6 +145,7 @@ class PageBuilderController extends Controller
             'hero2'        => ['default'],
             'hero3'        => ['default'],
             'hero4'        => ['default'],
+            'program_overview' => ['default'],
             'overview'     => ['cards', 'timeline'],
             'overview2'    => ['default'],
             'form_dark'    => ['default'],

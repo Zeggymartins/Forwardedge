@@ -109,7 +109,7 @@
     <div class="modal fade" id="blockModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <form id="modalForm" method="POST" enctype="multipart/form-data">
+                <form id="modalForm" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalTitle">Configure Block</h5>
@@ -798,6 +798,61 @@
         }
 
         /* ====== FIELD RENDERERS ====== */
+        function buildOverviewFields() {
+            return html(`
+<div class="row g-3">
+  <div class="col-md-4">
+    <label class="form-label small-label">Kicker</label>
+    <input class="form-control" name="data[kicker]">
+  </div>
+  <div class="col-md-8">
+    <label class="form-label small-label">Title*</label>
+    <input class="form-control" name="data[title]" required>
+  </div>
+  <div class="col-12">
+    <label class="form-label small-label">Description</label>
+    <textarea class="form-control" name="data[description]" rows="3"></textarea>
+  </div>
+  <div class="col-md-5">
+    <label class="form-label small-label">CTA Text</label>
+    <input class="form-control" name="data[link_text]">
+  </div>
+  ${linkControl('data[link]', 'CTA Link', 'col-md-7')}
+  <div class="col-12"><div class="section-divider"><span class="section-divider-label">Cards</span></div></div>
+  <div class="col-12 d-flex justify-content-between">
+    <label class="form-label small-label mb-0">Cards</label>
+    <button type="button" class="btn btn-dark btn-sm" data-repeater-add="items">Add Card</button>
+  </div>
+  <div class="col-12">
+    <div class="repeater" data-repeater data-name="items" data-max="5">
+      <template data-repeater-template>
+        <div class="repeater-item border rounded-12 p-3 mb-3" data-repeater-item draggable="true">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="drag-handle">☰</span>
+            <div class="row g-2 flex-grow-1">
+              <div class="col-md-6">
+                <label class="form-label small-label">Subtitle*</label>
+                <input class="form-control" name="data[items][__INDEX__][subtitle]" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small-label">Link Text</label>
+                <input class="form-control" name="data[items][__INDEX__][link_text]">
+              </div>
+              <div class="col-12">
+                <label class="form-label small-label">Text</label>
+                <textarea class="form-control" name="data[items][__INDEX__][text]" rows="2"></textarea>
+              </div>
+              ${linkControl('data[items][__INDEX__][link]', 'Link', 'col-12')}
+            </div>
+            <button class="btn btn-outline-danger btn-sm" type="button" data-repeater-remove>Remove</button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>`);
+        }
+
         function renderFieldsForType(type) {
             switch (type) {
                 case 'hero':
@@ -922,58 +977,8 @@
 </div>`);
 
                 case 'overview':
-                    return html(`
-<div class="row g-3">
-  <div class="col-md-4">
-    <label class="form-label small-label">Kicker</label>
-    <input class="form-control" name="data[kicker]">
-  </div>
-  <div class="col-md-8">
-    <label class="form-label small-label">Title*</label>
-    <input class="form-control" name="data[title]" required>
-  </div>
-  <div class="col-12">
-    <label class="form-label small-label">Description</label>
-    <textarea class="form-control" name="data[description]" rows="3"></textarea>
-  </div>
-  <div class="col-md-5">
-    <label class="form-label small-label">CTA Text</label>
-    <input class="form-control" name="data[link_text]">
-  </div>
-  ${linkControl('data[link]', 'CTA Link', 'col-md-7')}
-  <div class="col-12"><div class="section-divider"><span class="section-divider-label">Cards</span></div></div>
-  <div class="col-12 d-flex justify-content-between">
-    <label class="form-label small-label mb-0">Cards</label>
-    <button type="button" class="btn btn-dark btn-sm" data-repeater-add="items">Add Card</button>
-  </div>
-  <div class="col-12">
-    <div class="repeater" data-repeater data-name="items" data-max="5">
-      <template data-repeater-template>
-        <div class="repeater-item border rounded-12 p-3 mb-3" data-repeater-item draggable="true">
-          <div class="d-flex gap-3 align-items-start">
-            <span class="drag-handle">☰</span>
-            <div class="row g-2 flex-grow-1">
-              <div class="col-md-6">
-                <label class="form-label small-label">Subtitle*</label>
-                <input class="form-control" name="data[items][__INDEX__][subtitle]" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small-label">Link Text</label>
-                <input class="form-control" name="data[items][__INDEX__][link_text]">
-              </div>
-              <div class="col-12">
-                <label class="form-label small-label">Text</label>
-                <textarea class="form-control" name="data[items][__INDEX__][text]" rows="2"></textarea>
-              </div>
-              ${linkControl('data[items][__INDEX__][link]', 'Link', 'col-12')}
-            </div>
-            <button class="btn btn-outline-danger btn-sm" type="button" data-repeater-remove>Remove</button>
-          </div>
-        </div>
-      </template>
-    </div>
-  </div>
-</div>`);
+                case 'program_overview':
+                    return buildOverviewFields();
 
                 case 'about':
                     return html(`
