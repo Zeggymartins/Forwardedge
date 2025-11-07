@@ -396,6 +396,7 @@
                 if (modal) return modal;
 
                 modal = document.createElement('div');
+                modal.className = 'dynamic-form-modal';
                 modal.setAttribute('data-dynamic-form-modal', 'true');
                 modal.setAttribute('hidden', 'hidden');
                 modal.innerHTML = `

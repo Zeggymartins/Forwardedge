@@ -32,7 +32,7 @@
 @push('styles')
     <style>
         .fe-hero-two {
-            background: radial-gradient(circle at top, rgba(6, 12, 35, 0.9), #12B5F6 68%);
+            background: radial-gradient(circle at top, rgba(6, 12, 35, 0.9), #0d6486ff 68%);
             position: relative;
             border-radius: 32px;
             padding:40px;

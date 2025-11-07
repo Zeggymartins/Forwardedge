@@ -182,9 +182,9 @@ class NewsletterController extends Controller
         $phone = $fields->first(fn ($field) => $field['type'] === 'tel');
 
         $merge = [
-            'FNAME' => $first['value'] ?? '',
-            'LNAME' => $last['value'] ?? '',
-            'PHONE' => $phone['value'] ?? '',
+            'FNAME' => trim((string) ($first['value'] ?? '')),
+            'LNAME' => trim((string) ($last['value'] ?? '')),
+            'PHONE' => trim((string) ($phone['value'] ?? '')),
         ];
 
         $fields->each(function ($field, $index) use (&$merge) {
@@ -192,8 +192,11 @@ class NewsletterController extends Controller
             if ($key === '' || array_key_exists($key, $merge)) {
                 $key = 'FIELD' . ($index + 1);
             }
-            $merge[$key] = $field['value'] ?? '';
+            $merge[$key] = trim((string) ($field['value'] ?? ''));
         });
+
+        $merge['FNAME'] = $merge['FNAME'] !== '' ? $merge['FNAME'] : 'Subscriber';
+        $merge['LNAME'] = $merge['LNAME'] !== '' ? $merge['LNAME'] : '-';
 
         return $merge;
     }
