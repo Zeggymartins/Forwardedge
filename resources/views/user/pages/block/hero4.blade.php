@@ -25,7 +25,7 @@
         .fe-hero-radiant {
             background: radial-gradient(circle at 10% 20%, rgba(27, 166, 231, 0.15), transparent 45%),
                         radial-gradient(circle at 90% 10%, rgba(236, 72, 153, 0.2), transparent 40%),
-                        #4a4706ff;
+                        #06154aff;
             border-radius: clamp(24px, 5vw, 40px);
             padding: clamp(2.8rem, 4vw, 4.5rem);
             position: relative;
@@ -150,7 +150,7 @@
     </style>
 @endpush
 
-<section class="fe-hero-radiant my-5">
+<section class="fe-hero-radiant my-2">
     <div class="fe-hero-radiant__grid">
         <div class="fe-hero-radiant__content">
             @if ($kicker)
