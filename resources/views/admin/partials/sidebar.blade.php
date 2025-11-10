@@ -42,8 +42,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="bi bi-circle"></i><span>Scholarships</span>
+                            <a href="{{ route('admin.scholarships.applications') }}">
+                                <i class="bi bi-circle"></i><span>Scholarship Applications</span>
                             </a>
                         </li>
                     </ul>

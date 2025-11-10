@@ -46,7 +46,44 @@
         };
     }
 @endphp
-<section class="h7-project section-gap tj-sticky-panel-container">
+
+@push('styles')
+<style>
+  .fe-gallery-section .project-wrapper{
+    max-width: 640px;
+    margin-left: auto;
+  }
+  .fe-gallery-section .project-item{
+    padding: 1.25rem;
+    border-radius: 32px;
+    background: #fff;
+    border: 1px solid rgba(15,23,42,0.08);
+    box-shadow: 0 25px 70px rgba(15,23,42,0.08);
+  }
+  .fe-gallery-section .project-img{
+    border-radius: 28px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .fe-gallery-section .project-img img{
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    min-height: 420px;
+  }
+  @media (max-width: 991px){
+    .fe-gallery-section .project-wrapper{
+      max-width: 100%;
+      margin-top: 2rem;
+    }
+    .fe-gallery-section .project-img img{
+      min-height: 280px;
+    }
+  }
+</style>
+@endpush
+
+<section class="h7-project section-gap tj-sticky-panel-container fe-gallery-section">
   <div class="container">
     <div class="row">
       {{-- Left: sticky heading & CTA --}}

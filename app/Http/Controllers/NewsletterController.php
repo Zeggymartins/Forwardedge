@@ -40,12 +40,12 @@ class NewsletterController extends Controller
             'LNAME' => $data['last_name'] ?? '',
         ];
 
-        UpsertMember::dispatch($email, $merge, [
+        UpsertMember::dispatchSync($email, $merge, [
             'double_opt_in' => $data['double_optin'] ?? config('services.mailchimp.double_opt_in'),
             'tags'          => $data['tags'] ?? ['Website'],
         ]);
 
-        Mail::to($email)->queue(new NewsletterWelcomeMail($merge['FNAME'] ?: 'Subscriber'));
+        Mail::to($email)->send(new NewsletterWelcomeMail($merge['FNAME'] ?: 'Subscriber'));
 
         $message = ($data['double_optin'] ?? config('services.mailchimp.double_opt_in'))
             ? 'Almost done! Please confirm the email we just sent you.'
@@ -115,7 +115,7 @@ class NewsletterController extends Controller
 
         $normalizedMerge = $this->buildMergeFields($fields);
 
-        UpsertMember::dispatch(
+        UpsertMember::dispatchSync(
             strtolower($emailValue),
             $normalizedMerge,
             [
@@ -123,7 +123,7 @@ class NewsletterController extends Controller
             ]
         );
 
-        Mail::to($emailValue)->queue(new NewsletterWelcomeMail($normalizedMerge['FNAME'] ?? 'Subscriber'));
+        Mail::to($emailValue)->send(new NewsletterWelcomeMail($normalizedMerge['FNAME'] ?? 'Subscriber'));
 
         $message = 'Thanks for joining our newsletter! 🎉';
 

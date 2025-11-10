@@ -31,6 +31,8 @@
   $title         = $d['title']         ?? 'Numbers and facts that define performance.';
   $progressText  = $d['desc'] ?? null;
   $items         = is_array($d['items'] ?? null) ? $d['items'] : [];
+  $itemsCount    = count($items);
+  $columnClass   = $itemsCount <= 2 ? 'col-lg-6 col-md-6' : 'col-lg-4 col-md-6';
 
   // Normalize list entries: accept ["text", ...] or [{"text":"..."}]
   $asLines = function($maybeList) {
@@ -42,6 +44,34 @@
       }, $maybeList)));
   };
 @endphp
+
+@push('styles')
+<style>
+  .tj-funfact-section .heading-wrap-content{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.5rem;
+    align-items:flex-end;
+    justify-content:space-between;
+  }
+
+  .tj-funfact-section .progress-item{
+    padding:.9rem 1.5rem;
+    border-radius:999px;
+    background:rgba(15,23,42,.06);
+    border:1px solid rgba(15,23,42,.08);
+    min-width:240px;
+  }
+
+  .tj-funfact-section .progress-item .sub-title{
+    margin:0;
+    color:#0f172a;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+</style>
+@endpush
 
 <!-- start: Fun fact Section (cards behave like "sections") -->
 <section class="tj-funfact-section section-gap section-gap-x" aria-label="Fun facts">
@@ -81,7 +111,7 @@
           $list  = $asLines($item['list'] ?? []);
           $idx   = str_pad($i + 1, 2, '0', STR_PAD_LEFT) . '.';
         @endphp
-        <div class="col-lg-4 col-md-6">
+        <div class="{{ $columnClass }}">
           <div class="countup-item style-2 wow fadeInUp" data-wow-delay=".{{ [7,5,1][$i % 3] }}s">
             <span class="count-icon"><i class="{{ $icon }}"></i></span>
             <span class="steps">{{ $idx }}</span>
@@ -117,7 +147,7 @@
         </div>
       @empty
         {{-- Optional: render 1 placeholder card when empty --}}
-        <div class="col-lg-4 col-md-6">
+        <div class="{{ $columnClass }}">
           <div class="countup-item style-2">
             <span class="count-icon"><i class="tji-complete"></i></span>
             <span class="steps">01.</span>

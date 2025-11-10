@@ -31,8 +31,9 @@
   $topList   = is_array($d['list'] ?? null) ? $d['list'] : [];
   $link      = $d['link']     ?? '#';
   $linkText  = $d['link_text']?? 'Learn More';
-
   $items     = is_array($d['items'] ?? null) ? $d['items'] : [];
+  $itemsCount = count($items);
+  $columnClass = $itemsCount <= 2 ? 'col-lg-6 col-md-6' : 'col-lg-4 col-md-6';
 
   // Helpers
   $src = function ($path) {
@@ -109,7 +110,7 @@
                 $itLink  = $item['link'] ?? $link ?? '#';
               @endphp
 
-              <div class="swiper-slide">
+              <div class="swiper-slide {{ $columnClass }}">
                 <div class="h6-service-item">
                   <div class="h6-service-thumb">
                     <a href="{{ $itLink }}"><img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}"></a>

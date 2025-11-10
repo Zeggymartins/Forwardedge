@@ -9,7 +9,7 @@
 
     $primaryText = $d['primary_button_text'] ?? 'Join the next cohort';
     $primaryLink = $d['primary_button_link'] ?? '#';
-    $secondaryText = $d['secondary_button_text'] ?? 'Explore the curriculum';
+    $secondaryText = $d['secondary_button_text'] ?? 'Explore';
     $secondaryLink = $d['secondary_button_link'] ?? '#';
 
     $rawImage = $d['hero_image'] ?? null;
@@ -26,7 +26,7 @@
             background: radial-gradient(circle at 10% 20%, rgba(27, 166, 231, 0.15), transparent 45%),
                         radial-gradient(circle at 90% 10%, rgba(236, 72, 153, 0.2), transparent 40%),
                         #06154aff;
-            border-radius: clamp(24px, 5vw, 40px);
+            border-radius: clamp(18px, 5vw, 35px);
             padding: clamp(2.8rem, 4vw, 4.5rem);
             position: relative;
             overflow: hidden;

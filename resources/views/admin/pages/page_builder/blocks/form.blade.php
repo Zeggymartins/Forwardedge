@@ -163,7 +163,9 @@
     <script>
         /* ====== CONFIG ====== */
         const VARIANTS = @json($variants);
-        const PUBLIC_ROOT = @json(asset('storage/')) + '/';
+        const STORAGE_ROOT = @json(rtrim(asset('storage'), '/'));
+        const APP_ORIGIN = @json(rtrim(url('/'), '/'));
+        const PUBLIC_ROOT = STORAGE_ROOT + '/';
         const INTERNAL_ROUTES = @json($internalRoutes ?? []);
         const ROUTE_PARAM_OPTIONS = @json($routeBindingOptions ?? []);
 
@@ -283,6 +285,30 @@
             }
         }
 
+        function isAbsoluteUrl(value = '') {
+            return /^https?:\/\//i.test(value);
+        }
+
+        function resolveImageUrl(value = '') {
+            if (!value) return null;
+            if (isAbsoluteUrl(value)) return value;
+
+            if (value.startsWith('//')) {
+                return window.location.protocol + value;
+            }
+
+            if (value.startsWith('/')) {
+                return `${APP_ORIGIN}${value}`;
+            }
+
+            const trimmed = value.replace(/^\/+/, '');
+            if (trimmed.startsWith('storage/')) {
+                return `${APP_ORIGIN}/${trimmed}`;
+            }
+
+            return `${STORAGE_ROOT}/${trimmed}`;
+        }
+
         function showExistingImages(scope, publicRoot, data, prefix = '') {
             for (const [key, val] of Object.entries(data)) {
                 const fullKey = prefix ? `${prefix}_${key}` : key;
@@ -292,7 +318,10 @@
                     )) {
                     const img = scope.querySelector(`img[data-preview-key="${fullKey}"]`);
                     if (img && val) {
-                        img.src = publicRoot + val.replace(/^\/+/, '');
+                        const src = resolveImageUrl(val);
+                        if (src) {
+                            img.src = src;
+                        }
                         img.style.display = 'block';
                     }
                 } else if (Array.isArray(val)) {
@@ -355,17 +384,38 @@
             return path;
         }
 
+        function normalizeInternalLink(value = '') {
+            if (!value) return '';
+
+            const originless = value.startsWith(APP_ORIGIN)
+                ? value.slice(APP_ORIGIN.length)
+                : value;
+
+            try {
+                const parsed = new URL(value);
+                if (parsed.origin === APP_ORIGIN) {
+                    return parsed.pathname + parsed.search;
+                }
+            } catch (e) {
+                // not an absolute URL, fall through
+            }
+
+            return originless || '/';
+        }
+
         function matchRouteFromValue(value) {
             if (!value) return null;
 
+            const normalizedValue = normalizeInternalLink(value);
+
             for (const route of INTERNAL_ROUTES) {
-                if (!route.needs_params && route.path === value) {
+                if (!route.needs_params && route.path === normalizedValue) {
                     return { route, params: {} };
                 }
 
                 if (route.needs_params) {
                     const regex = buildRegexForRoute(route);
-                    const match = value.match(regex);
+                    const match = normalizedValue.match(regex);
                     if (match) {
                         const params = {};
                         (route.placeholders || []).forEach((ph, idx) => {
@@ -533,7 +583,7 @@
                 internalWrap?.classList.remove('d-none');
                 routeSelect.value = matched.route.path;
                 handleRouteChange(matched.params);
-                hidden.value = current;
+                hidden.value = buildPathFromParams(matched.route, matched.params);
             } else {
                 modeSelect.value = 'external';
                 externalWrap?.classList.remove('d-none');

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ScholarshipStatusMail;
 use App\Models\Enrollment;
 use App\Models\ScholarshipApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AdminEnrollmentController extends Controller
 {
@@ -32,6 +34,15 @@ class AdminEnrollmentController extends Controller
         return response()->json($enrollment);
     }
 
+    public function applications()
+    {
+        $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.pages.courses.scholarship.applications', compact('applications'));
+    }
+
     public function approve(ScholarshipApplication $application)
     {
         if ($application->status !== 'pending') {
@@ -53,6 +64,12 @@ class AdminEnrollmentController extends Controller
             'approved_at' => now(),
         ]);
 
+        $application->refresh();
+
+        if ($application->user?->email) {
+            Mail::to($application->user->email)->send(new ScholarshipStatusMail($application, 'approved'));
+        }
+
         return back()->with('success', 'Application approved & enrollment created.');
     }
 
@@ -62,11 +79,23 @@ class AdminEnrollmentController extends Controller
             return back()->with('warning', 'Already processed');
         }
 
+        $data = $request->validate([
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
         $application->update([
             'status'      => 'rejected',
             'rejected_at' => now(),
-            'admin_notes' => $request->input('notes'),
+            'admin_notes' => $data['notes'] ?? null,
         ]);
+
+        $application->refresh();
+
+        if ($application->user?->email) {
+            Mail::to($application->user->email)->send(
+                new ScholarshipStatusMail($application, 'rejected', $data['notes'] ?? null)
+            );
+        }
 
         return back()->with('success', 'Application rejected.');
     }
