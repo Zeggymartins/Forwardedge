@@ -1310,3 +1310,52 @@ body.fe-admin-body .container-fluid.py-4 {
 .fe-footer-links a:hover {
   color: var(--fe-admin-text);
 }
+
+/* ===== Email Engine ===== */
+.fe-campaign-blocks .fe-campaign-block {
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fff;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+}
+
+.fe-campaign-block__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.fe-campaign-block__body .form-control,
+.fe-campaign-block__body .form-select {
+  border-radius: 12px;
+}
+
+.fe-card-collection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.fe-campaign-card {
+  border: 1px dashed #d0d5dd;
+  border-radius: 12px;
+  padding: 0.85rem;
+  background-color: #fdfdfd;
+}
+
+.fe-stats-card {
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  min-height: 120px;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #111c44, #1d4ed8);
+  color: #fff;
+}

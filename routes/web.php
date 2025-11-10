@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminCourseController;
 use App\Http\Controllers\Admin\AdminDashboard;
+use App\Http\Controllers\Admin\AdminEmailController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminEnrollmentController;
@@ -419,6 +420,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
     Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{message}/json', [AdminMessageController::class, 'showJson'])->name('messages.json');
     Route::post('/messages/{message}/reply', [AdminMessageController::class, 'reply'])->name('messages.reply');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Email Engine
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('emails')->name('admin.emails.')->group(function () {
+        Route::get('/contacts', [AdminEmailController::class, 'contacts'])->name('contacts');
+
+        Route::get('/campaigns', [AdminEmailController::class, 'campaignsIndex'])->name('campaigns.index');
+        Route::get('/campaigns/create', [AdminEmailController::class, 'campaignsCreate'])->name('campaigns.create');
+        Route::post('/campaigns', [AdminEmailController::class, 'campaignsStore'])->name('campaigns.store');
+        Route::get('/campaigns/{campaign}', [AdminEmailController::class, 'campaignsShow'])->name('campaigns.show');
+        Route::post('/campaigns/{campaign}/send', [AdminEmailController::class, 'campaignsSend'])->name('campaigns.send');
+        Route::post('/campaigns/{campaign}/retry', [AdminEmailController::class, 'campaignsRetry'])->name('campaigns.retry');
+    });
 
 
 

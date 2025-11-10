@@ -29,7 +29,7 @@
   $d = $block->data ?? [];
   $kicker        = $d['kicker']        ?? 'OUR FUN FACT';
   $title         = $d['title']         ?? 'Numbers and facts that define performance.';
-  $progressText  = $d['desc'] ?? null;
+  $progressText  = $d[''] ?? null;
   $items         = is_array($d['items'] ?? null) ? $d['items'] : [];
 
   // Normalize list entries: accept ["text", ...] or [{"text":"..."}]
