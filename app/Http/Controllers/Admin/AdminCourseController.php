@@ -308,12 +308,14 @@ class AdminCourseController extends Controller
             'type'       => 'nullable|string|in:virtual,hybrid,physical',
         ]);
 
+        $resolvedType = $validated['type'] ?? 'bootcamp';
+
         CourseSchedule::create([
             'course_id'  => $course->id,
             'start_date' => $validated['start_date'],
             'end_date'   => $validated['end_date'] ?? null,
             'location'   => $validated['location'] ?? null,
-            'type'       => $validated['type'] ?? null,
+            'type'       => $resolvedType,
         ]);
 
         return back()->with('success', 'Schedule added successfully!');
@@ -331,11 +333,13 @@ class AdminCourseController extends Controller
             'type'       => 'nullable|string|in:virtual,hybrid,physical',
         ]);
 
+        $resolvedType = $validated['type'] ?? $schedule->type ?? 'bootcamp';
+
         $schedule->update([
             'start_date' => $validated['start_date'],
             'end_date'   => $validated['end_date'] ?? null,
             'location'   => $validated['location'] ?? null,
-            'type'       => $validated['type'] ?? null,
+            'type'       => $resolvedType,
         ]);
 
         return back()->with('success', 'Schedule updated successfully!');

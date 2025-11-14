@@ -920,7 +920,7 @@
             'meta_right' => $schedule->location ?: 'Online',
             // Prefer course details page; fall back to enroll link if needed
             'title'      => $title,
-            'url'        => $slug ? route('shop.details', $slug) : route('enroll.pricing', $schedule->id),
+            'url'        => $slug ? route('course.show', $course->slug) : route('course.enroll'),
             'cta'        => $slug ? 'View Details' : 'Enroll Now',
         ]);
     }

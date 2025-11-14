@@ -87,14 +87,16 @@
 
                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="guestMenuBtn"
                                        style="min-width:220px;">
-                                       <li>
-                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                               data-bs-target="#loginModal">Login</a>
-                                       </li>
-                                       <li>
-                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                               data-bs-target="#guestRegisterModal">Register</a>
-                                       </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item auth-trigger" data-auth-tab="login">
+                                                Login
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item auth-trigger" data-auth-tab="register">
+                                                Register
+                                            </button>
+                                        </li>
                                    </ul>
                                @endauth
                            </div>
@@ -237,14 +239,16 @@
 
                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="guestMenuBtn"
                                        style="min-width:220px;">
-                                       <li>
-                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                               data-bs-target="#loginModal">Login</a>
-                                       </li>
-                                       <li>
-                                           <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                               data-bs-target="#guestRegisterModal">Register</a>
-                                       </li>
+                                <li>
+                                    <button type="button" class="dropdown-item auth-trigger" data-auth-tab="login">
+                                        Login
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item auth-trigger" data-auth-tab="register">
+                                        Register
+                                    </button>
+                                </li>
                                    </ul>
                                @endauth
                            </div>

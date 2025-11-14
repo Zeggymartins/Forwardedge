@@ -24,7 +24,7 @@ class Course extends Model
 
     public function contents()
     {
-        return $this->hasMany(CourseContent::class)->orderBy('position', 'asc');
+        return $this->hasMany(CourseContent::class)->orderBy('order', 'asc');
     }
     public function phases()
     {

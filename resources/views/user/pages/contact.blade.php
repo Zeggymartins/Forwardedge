@@ -101,6 +101,7 @@
                                         <textarea name="cfMessage2" id="message" placeholder="Type message *" required>{{ old('cfMessage2') }}</textarea>
                                     </div>
                                 </div>
+                                <x-recaptcha action="contact_form" />
                                 <div class="submit-btn">
                                     <button class="tj-primary-btn" type="submit">
                                         <span class="btn-text"><span>Send Message</span></span>

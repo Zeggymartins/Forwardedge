@@ -85,21 +85,21 @@
                                                     {{ Str::plural('phase', $content->phases_count) }}
                                                 </small>
                                             </div>
-                                            <div class="btn-group">
+                                            <div class="action-buttons d-flex flex-wrap gap-2">
                                                 <a href="{{ route('admin.course_contents.show', $course->id) }}#content-{{ $content->id }}"
-                                                    class="btn btn-sm btn-outline-primary">View</a>
+                                                    class="btn btn-sm btn-outline-primary flex-fill">View</a>
 
-                                                    @php
-                                                        $payload = [
-                                                            'id'        => $content->id,
-                                                            'title'     => $content->title,
-                                                            'type'      => $content->type,
-                                                            'content'   => $content->content,
-                                                            'file_name' => $content->file_path ? basename($content->file_path) : null,
-                                                            'has_file'  => (bool) $content->file_path,
-                                                        ];
-                                                        @endphp
-                                                <button class="btn btn-sm btn-outline-secondary"
+                                                @php
+                                                    $payload = [
+                                                        'id'        => $content->id,
+                                                        'title'     => $content->title,
+                                                        'type'      => $content->type,
+                                                        'content'   => $content->content,
+                                                        'file_name' => $content->file_path ? basename($content->file_path) : null,
+                                                        'has_file'  => (bool) $content->file_path,
+                                                    ];
+                                                @endphp
+                                                <button class="btn btn-sm btn-outline-secondary flex-fill"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editContentModal"
                                                     data-action="{{ route('admin.course_contents.update', $content->id) }}"
@@ -107,9 +107,9 @@
                                                     Edit
                                                 </button>
                                                 <form action="{{ route('admin.course_contents.destroy', $content->id) }}" method="POST"
-                                                    onsubmit="return confirm('Delete this content block?');">
+                                                    onsubmit="return confirm('Delete this content block?');" class="flex-fill">
                                                     @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                                    <button class="btn btn-sm btn-outline-danger w-100">Delete</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -137,3 +137,16 @@
     'courseOptions' => $courseOptions,
     'typeOptions' => $typeOptions,
 ])
+
+@push('styles')
+<style>
+    .content-line .action-buttons .btn{
+        min-width: 110px;
+    }
+    @media (max-width: 575px){
+        .content-line .action-buttons .btn{
+            flex:1 1 100%;
+        }
+    }
+</style>
+@endpush

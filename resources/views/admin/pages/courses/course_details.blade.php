@@ -182,8 +182,8 @@
                                         <div class="col-md-6">
                                             <label class="form-label">Delivery type</label>
                                             <select name="type" class="form-select">
-                                                <option value="">Select type</option>
-                                                @foreach (['virtual', 'hybrid', 'physical'] as $type)
+                                                <option value="">Keep current ({{ ucfirst($schedule->type ?? 'bootcamp') }})</option>
+                                                @foreach (['bootcamp', 'virtual', 'hybrid', 'physical'] as $type)
                                                     <option value="{{ $type }}" @selected($schedule->type === $type)>{{ ucfirst($type) }}</option>
                                                 @endforeach
                                             </select>
@@ -250,11 +250,12 @@
                         <div class="col-md-6">
                             <label>Delivery type</label>
                             <select name="type" class="form-select">
-                                <option value="">Select type</option>
-                                @foreach (['virtual','hybrid','physical'] as $t)
+                                <option value="">Default (Bootcamp)</option>
+                                @foreach (['bootcamp','virtual','hybrid','physical'] as $t)
                                     <option value="{{ $t }}">{{ ucfirst($t) }}</option>
                                 @endforeach
                             </select>
+                            <small class="text-muted">Leave blank to use the standard bootcamp format.</small>
                         </div>
                     </div>
                     <div class="modal-footer"><button class="btn btn-primary">Add Schedule</button></div>

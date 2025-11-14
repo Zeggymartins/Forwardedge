@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\EventTicket;
 use App\Models\Payment;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,12 @@ class EventController extends Controller
             ->where('slug', $slug)
             ->where('status', 'published')
             ->firstOrFail();
+
+        seo()->set([
+            'title'       => "{$event->title} | " . config('seo.site_name', config('app.name')) . ' Events',
+            'description' => Str::limit(strip_tags($event->short_description ?? $event->title), 160),
+            'image'       => $event->banner_image ? asset('storage/' . $event->banner_image) : ($event->thumbnail ? asset('storage/' . $event->thumbnail) : null),
+        ], true);
 
         return view('user.pages.events_details', compact('event'));
     }
@@ -128,6 +135,7 @@ class EventController extends Controller
             'company'    => 'nullable|string|max:255',
             'job_title'  => 'nullable|string|max:255',
             'special_requirements' => 'nullable|string|max:500',
+            'recaptcha_token' => ['required', new Recaptcha('event_registration')],
         ]);
 
         $eventId  = $request->event_id;

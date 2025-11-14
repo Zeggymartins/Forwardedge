@@ -96,7 +96,7 @@
       </div>
 
       {{-- Partial Payment --}}
-      <div class="col-xl-5 col-md-6">
+      {{-- <div class="col-xl-5 col-md-6">
         <div class="pricing-box active wow fadeInUp" data-wow-delay=".7s">
           <div class="pricing-header">
             <h4 class="package-name">Partial Payment</h4>
@@ -136,7 +136,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> --}}
     </div>
 
     {{-- Optional: show selected plan features --}}

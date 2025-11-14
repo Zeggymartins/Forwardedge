@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-
 class ServiceController extends Controller
 {
     public function ServiceList()
@@ -28,6 +27,12 @@ class ServiceController extends Controller
             ->firstOrFail();
 
         $otherServices = Service::where('id', '!=', $service->id)->get();
+
+        seo()->set([
+            'title'       => "{$service->title} | " . config('seo.site_name', config('app.name')),
+            'description' => Str::limit(strip_tags($service->brief_description ?? $service->title), 160),
+            'image'       => $service->thumbnail ? asset('storage/' . $service->thumbnail) : null,
+        ], true);
 
         return view('user.pages.service_details', compact('service', 'otherServices'));
     }

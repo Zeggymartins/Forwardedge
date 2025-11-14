@@ -20,6 +20,8 @@ class PageBuilderController extends Controller
             ->with(['blocks' => fn($q) => $q->where('is_published', true)->orderBy('order')])
             ->firstOrFail();
 
+        seo()->forPage($page);
+
         return view('user.pages.dynamic', compact('page'));
     }
 
@@ -50,6 +52,11 @@ class PageBuilderController extends Controller
             'status'     => 'required|string|in:draft,published',
             'owner_type' => 'nullable|string|in:course,event',
             'owner_id'   => 'nullable|integer',
+            'meta_title'       => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:320',
+            'meta_keywords'    => 'nullable|string|max:255',
+            'meta_image'       => 'nullable|string|max:500',
+            'meta_canonical'   => 'nullable|string|max:500',
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
@@ -68,6 +75,9 @@ class PageBuilderController extends Controller
         }
 
         unset($data['owner_type'], $data['owner_id']);
+
+        $data['meta'] = $this->extractMetaFromRequest($request);
+        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical']);
 
         $page = Page::create($data);
 
@@ -90,6 +100,11 @@ class PageBuilderController extends Controller
             'status'     => 'required|string|in:draft,published',
             'owner_type' => 'nullable|string|in:course,event',
             'owner_id'   => 'nullable|integer',
+            'meta_title'       => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:320',
+            'meta_keywords'    => 'nullable|string|max:255',
+            'meta_image'       => 'nullable|string|max:500',
+            'meta_canonical'   => 'nullable|string|max:500',
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
@@ -114,6 +129,9 @@ class PageBuilderController extends Controller
         }
 
         unset($data['owner_type'], $data['owner_id']);
+
+        $data['meta'] = $this->extractMetaFromRequest($request);
+        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical']);
 
         $page->update($data);
 
@@ -742,5 +760,18 @@ class PageBuilderController extends Controller
                 }
             }
         }
+    }
+
+    private function extractMetaFromRequest(Request $request): ?array
+    {
+        $meta = array_filter([
+            'title'       => $request->input('meta_title'),
+            'description' => $request->input('meta_description'),
+            'keywords'    => $request->input('meta_keywords'),
+            'image'       => $request->input('meta_image'),
+            'canonical'   => $request->input('meta_canonical'),
+        ], fn($value) => filled($value));
+
+        return empty($meta) ? null : $meta;
     }
 }

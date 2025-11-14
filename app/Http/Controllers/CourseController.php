@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\CourseContent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -12,11 +13,19 @@ class CourseController extends Controller
 {
     public function getCourse()
     {
-        $course = Course::where('status', 'published')
-            ->latest()
-            ->paginate(10);
+        $contents = CourseContent::query()
+            ->with([
+                'course:id,title,slug,description,thumbnail',
+                'phases.topics',
+            ])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->whereHas('course', fn($q) => $q->where('status', 'published'))
+            ->orderBy('order')
+            ->orderByDesc('created_at')
+            ->paginate(9);
 
-        return view('user.pages.academy', compact('course'));
+        return view('user.pages.academy', compact('contents'));
     }
     public function showdetails(string $slug)
     {
@@ -40,6 +49,12 @@ class CourseController extends Controller
             'phases.topics',
             'schedules',
         ]);
+
+        seo()->set([
+            'title'       => "{$course->title} | " . config('seo.site_name', config('app.name')),
+            'description' => Str::limit(strip_tags($course->description ?? $course->title), 160),
+            'image'       => $course->thumbnail ? asset('storage/' . $course->thumbnail) : null,
+        ], true);
 
         return view('user.pages.course_details', compact('course'));
     }
@@ -234,26 +249,103 @@ class CourseController extends Controller
 
     public function shop(Request $request)
     {
-        // ===== Base: published + HAS CONTENT =====
-        // Content = (has phases with topics) OR (has details)
-        $base = Course::query()
-            ->where('status', 'published')
-            ->whereHas('contents');
+        $baseQuery = $this->makeShopQuery();
+        $query     = (clone $baseQuery);
 
-        // We'll reuse this base for other queries
-        $query = (clone $base);
-
-        // ===== Sorting =====
         $orderby = $request->get('orderby', 'date');
+        $this->applyShopOrdering($query, $orderby);
+
+        $course = $query->paginate(6)->withQueryString();
+        $latestCourse = (clone $baseQuery)->latest()->take(3)->get();
+
+        return view('user.pages.shop', compact('course', 'latestCourse'));
+    }
+
+
+    public function shopDetails(Request $request, $slug)
+    {
+        $course = Course::with([
+            'schedules',
+            'contents' => fn($q) => $q->with(['phases.topics', 'reviews.user'])
+                ->orderBy('order')
+                ->orderByDesc('created_at'),
+        ])->where('slug', $slug)->firstOrFail();
+
+        $selectedId = $request->query('content');
+        $selectedContent = $course->contents->firstWhere('id', (int) $selectedId) ?? $course->contents->first();
+
+        if ($selectedContent) {
+            $selectedContent->setRelation('reviews', $selectedContent->reviews()->with('user')->latest()->get());
+        }
+
+        return view('user.pages.shop_details', compact('course', 'selectedContent'));
+    }
+
+    public function shopData(Request $request)
+    {
+        $query = $this->makeShopQuery();
+
+        if ($search = trim((string) $request->get('search'))) {
+            $query->where(function (Builder $builder) use ($search) {
+                $builder->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('content', 'like', '%' . $search . '%')
+                    ->orWhereHas('course', function (Builder $courseQuery) use ($search) {
+                        $courseQuery->where('title', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($courseId = $request->get('course_id')) {
+            $query->where('course_id', $courseId);
+        }
+
+        $orderby = $request->get('orderby', 'date');
+        $this->applyShopOrdering($query, $orderby);
+
+        $perPage = (int) $request->get('per_page', 9);
+        $perPage = max(1, min($perPage, 24));
+
+        $paginator = $query->paginate($perPage)->withQueryString();
+        $collection = $paginator->getCollection()->map(fn (CourseContent $module) => $this->transformShopModule($module));
+
+        return response()->json([
+            'data' => $collection,
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+                'next_page_url' => $paginator->nextPageUrl(),
+                'prev_page_url' => $paginator->previousPageUrl(),
+            ],
+        ]);
+    }
+
+    protected function makeShopQuery(): Builder
+    {
+        return CourseContent::query()
+            ->with([
+                'course:id,title,slug,description,thumbnail,price,discount_price',
+                'phases.topics',
+            ])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->whereHas('course', fn(Builder $q) => $q->where('status', 'published'));
+    }
+
+    protected function applyShopOrdering(Builder $query, ?string $orderby): Builder
+    {
+        $orderby = $orderby ?: 'date';
+
         switch ($orderby) {
             case 'title':
-                $query->orderBy('title', 'asc');
+                $query->orderBy('title');
                 break;
             case 'price':
-                $query->orderByRaw('COALESCE(discount_price, price) ASC');
+                $query->orderByRaw('(SELECT COALESCE(discount_price, price) FROM courses WHERE courses.id = course_contents.course_id) ASC');
                 break;
             case 'price-desc':
-                $query->orderByRaw('COALESCE(discount_price, price) DESC');
+                $query->orderByRaw('(SELECT COALESCE(discount_price, price) FROM courses WHERE courses.id = course_contents.course_id) DESC');
                 break;
             case 'date':
             default:
@@ -261,37 +353,28 @@ class CourseController extends Controller
                 break;
         }
 
-        // ===== Price filter (applies to listables only) =====
-        if ($request->has('min_price') && $request->has('max_price')) {
-            $minPrice = $request->get('min_price');
-            $maxPrice = $request->get('max_price');
-
-            $query->where(function ($q) use ($minPrice, $maxPrice) {
-                $q->whereBetween('price', [$minPrice, $maxPrice])
-                    ->orWhereBetween('discount_price', [$minPrice, $maxPrice]);
-            });
-        }
-
-        // ===== Results =====
-        $course = $query->paginate(6)->withQueryString();
-
-        // Latest (respect same "has content" rule)
-        $latestCourse = (clone $base)->latest()->take(3)->get();
-
-        // Price range (respect same "has content" rule)
-        $priceRange = (clone $base)
-            ->selectRaw('MIN(COALESCE(discount_price, price)) as min_price')
-            ->selectRaw('MAX(COALESCE(discount_price, price)) as max_price')
-            ->first();
-
-        return view('user.pages.shop', compact('course', 'latestCourse', 'priceRange'));
+        return $query;
     }
 
-
-    public function shopDetails($slug)
+    protected function transformShopModule(CourseContent $module): array
     {
-        $course = Course::where('slug', $slug)->firstOrFail();
+        $course = $module->course;
+        $thumb = $course?->thumbnail
+            ? asset('storage/' . $course->thumbnail)
+            : asset('frontend/assets/images/product/product-1.webp');
+        $descriptionSource = $module->content ?? $course?->description ?? '';
 
-        return view('user.pages.shop_details', compact('course'));
+        return [
+            'id'             => $module->id,
+            'title'          => $module->title,
+            'course_slug'    => $course?->slug,
+            'description'    => Str::limit(strip_tags($descriptionSource), 180),
+            'thumbnail'      => $thumb,
+            'price'          => $course?->discount_price ?? $course?->price ?? 0,
+            'original_price' => $course?->price,
+            'rating'         => round((float) ($module->reviews_avg_rating ?? 0), 1),
+            'reviews_count'  => $module->reviews_count ?? 0,
+            'url'            => $course ? route('shop.details', ['slug' => $course->slug, 'content' => $module->id]) : null,
+        ];
     }
 }

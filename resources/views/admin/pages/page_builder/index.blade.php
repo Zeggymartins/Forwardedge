@@ -71,7 +71,7 @@
               <tr>
                 <td>
                   <div class="fw-semibold">{{ $p->title }}</div>
-                  <small class="text-muted">/p/{{ $p->slug }}</small>
+                  <small class="text-muted">/{{ $p->slug }}</small>
                 </td>
                 <td>
                   <span class="badge bg-{{ $typeBadge }}">{{ $typeDisplay }}</span>
@@ -103,7 +103,8 @@
                         'slug' => $p->slug,
                         'status' => $p->status,
                         'owner_type' => $ownerType,
-                        'owner_id' => $p->pageable_id
+                        'owner_id' => $p->pageable_id,
+                        'meta' => $p->meta,
                       ]) }}"
                     >
                       <i class="bi bi-pencil me-1"></i>Edit
@@ -215,6 +216,41 @@
                 @endforeach
               </select>
             </div>
+
+            <div class="col-12">
+              <hr>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-semibold mb-0">SEO Metadata</label>
+                <small class="text-muted">Optional but recommended for organic search</small>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Meta Title</label>
+              <input class="form-control" name="meta_title" id="metaTitle" maxlength="255" placeholder="Displayed in search results">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Keywords</label>
+              <input class="form-control" name="meta_keywords" id="metaKeywords" maxlength="255" placeholder="Comma-separated focus keywords">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Meta Description</label>
+              <textarea class="form-control" name="meta_description" id="metaDescription" rows="3" maxlength="320" placeholder="Short summary shown on Google & social previews"></textarea>
+              <small class="text-muted">Aim for 150-160 characters.</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Canonical URL</label>
+              <input class="form-control" name="meta_canonical" id="metaCanonical" maxlength="500" placeholder="https://example.com/landing-page">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Social Preview Image URL</label>
+              <input class="form-control" name="meta_image" id="metaImage" maxlength="500" placeholder="{{ asset('frontend/assets/images/logos/logo.png') }}">
+              <small class="text-muted">Use a full URL to the hero image (1200×630px).</small>
+            </div>
           </div>
         </div>
 
@@ -260,7 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
     slug: document.getElementById('pageSlug'),
     status: document.getElementById('pageStatus'),
     ownerCourse: document.getElementById('ownerCourse'),
-    ownerEvent: document.getElementById('ownerEvent')
+    ownerEvent: document.getElementById('ownerEvent'),
+    metaTitle: document.getElementById('metaTitle'),
+    metaDescription: document.getElementById('metaDescription'),
+    metaKeywords: document.getElementById('metaKeywords'),
+    metaImage: document.getElementById('metaImage'),
+    metaCanonical: document.getElementById('metaCanonical')
   };
 
   function setOwnerRequired(which) {
@@ -284,6 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Clear owner_id hidden input if exists
     form.querySelector('input[name="owner_id"]')?.remove();
+
+    if (elements.metaTitle) elements.metaTitle.value = '';
+    if (elements.metaDescription) elements.metaDescription.value = '';
+    if (elements.metaKeywords) elements.metaKeywords.value = '';
+    if (elements.metaImage) elements.metaImage.value = '';
+    if (elements.metaCanonical) elements.metaCanonical.value = '';
   }
 
   function populateForm(data) {
@@ -293,6 +340,12 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.title.value = data.title || '';
     elements.slug.value = data.slug || '';
     elements.status.value = data.status || 'draft';
+    const meta = data.meta || {};
+    if (elements.metaTitle) elements.metaTitle.value = meta.title || '';
+    if (elements.metaDescription) elements.metaDescription.value = meta.description || '';
+    if (elements.metaKeywords) elements.metaKeywords.value = meta.keywords || '';
+    if (elements.metaImage) elements.metaImage.value = meta.image || '';
+    if (elements.metaCanonical) elements.metaCanonical.value = meta.canonical || '';
 
     // Set owner type radio
     const ownerType = data.owner_type || '';
@@ -438,7 +491,14 @@ document.addEventListener('DOMContentLoaded', () => {
       slug: @json(old('slug', '')),
       status: @json(old('status', 'draft')),
       owner_type: @json(old('owner_type', '')),
-      owner_id: @json(old('owner_id', ''))
+      owner_id: @json(old('owner_id', '')),
+      meta: {
+        title: @json(old('meta_title')),
+        description: @json(old('meta_description')),
+        keywords: @json(old('meta_keywords')),
+        image: @json(old('meta_image')),
+        canonical: @json(old('meta_canonical')),
+      }
     };
     
     if (oldData.id) {

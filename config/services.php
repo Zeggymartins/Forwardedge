@@ -48,4 +48,10 @@ return [
         'transactional_key'  => env('MAILCHIMP_TRANSACTIONAL_KEY'),
         'double_opt_in'      => env('MAILCHIMP_DOUBLE_OPT_IN', false),
     ],
+
+    'recaptcha' => [
+        'key'    => env('RECAPTCHA_SITE_KEY'),
+        'secret' => env('RECAPTCHA_SECRET_KEY'),
+        'score'  => env('RECAPTCHA_MIN_SCORE', 0.5),
+    ],
 ];

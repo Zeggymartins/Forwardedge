@@ -3,6 +3,17 @@
 @section('title', 'Scholarship Applications')
 
 @section('main')
+@php
+    use Illuminate\Support\Str;
+
+    $scholarshipOptions = config('scholarship.form_options', []);
+    $optionLabel = function (string $group, ?string $value) use ($scholarshipOptions) {
+        if (!$value) {
+            return '—';
+        }
+        return $scholarshipOptions[$group][$value] ?? Str::headline(str_replace('_', ' ', $value));
+    };
+@endphp
 <div class="container py-5">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
@@ -27,7 +38,16 @@
                 <tbody>
                     @forelse($applications as $application)
                         @php
-                            $contact = $application->form_data['contact'] ?? [];
+                            $formData = $application->form_data ?? [];
+                            $contact = $formData['contact'] ?? [];
+                            $personal = $formData['personal'] ?? [];
+                            $education = $formData['education'] ?? [];
+                            $commitment = $formData['commitment'] ?? [];
+                            $technical = $formData['technical'] ?? [];
+                            $motivation = $formData['motivation'] ?? [];
+                            $skills = $formData['skills'] ?? [];
+                            $attitude = $formData['attitude'] ?? [];
+                            $bonus = $formData['bonus'] ?? [];
                         @endphp
                         <tr class="table-row-hover">
                             <td class="py-3 px-4">
@@ -112,12 +132,89 @@
                                                 @endif
                                             </div>
                                             <div class="col-12">
-                                                <h6 class="fw-semibold mb-2">Motivation</h6>
-                                                <p>{{ $application->form_data['why_join'] ?? '—' }}</p>
+                                                <h6 class="fw-semibold mb-2">Personal</h6>
+                                                <ul class="mini-list mb-3">
+                                                    <li><strong>Full name:</strong> {{ $personal['full_name'] ?? $contact['name'] ?? '—' }}</li>
+                                                    <li><strong>Email:</strong> {{ $personal['email'] ?? $contact['email'] ?? '—' }}</li>
+                                                    <li><strong>Phone:</strong> {{ $personal['phone'] ?? $contact['phone'] ?? '—' }}</li>
+                                                    <li><strong>Location:</strong> {{ $personal['location'] ?? '—' }}</li>
+                                                    <li><strong>Gender:</strong> {{ $optionLabel('genders', $personal['gender'] ?? null) }}</li>
+                                                    <li><strong>Age range:</strong> {{ $optionLabel('age_ranges', $personal['age_range'] ?? null) }}</li>
+                                                </ul>
+
+                                                <h6 class="fw-semibold mb-2">Education</h6>
+                                                <ul class="mini-list mb-3">
+                                                    <li><strong>Highest level:</strong> {{ $optionLabel('education_levels', $education['highest_level'] ?? null) }}</li>
+                                                    <li><strong>Field / background:</strong> {{ $education['field'] ?? '—' }}</li>
+                                                    <li><strong>Currently in school:</strong> {{ $optionLabel('yes_no', $education['currently_in_school'] ?? null) }}</li>
+                                                    @if(($education['currently_in_school'] ?? null) === 'yes')
+                                                        <li><strong>Institution:</strong> {{ $education['institution'] ?? '—' }}</li>
+                                                        <li><strong>Level:</strong> {{ $education['institution_level'] ?? '—' }}</li>
+                                                    @endif
+                                                </ul>
+
+                                                <h6 class="fw-semibold mb-2">Motivation & Goals</h6>
+                                                <p class="mb-2">{{ $motivation['reason'] ?? $formData['why_join'] ?? '—' }}</p>
+                                                <ul class="mini-list mb-3">
+                                                    <li><strong>Future plan:</strong> {{ $motivation['future_plan'] ?? '—' }}</li>
+                                                    <li><strong>If not selected:</strong> {{ $optionLabel('motivation_unselected_plan', $motivation['plan_if_not_selected'] ?? null) }}</li>
+                                                    <li><strong>Interest area:</strong>
+                                                        {{ $optionLabel('motivation_interest_areas', $motivation['interest_area'] ?? null) }}
+                                                        @if(($motivation['interest_area'] ?? null) === 'other')
+                                                            – {{ $motivation['interest_area_other'] ?? 'N/A' }}
+                                                        @endif
+                                                    </li>
+                                                </ul>
                                             </div>
                                             <div class="col-12">
-                                                <h6 class="fw-semibold mb-2">Experience</h6>
-                                                <p>{{ $application->form_data['experience'] ?? '—' }}</p>
+                                                <h6 class="fw-semibold mb-2">Commitment & Technical readiness</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <ul class="mini-list">
+                                                            <li><strong>Availability:</strong> {{ $optionLabel('commit_availability', $commitment['availability'] ?? null) }}</li>
+                                                            <li><strong>Hours / week:</strong> {{ $optionLabel('commit_hours', $commitment['hours_per_week'] ?? null) }}</li>
+                                                            <li><strong>Consistency plan:</strong> {{ $commitment['consistency_plan'] ?? '—' }}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <ul class="mini-list">
+                                                            <li><strong>Laptop:</strong> {{ $optionLabel('yes_no', $technical['has_laptop'] ?? null) }}</li>
+                                                            <li><strong>Specs:</strong> {{ $technical['laptop_specs'] ?? '—' }}</li>
+                                                            <li><strong>Internet:</strong> {{ $optionLabel('internet_quality', $technical['internet'] ?? null) }}</li>
+                                                            <li><strong>Tools used:</strong>
+                                                                @php
+                                                                    $tools = collect($technical['tools'] ?? [])
+                                                                        ->map(fn($tool) => $optionLabel('tech_tools', $tool))
+                                                                        ->filter()
+                                                                        ->implode(', ');
+                                                                @endphp
+                                                                {{ $tools ?: '—' }}
+                                                            </li>
+                                                            <li><strong>Experience:</strong> {{ $technical['experience'] ?? $formData['experience'] ?? '—' }}</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <h6 class="fw-semibold mb-2">Skills & Attitude</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <ul class="mini-list">
+                                                            <li><strong>Skill level:</strong> {{ $optionLabel('skill_levels', $skills['level'] ?? null) }}</li>
+                                                            <li><strong>Project response:</strong> {{ $optionLabel('skill_project_responses', $skills['project_response'] ?? null) }}</li>
+                                                            <li><strong>Familiarity:</strong> {{ $optionLabel('skill_familiarity', $skills['familiarity'] ?? null) }}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <ul class="mini-list">
+                                                            <li><strong>Teamwork:</strong> {{ $attitude['teamwork'] ?? '—' }}</li>
+                                                            <li><strong>Participation:</strong> {{ $optionLabel('yes_no', $attitude['participation'] ?? null) }}</li>
+                                                            <li><strong>Discovery channel:</strong> {{ $optionLabel('discovery_channels', $attitude['discovery_channel'] ?? null) }}</li>
+                                                            <li><strong>Commitment agreement:</strong> {{ $optionLabel('yes_no', $attitude['commitment_agreement'] ?? null) }}</li>
+                                                            <li><strong>Bonus challenge:</strong> {{ $optionLabel('yes_no', $bonus['challenge_opt_in'] ?? null) }}</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
                                             </div>
                                             @if($application->admin_notes)
                                                 <div class="col-12">
@@ -171,3 +268,16 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .mini-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    .mini-list li {
+        margin-bottom: .35rem;
+    }
+</style>
+@endpush

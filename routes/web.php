@@ -13,6 +13,7 @@ use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseContentReviewController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FaqController;
@@ -80,6 +81,9 @@ Route::prefix('shop')->name('shop')->group(function () {
     Route::get('/{slug}', [CourseController::class, 'shopDetails'])->name('.details');
     Route::get('/data', [CourseController::class, 'shopData'])->name('.data');
 });
+
+Route::post('/course-content/{content}/reviews', [CourseContentReviewController::class, 'store'])
+    ->name('course-content.reviews.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -461,7 +465,52 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
     });
 });
 
-Route::get('/p/{slug}', [PageBuilderController::class, 'show'])->name('page.show');
+/*
+|--------------------------------------------------------------------------
+| Dynamic Page Builder Routes
+|--------------------------------------------------------------------------
+*/
+$pageReservedSlugs = [
+    'about',
+    'academy',
+    'ajax',
+    'api',
+    'blog',
+    'checkout',
+    'confirm-password',
+    'contact',
+    'course',
+    'ctrl-panel-v2',
+    'enroll',
+    'events',
+    'forgot-password',
+    'gallery',
+    'login',
+    'logout',
+    'newsletter',
+    'password',
+    'payment',
+    'register',
+    'reset-password',
+    'scholarships',
+    'services',
+    'shop',
+    'storage',
+    'up',
+    'user',
+    'verify-email',
+    'p',
+];
+
+$pageReservedPattern = implode('|', array_map(fn ($slug) => preg_quote($slug, '#'), $pageReservedSlugs));
+
+Route::get('/{slug}', [PageBuilderController::class, 'show'])
+    ->where('slug', '^(?!(' . $pageReservedPattern . ')$)[A-Za-z0-9-]+$')
+    ->name('page.show');
+
+Route::get('/p/{slug}', function (string $slug) {
+    return redirect()->route('page.show', ['slug' => $slug], 301);
+})->where('slug', '[A-Za-z0-9\-]+')->name('page.legacy');
 /*
 |--------------------------------------------------------------------------
 | Laravel Breeze Auth Routes

@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
             $middleware->prependToGroup('web', \App\Http\Middleware\LogCsrfFailures::class);
         }
 
+        $middleware->appendToGroup('web', \App\Http\Middleware\ApplySeoDefaults::class);
+
         // Existing aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

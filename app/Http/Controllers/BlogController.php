@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -46,6 +47,15 @@ class BlogController extends Controller
         $categories = Blog::select('category', DB::raw('COUNT(*) as count'))
             ->groupBy('category')
             ->pluck('count', 'category');
+
+        $firstSection = $blog->details->first();
+        $excerpt = Str::limit(strip_tags($firstSection->content ?? $blog->short_description ?? $blog->title), 160);
+
+        seo()->set([
+            'title'       => "{$blog->title} | " . config('seo.site_name', config('app.name')),
+            'description' => $excerpt,
+            'image'       => $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : null,
+        ], true);
 
         return view('user.pages.blog_details', compact('blog', 'relatedBlogs', 'categories'));
     }

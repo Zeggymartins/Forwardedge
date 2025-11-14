@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\Service;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,6 +24,7 @@ class MessageController extends Controller
             'cfPhone2'   => 'nullable|string|max:20',
             'cfSubject2' => 'required|exists:services,id',
             'cfMessage2' => 'required|string',
+            'recaptcha_token' => ['required', new Recaptcha('contact_form')],
         ]);
 
         // Save to DB

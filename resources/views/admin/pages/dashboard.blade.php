@@ -45,9 +45,9 @@
                 </form>
             </div>
             <div class="d-flex gap-2">
-                <a href="/admin/courses/create" class="btn btn-primary"><i class="bi bi-journal-plus me-1"></i> New
+                <a href="{{ route('admin.courses.create') }}" class="btn btn-primary"><i class="bi bi-journal-plus me-1"></i> New
                     Course</a>
-                <a href="/admin/events/create" class="btn btn-ghost"><i class="bi bi-broadcast me-1"></i> New Event</a>
+                <a href="{{ route('admin.events.create') }}" class="btn btn-ghost"><i class="bi bi-broadcast me-1"></i> New Event</a>
             </div>
         </div>
     </div>
@@ -138,7 +138,7 @@
                 <div class="row g-3 row-cols-2 row-cols-md-4">
                     <div class="col">
                         <a class="glass-card p-3 d-block card-link text-decoration-none"
-                            href="/admin/enrollments?tag=free&status=pending">
+                            href="{{ route('admin.scholarships.applications', ['status' => 'pending']) }}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-muted small">Scholarships Pending</div>
@@ -150,7 +150,7 @@
                     </div>
                     <div class="col">
                         <a class="glass-card p-3 d-block card-link text-decoration-none"
-                            href="/admin/enrollments?status=pending">
+                            href="{{ route('admin.enrollments.index', ['status' => 'pending']) }}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-muted small">Pending Enrollments</div>
@@ -162,7 +162,7 @@
                     </div>
                     <div class="col">
                         <a class="glass-card p-3 d-block card-link text-decoration-none"
-                            href="/admin/payments?status=pending">
+                            href="{{ route('admin.transactions.index', ['status' => 'pending']) }}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-muted small">Payments to Review</div>
@@ -174,7 +174,7 @@
                     </div>
                     <div class="col">
                         <a class="glass-card p-3 d-block card-link text-decoration-none"
-                            href="/admin/messages?filter=unread">
+                            href="{{ route('messages.index', ['filter' => 'unread']) }}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-muted small">Unread Messages</div>
@@ -195,7 +195,7 @@
                 <div class="glass-card p-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0">Recent Orders</h5>
-                        <a href="/admin/orders" class="btn btn-sm btn-ghost">View all</a>
+                        <a href="{{ route('admin.orders.show') }}" class="btn btn-sm btn-ghost">View all</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle mb-0">
@@ -209,13 +209,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($recentOrders as $order)
+                                @forelse($recentOrders as $index=>$order)
                                     <tr>
-                                        <td><a href="/admin/orders/{{ $order->id }}">#{{ $order->id }}</a></td>
-                                        <td>{{ $order->customer_name ?? '—' }}</td>
+                                        <td><a href="{{ route('admin.orders.show', ['highlight' => $order->id]) }}">#{{ $index + 1 }}</a></td>
+                                        <td>{{ $order->user->name ?? '—' }}</td>
                                         <td>
                                             @php $currency = $order->currency ?? '₦'; @endphp
-                                            <strong>{{ $currency }}{{ number_format($order->total_amount ?? 0, 2) }}</strong>
+                                            <strong>{{ $currency }}{{ number_format($order->total_price ?? 0, 2) }}</strong>
                                         </td>
                                         <td><span
                                                 class="badge bg-{{ $statusBadge($order->status) }}">{{ ucfirst($order->status ?? 'unknown') }}</span>
@@ -238,7 +238,7 @@
                 <div class="glass-card p-3 mb-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0">Recent Payments</h5>
-                        <a href="/admin/payments" class="btn btn-sm btn-ghost">View all</a>
+                        <a href="{{ route('admin.transactions.index') }}" class="btn btn-sm btn-ghost">View all</a>
                     </div>
                     <ul class="list-group list-group-flush list-clean">
                         @forelse($recentPayments as $p)
@@ -289,11 +289,11 @@
                 <div class="glass-card p-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0">Latest Messages</h5>
-                        <a href="/admin/messages" class="btn btn-sm btn-ghost">View all</a>
+                        <a href="{{ route('messages.index') }}" class="btn btn-sm btn-ghost">View all</a>
                     </div>
                     <div class="list-group">
                         @forelse($recentMessages as $m)
-                            <a href="/admin/messages/{{ $m->id }}" class="list-group-item list-group-item-action">
+                            <a href="{{ route('messages.index', ['highlight' => $m->id]) }}" class="list-group-item list-group-item-action">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1">{{ $m->subject ?? 'Message #' . $m->id }}</h6>
                                     <small class="text-muted">{{ optional($m->created_at)->diffForHumans() }}</small>
@@ -316,17 +316,18 @@
                 <div class="glass-card p-3 h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0">Upcoming (7 days)</h5>
-                        <a href="/admin/events" class="btn btn-sm btn-ghost">View all</a>
+                        <a href="{{ route('admin.events.list') }}" class="btn btn-sm btn-ghost">View all</a>
                     </div>
                     <ul class="list-group list-group-flush list-clean">
-                        @forelse($upcomingEvents as $er)
+                        @forelse($upcomingEvents as $event)
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="fw-semibold">{{ $er->event->title ?? 'Event #' . $er->event_id }}</div>
-                                    <small
-                                        class="text-muted">{{ optional($er->event->start_at)->format('D, d M Y · H:i') }}</small>
+                                    <div class="fw-semibold">{{ $event->title ?? 'Event #' . $event->id }}</div>
+                                    <small class="text-muted">
+                                        {{ optional($event->start_date)->format('D, d M Y') }}
+                                    </small>
                                 </div>
-                                <span class="badge bg-secondary">{{ $er->event->location ?? 'Online' }}</span>
+                                <span class="badge bg-secondary">{{ $event->location ?? 'Online' }}</span>
                             </li>
                         @empty
                             <li class="list-group-item px-0 text-muted">Nothing scheduled.</li>

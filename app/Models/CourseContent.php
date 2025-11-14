@@ -18,6 +18,10 @@ class CourseContent extends Model
         'order',
     ];
 
+    protected $casts = [
+        'order' => 'integer',
+    ];
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -26,5 +30,21 @@ class CourseContent extends Model
     public function phases()
     {
         return $this->hasMany(CoursePhases::class, 'course_content_id')->ordered();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(CourseContentReview::class)->latest();
+    }
+
+    public function averageRating(): float
+    {
+        if ($this->relationLoaded('reviews')) {
+            $avg = $this->reviews->avg('rating');
+        } else {
+            $avg = $this->reviews_avg_rating ?? $this->reviews()->avg('rating');
+        }
+
+        return round((float) ($avg ?? 0), 1);
     }
 }

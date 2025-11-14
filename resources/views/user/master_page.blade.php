@@ -2,14 +2,33 @@
 <html class="no-js" lang="en">
 
 <head>
+    @php
+        $seo = seo()->toArray();
+        $pageTitle = trim($__env->yieldContent('title', $seo['title']));
+    @endphp
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
+    <meta name="description" content="{{ $seo['description'] }}">
+    <meta name="keywords" content="{{ $seo['keywords'] }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="canonical" href="{{ $seo['canonical'] }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $seo['site_name'] }}">
+    <meta property="og:url" content="{{ $seo['canonical'] }}">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $seo['description'] }}">
+    <meta property="og:image" content="{{ $seo['image'] }}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $seo['description'] }}">
+    <meta name="twitter:image" content="{{ $seo['image'] }}">
+    <meta name="twitter:site" content="@ForwardEdgeNg">
 
     <!-- Site Title -->
-    <title>@yield('title')</title>
+    <title>{{ $pageTitle }}</title>
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/assets/images/fav.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
@@ -390,11 +409,27 @@
                                 timeOut: "7000"
                             };
 
-                            // Modal helper function
-                            function showAuthModal(message = 'Please login to continue') {
-                                console.log('Showing auth modal:', message);
+                            const authModalEl = document.getElementById('authModal');
+
+                            function openAuthModal(tab = 'login') {
+                                if (!authModalEl) return;
+                                const trigger = authModalEl.querySelector(`[data-bs-toggle="tab"][href="#${tab}Tab"], [data-bs-toggle="tab"][data-bs-target="#${tab}Tab"]`);
+                                if (trigger) {
+                                    bootstrap.Tab.getOrCreateInstance(trigger).show();
+                                }
+                                bootstrap.Modal.getOrCreateInstance(authModalEl).show();
+                            }
+
+                            document.addEventListener('click', function (event) {
+                                const trigger = event.target.closest('.auth-trigger');
+                                if (!trigger) return;
+                                event.preventDefault();
+                                openAuthModal(trigger.dataset.authTab || 'login');
+                            });
+
+                            function showAuthModal(message = 'Please login to continue', tab = 'login') {
                                 toastr.info(message);
-                                $('#authModal').modal('show');
+                                openAuthModal(tab);
                             }
                             $(document).on('click', '.open-cart-btn', function(e) {
                                 e.preventDefault();
