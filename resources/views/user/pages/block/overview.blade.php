@@ -68,7 +68,7 @@
           return 'bi-cloud-check';
 
       // Networking
-      if ($has($hay, ['network','networking','firewall','packet','tcp','udp']))
+      if ($has($hay, ['network','networking','firewall','packet','tcp','udp', 'coverage']))
           return 'bi-hdd-network';
 
       // AppSec / DevSecOps
@@ -92,7 +92,7 @@
           return 'bi-shield';
 
       // Certification / Exam / Badge
-      if ($has($hay, ['certification','certificate','exam','exam prep','practice test','badge']))
+      if ($has($hay, ['certification','certificate','exam','exam prep','practice test','badge','completion']))
           return 'bi-award';
 
       // Schedules / Cohort / Live / Self-paced

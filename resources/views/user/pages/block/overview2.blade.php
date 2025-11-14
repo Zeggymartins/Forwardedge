@@ -32,8 +32,12 @@
   $link      = $d['link']     ?? '#';
   $linkText  = $d['link_text']?? 'Learn More';
   $items     = is_array($d['items'] ?? null) ? $d['items'] : [];
-  $itemsCount = count($items);
-  $columnClass = $itemsCount <= 2 ? 'col-lg-6 col-md-6' : 'col-lg-4 col-md-6';
+  $itemsCount  = count($items);
+  $columnClass = match (true) {
+      $itemsCount <= 1 => 'col-12',
+      $itemsCount === 2 => 'col-lg-6 col-md-6',
+      default => 'col-lg-4 col-md-6',
+  };
 
   // Helpers
   $src = function ($path) {
