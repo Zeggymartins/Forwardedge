@@ -505,12 +505,12 @@ $pageReservedSlugs = [
 $pageReservedPattern = implode('|', array_map(fn ($slug) => preg_quote($slug, '#'), $pageReservedSlugs));
 
 Route::get('/{slug}', [PageBuilderController::class, 'show'])
-    ->where('slug', '^(?!(' . $pageReservedPattern . ')$)[A-Za-z0-9-]+$')
+    ->where('slug', '^(?!(' . $pageReservedPattern . ')$)[A-Za-z0-9\.-]+$')
     ->name('page.show');
 
 Route::get('/p/{slug}', function (string $slug) {
     return redirect()->route('page.show', ['slug' => $slug], 301);
-})->where('slug', '[A-Za-z0-9\-]+')->name('page.legacy');
+})->where('slug', '[A-Za-z0-9\.-]+')->name('page.legacy');
 /*
 |--------------------------------------------------------------------------
 | Laravel Breeze Auth Routes
