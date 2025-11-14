@@ -117,7 +117,7 @@
               <div class="swiper-slide {{ $columnClass }}">
                 <div class="h6-service-item">
                   <div class="h6-service-thumb">
-                    <a href="{{ $itLink }}"><img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}"></a>
+                    <a href="{{ $itLink }}"><img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}" style></a>
                   </div>
 
                   <div class="h6-service-content">
