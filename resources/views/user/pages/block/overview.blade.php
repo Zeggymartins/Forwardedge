@@ -12,12 +12,25 @@
       ];
   }
 
-  /** Word-boundary matcher */
+  /** Keyword matcher tolerant to punctuation + casing */
   $has = function (string $hay, array $keywords): bool {
+      $hayLower   = Str::lower($hay);
+      $hayCompact = preg_replace('/[^a-z0-9]+/i', '', $hayLower) ?: '';
+
       foreach ($keywords as $kw) {
-          $kw = preg_quote($kw, '/');
-          if (preg_match("/\\b{$kw}\\b/i", $hay)) return true;
+          $kwLower   = Str::lower($kw);
+          $kwPattern = preg_quote($kwLower, '/');
+
+          if (preg_match("/\\b{$kwPattern}\\b/u", $hayLower)) {
+              return true;
+          }
+
+          $kwCompact = preg_replace('/[^a-z0-9]+/i', '', $kwLower) ?: '';
+          if ($kwCompact && str_contains($hayCompact, $kwCompact)) {
+              return true;
+          }
       }
+
       return false;
   };
 
@@ -33,7 +46,7 @@
           if (str_contains($hint, 'lab'))    return 'bi-bezier';
       }
 
-      $hay = strtolower(($it['subtitle'] ?? '') . ' ' . ($it['text'] ?? ''));
+      $hay = ($it['subtitle'] ?? '') . ' ' . ($it['text'] ?? '');
 
       // Foundations / Intro / Core
       if ($has($hay, ['foundation','foundations','intro','basics','core','beginner','fundamental']))

@@ -830,28 +830,44 @@ Progressbar js
 
 	// Service Slider 6 Js
 	if ($(".h6-service-slider").length > 0) {
-		var service = new Swiper(".h6-service-slider", {
-			slidesPerView: 1,
-			spaceBetween: 15,
-			loop: true,
-			speed: 1500,
-			autoplay: {
-				delay: 2000,
-			},
-			pagination: {
-				el: ".swiper-pagination-area",
-				clickable: true,
-			},
-			breakpoints: {
-				768: {
-					slidesPerView: 2,
-					spaceBetween: 30,
+		$(".h6-service-slider").each(function () {
+			var $slider = $(this);
+			var slideCount = $slider.find(".swiper-wrapper .swiper-slide").length;
+			if (!slideCount) return;
+
+			var loopEnabled = slideCount > 3;
+			var paginationEl = $slider.find(".swiper-pagination-area")[0];
+			var autoplayConfig = slideCount > 1 ? { delay: 2000 } : false;
+
+			var options = {
+				slidesPerView: 1,
+				spaceBetween: 15,
+				loop: loopEnabled,
+				speed: 1500,
+				breakpoints: {
+					768: {
+						slidesPerView: Math.min(2, slideCount),
+						spaceBetween: 30,
+					},
+					1200: {
+						slidesPerView: Math.min(3, slideCount),
+						spaceBetween: 30,
+					},
 				},
-				1200: {
-					slidesPerView: 3,
-					spaceBetween: 30,
-				},
-			},
+			};
+
+			if (paginationEl) {
+				options.pagination = {
+					el: paginationEl,
+					clickable: true,
+				};
+			}
+
+			if (autoplayConfig) {
+				options.autoplay = autoplayConfig;
+			}
+
+			new Swiper($slider[0], options);
 		});
 	}
 
