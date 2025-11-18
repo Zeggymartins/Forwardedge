@@ -384,11 +384,20 @@
             });
 
             function showFormFeedback(el, message, state) {
-                if (!el) return;
-                el.textContent = message;
-                el.classList.remove('success', 'error', 'is-visible');
-                el.classList.add(state, 'is-visible');
-                openNewsletterModal(message, state);
+                if (window.toastr) {
+                    if (state === 'success') {
+                        toastr.success(message);
+                    } else {
+                        toastr.error(message);
+                    }
+                } else {
+                    alert(message);
+                }
+
+                if (el) {
+                    el.textContent = '';
+                    el.classList.remove('success', 'error', 'is-visible');
+                }
             }
 
             function ensureNewsletterModal() {
