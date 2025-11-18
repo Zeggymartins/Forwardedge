@@ -6,7 +6,7 @@
     $linkText   = $d['link_text']  ?? ($linkText  ?? 'Get Started');
     $link       = $d['link']       ?? ($link      ?? '#');
     $desc       = trim($d['desc'] ?? ($Desc ?? 'Join immersive cohorts, earn job-ready skills, and plug into Forward Edge’s network of hiring partners.'));
-    $tagline    = $d['kicker']     ?? $d['tagline'] ?? 'Forward Edge • Cybersecurity 5.0';
+    $tagline    = $d['kicker']     ?? $d['tagline'] ?? 'Forward Edge ';
     $secondaryLink = $d['link_secondary'] ?? null;
     $secondaryText = $d['link_text_secondary'] ?? 'Explore cohorts';
 
