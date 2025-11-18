@@ -821,7 +821,7 @@ class PageBuilderController extends Controller
         }
 
         $slug = Str::lower($base);
-        $slug = preg_replace('/[^a-z0-9\.\-]+/i', '-') ?: '';
+        $slug = preg_replace('/[^a-z0-9\.\-]+/i', '-', $slug) ?: '';
         $slug = preg_replace('/-+/', '-', $slug);
         $slug = trim($slug, '-.');
 
