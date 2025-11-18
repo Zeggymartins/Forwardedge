@@ -40,6 +40,9 @@ class NewsletterController extends Controller
             'LNAME' => $data['last_name'] ?? '',
         ];
 
+        $merge['FNAME'] = $merge['FNAME'] !== '' ? $merge['FNAME'] : 'Subscriber';
+        $merge['LNAME'] = $merge['LNAME'] !== '' ? $merge['LNAME'] : '-';
+
         UpsertMember::dispatchSync($email, $merge, [
             'double_opt_in' => $data['double_optin'] ?? config('services.mailchimp.double_opt_in'),
             'tags'          => $data['tags'] ?? ['Website'],

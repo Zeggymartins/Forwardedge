@@ -132,32 +132,35 @@ class AdminBlogController extends Controller
 
         $validatedBlocks = $request->validate([
             'blocks' => 'required|array|min:1',
-            'blocks.*.type' => 'required|in:heading,paragraph,quote,list,image,code',
+            'blocks.*.type' => 'required|in:heading,paragraph,quote,list,image',
             'blocks.*.content' => 'required',
             'blocks.*.order' => 'nullable|integer|min:1',
         ]);
 
         DB::transaction(function () use ($validatedBlocks, $blog, $request) {
-            foreach ($validatedBlocks['blocks'] as $block) {
+            $nextOrder = (int) ($blog->details()->max('order') ?? 0);
+
+            foreach ($validatedBlocks['blocks'] as $index => $block) {
                 $content = $block['content'];
+                $type = $block['type'];
 
-                // Handle image uploads
-                foreach ($request->blocks as $index => $block) {
-                    if ($request->hasFile("blocks.$index.content")) {
-                        $content = $request->file("blocks.$index.content")->store('blogs/content', 'public');
-                    }
+                if ($type === 'image' && $request->hasFile("blocks.$index.content")) {
+                    $content = $request->file("blocks.$index.content")->store('blogs/content', 'public');
                 }
 
-                // Handle lists (convert to JSON)
-                if ($block['type'] === 'list' && is_string($content)) {
-                    $content = json_encode(array_filter(preg_split("/\r\n|\r|\n/", $content)));
+                if ($type === 'list') {
+                    $content = json_encode($this->normalizeListItems($content));
                 }
 
-                BlogDetail::create([
-                    'blog_id' => $blog->id,
-                    'type' => $block['type'],
-                    'content' => $content,
-                    'order' => $block['order'] ?? ($blog->details()->max('order') + 1),
+                $orderValue = isset($block['order']) ? (int) $block['order'] : ++$nextOrder;
+                if (isset($block['order'])) {
+                    $nextOrder = max($nextOrder, $orderValue);
+                }
+
+                $blog->details()->create([
+                    'type'   => $type,
+                    'content'=> $content,
+                    'order'  => $orderValue,
                 ]);
             }
         });
@@ -187,8 +190,8 @@ class AdminBlogController extends Controller
         }
 
         // Handle lists
-        if ($detail->type === 'list' && is_array($contentData)) {
-            $contentData = json_encode(array_filter($contentData));
+        if ($detail->type === 'list') {
+            $contentData = json_encode($this->normalizeListItems($contentData));
         }
 
         $detail->update([
@@ -211,5 +214,26 @@ class AdminBlogController extends Controller
         $detail->delete();
 
         return back()->with('success', 'Content deleted successfully!');
+    }
+
+    private function normalizeListItems(mixed $value): array
+    {
+        if (is_array($value)) {
+            return collect($value)
+                ->map(fn($item) => trim((string) $item))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if (is_string($value)) {
+            return collect(preg_split("/\r\n|\r|\n/", $value))
+                ->map(fn($item) => trim((string) $item))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        return [];
     }
 }

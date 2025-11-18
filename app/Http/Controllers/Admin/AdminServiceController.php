@@ -36,7 +36,7 @@ class AdminServiceController extends Controller
                 'brief_description' => 'required|string',
                 'thumbnail'         => 'required|file|mimes:jpg,jpeg,png,svg,webp|max:2048',
                 'contents'          => 'required|array',
-                'contents.*.type'   => 'required|string|in:heading,paragraph,list,image,feature',
+                'contents.*.type'   => 'required|string|in:heading,paragraph,list,image,feature,features',
             ]);
 
             // ========== STEP 3: Log validation success ==========
@@ -70,7 +70,13 @@ class AdminServiceController extends Controller
                             'content'    => null,
                         ];
 
-                        switch ($content['type']) {
+                        $type = $content['type'] ?? null;
+                        if ($type === 'features') {
+                            $content['type'] = 'feature';
+                            $type = 'feature';
+                        }
+
+                        switch ($type) {
                             case 'heading':
                             case 'paragraph':
                                 $data['content'] = $content['content'] ?? '';
@@ -199,26 +205,34 @@ class AdminServiceController extends Controller
         $service = Service::findOrFail($serviceId);
 
         $validated = $request->validate([
-            'type' => 'required|in:heading,paragraph,list,image,feature',
+            'type' => 'required|in:heading,paragraph,list,image,feature,features',
             'content' => 'required',
             'position' => 'nullable|integer|min:1',
         ]);
 
+        $type = $validated['type'] === 'features' ? 'feature' : $validated['type'];
         $contentData = $validated['content'];
 
         // Handle image uploads
-        if ($validated['type'] === 'image' && $request->hasFile('content')) {
+        if ($type === 'image' && $request->hasFile('content')) {
             $contentData = $request->file('content')->store('services/content', 'public');
         }
 
         // Handle lists (array)
-        if ($validated['type'] === 'list' && is_array($contentData)) {
+        if ($type === 'list' && is_array($contentData)) {
             $contentData = array_filter($contentData); // Remove empty items
+        }
+
+        if ($type === 'feature' && is_array($contentData)) {
+            $contentData = [
+                'heading'   => $contentData['heading'] ?? '',
+                'paragraph' => $contentData['paragraph'] ?? '',
+            ];
         }
 
         ServiceContent::create([
             'service_id' => $service->id,
-            'type' => $validated['type'],
+            'type' => $type,
             'content' => $contentData,
             'position' => $validated['position'] ?? ($service->contents()->max('position') + 1),
         ]);
@@ -250,6 +264,13 @@ class AdminServiceController extends Controller
         // Handle lists
         if ($content->type === 'list' && is_array($contentData)) {
             $contentData = array_filter($contentData);
+        }
+
+        if ($content->type === 'feature' && is_array($contentData)) {
+            $contentData = [
+                'heading'   => $contentData['heading'] ?? '',
+                'paragraph' => $contentData['paragraph'] ?? '',
+            ];
         }
 
         $content->update([

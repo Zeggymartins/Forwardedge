@@ -1,3 +1,17 @@
+@php
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+
+    $resolveImage = function ($path) {
+        if (!$path) {
+            return null;
+        }
+        return Str::startsWith($path, ['http://', 'https://']) ? $path : Storage::url($path);
+    };
+
+    $heroUrl = $resolveImage($campaign->hero_image);
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,10 +37,10 @@
                         </td>
                     </tr>
 
-                    @if($campaign->hero_image)
+                    @if($heroUrl)
                         <tr>
                             <td style="padding:0;">
-                                <img src="{{ $campaign->hero_image }}" alt="Hero" style="width:100%;display:block;max-height:320px;object-fit:cover;">
+                                <img src="{{ $heroUrl }}" alt="Hero" style="width:100%;display:block;max-height:320px;object-fit:cover;">
                             </td>
                         </tr>
                     @endif
@@ -72,12 +86,15 @@
                                         @endif
                                     </div>
                                 @elseif(($block['type'] ?? '') === 'image')
+                                    @php $blockImage = $resolveImage($block['image_url'] ?? null); @endphp
+                                    @if($blockImage)
                                     <div style="margin-bottom:32px;text-align:center;">
-                                        <img src="{{ $block['image_url'] }}" alt="{{ $block['alt'] ?? 'Campaign asset' }}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;">
+                                            <img src="{{ $blockImage }}" alt="{{ $block['alt'] ?? 'Campaign asset' }}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;">
                                         @if(!empty($block['caption']))
                                             <p style="margin:12px 0 0;color:#667085;font-size:13px;">{{ $block['caption'] }}</p>
                                         @endif
                                     </div>
+                                    @endif
                                 @elseif(($block['type'] ?? '') === 'cards')
                                     <div style="margin-bottom:32px;">
                                         @if(!empty($block['heading']))
@@ -91,8 +108,9 @@
                                                 @foreach($block['cards'] ?? [] as $card)
                                                     <td style="width:33%;padding:8px;vertical-align:top;">
                                                         <div style="border:1px solid #e4e7ec;border-radius:12px;padding:16px;height:100%;background:#ffffff;">
-                                                            @if(!empty($card['image']))
-                                                                <img src="{{ $card['image'] }}" alt="" style="width:100%;border-radius:8px;margin-bottom:12px;max-height:140px;object-fit:cover;">
+                                                            @php $cardImage = $resolveImage($card['image'] ?? null); @endphp
+                                                            @if($cardImage)
+                                                                <img src="{{ $cardImage }}" alt="" style="width:100%;border-radius:8px;margin-bottom:12px;max-height:140px;object-fit:cover;">
                                                             @endif
                                                             @if(!empty($card['title']))
                                                                 <h4 style="margin:0 0 8px;font-size:16px;color:#0f172a;">{{ $card['title'] }}</h4>

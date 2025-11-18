@@ -1,5 +1,17 @@
 @extends('admin.master_page')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .fe-campaign-block__head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: .5rem;
+        }
+    }
+</style>
+@endpush
+
 @section('main')
     <div class="container-fluid py-4 px-4 px-xl-5">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -11,7 +23,7 @@
             <a href="{{ route('admin.emails.campaigns.index') }}" class="btn btn-outline-secondary btn-sm">Back to campaigns</a>
         </div>
 
-        <form action="{{ route('admin.emails.campaigns.store') }}" method="POST" id="campaignBuilderForm">
+        <form action="{{ route('admin.emails.campaigns.store') }}" method="POST" id="campaignBuilderForm" enctype="multipart/form-data">
             @csrf
             <div class="row g-4">
                 <div class="col-lg-4">
@@ -35,8 +47,9 @@
                                 <textarea class="form-control" name="intro" rows="4" placeholder="Warm welcome message">{{ old('intro') }}</textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Hero image URL</label>
-                                <input type="url" class="form-control" name="hero_image" value="{{ old('hero_image') }}" placeholder="https://">
+                                <label class="form-label fw-semibold">Hero image</label>
+                                <input type="file" class="form-control" name="hero_image" accept="image/*">
+                                <small class="text-muted">Upload a JPG/PNG/WebP up to 4MB.</small>
                             </div>
                         </div>
                     </div>
@@ -107,6 +120,32 @@
 
             const initialBlocks = @json(old('blocks', []));
 
+            const listInputTemplate = (name, value = '') => `
+                <div class="input-group input-group-sm mb-2" data-list-item>
+                    <input type="text" class="form-control form-control-sm" name="${name}" value="${escapeHtml(value ?? '')}" placeholder="Bullet item">
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-action="remove-list-item"><i class="bi bi-dash"></i></button>
+                </div>
+            `;
+
+            const notifyWarning = (message) => {
+                if (window.iziToast) {
+                    iziToast.warning({ title: 'Notice', message, position: 'topRight' });
+                } else {
+                    alert(message);
+                }
+            };
+
+            function initListEditors(scope = document) {
+                scope.querySelectorAll('[data-list-editor]').forEach(editor => {
+                    if (!editor.querySelector('[data-list-items]')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.setAttribute('data-list-items', '1');
+                        wrapper.innerHTML = listInputTemplate(editor.dataset.name);
+                        editor.insertBefore(wrapper, editor.querySelector('[data-action="add-list-item"]'));
+                    }
+                });
+            }
+
             const templates = {
                 text: (index, data = {}) => `
                     <input type="hidden" name="blocks[${index}][type]" value="text">
@@ -119,30 +158,37 @@
                         <textarea class="form-control" rows="4" name="blocks[${index}][body]">${escapeHtml(data.body ?? '')}</textarea>
                     </div>
                 `,
-                list: (index, data = {}) => `
-                    <input type="hidden" name="blocks[${index}][type]" value="list">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Headline</label>
-                        <input type="text" class="form-control" name="blocks[${index}][heading]" value="${escapeHtml(data.heading ?? '')}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Intro</label>
-                        <textarea class="form-control" rows="3" name="blocks[${index}][body]">${escapeHtml(data.body ?? '')}</textarea>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Bullet items</label>
-                        <textarea class="form-control" rows="4" name="blocks[${index}][items]" placeholder="One value per line">${escapeHtml((data.items || []).join('\n'))}</textarea>
-                    </div>
-                `,
+                list: (index, data = {}) => {
+                    const items = Array.isArray(data.items) && data.items.length ? data.items : [''];
+                    const inputs = items.map(item => listInputTemplate(`blocks[${index}][items][]`, item)).join('');
+                    return `
+                        <input type="hidden" name="blocks[${index}][type]" value="list">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Headline</label>
+                            <input type="text" class="form-control" name="blocks[${index}][heading]" value="${escapeHtml(data.heading ?? '')}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Intro</label>
+                            <textarea class="form-control" rows="3" name="blocks[${index}][body]">${escapeHtml(data.body ?? '')}</textarea>
+                        </div>
+                        <div class="mb-0 list-editor" data-list-editor data-name="blocks[${index}][items][]" data-compact="1">
+                            <label class="form-label fw-semibold">Bullet items</label>
+                            <div data-list-items>${inputs}</div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-action="add-list-item">+ Add bullet</button>
+                        </div>
+                    `;
+                },
                 image: (index, data = {}) => `
                     <input type="hidden" name="blocks[${index}][type]" value="image">
+                    ${data.image_url ? `<input type="hidden" name="blocks[${index}][existing_image]" value="${escapeHtml(data.image_url)}">` : ''}
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Section title</label>
                         <input type="text" class="form-control" name="blocks[${index}][heading]" value="${escapeHtml(data.heading ?? '')}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Image URL</label>
-                        <input type="url" class="form-control" name="blocks[${index}][image_url]" value="${escapeHtml(data.image_url ?? '')}" required>
+                        <label class="form-label fw-semibold">Image upload</label>
+                        <input type="file" class="form-control" name="blocks[${index}][image_file]" accept="image/*" ${data.image_url ? '' : 'required'}>
+                        <small class="text-muted">Upload a branded image for this section.</small>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -192,9 +238,10 @@
                             <label class="form-label small fw-semibold">Description</label>
                             <textarea class="form-control form-control-sm" rows="3" name="blocks[${blockIndex}][cards][${cardIndex}][body]">${escapeHtml(card.body ?? '')}</textarea>
                         </div>
+                        ${card.image ? `<input type="hidden" name="blocks[${blockIndex}][cards][${cardIndex}][existing_image]" value="${escapeHtml(card.image)}">` : ''}
                         <div>
-                            <label class="form-label small fw-semibold">Image URL</label>
-                            <input type="url" class="form-control form-control-sm" name="blocks[${blockIndex}][cards][${cardIndex}][image]" value="${escapeHtml(card.image ?? '')}">
+                            <label class="form-label small fw-semibold">Image upload</label>
+                            <input type="file" class="form-control form-control-sm" name="blocks[${blockIndex}][cards][${cardIndex}][image_file]" accept="image/*">
                         </div>
                     </div>
                 `;
@@ -234,7 +281,10 @@
                 `;
 
                 wrapper.appendChild(block);
-                placeholder.classList.add('d-none');
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                }
+                initListEditors(block);
             }
 
             wrapper.addEventListener('click', (event) => {
@@ -245,6 +295,7 @@
                     if (!wrapper.children.length) {
                         placeholder.classList.remove('d-none');
                     }
+                    return;
                 }
 
                 if (event.target.closest('[data-action="add-card"]')) {
@@ -254,6 +305,7 @@
                     const index = block.dataset.index;
                     const nextId = generateId();
                     cardsWrapper.insertAdjacentHTML('beforeend', buildCard(index, nextId, {}));
+                    return;
                 }
 
                 if (event.target.closest('[data-action="remove-card"]')) {
@@ -261,13 +313,31 @@
                     const card = event.target.closest('.fe-campaign-card');
                     const cardsWrapper = event.target.closest('.fe-card-collection');
                     if (cardsWrapper.children.length === 1) {
-                        iziToast.warning({
-                            title: 'Required',
-                            message: 'At least one card is needed.',
-                        });
+                        notifyWarning('At least one card is needed.');
                         return;
                     }
                     card.remove();
+                    return;
+                }
+
+                if (event.target.closest('[data-action="add-list-item"]')) {
+                    event.preventDefault();
+                    const editor = event.target.closest('[data-list-editor]');
+                    const container = editor.querySelector('[data-list-items]');
+                    container.insertAdjacentHTML('beforeend', listInputTemplate(editor.dataset.name));
+                    return;
+                }
+
+                if (event.target.closest('[data-action="remove-list-item"]')) {
+                    event.preventDefault();
+                    const editor = event.target.closest('[data-list-editor]');
+                    const container = editor.querySelector('[data-list-items]');
+                    const items = container.querySelectorAll('[data-list-item]');
+                    if (items.length <= 1) {
+                        notifyWarning('Keep at least one bullet.');
+                        return;
+                    }
+                    event.target.closest('[data-list-item]').remove();
                 }
             });
 
@@ -281,6 +351,7 @@
                     addBlock(block.type, block);
                 }
             });
+            initListEditors(wrapper);
         });
     </script>
 @endpush

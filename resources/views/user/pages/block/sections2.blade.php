@@ -50,7 +50,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="heading-wrap-content">
-          <div class="sec-heading style-4">
+          <div class="sec-heading">
             @if(!empty($kicker))
               <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
                 <i class="tji-box"></i>{{ $kicker }}
@@ -60,11 +60,7 @@
           </div>
 
           @if(!empty($progressText))
-            <div class="progress-item">
-              <div class="progress-text">
-                <span class="sub-title">{{ $progressText }}</span>
-              </div>
-            </div>
+            <p class="desc wow fadeInUp" data-wow-delay=".5s">{{ $progressText }}
           @endif
         </div>
       </div>

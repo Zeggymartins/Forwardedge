@@ -1044,6 +1044,13 @@
                                 console.log('✅ Quick-register href guard active for /enroll*, scholarships allowed');
                             })();
                         </script>
+                        @if (config('services.recaptcha.key'))
+                            <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.key') }}" async defer></script>
+                            <script>
+                                window.RECAPTCHA_SITE_KEY = "{{ config('services.recaptcha.key') }}";
+                            </script>
+                        @endif
+
                         <script>
                             window.IS_AUTH = @json(auth()->check()); // true/false from server
                         </script>

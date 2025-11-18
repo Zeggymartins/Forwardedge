@@ -37,6 +37,7 @@
   /** Bootstrap Icon picker (override -> hint -> rules -> fallback) */
   $pickIcon = function (array $it, int $i) use ($has): string {
       if (!empty($it['icon_bi'])) return trim($it['icon_bi']);           // explicit override
+      if (!empty($it['icon'])) return trim($it['icon']);                 // legacy saved icon
       if (!empty($it['icon_hint'])) {                                    // gentle hints
           $hint = strtolower($it['icon_hint']);
           if (str_contains($hint, 'shield')) return 'bi-shield-check';
@@ -232,7 +233,7 @@
 
         <div class="overview-card wow fadeInUp" data-wow-delay=".{{ $delay }}s">
           <div class="overview-card__icon" aria-hidden="true">
-            <i class="bi {{ $biIcon }}"></i>
+            <i class="bi {{ e($biIcon) }}"></i>
           </div>
           <h4 class="overview-card__title">{{ $it['subtitle'] ?? '' }}</h4>
           <p class="overview-card__desc">{{ $it['text'] ?? '' }}</p>

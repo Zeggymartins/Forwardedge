@@ -1,4 +1,6 @@
 @php
+  use Illuminate\Support\Str;
+
   /**
    * Expected $block->data shape:
    * {

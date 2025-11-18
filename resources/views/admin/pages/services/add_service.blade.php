@@ -71,7 +71,7 @@
                                     <option value="paragraph">Paragraph</option>
                                     <option value="list">List</option>
                                     <option value="image">Image</option>
-                                    <option value="feature">Feature</option>
+                                    <option value="features">Feature</option>
                                 </select>
                                 <div class="content-fields mt-3"></div>
                                 <input type="hidden" name="contents[0][position]" value="1">
@@ -122,7 +122,12 @@
         ======================== */
         let contentIndex = 1; // first block exists
 
+        function normalizeType(value) {
+            return value === 'feature' ? 'features' : value;
+        }
+
         function addContentBlock(type = null, values = null) {
+            type = normalizeType(type);
             const container = document.getElementById('serviceDetails');
             if (!container) return;
 
@@ -141,7 +146,7 @@
             <option value="paragraph" ${type === 'paragraph' ? 'selected' : ''}>Paragraph</option>
             <option value="list" ${type === 'list' ? 'selected' : ''}>List</option>
             <option value="image" ${type === 'image' ? 'selected' : ''}>Image</option>
-            <option value="feature" ${type === 'feature' ? 'selected' : ''}>Feature</option>
+            <option value="features" ${type === 'features' ? 'selected' : ''}>Feature</option>
         </select>
         <div class="content-fields mt-3"></div>
         <input type="hidden" name="contents[${contentIndex}][position]" value="${contentIndex + 1}">
@@ -203,6 +208,7 @@
                     break;
 
                 case 'feature':
+                case 'features':
                     fieldsDiv.innerHTML =
                         `
                 <input type="text" class="form-control mb-2" name="contents[${index}][content][heading]" placeholder="Feature Heading" required>
@@ -270,7 +276,8 @@
             // Content blocks
             document.querySelectorAll('.content-block').forEach(block => {
                 const index = block.getAttribute('data-index');
-                const type = block.querySelector('.content-type')?.value || '';
+                let type = block.querySelector('.content-type')?.value || '';
+                type = normalizeType(type);
                 const fieldsDiv = block.querySelector('.content-fields');
                 let content;
 
@@ -288,6 +295,7 @@
                             .length ? f.files[0].name : '');
                         break;
                     case 'feature':
+                    case 'features':
                         content = {
                             heading: fieldsDiv.querySelector('input')?.value || '',
                             paragraph: fieldsDiv.querySelector('textarea')?.value || ''
@@ -325,11 +333,12 @@
 
             // Restore blocks
             data.contents.forEach((blockData, i) => {
+                const normalizedType = normalizeType(blockData.type);
                 if (i === 0 && firstBlock) {
-                    firstBlock.querySelector('.content-type').value = blockData.type;
-                    renderFields(firstBlock, blockData.type, blockData.content);
+                    firstBlock.querySelector('.content-type').value = normalizedType;
+                    renderFields(firstBlock, normalizedType, blockData.content);
                 } else {
-                    addContentBlock(blockData.type, blockData.content);
+                    addContentBlock(normalizedType, blockData.content);
                 }
             });
 
@@ -343,5 +352,34 @@
         }
 
         window.addEventListener('DOMContentLoaded', restoreForm);
+
+        document.getElementById('clearForm')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (!form) return;
+
+            form.reset();
+            localStorage.removeItem(LS_KEY);
+
+            const container = document.getElementById('serviceDetails');
+            if (container) {
+                const blocks = container.querySelectorAll('.content-block');
+                blocks.forEach((block, idx) => {
+                    if (idx === 0) {
+                        block.setAttribute('data-index', 0);
+                        const typeSelect = block.querySelector('.content-type');
+                        if (typeSelect) typeSelect.selectedIndex = 0;
+                        const fields = block.querySelector('.content-fields');
+                        if (fields) fields.innerHTML = '';
+                    } else {
+                        block.remove();
+                    }
+                });
+            }
+
+            const slugInput = document.getElementById('slug');
+            if (slugInput) slugInput.value = '';
+
+            contentIndex = 1;
+        });
     </script>
 @endsection

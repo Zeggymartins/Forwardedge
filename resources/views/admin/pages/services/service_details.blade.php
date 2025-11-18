@@ -59,6 +59,24 @@
                                                     {{ \Illuminate\Support\Str::limit($item, 50) }}</li>
                                             @endforeach
                                         </ul>
+                                    @elseif (in_array($content->type, ['features', 'feature']))
+                                        @php
+                                            $feature = $content->asArray();
+                                            $isAssoc = is_array($feature) && array_keys($feature) !== range(0, count($feature) - 1);
+                                        @endphp
+                                        @if ($isAssoc)
+                                            <div class="border rounded-3 p-3 bg-light">
+                                                <h6 class="mb-1">{{ $feature['heading'] ?? 'Feature' }}</h6>
+                                                <p class="text-muted small mb-0">{{ $feature['paragraph'] ?? '' }}</p>
+                                            </div>
+                                        @else
+                                            <ul class="list-unstyled small text-muted mb-0">
+                                                @foreach ($feature as $item)
+                                                    <li><i class="bi bi-check-circle-fill text-success me-1"></i>
+                                                        {{ \Illuminate\Support\Str::limit($item, 50) }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     @else
                                         <p class="text-muted small mb-0">
                                             {{ \Illuminate\Support\Str::limit($content->asString(), 150) }}</p>
@@ -118,13 +136,27 @@
                                                 accept="{{ $content->type === 'image' ? 'image/*' : 'video/*' }}">
                                             <div class="form-text">Current: {{ basename($content->content) }}</div>
                                         </div>
-                                    @elseif ($content->type === 'list' || $content->type === 'features')
+                                    @elseif ($content->type === 'list')
                                         <div class="col-12">
                                             <label class="form-label">{{ ucfirst($content->type) }} Items (One per
                                                 line)</label>
                                             {{-- 💡 FIX: Use asArray() to get the list items and implode them for the textarea --}}
                                             <textarea name="content" class="form-control" rows="6" required>{{ implode("\n", $content->asArray()) }}</textarea>
                                             <div class="form-text">Each line will be saved as a separate item.</div>
+                                        </div>
+                                    @elseif (in_array($content->type, ['features', 'feature']))
+                                        @php
+                                            $feature = $content->asArray();
+                                            $feature = is_array($feature) ? $feature : [];
+                                        @endphp
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">Feature Heading</label>
+                                            <input type="text" name="content[heading]" class="form-control"
+                                                value="{{ $feature['heading'] ?? '' }}" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Feature Description</label>
+                                            <textarea name="content[paragraph]" class="form-control" rows="4" required>{{ $feature['paragraph'] ?? '' }}</textarea>
                                         </div>
                                     @else
                                         <div class="col-12">
@@ -223,11 +255,23 @@
                                 <textarea name="content" class="form-control" rows="${type === 'heading' ? '1' : '5'}" required placeholder="Enter the text content"></textarea>`;
                             break;
                         case 'list':
-                        case 'features':
                             contentHtml = `
                                 <label class="form-label">${type === 'list' ? 'List Items' : 'Features (one per line)'}</label>
                                 <textarea name="content" class="form-control" rows="6" placeholder="Item 1\nItem 2\nItem 3" required></textarea>
                                 <div class="form-text">Each line will be saved as a separate item.</div>`;
+                            break;
+                        case 'features':
+                            contentHtml = `
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Feature Heading</label>
+                                        <input type="text" name="content[heading]" class="form-control" placeholder="Feature title" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Feature Description</label>
+                                        <textarea name="content[paragraph]" class="form-control" rows="4" placeholder="Describe this benefit" required></textarea>
+                                    </div>
+                                </div>`;
                             break;
                         case 'image':
                             contentHtml = `

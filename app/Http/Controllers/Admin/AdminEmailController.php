@@ -11,6 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 class AdminEmailController extends Controller
 {
@@ -75,7 +76,7 @@ class AdminEmailController extends Controller
             'title'      => 'required|string|max:160',
             'subject'    => 'required|string|max:160',
             'subtitle'   => 'nullable|string|max:200',
-            'hero_image' => 'nullable|string|max:255',
+            'hero_image' => 'nullable|image|max:4096',
             'intro'      => 'nullable|string',
             'cta_text'   => 'nullable|string|max:120',
             'cta_link'   => 'nullable|url|max:255',
@@ -83,7 +84,7 @@ class AdminEmailController extends Controller
             'blocks.*.type' => 'required|string|in:text,list,image,cards',
         ]);
 
-        $blocks = $this->normalizeBlocks($request->input('blocks', []));
+        $blocks = $this->normalizeBlocks($request, $request->input('blocks', []));
 
         if ($blocks->isEmpty()) {
             return back()->withErrors([
@@ -91,11 +92,15 @@ class AdminEmailController extends Controller
             ])->withInput();
         }
 
+        $heroPath = $request->hasFile('hero_image')
+            ? $request->file('hero_image')->store('campaigns/hero', 'public')
+            : null;
+
         EmailCampaign::create([
             'title'      => $validated['title'],
             'subject'    => $validated['subject'],
             'subtitle'   => $validated['subtitle'] ?? null,
-            'hero_image' => $validated['hero_image'] ?? null,
+            'hero_image' => $heroPath,
             'intro'      => $validated['intro'] ?? null,
             'blocks'     => $blocks->values()->all(),
             'cta_text'   => $validated['cta_text'] ?? null,
@@ -158,17 +163,13 @@ class AdminEmailController extends Controller
         return back()->with('success', 'Retry started. We will re-send to the pending addresses.');
     }
 
-    protected function normalizeBlocks(array $blocks): Collection
+    protected function normalizeBlocks(Request $request, array $blocks): Collection
     {
-        return collect($blocks)->map(function ($block) {
+        return collect($blocks)->map(function ($block, $index) use ($request) {
             $type = Arr::get($block, 'type');
 
             if ($type === 'list') {
-                $items = collect(preg_split("/\r\n|\r|\n/", (string) Arr::get($block, 'items')))
-                    ->map(fn ($line) => trim($line))
-                    ->filter()
-                    ->values()
-                    ->all();
+                $items = $this->normalizeCampaignListItems(Arr::get($block, 'items'));
 
                 return [
                     'type'    => 'list',
@@ -180,10 +181,15 @@ class AdminEmailController extends Controller
             }
 
             if ($type === 'image') {
+                $path = $this->storeCampaignImage($request, "blocks.$index.image_file", 'campaigns/blocks');
+                if (!$path && filled(Arr::get($block, 'existing_image'))) {
+                    $path = Arr::get($block, 'existing_image');
+                }
+
                 return [
                     'type'      => 'image',
                     'heading'   => Arr::get($block, 'heading'),
-                    'image_url' => Arr::get($block, 'image_url'),
+                    'image_url' => $path,
                     'caption'   => Arr::get($block, 'caption'),
                     'alt'       => Arr::get($block, 'alt'),
                 ];
@@ -191,11 +197,16 @@ class AdminEmailController extends Controller
 
             if ($type === 'cards') {
                 $cards = collect(Arr::get($block, 'cards', []))
-                    ->map(function ($card) {
+                    ->map(function ($card, $cardIndex) use ($request, $index) {
+                        $imagePath = $this->storeCampaignImage($request, "blocks.$index.cards.$cardIndex.image_file", 'campaigns/cards');
+                        if (!$imagePath && filled(Arr::get($card, 'existing_image'))) {
+                            $imagePath = Arr::get($card, 'existing_image');
+                        }
+
                         return [
                             'title' => Arr::get($card, 'title'),
                             'body'  => Arr::get($card, 'body'),
-                            'image' => Arr::get($card, 'image'),
+                            'image' => $imagePath,
                         ];
                     })
                     ->filter(function ($card) {
@@ -212,7 +223,6 @@ class AdminEmailController extends Controller
                 ];
             }
 
-            // default text block
             return [
                 'type'    => 'text',
                 'heading' => Arr::get($block, 'heading'),
@@ -230,5 +240,35 @@ class AdminEmailController extends Controller
 
             return filled($block['heading']) || filled($block['body']) || !empty($block['items'] ?? []);
         });
+    }
+
+    protected function normalizeCampaignListItems(mixed $value): array
+    {
+        if (is_array($value)) {
+            return collect($value)
+                ->map(fn ($item) => trim((string) $item))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if (is_string($value)) {
+            return collect(preg_split("/\r\n|\r|\n/", $value))
+                ->map(fn ($item) => trim((string) $item))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        return [];
+    }
+
+    protected function storeCampaignImage(Request $request, string $dotKey, string $directory): ?string
+    {
+        if ($file = $request->file($dotKey)) {
+            return $file->store($directory, 'public');
+        }
+
+        return null;
     }
 }

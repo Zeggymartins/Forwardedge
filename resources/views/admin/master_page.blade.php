@@ -31,6 +31,7 @@
 
   <link href="{{ asset('backend/assets/css/style.css') }}" rel="stylesheet">
   {{-- <link href="{{ asset('frontend/assets/css/main.css') }}" rel="stylesheet"> --}}
+  @stack('styles')
 </head>
 
 <body class="fe-admin-body">

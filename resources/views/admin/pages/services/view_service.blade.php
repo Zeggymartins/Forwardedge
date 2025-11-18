@@ -1,5 +1,32 @@
 @extends('admin.master_page')
 
+@php
+    use Illuminate\Support\Facades\Storage;
+@endphp
+
+@push('styles')
+<style>
+    .service-table .service-thumbnail-wrapper img{
+        width:100px;
+        height:100px;
+        object-fit:cover;
+    }
+    @media (max-width: 575.98px){
+        .service-actions{
+            flex-direction:column !important;
+            width:100%;
+        }
+        .service-actions .btn{
+            width:100%;
+        }
+        .service-table .service-thumbnail-wrapper img{
+            width:70px;
+            height:70px;
+        }
+    }
+</style>
+@endpush
+
 @section('title', 'Services Management')
 
 @section('main')
@@ -12,8 +39,8 @@
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-0">
-            <table class="table align-middle mb-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table align-middle mb-0 service-table">
                 <thead class="bg-gradient">
                     <tr>
                         <th class="py-3 px-4">#</th>
@@ -28,23 +55,22 @@
                         <tr class="table-row-hover">
                             <td class="fw-semibold py-4 px-4">{{ $index + 1 }}</td>
                             <td class="py-4 px-4">
-                                    @if ($service->thumbnail)
-                                        <div class="service-thumbnail-wrapper shadow-sm">
-                                            <img src="{{ asset('storage/' . $service->thumbnail) }}"
-                                                alt="{{ $service->title }}"
-                                                class="img-fluid rounded-circle shadow-sm border"
-                                                style="width: 100px; height: 100px; object-fit: cover;">
-                                        </div>
-                                    @else
-                                        <div class="service-thumbnail-wrapper bg-light shadow-sm">
-                                            <i class="bi bi-image text-muted"></i>
-                                        </div>
-                                    @endif
-                                </td>
+                                @php $thumb = $service->thumbnail ? Storage::url($service->thumbnail) : null; @endphp
+                                @if ($thumb)
+                                    <div class="service-thumbnail-wrapper shadow-sm rounded-circle border">
+                                        <img src="{{ $thumb }}" alt="{{ $service->title }}" class="img-fluid rounded-circle">
+                                    </div>
+                                @else
+                                    <div class="service-thumbnail-wrapper bg-light shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width:80px;height:80px;">
+                                        <i class="bi bi-image text-muted"></i>
+                                    </div>
+                                @endif
+                            </td>
                             <td class="py-4 px-4 fw-bold">{{ $service->title }}</td>
                             <td class="py-4 px-4">{{ Str::limit($service->brief_description, 50) }}</td>
                             <td class="py-4 px-4 text-center">
-                                <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-2 me-1"
+                                <div class="d-flex gap-2 justify-content-center service-actions flex-sm-row flex-column">
+                                <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-2"
                                     data-bs-toggle="modal" data-bs-target="#updateServiceModal"
                                     data-id="{{ $service->id }}"
                                     data-title="{{ htmlentities($service->title, ENT_QUOTES) }}"
@@ -53,7 +79,7 @@
                                     <i class="bi bi-pencil"></i> Update
                                 </button>
                                 <a href="{{ route('admin.services.show', $service->id) }}"
-                                    class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 me-1">
+                                    class="btn btn-sm btn-outline-info rounded-pill px-3 py-2">
                                     <i class="bi bi-eye"></i> View
                                 </a>
                                 <form action="{{ route('admin.services.destroy', $service->id) }}" method="POST" class="d-inline">
@@ -63,6 +89,7 @@
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

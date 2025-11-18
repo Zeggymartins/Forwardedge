@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\{DB, Storage, Log, Route as RouteFacade};
 use App\Support\PageBlueprint;
+use Illuminate\Validation\ValidationException;
 
 class PageBuilderController extends Controller
 {
@@ -59,7 +60,8 @@ class PageBuilderController extends Controller
             'meta_canonical'   => 'nullable|string|max:500',
         ]);
 
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
+        $this->assertUniquePageSlug($data['slug']);
 
         if (!empty($data['owner_type']) && !empty($data['owner_id'])) {
             $pageableClass = match ($data['owner_type']) {
@@ -107,7 +109,8 @@ class PageBuilderController extends Controller
             'meta_canonical'   => 'nullable|string|max:500',
         ]);
 
-        $data['slug'] = $data['slug'] ?: Str::slug($data['title']);
+        $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
+        $this->assertUniquePageSlug($data['slug'], $page->id);
 
         if (!empty($data['owner_type']) && !empty($data['owner_id'])) {
             $pageableClass = match ($data['owner_type']) {
@@ -226,13 +229,16 @@ class PageBuilderController extends Controller
 
         $routeBindingOptions = $this->buildRouteBindingOptions();
 
+        $iconOptions = $this->loadBootstrapIcons();
+
         return view('admin.pages.page_builder.blocks.form', compact(
             'page',
             'blocks',
             'blockTypes',
             'variants',
             'internalRoutes',
-            'routeBindingOptions'
+            'routeBindingOptions',
+            'iconOptions'
         ));
     }
 
@@ -609,21 +615,23 @@ class PageBuilderController extends Controller
      */
     private function cleanHero3Data(array $data): array
     {
-        // Keep only non-empty strings in title_segments
-        if (!empty($data['title_segments']) && is_array($data['title_segments'])) {
-            $data['title_segments'] = array_values(array_filter(
-                array_map(
-                    fn($v) => is_string($v) ? trim($v) : null,
-                    $data['title_segments']
-                ),
-                fn($v) => $v !== null && $v !== ''
-            ));
+        if (empty($data['title']) && !empty($data['title_segments']) && is_array($data['title_segments'])) {
+            $data['title'] = trim(implode(' ', array_filter(array_map(
+                fn($v) => is_string($v) ? trim($v) : '',
+                $data['title_segments']
+            ))));
         }
 
-        // Cast highlight_index safely
-        if (isset($data['highlight_index'])) {
-            $data['highlight_index'] = (int) $data['highlight_index'];
+        $data['title'] = isset($data['title']) ? trim((string) $data['title']) : null;
+        $data['description'] = isset($data['description']) ? trim((string) $data['description']) : null;
+
+        if (!empty($data['icon_bi']) && is_string($data['icon_bi'])) {
+            $data['icon_bi'] = trim($data['icon_bi']);
+        } else {
+            unset($data['icon_bi']);
         }
+
+        unset($data['title_segments'], $data['highlight_index']);
 
         return $data;
     }
@@ -773,5 +781,64 @@ class PageBuilderController extends Controller
         ], fn($value) => filled($value));
 
         return empty($meta) ? null : $meta;
+    }
+
+    private function loadBootstrapIcons(): array
+    {
+        $path = public_path('backend/assets/vendor/bootstrap-icons/bootstrap-icons.css');
+
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $css = file_get_contents($path);
+        if ($css === false) {
+            return [];
+        }
+
+        preg_match_all('/\\.bi-([a-z0-9-]+)::before/', $css, $matches);
+        $names = $matches[1] ?? [];
+
+        return collect($names)
+            ->unique()
+            ->map(function ($name) {
+                $readable = Str::of($name)->replace(['-', '_'], ' ')->title();
+                return [
+                    'value' => 'bi-' . $name,
+                    'label' => "{$readable} ({$name})",
+                ];
+            })
+            ->sortBy('label')
+            ->values()
+            ->all();
+    }
+
+    private function normalizePageSlug(?string $value, string $fallback): string
+    {
+        $base = trim($value ?? '');
+        if ($base === '') {
+            $base = $fallback;
+        }
+
+        $slug = Str::lower($base);
+        $slug = preg_replace('/[^a-z0-9\.\-]+/i', '-') ?: '';
+        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = trim($slug, '-.');
+
+        return $slug !== '' ? $slug : Str::slug($fallback);
+    }
+
+    private function assertUniquePageSlug(string $slug, ?int $ignoreId = null): void
+    {
+        $query = Page::where('slug', $slug);
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        if ($query->exists()) {
+            throw ValidationException::withMessages([
+                'slug' => 'This slug is already in use once formatting is applied.',
+            ]);
+        }
     }
 }

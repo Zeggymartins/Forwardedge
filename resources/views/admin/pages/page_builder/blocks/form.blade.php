@@ -1,8 +1,26 @@
 @extends('admin.master_page')
 @section('title', 'Page Builder • ' . $page->title)
 
-
-
+@push('styles')
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <style>
+    .select2-container .select2-selection--single {
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid #ced4da;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        padding-left: 12px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        right: 6px;
+    }
+  </style>
+@endpush
 
 @section('main')
     <div class="container py-5">
@@ -160,6 +178,8 @@
 
 
     {{-- ===================== JS ===================== --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         /* ====== CONFIG ====== */
         const VARIANTS = @json($variants);
@@ -168,12 +188,57 @@
         const PUBLIC_ROOT = STORAGE_ROOT + '/';
         const INTERNAL_ROUTES = @json($internalRoutes ?? []);
         const ROUTE_PARAM_OPTIONS = @json($routeBindingOptions ?? []);
+        const ICON_OPTIONS = @json($iconOptions ?? []);
 
         /* ====== UTILITIES ====== */
         function html(markup) {
             const t = document.createElement('template');
             t.innerHTML = markup.trim();
             return t.content.firstElementChild;
+        }
+
+        function buildIconOptions() {
+            if (!Array.isArray(ICON_OPTIONS) || ICON_OPTIONS.length === 0) {
+                return '<option value="">Auto (based on text)</option>';
+            }
+
+            return [
+                '<option value="">Auto (based on text)</option>',
+                ...ICON_OPTIONS.map(opt => `<option value="${opt.value}">${opt.label}</option>`)
+            ].join('');
+        }
+
+        function initIconPickers(scope = document) {
+            scope.querySelectorAll('[data-icon-select]').forEach(select => {
+                if (!select.dataset.iconOptionsLoaded) {
+                    select.innerHTML = buildIconOptions();
+                    select.dataset.iconOptionsLoaded = '1';
+                }
+
+                if (select.dataset.iconReady) {
+                    return;
+                }
+
+                select.dataset.iconReady = '1';
+
+                if (window.jQuery && window.jQuery.fn.select2) {
+                    jQuery(select).select2({
+                        dropdownParent: jQuery('#blockModal'),
+                        placeholder: 'Search icon',
+                        allowClear: true,
+                        width: '100%',
+                    });
+                }
+            });
+        }
+
+        function syncIconPickers(scope = document) {
+            if (!window.jQuery || !window.jQuery.fn.select2) return;
+            scope.querySelectorAll('[data-icon-select]').forEach(select => {
+                if (jQuery(select).data('select2')) {
+                    jQuery(select).trigger('change.select2');
+                }
+            });
         }
 
         function linkControl(name, label = 'Link', wrapperClass = 'col-12', placeholder = 'https://example.com') {
@@ -314,7 +379,7 @@
                 const fullKey = prefix ? `${prefix}_${key}` : key;
 
                 if (typeof val === 'string' && (key === 'image' || key === 'photo' || key === 'bg' ||
-                        key.includes('_image') || key === 'banner_image' || key === 'hero_image' || key === 'about_image'
+                        key.includes('_image') || key === 'banner_image' || key === 'hero_image' || key === 'about_image' || key === 'verified_icon'
                     )) {
                     const img = scope.querySelector(`img[data-preview-key="${fullKey}"]`);
                     if (img && val) {
@@ -700,6 +765,16 @@
 
             // Render fields
             mount.innerHTML = '';
+            let dataPayload = data.data && typeof data.data === 'object' ? { ...data.data } : {};
+            if (typeSel.value === 'hero3' && dataPayload) {
+                if (!dataPayload.title && Array.isArray(dataPayload.title_segments)) {
+                    dataPayload.title = dataPayload.title_segments.join(' ');
+                }
+                if (!dataPayload.description && typeof dataPayload.sub_text === 'string') {
+                    dataPayload.description = dataPayload.sub_text;
+                }
+            }
+
             const fieldsEl = renderFieldsForType(typeSel.value);
             if (fieldsEl) {
                 mount.appendChild(fieldsEl);
@@ -707,12 +782,15 @@
                 // 1. Initialize repeaters
                 initRepeater(mount);
                 initLinkPickers(mount);
+                initIconPickers(mount);
 
                 // 2. Then hydrate data with LONGER delay to ensure DOM is ready
-                if (data.data && typeof data.data === 'object') {
+                if (dataPayload && typeof dataPayload === 'object') {
                     setTimeout(() => {
-                        hydrateFields(mount, data.data);
+                        hydrateFields(mount, dataPayload);
                         initLinkPickers(mount);
+                        initIconPickers(mount);
+                        syncIconPickers(mount);
                     }, 200); // 👈 Increased delay
                 }
 
@@ -732,6 +810,7 @@
                     mount.appendChild(newFields);
                     initRepeater(mount);
                     initLinkPickers(mount);
+                    initIconPickers(mount);
                     setupFilePreviewHandlers(mount, PUBLIC_ROOT, {});
                     attachTypeBindings(typeSel.value, mount, 'create', {});
                 }
@@ -888,6 +967,13 @@
                 <label class="form-label small-label">Link Text</label>
                 <input class="form-control" name="data[items][__INDEX__][link_text]">
               </div>
+              <div class="col-md-6">
+                <label class="form-label small-label">Icon</label>
+                <select class="form-select" data-icon-select name="data[items][__INDEX__][icon_bi]">
+                  <option value="">Auto (based on text)</option>
+                </select>
+                <small class="text-muted">Search Bootstrap icon by name</small>
+              </div>
               <div class="col-12">
                 <label class="form-label small-label">Text</label>
                 <textarea class="form-control" name="data[items][__INDEX__][text]" rows="2"></textarea>
@@ -963,27 +1049,22 @@
                 case 'hero3':
                     return html(`
 <div class="row g-3">
-  <div class="col-12"><div class="section-divider"><span class="section-divider-label">Title Segments</span></div></div>
-  <div class="col-12 d-flex justify-content-between align-items-center">
-    <label class="form-label small-label mb-0">Segments</label>
-    <button type="button" class="btn btn-dark btn-sm" data-repeater-add="title_segments">Add Segment</button>
+  <div class="col-12">
+    <label class="form-label small-label">Title*</label>
+    <input class="form-control" name="data[title]" required>
   </div>
   <div class="col-12">
-    <div class="repeater" data-repeater data-name="title_segments">
-      <template data-repeater-template>
-        <div class="repeater-item d-flex align-items-center gap-2 mb-2" data-repeater-item draggable="true">
-          <span class="drag-handle">☰</span>
-          <input class="form-control" name="data[title_segments][__INDEX__]">
-          <button class="btn btn-outline-danger btn-sm" type="button" data-repeater-remove>×</button>
-        </div>
-      </template>
-    </div>
+    <label class="form-label small-label">Description</label>
+    <textarea class="form-control" name="data[description]" rows="3" placeholder="Short supporting copy"></textarea>
   </div>
-  <div class="col-md-4">
-    <label class="form-label small-label">Highlight Index</label>
-    <input class="form-control" type="number" min="0" name="data[highlight_index]" value="1">
+  <div class="col-md-6">
+    <label class="form-label small-label">Badge Icon</label>
+    <select class="form-select" data-icon-select name="data[icon_bi]">
+      <option value="">Hide badge</option>
+    </select>
+    <small class="text-muted">Search Bootstrap icons (bi-*)</small>
   </div>
-  <div class="col-md-8">
+  <div class="col-md-6">
     <label class="form-label small-label">Banner Image</label>
     <input class="form-control" type="file" name="banner_image" accept=".webp,.jpg,.jpeg,.png" data-file-key="banner_image">
     <div class="mt-2"><img data-preview-key="banner_image" style="max-width:100%;height:auto;display:none"></div>
@@ -1866,6 +1947,7 @@
 
             initRepeater(item);
             initLinkPickers(item);
+            initIconPickers(item);
 
 
 

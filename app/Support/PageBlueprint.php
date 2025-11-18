@@ -76,6 +76,7 @@ final class PageBlueprint
                 'link'              => self::linkRule(),
                 'items'             => ['nullable', 'array', 'max:6'],
                 'items.*.icon'      => ['nullable', 'string', 'max:100'],
+                'items.*.icon_bi'   => ['nullable', 'string', 'max:100'],
                 'items.*.subtitle'  => ['required_with:items', 'string', 'max:160'],
                 'items.*.text'      => ['nullable', 'string', 'max:400'],
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
@@ -89,6 +90,7 @@ final class PageBlueprint
                 'link'              => self::linkRule(),
                 'items'             => ['nullable', 'array', 'max:6'],
                 'items.*.icon'      => ['nullable', 'string', 'max:100'],
+                'items.*.icon_bi'   => ['nullable', 'string', 'max:100'],
                 'items.*.subtitle'  => ['required_with:items', 'string', 'max:160'],
                 'items.*.text'      => ['nullable', 'string', 'max:400'],
                 'items.*.link_text' => ['nullable', 'string', 'max:60'],
@@ -318,11 +320,15 @@ final class PageBlueprint
 
             /* ================= NEW: HERO 3 (trusted banner with segments) ================= */
             'hero3' => [
-                'title_segments'      => ['required', 'array', 'min:1', 'max:6'],
-                'title_segments.*'    => ['string', 'max:60'],
-                'banner_image'        => $fileImg,
-                'image'               => $fileImg,         // alias
-                'hero_image'          => $fileImg,         // alias
+                'title'              => ['required_without:title_segments', 'string', 'max:180'],
+                'description'        => ['nullable', 'string', 'max:500'],
+                'icon_bi'            => ['nullable', 'string', 'max:80'],
+                'title_segments'     => ['nullable', 'array', 'min:1', 'max:6'],
+                'title_segments.*'   => ['string', 'max:60'],
+                'banner_image'       => $fileImg,
+                'image'              => $fileImg,         // alias
+                'hero_image'         => $fileImg,         // alias
+                'verified_icon'      => $fileImg,
             ],
 
             'hero4' => [

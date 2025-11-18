@@ -7,6 +7,7 @@
             <div class="row row-gap-5">
                 <div class="col-lg-8">
                     <div class="blog-post-wrapper">
+                        @php use Illuminate\Support\Str; @endphp
                         @forelse ($blogs as $blog)
                             <article class="blog-item wow fadeInUp" data-wow-delay=".{{ $loop->iteration }}s">
                                 <div class="blog-thumb">
@@ -30,6 +31,13 @@
                                     <h3 class="title">
                                         <a href="{{ route('blogs.show', $blog->slug) }}">{{ $blog->title }}</a>
                                     </h3>
+                                    @php
+                                        $firstParagraph = optional($blog->details)->sortBy('order')->firstWhere('type', 'paragraph');
+                                        $excerpt = $firstParagraph ? Str::limit(strip_tags($firstParagraph->contentString()), 160) : null;
+                                    @endphp
+                                    @if ($excerpt)
+                                        <p class="text-muted">{{ $excerpt }}</p>
+                                    @endif
 
                                     @if ($blog->details->isEmpty())
                                         <a class="text-btn disabled" href="javascript:void(0)"

@@ -250,7 +250,7 @@
                         </div>
                     </form>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="{{ route('admin.courses.create') }}" class="btn btn-primary w-100"><i class="bi bi-journal-plus me-1"></i> New Course</a>
+                        <a href="{{ route('admin.courses.create') }}" class="btn btn-primary w-100"><i class="bi bi-journal-plus me-1"></i> New Academy Training</a>
                         <a href="{{ route('admin.events.create') }}" class="btn btn-outline-primary w-100"><i class="bi bi-broadcast me-1"></i> New Event</a>
                     </div>
                 </div>

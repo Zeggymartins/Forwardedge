@@ -56,42 +56,57 @@
 
                         {{-- Blog Body --}}
                         <div class="blog-text">
-                            @if ($blog->details && $blog->details->count() > 0)
-                                @foreach ($blog->details as $block)
-                                    @if ($block->type === 'paragraph')
-                                        <p class="wow fadeInUp" data-wow-delay=".3s">{{ $block->content }}</p>
-                                    @elseif($block->type === 'heading')
-                                        <h3 class="wow fadeInUp" data-wow-delay=".3s">{{ $block->content }}</h3>
-                                    @elseif($block->type === 'feature')
-                                        <blockquote class="wow fadeInUp" data-wow-delay=".3s">
-                                            <p>{{ $block->content }}</p>
-                                            <cite>{{ $block->extras['author'] ?? 'Forward Edge Consulting' }}</cite>
-                                        </blockquote>
-                                    @elseif($block->type === 'list')
-                                        <ul class="wow fadeInUp" data-wow-delay=".3s">
-                                            @foreach (json_decode($block->content, true) ?: [] as $item)
-                                                <li><span><i class="tji-check"></i></span>{{ $item }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @elseif($block->type === 'image')
-                                        <div class="image-box wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ file_exists(public_path($block->content))
-                                                ? asset($block->content)
-                                                : asset('frontend/assets/images/service/service-2.webp') }}"
-                                                alt="Blog Image" class="img-fluid">
-                                        </div>
-                                    @elseif($block->type === 'video')
-                                        <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
-                                            <img src="{{ $block->extras['thumbnail'] ?? false
-                                                ? asset($block->extras['thumbnail'])
-                                                : asset('frontend/assets/images/service/service-3.webp') }}"
-                                                alt="Video Thumbnail" class="img-fluid">
-                                            <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
-                                                href="{{ $block->content ?? 'https://www.youtube.com/watch?v=MLpWrANjFbI' }}">
-                                                <span><i class="tji-play"></i></span>
-                                            </a>
-                                        </div>
-                                    @endif
+                            @php $blocks = $blog->details->sortBy('order'); @endphp
+                            @if ($blocks->isNotEmpty())
+                                @foreach ($blocks as $block)
+                                    @switch($block->type)
+                                        @case('heading')
+                                            <h3 class="wow fadeInUp" data-wow-delay=".3s">{{ $block->contentString() }}</h3>
+                                            @break
+                                        @case('paragraph')
+                                            <p class="wow fadeInUp" data-wow-delay=".3s">{!! nl2br(e($block->contentString())) !!}</p>
+                                            @break
+                                        @case('quote')
+                                            <blockquote class="wow fadeInUp" data-wow-delay=".3s">
+                                                <p>{{ $block->contentString() }}</p>
+                                                <cite>{{ $block->quoteAuthor() }}</cite>
+                                            </blockquote>
+                                            @break
+                                        @case('list')
+                                            @php $items = $block->contentArray(); @endphp
+                                            @if ($items)
+                                                <ul class="wow fadeInUp" data-wow-delay=".3s">
+                                                    @foreach ($items as $item)
+                                                        <li><span><i class="tji-check"></i></span>{{ $item }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                            @break
+                                        @case('image')
+                                            @php $imageUrl = $block->imageUrl(); @endphp
+                                            @if ($imageUrl)
+                                                <figure class="image-box wow fadeInUp" data-wow-delay=".3s">
+                                                    <img src="{{ $imageUrl }}" alt="Blog Image" class="img-fluid">
+                                                    @if (!empty($block->extras['caption']))
+                                                        <figcaption class="text-muted small mt-2">{{ $block->extras['caption'] }}</figcaption>
+                                                    @endif
+                                                </figure>
+                                            @endif
+                                            @break
+                                        @case('video')
+                                            <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
+                                                <img src="{{ $block->extras['thumbnail'] ?? asset('frontend/assets/images/service/service-3.webp') }}"
+                                                    alt="Video Thumbnail" class="img-fluid">
+                                                <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
+                                                    href="{{ $block->content ?? 'https://www.youtube.com/watch?v=MLpWrANjFbI' }}">
+                                                    <span><i class="tji-play"></i></span>
+                                                </a>
+                                            </div>
+                                            @break
+                                        @default
+                                            <p class="wow fadeInUp" data-wow-delay=".3s">{{ $block->contentString() }}</p>
+                                            @break
+                                    @endswitch
                                 @endforeach
                             @else
                                 {{-- Enhanced Dummy Content --}}

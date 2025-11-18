@@ -2,13 +2,13 @@
 
 @section('main')
     <div class="container py-4">
-        <h3 class="mb-4 fw-bold">Create Course</h3>
+        <h3 class="mb-4 fw-bold">Create Training </h3>
 
         <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" id="courseForm">
             @csrf
 
             <div class="card shadow-sm mb-4 p-4">
-                <h5 class="fw-semibold mb-3">Course Details</h5>
+                <h5 class="fw-semibold mb-3">Training Details</h5>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Title</label>
