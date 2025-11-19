@@ -21,6 +21,9 @@
                     </tr>
                     <tr>
                         <td style="font-size:16px;line-height:1.6;">
+                               <p style="margin:0 0 18px;">
+                                Hi {{ $firstName }},
+                            </p>
                             {!! nl2br(e($bodyCopy ?: 'We received your submission and will be in touch shortly.')) !!}
                             <p style="margin-top:24px;">Warm regards,<br>Forward Edge Consulting</p>
                         </td>
