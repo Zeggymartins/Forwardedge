@@ -12,6 +12,13 @@
             <td align="center">
                 <table width="600" cellpadding="0" cellspacing="0" role="presentation"
                     style="background:#ffffff;border-radius:18px;box-shadow:0 15px 35px rgba(15,23,42,.08);padding:32px;">
+                     <tr>
+                        <td style="text-align:center;padding-bottom:24px;">
+                            <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge"
+                                width="120" style="display:block;margin:0 auto 16px;">
+                            <h1 style="margin:0;font-size:26px;color:#f8fafc;">Welcome to Forward Edge</h1>
+                        </td>
+                    </tr>
                     <tr>
                         <td style="font-size:16px;line-height:1.6;">
                             {!! nl2br(e($bodyCopy ?: 'We received your submission and will be in touch shortly.')) !!}
