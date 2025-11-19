@@ -3,12 +3,12 @@
     $d = $block->data ?? [];
 
     $heroTitle  = $d['title']      ?? ($heroTitle ?? 'Kickstart your journey');
-    $linkText   = $d['link_text']  ?? ($linkText  ?? 'Get Started');
+    $linkText   = $d['link_text']  ?? ($linkText  ?? null);
     $link       = $d['link']       ?? ($link      ?? '#');
     $desc       = trim($d['desc'] ?? ($Desc ?? 'Join immersive cohorts, earn job-ready skills, and plug into Forward Edge’s network of hiring partners.'));
     $tagline    = $d['kicker']     ?? $d['tagline'] ?? 'Forward Edge ';
     $secondaryLink = $d['link_secondary'] ?? null;
-    $secondaryText = $d['link_text_secondary'] ?? 'Explore cohorts';
+    $secondaryText = $d['link_text_secondary'] ?? null;
 
     $imgRaw = $d['hero_image'] ?? $d['banner_image'] ?? ($heroImage ?? null);
     $src = function ($path) {
