@@ -209,10 +209,12 @@
                 <p class="fe-hero-desc">{{ $desc }}</p>
 
                 <div class="fe-hero-cta">
+                    @if ($linkText)
                     <a class="tj-primary-btn" href="{{ $link }}">
                         <span class="btn-text"><span>{{ $linkText }}</span></span>
                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                     </a>
+                     @endif
 
                     @if ($secondaryLink)
                         <a class="ghost-btn" href="{{ $secondaryLink }}">

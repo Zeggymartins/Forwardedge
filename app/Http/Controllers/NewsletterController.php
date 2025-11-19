@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use MailchimpMarketing\ApiException;
 
 class NewsletterController extends Controller
 {
@@ -45,10 +46,18 @@ class NewsletterController extends Controller
         $merge['FNAME'] = $merge['FNAME'] !== '' ? $merge['FNAME'] : 'Subscriber';
         $merge['LNAME'] = $merge['LNAME'] !== '' ? $merge['LNAME'] : '-';
 
-        UpsertMember::dispatchSync($email, $merge, [
-            'double_opt_in' => $data['double_optin'] ?? config('services.mailchimp.double_opt_in'),
-            'tags'          => $data['tags'] ?? ['Website'],
-        ]);
+        try {
+            UpsertMember::dispatchSync($email, $merge, [
+                'double_opt_in' => $data['double_optin'] ?? config('services.mailchimp.double_opt_in'),
+                'tags'          => $data['tags'] ?? ['Website'],
+            ]);
+        } catch (ApiException $e) {
+            $message = $this->mapMailchimpException($e);
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $message], 422);
+            }
+            throw ValidationException::withMessages(['email' => $message]);
+        }
 
         Mail::to($email)->send(new NewsletterWelcomeMail($merge['FNAME'] ?: 'Subscriber'));
 
@@ -120,13 +129,24 @@ class NewsletterController extends Controller
 
         $normalizedMerge = $this->buildMergeFields($fields);
 
-        UpsertMember::dispatchSync(
-            strtolower($emailValue),
-            $normalizedMerge,
-            [
-                'tags' => !empty($payload['tags']) ? $payload['tags'] : ['Newsletter'],
-            ]
-        );
+        try {
+            UpsertMember::dispatchSync(
+                strtolower($emailValue),
+                $normalizedMerge,
+                [
+                    'tags' => !empty($payload['tags']) ? $payload['tags'] : ['Newsletter'],
+                ]
+            );
+        } catch (ApiException $e) {
+            $message = $this->mapMailchimpException($e);
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => $message], 422);
+            }
+
+            throw ValidationException::withMessages([
+                'fields' => $message,
+            ]);
+        }
 
         $block = isset($payload['block_id']) ? Block::find($payload['block_id']) : null;
         $blockData = $block && is_array($block->data) ? $block->data : [];
@@ -238,5 +258,30 @@ class NewsletterController extends Controller
         $merge['LNAME'] = $merge['LNAME'] !== '' ? $merge['LNAME'] : '-';
 
         return $merge;
+    }
+
+    protected function mapMailchimpException(ApiException $e): string
+    {
+        $detail = '';
+        $body = $e->getResponseBody();
+
+        if (is_object($body) && isset($body->detail)) {
+            $detail = (string) $body->detail;
+        } elseif (is_string($body)) {
+            $detail = $body;
+        } else {
+            $detail = $e->getMessage();
+        }
+
+        $detailLower = strtolower($detail);
+        if (str_contains($detailLower, 'permanently deleted')) {
+            return 'This email unsubscribed previously, so Mailchimp will not add it automatically. Please use a different email or resubscribe via one of our Mailchimp opt-in forms.';
+        }
+
+        if (str_contains($detailLower, 'forgotten email')) {
+            return 'This email was removed from our mailing list and must re-confirm via a Mailchimp form before we can add it again.';
+        }
+
+        return 'We could not subscribe this email right now. Please try again later or contact support.';
     }
 }
