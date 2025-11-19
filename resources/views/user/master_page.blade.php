@@ -48,6 +48,26 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/meanmenu.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/shop.css') }}" />
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/main.css') }}">
+    @if (config('services.meta_pixel.id'))
+        <!-- Meta Pixel Code -->
+        <script>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)n._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ config('services.meta_pixel.id') }}');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+            <img height="1" width="1" style="display:none"
+                src="https://www.facebook.com/tr?id={{ config('services.meta_pixel.id') }}&ev=PageView&noscript=1" />
+        </noscript>
+        <!-- End Meta Pixel Code -->
+    @endif
     <style>
         .tji-box:before {
             content: "";
@@ -1045,9 +1065,34 @@
                             })();
                         </script>
                         @if (config('services.recaptcha.key'))
-                            <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.key') }}" async defer></script>
                             <script>
-                                window.RECAPTCHA_SITE_KEY = "{{ config('services.recaptcha.key') }}";
+                                (function () {
+                                    const siteKey = "{{ config('services.recaptcha.key') }}";
+                                    const sources = [
+                                        `https://www.google.com/recaptcha/api.js?render=${siteKey}`,
+                                        `https://www.recaptcha.net/recaptcha/api.js?render=${siteKey}`,
+                                    ];
+
+                                    window.RECAPTCHA_SITE_KEY = siteKey;
+
+                                    function injectNext() {
+                                        if (!sources.length) return;
+                                        const src = sources.shift();
+                                        const script = document.createElement('script');
+                                        script.src = src;
+                                        script.async = true;
+                                        script.defer = true;
+                                        script.onload = () => {
+                                            document.dispatchEvent(new CustomEvent('recaptcha:loaded'));
+                                        };
+                                        script.onerror = () => {
+                                            injectNext();
+                                        };
+                                        document.head.appendChild(script);
+                                    }
+
+                                    injectNext();
+                                })();
                             </script>
                         @endif
 

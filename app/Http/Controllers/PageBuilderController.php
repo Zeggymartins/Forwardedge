@@ -607,6 +607,16 @@ class PageBuilderController extends Controller
 
         $data['fields'] = array_values($normalized);
 
+        $mode = $data['email_mode'] ?? null;
+        $allowedModes = ['newsletter', 'thank_you', 'custom', 'none'];
+        $data['email_mode'] = in_array($mode, $allowedModes, true) ? $mode : null;
+
+        $subject = trim((string) ($data['email_subject'] ?? ''));
+        $body = trim((string) ($data['email_body'] ?? ''));
+
+        $data['email_subject'] = $subject !== '' ? $subject : null;
+        $data['email_body'] = $body !== '' ? $body : null;
+
         return $data;
     }
 

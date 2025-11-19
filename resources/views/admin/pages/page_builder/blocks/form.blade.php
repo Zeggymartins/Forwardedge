@@ -868,6 +868,23 @@
     <label class="form-label small-label">Success Tags (comma separated)</label>
     <input class="form-control" name="data[tags]" placeholder="Newsletter, Website">
   </div>
+  <div class="col-md-4">
+    <label class="form-label small-label">Auto Reply Type</label>
+    <select class="form-select" name="data[email_mode]">
+      <option value="newsletter">Newsletter welcome</option>
+      <option value="thank_you">Thank you note</option>
+      <option value="custom">Custom message</option>
+      <option value="none">No auto-reply</option>
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label small-label">Auto Reply Subject</label>
+    <input class="form-control" name="data[email_subject]" placeholder="Thanks for reaching out">
+  </div>
+  <div class="col-12">
+    <label class="form-label small-label">Auto Reply Message</label>
+    <textarea class="form-control" name="data[email_body]" rows="4" placeholder="Compose the email body your leads should receive. Supports simple HTML."></textarea>
+  </div>
 
   <div class="col-12"><div class="section-divider"><span class="section-divider-label">Fields</span></div></div>
   <div class="col-12 d-flex justify-content-between align-items-center">

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Mailchimp\UpsertMember;
+use App\Mail\BuilderFormAutoReply;
 use App\Mail\NewsletterWelcomeMail;
+use App\Models\Block;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -126,9 +128,22 @@ class NewsletterController extends Controller
             ]
         );
 
-        Mail::to($emailValue)->send(new NewsletterWelcomeMail($normalizedMerge['FNAME'] ?? 'Subscriber'));
+        $block = isset($payload['block_id']) ? Block::find($payload['block_id']) : null;
+        $blockData = $block && is_array($block->data) ? $block->data : [];
+        $autoReplyMode = $blockData['email_mode'] ?? 'newsletter';
 
-        $message = 'Thanks for joining our newsletter! 🎉';
+        if ($autoReplyMode === 'newsletter' || empty($autoReplyMode)) {
+            $message = 'Thanks for joining our newsletter! 🎉';
+            Mail::to($emailValue)->send(new NewsletterWelcomeMail($normalizedMerge['FNAME'] ?? 'Subscriber'));
+        } elseif ($autoReplyMode === 'none') {
+            $message = 'Thanks for reaching out! We will be in touch shortly.';
+        } else {
+            $message = 'Thanks for reaching out! Please check your inbox.';
+            $subject = trim((string) ($blockData['email_subject'] ?? 'Thank you for contacting us'));
+            $body = trim((string) ($blockData['email_body'] ?? 'We received your submission and will respond shortly.'));
+
+            Mail::to($emailValue)->send(new BuilderFormAutoReply($subject, $body));
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

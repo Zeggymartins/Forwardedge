@@ -415,6 +415,9 @@ final class PageBlueprint
             'method'      => ['nullable', Rule::in(['POST', 'GET'])],
             'button_text' => ['nullable', 'string', 'max:40'],
             'tags'        => ['nullable', 'string', 'max:255'],
+            'email_mode'  => ['nullable', Rule::in(['newsletter', 'thank_you', 'custom', 'none'])],
+            'email_subject' => ['nullable', 'string', 'max:160'],
+            'email_body'    => ['nullable', 'string', 'max:5000'],
 
             'fields'                 => ['required', 'array', 'min:1', 'max:10'],
             'fields.*.label'         => ['required', 'string', 'max:120'],
