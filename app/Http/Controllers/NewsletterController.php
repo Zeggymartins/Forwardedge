@@ -99,7 +99,7 @@ class NewsletterController extends Controller
         }
 
         $payload = $request->validate([
-            'block_id'       => 'nullable|integer',
+            'block_id'       => 'nullable',
             'fields'         => 'required|array|min:1',
             'fields.*.label' => 'nullable|string|max:120',
             'fields.*.name'  => 'required|string|max:60',
