@@ -2,8 +2,8 @@
     use Illuminate\Support\Str;
 
     $selected = $selectedContent;
-    $price = $course->discount_price ?? $course->price ?? 0;
-    $originalPrice = $course->price ?? null;
+    $price = $selected ? ($selected->discount_price ?? $selected->price ?? 0) : 0;
+    $originalPrice = $selected?->price;
     $moduleTitle = $selected?->title ?? $course->title;
     $moduleSummary = Str::limit(strip_tags($selected?->content ?? $course->description ?? $moduleTitle), 280);
     $phaseCount = $selected?->phases?->count() ?? 0;
@@ -127,7 +127,7 @@
                                 </p>
                                 <div class="tj-product-details-price-wrapper">
                                     <p class="price">
-                                        @if ($course->discount_price && $originalPrice)
+                                        @if ($selected && $selected->discount_price && $originalPrice && $selected->discount_price < $originalPrice)
                                             <del>
                                                 <span><span>₦</span>{{ number_format($originalPrice) }}</span>
                                             </del>
@@ -171,7 +171,13 @@
                                             </div>
                                         </div>
                                         <div class="tj-product-details-add-to-cart ms-3">
-                                            <button type="button" class="tj-cart-btn open-cart-btn">
+                                            <button
+                                                type="button"
+                                                class="tj-cart-btn cart-button"
+                                                data-course-id="{{ $course->id }}"
+                                                data-content-id="{{ $selected?->id }}"
+                                                data-quantity="1"
+                                            >
                                                 <span class="btn-icon"><i class="fal fa-shopping-cart"></i><i class="fal fa-shopping-cart"></i></span>
                                                 <span class="btn-text"><span>Add to cart</span></span>
                                             </button>
@@ -377,6 +383,9 @@
                                         @php
                                             $parent = $module->course;
                                             $thumb = $parent?->thumbnail ? asset('storage/' . $parent->thumbnail) : asset('frontend/assets/images/product/product-1.webp');
+                                            $relatedRegular = $module->price ?? 0;
+                                            $relatedSale = $module->discount_price ?? $relatedRegular;
+                                            $relatedHasDiscount = $module->discount_price && $module->price && $module->discount_price < $module->price;
                                         @endphp
                                         <div class="tj-product">
                                             <div class="tj-product-item">
@@ -385,11 +394,16 @@
                                                         <img src="{{ $thumb }}" alt="">
                                                     </a>
                                                     <div class="tj-product-cart-btn">
-                                                        <a href="{{ route('shop.details', ['slug' => $parent?->slug, 'content' => $module->id]) }}"
-                                                           class="cart-button button tj-cart-btn stock-available ">
+                                                        <button
+                                                            type="button"
+                                                            class="cart-button button tj-cart-btn stock-available"
+                                                            data-course-id="{{ $parent?->id ?? $module->course_id }}"
+                                                            data-content-id="{{ $module->id }}"
+                                                            data-quantity="1"
+                                                        >
                                                             <span class="btn-icon"><i class="fal fa-shopping-cart"></i><i class="fal fa-shopping-cart"></i></span>
-                                                            <span class="btn-text"><span>View module</span></span>
-                                                        </a>
+                                                            <span class="btn-text"><span>Add to cart</span></span>
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div class="tj-product-content">
@@ -399,7 +413,16 @@
                                                         </a>
                                                     </h3>
                                                     <div class="tj-product-price-wrapper">
-                                                        <span class="price"><span><bdi><span>₦</span>{{ number_format($parent->discount_price ?? $parent->price ?? 0) }}</bdi></span></span>
+                                                        <span class="price">
+                                                            @if($relatedHasDiscount)
+                                                                <del>
+                                                                    <span><bdi><span>₦</span>{{ number_format($relatedRegular) }}</bdi></span>
+                                                                </del>
+                                                            @endif
+                                                            <ins>
+                                                                <span><bdi><span>₦</span>{{ number_format($relatedSale) }}</bdi></span>
+                                                            </ins>
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>

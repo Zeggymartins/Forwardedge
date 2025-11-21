@@ -2,7 +2,7 @@
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Str;
   $d = $block->data ?? [];
-  $items = $d['items'] ?? [];
+  $items = is_array($d['items'] ?? null) ? $d['items'] : [];
   if (!isset($imgUrl)) {
         $imgUrl = function ($path = null, $fallbackAsset = null) {
             if (blank($path)) {
@@ -14,32 +14,6 @@
             return Storage::url($path); // e.g. blocks/... -> /storage/blocks/...
         };
     }
-  // sensible defaults so it never looks empty
-  if (empty($items)) {
-      $items = [
-          [
-              'name' => 'Guy Hawkins',
-              'designation' => 'Co. Founder',
-              'photo' => 'assets/images/testimonial/client-1.webp',
-              'text' => "We’ve worked with the team for years — proactive, responsive, and always go the extra mile.",
-              'rating_fill' => 100
-          ],
-          [
-              'name' => 'Ralph Edwards',
-              'designation' => 'Co. Founder',
-              'photo' => 'assets/images/testimonial/client-2.webp',
-              'text' => "A game-changer for our business. Professionalism and innovative solutions streamlined operations.",
-              'rating_fill' => 100
-          ],
-          [
-              'name' => 'Devon Lane',
-              'designation' => 'Co. Founder',
-              'photo' => 'assets/images/testimonial/client-3.webp',
-              'text' => "Results beyond expectations—they understood our vision and added ideas that lifted the business.",
-              'rating_fill' => 100
-          ],
-      ];
-  }
 @endphp
 @push('styles')
 <style>
@@ -78,15 +52,19 @@
 @endpush
 
 <!-- start: Testimonial Section -->
-<section class="tj-testimonial-section h7-testimonial section-gap section-gap-x">
+<section class="tj-testimonial-section h7-testimonial section-gap section-gap-x pb-rich-text">
   <div class="container">
     <div class="row justify-content-between">
       <div class="col-12">
         <div class="sec-heading style-2 style-7 sec-heading-centered">
-          <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-            <i class="tji-box"></i> {{ $d['kicker'] ?? 'CLIENT FEEDBACK' }}
-          </span>
-          <h2 class="sec-title text-anim">{{ $d['title'] ?? 'Our Clients Share Their Success Stories.' }}</h2>
+          @if(!blank($d['kicker'] ?? null))
+            <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+              <i class="tji-box"></i> {!! pb_text($d['kicker'] ?? null) !!}
+            </span>
+          @endif
+          @if(!blank($d['title'] ?? null))
+            <h2 class="sec-title text-anim">{!! pb_text($d['title'] ?? null) !!}</h2>
+          @endif
         </div>
       </div>
     </div>
@@ -97,24 +75,37 @@
           <div class="swiper swiper-container testimonial-slider">
             <div class="swiper-wrapper">
               @foreach($items as $it)
+                @php
+                    $name = $it['name'] ?? '';
+                    $designation = $it['designation'] ?? '';
+                    $text = $it['text'] ?? '';
+                @endphp
+                @continue(blank($name) && blank($text))
                 <div class="swiper-slide">
                   <div class="testimonial-item">
                     <div class="testimonial-author">
                       <div class="author-inner">
                         <div class="author-img">
-                          <img src="{{ $imgUrl($it['photo'] ?? 'assets/images/testimonial/client-1.webp') }}" alt="">
+                          @php $photo = $imgUrl($it['photo'] ?? null); @endphp
+                          @if($photo)
+                            <img src="{{ $photo }}" alt="{{ $name ?: 'Client photo' }}">
+                          @endif
                         </div>
                         <div class="author-header">
-                          <h4 class="title">{{ $it['name'] ?? '' }}</h4>
-                          @if(!empty($it['designation']))
-                            <span class="designation">{{ $it['designation'] }}</span>
+                          @if(!blank($name))
+                            <h4 class="title">{!! pb_text($name) !!}</h4>
+                          @endif
+                          @if(!blank($designation))
+                            <span class="designation">{!! pb_text($designation) !!}</span>
                           @endif
                         </div>
                       </div>
                     </div>
-                    <div class="desc ">
-                      <p>{{ $it['text'] ?? '' }}</p>
-                    </div>
+                    @if(!blank($text))
+                        <div class="desc">
+                          <p>{!! pb_text($text) !!}</p>
+                        </div>
+                    @endif
                     
                     <div class="star-ratings">
                       <div class="fill-ratings" style="width: {{ (int)($it['rating_fill'] ?? 100) }}%">

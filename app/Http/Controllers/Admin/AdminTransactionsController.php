@@ -29,7 +29,7 @@ class AdminTransactionsController extends Controller
 
     public function getOrders()
     {
-        $orders = Orders::with(['user', 'items.course'])->latest()->paginate(10);
+        $orders = Orders::with(['user', 'items.course', 'items.courseContent'])->latest()->paginate(10);
         return view('admin.pages.orders', compact('orders'));
     }
 }

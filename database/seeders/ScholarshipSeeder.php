@@ -15,9 +15,9 @@ class ScholarshipSeeder extends Seeder
         // Ensure we have some courses to attach to
         if (Course::count() === 0) {
             $seedCourses = [
-                ['title' => 'Cybersecurity Bootcamp', 'slug' => 'cybersecurity-bootcamp', 'status' => 'published', 'price' => 0],
-                ['title' => 'Data Analytics Pro',      'slug' => 'data-analytics-pro',     'status' => 'published', 'price' => 0],
-                ['title' => 'Full-Stack Web Dev',      'slug' => 'full-stack-web-dev',     'status' => 'published', 'price' => 0],
+                ['title' => 'Cybersecurity Bootcamp', 'slug' => 'cybersecurity-bootcamp', 'status' => 'published'],
+                ['title' => 'Data Analytics Pro',      'slug' => 'data-analytics-pro',     'status' => 'published'],
+                ['title' => 'Full-Stack Web Dev',      'slug' => 'full-stack-web-dev',     'status' => 'published'],
             ];
 
             foreach ($seedCourses as $c) {
@@ -26,7 +26,6 @@ class ScholarshipSeeder extends Seeder
                     [
                         'title'       => $c['title'],
                         'status'      => $c['status'],
-                        'price'       => $c['price'],
                         'description' => 'Seeded course for scholarship testing.',
                     ]
                 );

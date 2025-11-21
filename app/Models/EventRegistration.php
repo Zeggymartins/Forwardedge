@@ -12,7 +12,6 @@ class EventRegistration extends Model
 
     protected $fillable = [
         'event_id',
-        'ticket_id',
         'first_name',
         'last_name',
         'email',
@@ -50,11 +49,6 @@ class EventRegistration extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
-    }
-
-    public function ticket()
-    {
-        return $this->belongsTo(EventTicket::class);
     }
 
     public function getFullNameAttribute()

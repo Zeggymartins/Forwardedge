@@ -14,17 +14,37 @@ class EmailCampaignMail extends Mailable implements ShouldQueue
 
     public function __construct(
         public EmailCampaign $campaign,
-        public ?string $recipientName = null
+        public ?string $recipientName = null,
+        public ?string $recipientEmail = null
     ) {
         $this->subject($campaign->subject);
     }
 
     public function build(): self
     {
+        $ctaLink = $this->resolveCtaLink();
+
         return $this->view('emails.campaign')
             ->with([
                 'campaign' => $this->campaign,
                 'recipientName' => $this->recipientName,
+                'recipientEmail' => $this->recipientEmail,
+                'ctaLink' => $ctaLink,
             ]);
+    }
+
+    protected function resolveCtaLink(): ?string
+    {
+        if (!$this->campaign->cta_link) {
+            return null;
+        }
+
+        if (!$this->recipientEmail || !$this->campaign->cta_email_param) {
+            return $this->campaign->cta_link;
+        }
+
+        $separator = str_contains($this->campaign->cta_link, '?') ? '&' : '?';
+
+        return $this->campaign->cta_link . $separator . $this->campaign->cta_email_param . '=' . urlencode($this->recipientEmail);
     }
 }

@@ -50,6 +50,12 @@
                                 @endif
                             </div>
                             <div class="flex-grow-1">
+                                @php
+                                    $startingDisplay = $course->contents
+                                        ->map(fn($c) => $c->discount_price ?? $c->price)
+                                        ->filter(fn($value) => !is_null($value) && $value >= 0)
+                                        ->min();
+                                @endphp
                                 <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                                     <h5 class="fw-bold mb-0">{{ $course->title }}</h5>
                                     <span class="status-pill {{ $course->is_published ? 'published' : 'draft' }}">
@@ -60,9 +66,9 @@
                                     <span class="badge bg-secondary-subtle text-secondary fw-semibold">
                                         {{ $course->contents_count }} {{ Str::plural('Content', $course->contents_count) }}
                                     </span>
-                                    @if ($course->price)
+                                    @if (!is_null($startingDisplay))
                                         <span class="badge bg-primary-subtle text-primary fw-semibold">
-                                            ₦{{ number_format($course->discount_price ?? $course->price, 2) }}
+                                            From ₦{{ number_format($startingDisplay, 2) }}
                                         </span>
                                     @endif
                                 </div>
@@ -77,13 +83,23 @@
                             @else
                                 <div class="content-list">
                                     @foreach ($course->contents as $content)
-                                        <div class="content-line">
-                                            <div>
-                                                <h6>{{ $content->title }}</h6>
-                                                <small>
+                                        <div class="content-line d-flex flex-wrap justify-content-between align-items-center">
+                                            <div class="me-3">
+                                                <h6 class="mb-1">{{ $content->title }}</h6>
+                                                <small class="text-muted">
                                                     {{ ucfirst($content->type) }} · {{ $content->phases_count }}
                                                     {{ Str::plural('phase', $content->phases_count) }}
                                                 </small>
+                                            </div>
+                                            <div class="text-end ms-auto me-3">
+                                                <span class="fw-semibold d-block">
+                                                    ₦{{ number_format($content->discount_price ?? $content->price ?? 0, 2) }}
+                                                </span>
+                                                @if ($content->discount_price && $content->price && $content->discount_price < $content->price)
+                                                    <small class="text-muted text-decoration-line-through">
+                                                        ₦{{ number_format($content->price, 2) }}
+                                                    </small>
+                                                @endif
                                             </div>
                                             <div class="action-buttons d-flex flex-wrap gap-2">
                                                 <a href="{{ route('admin.course_contents.show', $course->id) }}#content-{{ $content->id }}"
@@ -97,6 +113,11 @@
                                                         'content'   => $content->content,
                                                         'file_name' => $content->file_path ? basename($content->file_path) : null,
                                                         'has_file'  => (bool) $content->file_path,
+                                                        'price'     => $content->price,
+                                                        'discount_price' => $content->discount_price,
+                                                        'drive_folder_id' => $content->drive_folder_id,
+                                                        'drive_share_link' => $content->drive_share_link,
+                                                        'auto_grant_access' => $content->auto_grant_access,
                                                     ];
                                                 @endphp
                                                 <button class="btn btn-sm btn-outline-secondary flex-fill"
@@ -121,7 +142,7 @@
                         <div class="mt-3 d-flex justify-content-between align-items-center">
                             <a href="{{ route('admin.course_contents.show', $course->id) }}"
                                 class="btn btn-outline-secondary btn-sm rounded-pill">Manage Contents</a>
-                            <button class="btn btn-link text-decoration-none p-0" data-bs-toggle="modal"
+                            <button class="btn btn-outline text-decoration-none p-2" data-bs-toggle="modal"
                                 data-bs-target="#addContentModal" data-course="{{ $course->id }}">
                                 + Add Module
                             </button>

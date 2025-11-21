@@ -2,22 +2,22 @@
     /** @var \App\Models\Block $block */
     $d = $block->data ?? [];
 
-    $kicker      = $d['kicker'] ?? 'Forward Edge · Signature Cohorts';
-    $title       = $d['title'] ?? 'Ignite your cybersecurity career with an unfair advantage';
-    $subtitle    = $d['subtitle'] ?? 'Academy Training • Fellows • Scholarships';
-    $description = $d['description'] ?? 'Hands-on labs, red-team mentors, and partner-backed hiring pathways built for ambitious talent across Africa.';
+    $kicker      = $d['kicker'] ?? null;
+    $title       = $d['title'] ?? null;
+    $subtitle    = $d['subtitle'] ?? null;
+    $description = $d['description'] ?? null;
 
-    $primaryText = $d['primary_button_text'] ?? 'Join the next cohort';
-    $primaryLink = $d['primary_button_link'] ?? '#';
-    $secondaryText = $d['secondary_button_text'] ?? 'Explore';
-    $secondaryLink = $d['secondary_button_link'] ?? '#';
+    $primaryText = $d['primary_button_text'] ?? null;
+    $primaryLink = $d['primary_button_link'] ?? null;
+    $secondaryText = $d['secondary_button_text'] ?? null;
+    $secondaryLink = $d['secondary_button_link'] ?? null;
 
     $rawImage = $d['hero_image'] ?? null;
     $heroImage = $rawImage
         ? (Str::startsWith($rawImage, ['http://', 'https://', '//'])
             ? $rawImage
             : asset('storage/' . ltrim($rawImage, '/')))
-        : asset('frontend/assets/images/banner/hero-fallback.webp');
+        : null;
 @endphp
 
 @push('styles')
@@ -150,43 +150,47 @@
     </style>
 @endpush
 
-<section class="fe-hero-radiant my-2">
+<section class="fe-hero-radiant my-2 pb-rich-text">
     <div class="fe-hero-radiant__grid">
-        <div class="fe-hero-radiant__content">
-            @if ($kicker)
-                <span class="fe-hero-radiant__kicker">{{ $kicker }}</span>
+        <div class="fe-hero-radiant__content pb-rich-text">
+            @if (!blank($kicker))
+                <span class="fe-hero-radiant__kicker">{!! pb_text($kicker) !!}</span>
             @endif
 
-            @if ($subtitle)
-                <p class="fe-hero-radiant__subtitle">{{ $subtitle }}</p>
+            @if (!blank($subtitle))
+                <p class="fe-hero-radiant__subtitle">{!! pb_text($subtitle) !!}</p>
             @endif
 
-            <h1>{{ $title }}</h1>
+            @if(!blank($title))
+                <h1>{!! pb_text($title) !!}</h1>
+            @endif
 
-            @if ($description)
-                <p class="fe-hero-radiant__desc">{{ $description }}</p>
+            @if (!blank($description))
+                <p class="fe-hero-radiant__desc">{!! pb_text($description) !!}</p>
             @endif
 
             <div class="fe-hero-radiant__ctas">
-                @if ($primaryText && $primaryLink)
+                @if (!blank($primaryText) && !blank($primaryLink))
                     <a href="{{ $primaryLink }}" class="btn btn-primary">
-                        {{ $primaryText }}
+                        {!! pb_text($primaryText) !!}
                     </a>
                 @endif
 
-                @if ($secondaryText && $secondaryLink)
+                @if (!blank($secondaryText) && !blank($secondaryLink))
                     <a href="{{ $secondaryLink }}" class="btn btn-link">
-                        {{ $secondaryText }}
+                        {!! pb_text($secondaryText) !!}
                         <i class="bi bi-arrow-up-right"></i>
                     </a>
                 @endif
             </div>
         </div>
 
-        <div class="fe-hero-radiant__media">
-            <figure>
-                <img src="{{ $heroImage }}" alt="{{ $title }} illustration">
-            </figure>
-        </div>
+        @if($heroImage)
+            <div class="fe-hero-radiant__media">
+                <figure>
+                    <img src="{{ $heroImage }}" alt="{{ $title }} illustration">
+                </figure>
+            </div>
+        @endif
     </div>
 </section>

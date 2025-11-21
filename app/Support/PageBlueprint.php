@@ -126,6 +126,8 @@ final class PageBlueprint
                 'plans.*.subtitle'     => ['nullable', 'string', 'max:160'],
                 'plans.*.price_naira'  => ['nullable', 'string', 'max:40'],
                 'plans.*.price_usd'    => ['nullable', 'string', 'max:40'],
+                'plans.*.course_id'       => ['nullable', 'integer', 'exists:courses,id'],
+                'plans.*.course_content_id'=> ['nullable', 'integer', 'exists:course_contents,id'],
 
                 // Features - array is optional, but if present items must be strings
                 'plans.*.features'     => ['nullable', 'array', 'max:30'],

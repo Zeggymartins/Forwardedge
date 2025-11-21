@@ -39,7 +39,11 @@ class PrepareEmailCampaign implements ShouldQueue
             ])->save();
         }
 
-        $targets = $collector->all();
+        $targets = $collector->all([
+            'sources' => $campaign->audience_sources ?? [],
+            'include' => $campaign->include_emails ?? [],
+            'exclude' => $campaign->exclude_emails ?? [],
+        ]);
 
         if ($targets->isEmpty()) {
             $campaign->forceFill([

@@ -45,6 +45,23 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Google Drive Folder ID</label>
+                        <input type="text" name="drive_folder_id" class="form-control" placeholder="e.g. 1aBcD2EfGh" value="{{ old('drive_folder_id') }}">
+                        <small class="text-muted">Paste the last segment of the Drive share URL.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Share Link (optional)</label>
+                        <input type="url" name="drive_share_link" class="form-control" placeholder="https://drive.google.com/..." value="{{ old('drive_share_link') }}">
+                        <small class="text-muted">Shown in order emails so learners can open the folder.</small>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="driveAutoGrant" name="auto_grant_access" value="1" {{ old('auto_grant_access') ? 'checked' : '' }}>
+                            <label for="driveAutoGrant" class="form-check-label">Automatically grant Drive access when a learner pays</label>
+                        </div>
+                        <small class="text-muted">Requires Google Drive credentials + token to be configured on the server.</small>
+                    </div>
                 </div>
 
                 <div class="mt-3" data-content-field="text">
@@ -62,12 +79,12 @@
 
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">
-                        <label class="form-label">Course Price (₦)</label>
-                        <input type="number" name="price" class="form-control" step="0.01" min="0" placeholder="Leave empty to keep current price">
+                        <label class="form-label">Module Price (₦) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" step="0.01" min="0" placeholder="e.g. 45000" value="{{ old('price') }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Discount Price (₦)</label>
-                        <input type="number" name="discount_price" class="form-control" step="0.01" min="0" placeholder="Optional discount">
+                        <input type="number" name="discount_price" class="form-control" step="0.01" min="0" placeholder="Optional discount" value="{{ old('discount_price') }}">
                     </div>
                 </div>
 
@@ -118,6 +135,28 @@
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Google Drive Folder ID</label>
+                        <input type="text" name="drive_folder_id" id="editDriveFolder" class="form-control" placeholder="e.g. 1aBcD2EfGh">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Share Link</label>
+                        <input type="url" name="drive_share_link" id="editDriveShare" class="form-control" placeholder="https://drive.google.com/...">
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="editAutoGrant" name="auto_grant_access" value="1">
+                            <label for="editAutoGrant" class="form-check-label">Automatically grant Drive access</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Module Price (₦) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" id="editContentPrice" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Discount Price (₦)</label>
+                        <input type="number" name="discount_price" id="editContentDiscount" class="form-control" step="0.01" min="0">
                     </div>
                 </div>
 
@@ -344,6 +383,11 @@
             const editFileInput = document.getElementById('editContentFile');
             const editFileHint = document.getElementById('editFileHint');
             const editCurrentFile = document.getElementById('editCurrentFile');
+            const editDriveFolder = document.getElementById('editDriveFolder');
+            const editDriveShare = document.getElementById('editDriveShare');
+            const editAutoGrant = document.getElementById('editAutoGrant');
+            const editPriceInput = document.getElementById('editContentPrice');
+            const editDiscountInput = document.getElementById('editContentDiscount');
             let editOriginalType = 'text';
             let editHasFile = false;
 
@@ -382,6 +426,17 @@
                 if (editTitle) editTitle.value = data.title || '';
                 if (editType) editType.value = data.type || 'text';
                 if (editBody) editBody.value = data.content || '';
+                if (editDriveFolder) editDriveFolder.value = data.drive_folder_id || '';
+                if (editDriveShare) editDriveShare.value = data.drive_share_link || '';
+                if (editAutoGrant) {
+                    editAutoGrant.checked = Boolean(data.auto_grant_access);
+                }
+                if (editPriceInput) {
+                    editPriceInput.value = data.price ?? 0;
+                }
+                if (editDiscountInput) {
+                    editDiscountInput.value = data.discount_price ?? '';
+                }
                 editOriginalType = data.type || 'text';
                 editHasFile = Boolean(data.has_file);
                 if (editCurrentFile) {
@@ -394,6 +449,8 @@
             editModalEl?.addEventListener('hidden.bs.modal', () => {
                 editForm?.reset();
                 if (editFileInput) editFileInput.value = '';
+                if (editPriceInput) editPriceInput.value = '';
+                if (editDiscountInput) editDiscountInput.value = '';
             });
         });
     </script>

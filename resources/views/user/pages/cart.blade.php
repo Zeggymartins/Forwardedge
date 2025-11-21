@@ -1,6 +1,10 @@
 @extends('user.master_page')
 @section('title', 'Cart | Forward Edge Consulting')
 @section('main')
+    @php
+        $currencySymbol = '₦';
+        $cartSubtotal = $cartItems->sum(fn($item) => ($item->price ?? 0) * ($item->quantity ?? 1));
+    @endphp
     @include('user.partials.breadcrumb')
     <section class="full-width tj-page__area section-gap">
         <div class="container">
@@ -21,7 +25,7 @@
                                                         <th class="product-thumbnail">Product</th>
                                                         <th class="product-name"></th>
                                                         <th class="product-price">Price</th>
-                                                        <th class="product-quantity">Quantity</th>
+                                                        {{-- <th class="product-quantity">Quantity</th> --}}
                                                         <th class="product-subtotal">Subtotal</th>
                                                         <th class="product-remove">&nbsp;</th>
                                                     </tr>
@@ -38,19 +42,26 @@
                                                                 </a>
                                                             </td>
                                                             <td class="product-name" data-title="Name">
-                                                                <h5><a
-                                                                        href="{{ route('course.show', $item->course->slug) }}">{{ $item->course->title }}</a>
+                                                                <h5>
+                                                                    <a href="{{ route('course.show', $item->course->slug) }}">
+                                                                        {{ $item->course->title }}
+                                                                    </a>
                                                                 </h5>
+                                                                @if($item->courseContent)
+                                                                    <small class="text-muted d-block">
+                                                                        Module: {{ $item->courseContent->title }}
+                                                                    </small>
+                                                                @endif
                                                             </td>
                                                             <td class="product-price" data-title="Price">
                                                                 <span class="woocommerce-Price-amount amount">
                                                                     <bdi>
                                                                         <span
-                                                                            class="woocommerce-Price-currencySymbol">$</span>{{ number_format($item->price, 2) }}
+                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($item->price, 2) }}
                                                                     </bdi>
                                                                 </span>
                                                             </td>
-                                                            <td class="product-quantity tj-cart-quantity"
+                                                            {{-- <td class="product-quantity tj-cart-quantity"
                                                                 data-title="Quantity">
                                                                 <div class="tj-product-quantity">
                                                                     <div class="quantity">
@@ -73,19 +84,23 @@
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                            </td>
+                                                            </td> --}}
                                                             <td class="product-subtotal" data-title="Subtotal">
                                                                 <span class="woocommerce-Price-amount amount">
                                                                     <bdi>
                                                                         <span
-                                                                            class="woocommerce-Price-currencySymbol">$</span>{{ number_format($item->price * $item->quantity, 2) }}
+                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($item->price * $item->quantity, 2) }}
                                                                     </bdi>
                                                                 </span>
                                                             </td>
                                                             <td class="product-remove">
-                                                                <a href="#" class="remove"
-                                                                    aria-label="Remove this item"
-                                                                    data-course-id="{{ $item->course_id }}">×</a>
+                                                                <a href="#"
+                                                                   class="remove"
+                                                                   aria-label="Remove this item"
+                                                                   data-course-id="{{ $item->course_id }}"
+                                                                   data-content-id="{{ $item->course_content_id }}">
+                                                                    ×
+                                                                </a>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -93,7 +108,7 @@
                                             </table>
                                         </div>
 
-                                        <div class="cart_totals_action_wrap">
+                                        {{-- <div class="cart_totals_action_wrap">
                                             <div class="actions">
                                                 <div class="row rg-30 align-items-center">
                                                     <div class="col-md-8">
@@ -123,7 +138,7 @@
                                                 <input type="hidden" id="woocommerce-cart-nonce"
                                                     name="woocommerce-cart-nonce">
                                             </div>
-                                        </div>
+                                        </div> --}}
                                     </form>
                                 </div>
                                 <div class="col-sm-12">
@@ -137,14 +152,14 @@
                                                         <th>Subtotal</th>
                                                         <td data-title="Subtotal"><span
                                                                 class="woocommerce-Price-amount amount"><bdi><span
-                                                                        class="woocommerce-Price-currencySymbol">$</span>450.00</bdi></span>
+                                                                        class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($cartSubtotal, 2) }}</bdi></span>
                                                         </td>
                                                     </tr>
                                                     <tr class="order-total">
                                                         <th>Total</th>
                                                         <td data-title="Total"><strong><span
                                                                     class="woocommerce-Price-amount amount"><bdi><span
-                                                                            class="woocommerce-Price-currencySymbol">$</span>450.00</bdi></span></strong>
+                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($cartSubtotal, 2) }}</bdi></span></strong>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -174,32 +189,34 @@
             const CSRF = document.querySelector('meta[name="csrf-token"]')?.content;
 
             // --- recalc totals (DOM-driven) ---
+            const currencySymbol = @json($currencySymbol ?? '₦');
+
             function recalcTotals() {
                 let subtotal = 0;
                 document.querySelectorAll("tr.cart_item").forEach(row => {
                     const priceEl = row.querySelector(".product-price .amount bdi");
-                    const qtyEl = row.querySelector("input.qty");
                     const subtotalEl = row.querySelector(".product-subtotal .amount bdi");
 
-                    if (!priceEl || !qtyEl || !subtotalEl) return;
+                    if (!priceEl || !subtotalEl) return;
 
                     const price = parseFloat(priceEl.textContent.replace(/[^0-9.]/g, "")) || 0;
-                    const qty = parseInt(qtyEl.value) || 1;
+                    const qtyEl = row.querySelector("input.qty");
+                    const qty = qtyEl ? parseInt(qtyEl.value) || 1 : 1;
                     const lineTotal = price * qty;
 
                     subtotal += lineTotal;
 
                     subtotalEl.innerHTML =
-                        `<span class="woocommerce-Price-currencySymbol">₦</span>${lineTotal.toFixed(2)}`;
+                        `<span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${lineTotal.toFixed(2)}`;
                 });
 
                 document.querySelectorAll(".cart-subtotal .amount bdi").forEach(el => {
                     el.innerHTML =
-                        `<span class="woocommerce-Price-currencySymbol">₦</span>${subtotal.toFixed(2)}`;
+                        `<span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${subtotal.toFixed(2)}`;
                 });
                 document.querySelectorAll(".order-total .amount bdi").forEach(el => {
                     el.innerHTML =
-                        `<span class="woocommerce-Price-currencySymbol">₦</span>${subtotal.toFixed(2)}`;
+                        `<span class="woocommerce-Price-currencySymbol">${currencySymbol}</span>${subtotal.toFixed(2)}`;
                 });
             }
 
@@ -231,8 +248,8 @@
                     e.preventDefault();
                     if (!confirm("Remove this item from cart?")) return;
                     const row = this.closest("tr.cart_item");
-                    const courseId = this.dataset.courseId || this.getAttribute('data-course-id') ||
-                        null;
+                    const courseId = this.dataset.courseId || this.getAttribute('data-course-id') || null;
+                    const contentId = this.dataset.contentId || this.getAttribute('data-content-id') || null;
 
                     // Visual feedback
                     row.style.opacity = 0.6;
@@ -246,7 +263,8 @@
                                     "Accept": "application/json"
                                 },
                                 body: JSON.stringify({
-                                    course_id: parseInt(courseId)
+                                    course_id: parseInt(courseId),
+                                    course_content_id: contentId ? parseInt(contentId) : null
                                 })
                             }).then(r => r.json())
                             .then(json => {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\ScholarshipStatusMail;
 use App\Models\Enrollment;
+use App\Models\OrderItem;
 use App\Models\ScholarshipApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -21,7 +22,12 @@ class AdminEnrollmentController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('admin.pages.enrollment', compact('enrollments'));
+        $moduleEnrollments = OrderItem::with(['order.user', 'course', 'courseContent'])
+            ->whereNotNull('course_content_id')
+            ->latest()
+            ->paginate(10, ['*'], 'modules_page');
+
+        return view('admin.pages.enrollment', compact('enrollments', 'moduleEnrollments'));
     }
 
     /**

@@ -29,10 +29,10 @@
   $data = $block->data ?? [];
 
   $kicker   = $data['kicker']   ?? ($Kicker   ?? null);
-  $title    = $data['title']    ?? ($title    ?? 'We deliver measurable results, build trust, and grow with you.');
+  $title    = $data['title']    ?? ($title    ?? null);
   $text     = $data['text']     ?? ($text     ?? null);
   $linkText = $data['link_text']?? ($link_Text?? null);
-  $link     = $data['link']     ?? ($link     ?? '#');
+  $link     = $data['link']     ?? ($link     ?? null);
 
   $columns  = $data['columns'] ?? [];
   // Force exactly two columns (render what exists)
@@ -61,7 +61,7 @@
 @endphp
 
 {{-- ========== About ========== --}}
-<section class="tj-about-section h6-about section-gap section-gap-x" aria-label="About">
+<section class="tj-about-section h6-about section-gap section-gap-x pb-rich-text" aria-label="About">
   <div class="container">
     <div class="row">
       {{-- Text / Left --}}
@@ -70,16 +70,16 @@
           <div class="sec-heading style-2 style-6">
             @if(!empty($kicker))
               <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                <i class="tji-box"></i>{{ $kicker }}
+                <i class="tji-box"></i>{!! pb_text($kicker) !!}
               </span>
             @endif
 
             <h2 class="sec-title title-anim">
-              {{ $title }}
+              {!! pb_text($title) !!}
             </h2>
 
             @if (!empty($text))
-              <p class="desc wow fadeInUp" data-wow-delay=".8s">{{ $text }}</p>
+              <p class="desc wow fadeInUp" data-wow-delay=".8s">{!! pb_text($text) !!}</p>
             @endif
 
             {{-- ===== Two-column list block (head, subhead, description, list) ===== --}}
@@ -95,20 +95,21 @@
                   <div class="col-md-6">
                     <div class="pe-md-3">
                       @if($head)
-                        <h4 class="mb-1">{{ $head }}</h4>
+                        <h4 class="mb-1">{!! pb_text($head) !!}</h4>
                       @endif
                       @if($sub)
-                        <div class="text-muted small mb-2">{{ $sub }}</div>
+                        <div class="text-muted small mb-2">{!! pb_text($sub) !!}</div>
                       @endif
                       @if($desc)
-                        <p class="mb-3">{{ $desc }}</p>
+                        <p class="mb-3">{!! pb_text($desc) !!}</p>
                       @endif
                       @if(count($list))
                         <ul class="list-unstyled m-0">
                           @foreach($list as $li)
+                            @continue(blank($li))
                             <li class="d-flex align-items-start gap-2 mb-2">
                               <i class="tji-check-circle mt-1"></i>
-                              <span>{{ $li }}</span>
+                              <span>{!! pb_text($li) !!}</span>
                             </li>
                           @endforeach
                         </ul>
@@ -125,7 +126,7 @@
           @if($linkText && $link)
             <div class="btn-area wow fadeInUp mt-3" data-wow-delay=".8s">
               <a class="tj-primary-btn" href="{{ $link }}">
-                <span class="btn-text"><span>{{ $linkText }}</span></span>
+                <span class="btn-text"><span>{!! pb_text($linkText) !!}</span></span>
                 <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
               </a>
             </div>

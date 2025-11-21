@@ -40,7 +40,7 @@
                                             $type = class_basename($txn->payable_type);
                                             if ($type === 'CourseSchedule') {
                                                 $typeLabel = 'Bootcamp';
-                                            } elseif ($type === 'EventTicket') {
+                                            } elseif ($type === 'EventTicket' || $type === 'Event') {
                                                 $typeLabel = 'Event';
                                             } elseif ($type === 'Orders') {
                                                 $typeLabel = 'Order';

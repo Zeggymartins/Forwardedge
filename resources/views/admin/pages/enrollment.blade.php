@@ -132,5 +132,57 @@
     <div class="mt-4">
         {{ $enrollments->links() }}
     </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mt-5">
+        <div class="card-body p-0">
+            <div class="d-flex justify-content-between align-items-center px-4 pt-4">
+                <h2 class="h5 mb-0">📁 Module Purchases</h2>
+                <span class="text-muted small">Showing {{ $moduleEnrollments->total() }} records</span>
+            </div>
+            <table class="table align-middle mb-0">
+                <thead class="bg-gradient-primary">
+                    <tr>
+                        <th class="py-3 px-4">#</th>
+                        <th class="py-3 px-4">Student</th>
+                        <th class="py-3 px-4">Module</th>
+                        <th class="py-3 px-4">Course</th>
+                        <th class="py-3 px-4">Order</th>
+                        <th class="py-3 px-4">Purchased</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($moduleEnrollments as $index => $item)
+                        <tr>
+                            <td class="py-3 px-4">{{ $moduleEnrollments->firstItem() + $index }}</td>
+                            <td class="py-3 px-4">
+                                <span class="fw-bold">{{ $item->order->user->name ?? 'Guest' }}</span><br>
+                                <small class="text-muted">{{ $item->order->user->email ?? '—' }}</small>
+                            </td>
+                            <td class="py-3 px-4">
+                                {{ $item->courseContent->title ?? 'Module removed' }}
+                            </td>
+                            <td class="py-3 px-4">
+                                {{ $item->course->title ?? 'Course removed' }}
+                            </td>
+                            <td class="py-3 px-4">
+                                #{{ $item->order_id }}
+                                <div><span class="badge bg-success">{{ ucfirst($item->order->status ?? 'paid') }}</span></div>
+                            </td>
+                            <td class="py-3 px-4">
+                                {{ optional($item->created_at)->format('M d, Y') }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No module purchases yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="mt-4">
+        {{ $moduleEnrollments->links() }}
+    </div>
 </div>
 @endsection

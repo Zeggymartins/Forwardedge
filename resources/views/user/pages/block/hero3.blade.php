@@ -9,14 +9,11 @@
     if (!$title && is_array($titleSegments)) {
         $title = trim(implode(' ', array_filter($titleSegments)));
     }
-    if (!$title) {
-        $title = 'Trusted Cybersecurity Solutions';
-    }
 
-    $description = trim((string) ($d['description'] ?? ($d['sub_text'] ?? 'We secure organizations with modern defensive playbooks, expert training, and always-on support.')));
+    $description = trim((string) ($d['description'] ?? ($d['sub_text'] ?? '')));
 
     $imgRaw = $d['banner_image']
-        ?? ($d['image'] ?? ($d['hero_image'] ?? 'frontend/assets/images/hero/h7-hero-banner.webp'));
+        ?? ($d['image'] ?? ($d['hero_image'] ?? null));
 
     $src = function ($path) {
         if (!$path || !is_string($path)) {
@@ -38,7 +35,7 @@
 
 
 
-<section class="h7-hero">
+<section class="h7-hero pb-rich-text">
      <div class="h7-hero-inner">
          <div class="h7-hero-bg-image" data-bg-image="{{asset('frontend/assets/images/hero/h7-hero-bg.webp')}}"></div>
          <div class="container">
@@ -46,27 +43,25 @@
                  <div class="col-12">
                     <div class="h7-hero-item-wrapper">
                         <div class="h7-hero-content">
-                            <h1 class="h7-hero-title text-anim">
-                                <span>
-                                    @if ($iconClass)
-                                        <span class="badge rounded-pill bg-primary-subtle text-primary me-2">
-                                            <i class="bi {{ e($iconClass) }}"></i>
-                                        </span>
-                                    @elseif ($iconImage)
-                                        <img class="wow bounceIn me-2" data-wow-delay="1s" src="{{ $iconImage }}" alt="Verified badge">
-                                    @endif
-                                    {{ $title }}
-                                </span>
-                            </h1>
-                            @if ($description)
-                                <p class="text-white-50 mt-3">{{ $description }}</p>
+                            @if(!blank($title))
+                                <h1 class="h7-hero-title text-anim pb-rich-text">
+                                    <span>
+                                        {{-- optional badge/icon removed when missing --}}
+                                        {!! pb_text($title) !!}
+                                    </span>
+                                </h1>
+                            @endif
+                            @if (!blank($description))
+                                <div class="text-white-50 mt-3">{!! pb_text($description) !!}</div>
                             @endif
                         </div>
 
+                        @if($image)
                         <div class="h7-hero-banner">
                              <img class="wow fadeInUpBig" data-wow-delay=".8s" src="{{ $image }}"
                                  alt="Hero Banner" style="width: 651px; height:839px">
                          </div>
+                        @endif
                      </div>
                  </div>
 

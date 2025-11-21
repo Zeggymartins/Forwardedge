@@ -67,7 +67,9 @@ class AdminEmailController extends Controller
 
     public function campaignsCreate()
     {
-        return view('admin.pages.emails.campaigns.create');
+        return view('admin.pages.emails.campaigns.create', [
+            'sourceOptions' => $this->collector->availableSources(),
+        ]);
     }
 
     public function campaignsStore(Request $request): RedirectResponse
@@ -80,8 +82,13 @@ class AdminEmailController extends Controller
             'intro'      => 'nullable|string',
             'cta_text'   => 'nullable|string|max:120',
             'cta_link'   => 'nullable|url|max:255',
+            'cta_email_param' => 'nullable|string|max:40|regex:/^[a-zA-Z0-9_\\-]+$/',
             'blocks'     => 'required|array|min:1',
             'blocks.*.type' => 'required|string|in:text,list,image,cards',
+            'audience_sources' => 'nullable|array',
+            'audience_sources.*' => 'string',
+            'include_emails' => 'nullable|string|max:2000',
+            'exclude_emails' => 'nullable|string|max:2000',
         ]);
 
         $blocks = $this->normalizeBlocks($request, $request->input('blocks', []));
@@ -96,6 +103,9 @@ class AdminEmailController extends Controller
             ? $request->file('hero_image')->store('campaigns/hero', 'public')
             : null;
 
+        $includeEmails = $this->parseEmailList($request->input('include_emails'));
+        $excludeEmails = $this->parseEmailList($request->input('exclude_emails'));
+
         EmailCampaign::create([
             'title'      => $validated['title'],
             'subject'    => $validated['subject'],
@@ -105,6 +115,10 @@ class AdminEmailController extends Controller
             'blocks'     => $blocks->values()->all(),
             'cta_text'   => $validated['cta_text'] ?? null,
             'cta_link'   => $validated['cta_link'] ?? null,
+            'cta_email_param' => $validated['cta_email_param'] ?? null,
+            'audience_sources' => !empty($validated['audience_sources']) ? array_values(array_unique($validated['audience_sources'])) : null,
+            'include_emails' => !empty($includeEmails) ? $includeEmails : null,
+            'exclude_emails' => !empty($excludeEmails) ? $excludeEmails : null,
             'status'     => 'draft',
             'user_id'    => Auth::id(),
         ]);
@@ -270,5 +284,33 @@ class AdminEmailController extends Controller
         }
 
         return null;
+    }
+
+    protected function parseEmailList(?string $input): array
+    {
+        if (!$input) {
+            return [];
+        }
+
+        $normalized = str_replace(["\r", ';'], ["\n", ','], $input);
+        $parts = preg_split('/[\\n,]+/', $normalized);
+
+        return collect($parts)
+            ->map(function ($line) {
+                $line = trim($line);
+                if ($line === '') {
+                    return null;
+                }
+
+                if (preg_match('/<([^>]+)>/', $line, $matches)) {
+                    $line = $matches[1];
+                }
+
+                return strtolower($line);
+            })
+            ->filter(fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL))
+            ->unique()
+            ->values()
+            ->all();
     }
 }

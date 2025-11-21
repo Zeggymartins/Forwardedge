@@ -16,8 +16,6 @@ class Course extends Model
         'description',
         'thumbnail',
         'status',
-        'price',
-        'discount_price',
         'is_featured'
     ];
     protected $table = 'courses';

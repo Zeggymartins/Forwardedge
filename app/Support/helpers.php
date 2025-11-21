@@ -8,3 +8,18 @@ if (!function_exists('seo')) {
         return app(SeoManager::class);
     }
 }
+
+if (!function_exists('pb_text')) {
+    /**
+     * Render Page Builder copy with preserved line breaks.
+     */
+    function pb_text(?string $value): string
+    {
+        $value = $value ?? '';
+        if ($value === '') {
+            return '';
+        }
+
+        return nl2br(e($value));
+    }
+}

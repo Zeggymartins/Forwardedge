@@ -3,11 +3,7 @@
   $d = $block->data ?? [];
 
   // Slides: each = ['title' => string, 'image' => 'path/to/file']
-  // Your admin form posts files into slides[*][image] and stores path back into $d['slides'][*]['image'].
-  $slides = $d['slides'] ?? [
-    ['title' => 'Growth',     'image' => 'frontend/assets/images/marquee/marquee-1.webp'],
-    ['title' => 'Leadership', 'image' => 'frontend/assets/images/marquee/marquee-2.webp'],
-  ];
+  $slides = is_array($d['slides'] ?? null) ? $d['slides'] : [];
 
   // Make a unique class to scope the Swiper instance (so multiple blocks can coexist)
   $uid = 'marquee-' . ($block->id ?? uniqid());
@@ -48,19 +44,20 @@ $slides = $slides ?? ($d['slides'] ?? []);
     </style>
 @endpush
 
-<section class="tj-marquee-section section-gap-x {{ $uid ?? '' }}">
+<section class="tj-marquee-section section-gap-x {{ $uid ?? '' }} pb-rich-text">
   <div class="marquee-wrapper">
     <div class="swiper marquee-slider">
       <div class="swiper-wrapper">
         @foreach($slides as $s)
           @php
             $title = data_get($s, 'title', '');
-            $img   = $imgUrl(data_get($s, 'image'), 'frontend/assets/images/marquee/marquee-1.webp');
+            $img   = $imgUrl(data_get($s, 'image'));
           @endphp
+          @continue(blank($title) && blank($img))
 
           <div class="swiper-slide marquee-item">
             @if($title !== '')
-              <h4 class="marquee-text mb-0">{{ $title }}</h4>
+              <h4 class="marquee-text mb-0">{!! pb_text($title) !!}</h4>
             @endif
             <div class="marquee-img">
               <img src="{{ $img }}" alt="{{ $title ?: 'Slide' }}" loading="lazy">

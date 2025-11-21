@@ -30,7 +30,15 @@
                             </td>
                             <td class="py-3 px-4">₦{{ number_format($order->total_price, 2) }}</td>
                             <td class="py-3 px-4">
-                                <span class="badge {{ $order->status == 'pending' ? 'bg-warning' : ($order->status == 'successful' ? 'bg-success' : 'bg-danger') }}">
+                                @php
+                                    $statusClass = [
+                                        'pending' => 'bg-warning',
+                                        'paid' => 'bg-success',
+                                        'successful' => 'bg-success',
+                                        'failed' => 'bg-danger',
+                                    ][$order->status] ?? 'bg-secondary';
+                                @endphp
+                                <span class="badge {{ $statusClass }}">
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
@@ -59,15 +67,25 @@
                                                         <div class="card shadow-sm h-100">
                                                             <div class="row g-0">
                                                                 <div class="col-4">
-                                                                    <img src="{{ asset('storage/' . $item->course->thumbnail) }}" 
-                                                                         alt="{{ $item->course->title }}" 
+                                                                    @php
+                                                                        $thumb = $item->course?->thumbnail
+                                                                            ? asset('storage/' . $item->course->thumbnail)
+                                                                            : asset('frontend/assets/images/product/product-1.webp');
+                                                                    @endphp
+                                                                    <img src="{{ $thumb }}" 
+                                                                         alt="{{ $item->course->title ?? 'Course thumbnail' }}" 
                                                                          class="img-fluid rounded-start">
                                                                 </div>
                                                                 <div class="col-8">
                                                                     <div class="card-body">
-                                                                        <h6 class="card-title">{{ $item->course->title }}</h6>
+                                                                        <h6 class="card-title">{{ $item->course->title ?? 'Course removed' }}</h6>
+                                                                        @if($item->courseContent)
+                                                                            <p class="text-muted small mb-2">
+                                                                                Module: {{ $item->courseContent->title }}
+                                                                            </p>
+                                                                        @endif
                                                                         <p class="mb-1">Quantity: {{ $item->quantity }}</p>
-                                                                        <p class="mb-0">Price: ${{ number_format($item->price, 2) }}</p>
+                                                                        <p class="mb-0">Price: ₦{{ number_format($item->price, 2) }}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>

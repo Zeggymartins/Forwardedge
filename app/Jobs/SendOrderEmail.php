@@ -33,6 +33,7 @@ class SendOrderEmail implements ShouldQueue
     public function handle()
     {
         try {
+            $this->order->loadMissing('items.course.contents');
             Log::info("Sending order email", [
                 'order_id' => $this->order->id,
                 'user_email' => $this->order->user->email,

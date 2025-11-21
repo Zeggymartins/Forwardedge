@@ -14,12 +14,20 @@ class CourseContent extends Model
         'title',
         'file_path',
         'type',
+        'price',
+        'discount_price',
         'content',
         'order',
+        'drive_folder_id',
+        'drive_share_link',
+        'auto_grant_access',
     ];
 
     protected $casts = [
         'order' => 'integer',
+        'auto_grant_access' => 'boolean',
+        'price' => 'float',
+        'discount_price' => 'float',
     ];
 
     public function course()
@@ -35,6 +43,11 @@ class CourseContent extends Model
     public function reviews()
     {
         return $this->hasMany(CourseContentReview::class)->latest();
+    }
+
+    public function accessLogs()
+    {
+        return $this->hasMany(CourseContentAccessLog::class);
     }
 
     public function averageRating(): float

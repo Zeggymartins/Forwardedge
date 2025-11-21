@@ -54,31 +54,6 @@ class Event extends Model
         });
     }
 
-    public function contents()
-    {
-        return $this->hasMany(EventContent::class)->orderBy('sort_order');
-    }
-
-    public function speakers()
-    {
-        return $this->hasMany(EventSpeaker::class)->orderBy('sort_order');
-    }
-
-    public function schedules()
-    {
-        return $this->hasMany(EventSchedule::class)->orderBy('schedule_date')->orderBy('start_time');
-    }
-
-    public function tickets()
-    {
-        return $this->hasMany(EventTicket::class)->where('is_active', true)->orderBy('sort_order');
-    }
-
-    public function sponsors()
-    {
-        return $this->hasMany(EventSponsor::class)->orderBy('sort_order');
-    }
-
     public function registrations()
     {
         return $this->hasMany(EventRegistration::class);
@@ -110,11 +85,6 @@ class Event extends Model
     public function getIsUpcomingAttribute()
     {
         return $this->start_date > now();
-    }
-
-    public function getAvailableTicketsAttribute()
-    {
-        return $this->max_attendees ? ($this->max_attendees - $this->current_attendees) : null;
     }
 
     public function page()

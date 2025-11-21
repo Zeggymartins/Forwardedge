@@ -1,4 +1,11 @@
-@php $d = $block->data ?? []; @endphp
+@php
+    $d = $block->data ?? [];
+    $heroTitle = trim((string) ($d['title'] ?? ''));
+    $primaryLink = $d['link'] ?? null;
+    $primaryText = trim((string) ($d['link_text'] ?? ''));
+    $secondaryLink = $d['link_secondary'] ?? ($d['link'] ?? null);
+    $secondaryText = trim((string) ($d['link_text_secondary'] ?? ($d['link_text'] ?? '')));
+@endphp
 @push('styles')
     <style>
         .banner-actions {
@@ -67,75 +74,84 @@
         }
     </style>
 @endpush
-<section class="h4-banner-section section-gap-x">
+<section class="h4-banner-section section-gap-x pb-rich-text">
     <div class="h4-banner-area">
         <div class="h4-banner-content">
-            <span class="sub-title wow fadeInUp" data-wow-delay=".2s">
-                <i class="tji-box"></i>
-                hero-banner
-            </span>
+            @if(!blank($d['kicker'] ?? null))
+                <span class="sub-title wow fadeInUp" data-wow-delay=".2s">
+                    <i class="tji-box"></i>
+                    {!! pb_text($d['kicker'] ?? null) !!}
+                </span>
+            @endif
 
-            <h1 class="banner-title text-anim">{{ $d['title'] ?? 'Bootcamp' }}</h1>
+            @if(!blank($heroTitle))
+                <h1 class="banner-title text-anim">{!! pb_text($heroTitle) !!}</h1>
+            @endif
 
             @php
                 $raw = trim(
                     $d['sub_text'] ??
-                        'Committed to delivering innovative solutions that drive success. With a focus on quality.',
+                        ''
                 );
-                [$firstPart, $secondPart] = array_pad(preg_split('/(?<=[.!?。])\s+/u', $raw, 2), 2, '');
-
+                [$firstPart, $secondPart] = array_pad(preg_split("/\r\n|\r|\n/", $raw, 2), 2, '');
             @endphp
 
             <div class="banner-desc-area wow fadeInUp" data-wow-delay=".7s">
                 <!-- Responsive buttons -->
                 <div class="banner-actions">
-                    <a class="tj-primary-btn" href="{{ $d['link'] ?? '#' }}">
-                        <span class="btn-text"><span>{{ $d['link_text'] ?? 'Get Started' }}</span></span>
-                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                    </a>
+                    @if(!blank($primaryLink) && !blank($primaryText))
+                        <a class="tj-primary-btn" href="{{ $primaryLink }}">
+                            <span class="btn-text"><span>{!! pb_text($primaryText) !!}</span></span>
+                            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                        </a>
+                    @endif
 
-                    <a class="tj-primary-btn" href="{{ $d['link_secondary'] ?? ($d['link'] ?? '#') }}">
-                        <span
-                            class="btn-text"><span>{{ $d['link_text_secondary'] ?? ($d['link_text'] ?? 'Learn More') }}</span></span>
-                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                    </a>
+                    @if(!blank($secondaryLink) && !blank($secondaryText))
+                        <a class="tj-primary-btn" href="{{ $secondaryLink }}">
+                            <span class="btn-text"><span>{!! pb_text($secondaryText) !!}</span></span>
+                            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                        </a>
+                    @endif
                 </div>
 
                 <!-- Split paragraph: first bold+italic, second normal in a span -->
-                <p class="banner-desc mb-0">
-                    @if ($firstPart !== '')
-                        <strong  style="color: #dbbf07ff; font-size: 25px; margin-bottomz: 10px;">{{ $firstPart }}</strong> <br>
-                    @endif
-                    @if ($secondPart !== '')
-                      <span> {{ $secondPart }}</span>
-                    @endif
-                </p>
+                @if($firstPart !== '' || $secondPart !== '')
+                    <p class="banner-desc mb-0">
+                        @if ($firstPart !== '')
+                            <strong  style="color: #dbbf07ff; font-size: 25px; margin-bottomz: 10px;">{!! pb_text($firstPart) !!}</strong> <br>
+                        @endif
+                        @if ($secondPart !== '')
+                          <span>{!! pb_text($secondPart) !!}</span>
+                        @endif
+                    </p>
+                @endif
             </div>
 
 
 
         </div>
 
-        <div class="banner-img-area">
             @php
                 $img = $d['banner_image'] ?? null;
                 $src = $img
                     ? (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://', '//', '/'])
                         ? $img
                         : \Illuminate\Support\Facades\Storage::url($img))
-                    : asset('frontend/assets/images/hero/h4-hero-img.webp');
+                    : null;
             @endphp
 
-            <div class="banner-img">
-                <img data-speed="0.8" src="{{ $src }}" alt="{{ $d['title'] ?? 'Banner' }}">
-            </div>
+            @if($src)
+                <div class="banner-img-area">
+                    <div class="banner-img">
+                        <img data-speed="0.8" src="{{ $src }}" alt="{{ $d['title'] ?? 'Banner' }}">
+                    </div>
 
-
-            <div class="h4-rating-box wow fadeInUp" data-wow-delay="1s">
-                <h2 class="title">4.8</h2>
-                <p class="desc">Global rating based on 100+ reviews</p>
-            </div>
-        </div>
+                    <div class="h4-rating-box wow fadeInUp" data-wow-delay="1s">
+                        <h2 class="title">4.8</h2>
+                        <p class="desc">Global rating based on 100+ reviews</p>
+                    </div>
+                </div>
+            @endif
     </div>
 
     <div class="bg-shape-1">

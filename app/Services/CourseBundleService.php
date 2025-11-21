@@ -19,6 +19,8 @@ class CourseBundleService
     public static function createZip(Orders $order): ?string
     {
         $zip = new ZipArchive();
+
+        $order->loadMissing(['items.course.contents', 'items.courseContent']);
         
         // Use temporary directory for better cleanup
         $tempDir = sys_get_temp_dir();
@@ -49,7 +51,15 @@ class CourseBundleService
                 continue;
             }
 
-            foreach ($course->contents as $content) {
+            $targetContents = $item->course_content_id
+                ? collect([$item->courseContent])->filter()
+                : $course->contents;
+
+            if ($item->course_content_id && $targetContents->isEmpty() && $course->relationLoaded('contents')) {
+                $targetContents = $course->contents->where('id', $item->course_content_id);
+            }
+
+            foreach ($targetContents as $content) {
                 if (!$content->file_path) {
                     continue;
                 }

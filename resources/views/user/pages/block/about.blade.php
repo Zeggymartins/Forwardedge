@@ -2,55 +2,21 @@
     $d = $block->data ?? [];
 
     // Left heading/copy defaults
-    $kicker = $d['kicker'] ?? 'Get to Know Us';
-    $title = $d['title'] ?? 'Powering Innovations Through Partnerships.';
+    $kicker = $d['kicker'] ?? null;
+    $title = $d['title'] ?? null;
     $subtitle = $d['subtitle'] ?? null; // optional short lead
     $text = $d['text'] ?? null; // longer paragraph
-    $list = $d['list'] ?? []; // bullet list (array)
+    $list = is_array($d['list'] ?? null) ? $d['list'] : []; // bullet list (array)
     $cta = $d['cta'] ?? null; // ['text'=>..., 'link'=>...]
 
     // Cards (no icons) — 2 per row
-    $cards = $d['cards'] ?? [
-        [
-            'title' => 'Enterprise-Ready',
-            'text' => 'Battle-tested processes and SLAs for serious teams.',
-            'image' => null,
-        ],
-        ['title' => 'Outcome Focused', 'text' => 'We anchor work to measurable business results.', 'image' => null],
-    ];
+    $cards = is_array($d['cards'] ?? null) ? $d['cards'] : [];
 
     // Right side visuals
-    $bannerLeft = $d['banner_left'] ?? 'frontend/assets/images/about/h7-about-banner.webp';
+    $bannerLeft = $d['banner_left'] ?? null;
 
     // Tiles (4-up grid on the right)
-    // Types:
-    //  - counter: ['type'=>'counter','label'=>'Faster Growth','value'=>'8.5','suffix'=>'X','note'=>'Built for Super Speed']
-    //  - image:   ['type'=>'image','bg'=>'frontend/assets/...']
-    //  - customers: ['type'=>'customers','bg'=>'frontend/assets/...','text'=>'Enabling startups to raise $25M+ ...','link_text'=>'Contact us','link'=>'#']
-    $tiles = $d['tiles'] ?? [
-        [
-            'type' => 'counter',
-            'label' => 'Faster Growth',
-            'value' => '8.5',
-            'suffix' => 'X',
-            'note' => 'Built for Super Speed',
-        ],
-        ['type' => 'image', 'bg' => 'frontend/assets/images/about/h7-about-item.webp'],
-        [
-            'type' => 'customers',
-            'bg' => 'frontend/assets/images/about/h7-about-item-bg.webp',
-            'text' => 'Enabling startups to raise $25M+ in venture funding.',
-            'link_text' => 'Contact us',
-            'link' => '#',
-        ],
-        [
-            'type' => 'counter',
-            'label' => 'Reach Worldwide',
-            'value' => '20',
-            'suffix' => 'M',
-            'note' => 'Corporate Service Holders',
-        ],
-    ];
+    $tiles = is_array($d['tiles'] ?? null) ? $d['tiles'] : [];
 @endphp
 @php
     use Illuminate\Support\Facades\Storage;
@@ -81,7 +47,7 @@
 
     // Banner (left) - accept either controller vars or $d['banner_left']
     $bannerLeftPath = $bannerLeft ?? ($banner_left ?? ($d['banner_left'] ?? null));
-    $bannerLeftUrl  = $imgUrl($bannerLeftPath, 'frontend/assets/images/about/h7-about-banner.webp');
+    $bannerLeftUrl  = $imgUrl($bannerLeftPath);
 @endphp
 
 @push('styles')
@@ -130,7 +96,7 @@
 </style>
 @endpush
 
-<section class="tj-about-section h7-about section-gap section-gap-x mt-10">
+<section class="tj-about-section h7-about section-gap section-gap-x mt-10 pb-rich-text">
   <div class="container">
     <div class="row row-gap-4">
       <div class="col-12">
@@ -141,30 +107,31 @@
               <div class="col-12 col-lg-4">
                 @if(!empty($kicker))
                   <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                    <i class="tji-box"></i>{{ $kicker }}
+                    <i class="tji-box"></i>{!! pb_text($kicker) !!}
                   </span>
                 @endif
               </div>
 
               <!-- Title, subtitle, text, list, cards, CTA -->
               <div class="col-12 col-lg-8">
-                <div class="h7-about-content-inner">
+                <div class="h7-about-content-inner pb-rich-text">
                   @if(!empty($title))
-                    <h2 class="sec-title title-highlight">{{ $title }}</h2>
+                    <h2 class="sec-title title-highlight">{!! pb_text($title) !!}</h2>
                   @endif
 
                   @if(!empty($subtitle))
-                    <p class="mb-2 text-muted">{{ $subtitle }}</p>
+                    <p class="mb-2 text-muted">{!! pb_text($subtitle) !!}</p>
                   @endif
 
                   @if(!empty($text))
-                    <p class="mb-3">{{ $text }}</p>
+                    <p class="mb-3">{!! pb_text($text) !!}</p>
                   @endif
 
                   @if(!empty($list))
                     <ul class="mb-4">
                       @foreach($list as $li)
-                        <li>{{ $li }}</li>
+                        @continue(blank($li))
+                        <li>{!! pb_text($li) !!}</li>
                       @endforeach
                     </ul>
                   @endif
@@ -179,18 +146,18 @@
                               <div class="mb-3 d-flex justify-content-center">
                                 <div class="circle-wrap">
                                   <img
-                                    src="{{ $imgUrl($c['image'], 'frontend/assets/images/about/h7-about-item.webp') }}"
+                                    src="{{ $imgUrl($c['image'] ?? null) }}"
                                     alt="{{ $c['title'] ?? 'About card' }}">
                                 </div>
                               </div>
                             @endif
 
                             @if (!empty($c['title']))
-                              <h4 class="title">{{ $c['title'] }}</h4>
+                              <h4 class="title">{!! pb_text($c['title']) !!}</h4>
                             @endif
 
                             @if (!empty($c['text']))
-                              <p class="desc">{{ $c['text'] }}</p>
+                              <p class="desc">{!! pb_text($c['text']) !!}</p>
                             @endif
                           </div>
                         </div>
@@ -202,7 +169,7 @@
                   @if(!empty($cta['link_text']) && !empty($cta['link']))
                     <div class="about-btn-area-2 wow fadeInUp" data-wow-delay="1s">
                       <a class="tj-primary-btn" href="{{ $cta['link'] }}">
-                        <span class="btn-text"><span>{{ $cta['link_text'] }}</span></span>
+                        <span class="btn-text"><span>{!! pb_text($cta['link_text']) !!}</span></span>
                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                       </a>
                     </div>
@@ -235,13 +202,17 @@
             @if(($t['type'] ?? '') === 'counter')
               <div class="col-12 col-md-6">
                 <div class="countup-item style-2 wow fadeInUp" data-wow-delay="{{ $delay }}s">
-                  <p class="counter-title">{{ $t['label'] ?? '' }}</p>
+                  @if(!blank($t['label'] ?? null))
+                    <p class="counter-title">{!! pb_text($t['label']) !!}</p>
+                  @endif
                   <div class="count-inner">
-                    <div class="inline-content">
-                      <span class="odometer countup-number" data-count="{{ $t['value'] ?? '0' }}"></span>
-                      @if(!empty($t['suffix']))<span class="count-plus">{{ $t['suffix'] }}</span>@endif
-                    </div>
-                    @if(!empty($t['note']))<span class="count-text">{{ $t['note'] }}</span>@endif
+                    @if(!blank($t['value'] ?? null))
+                      <div class="inline-content">
+                        <span class="odometer countup-number" data-count="{{ $t['value'] }}"></span>
+                        @if(!empty($t['suffix']))<span class="count-plus">{!! pb_text($t['suffix']) !!}</span>@endif
+                      </div>
+                    @endif
+                    @if(!empty($t['note']))<span class="count-text">{!! pb_text($t['note']) !!}</span>@endif
                   </div>
                 </div>
               </div>
@@ -250,7 +221,7 @@
               <div class="col-12 col-md-6">
                 <div class="img-box style-2 wow fadeInUp"
                      data-wow-delay="{{ $delay }}s"
-                     data-bg-image="{{ $imgUrl($t['bg'] ?? null, 'frontend/assets/images/about/h7-about-item.webp') }}">
+                     data-bg-image="{{ $imgUrl($t['bg'] ?? null) }}">
                 </div>
               </div>
 
@@ -258,14 +229,14 @@
               <div class="col-12 col-md-6">
                 <div class="customers-box style-2 wow fadeInUp" data-wow-delay="{{ $delay }}s">
                   <div class="customers-bg"
-                       data-bg-image="{{ $imgUrl($t['bg'] ?? null, 'frontend/assets/images/about/h7-about-item-bg.webp') }}">
+                       data-bg-image="{{ $imgUrl($t['bg'] ?? null) }}">
                   </div>
                   @if(!empty($t['text']))
-                    <h6 class="customers-text wow fadeInLeft" data-wow-delay=".6s">{{ $t['text'] }}</h6>
+                    <h6 class="customers-text wow fadeInLeft" data-wow-delay=".6s">{!! pb_text($t['text']) !!}</h6>
                   @endif
                   @if(!empty($t['link']) && !empty($t['link_text']))
                     <a class="text-btn wow fadeInLeft" data-wow-delay=".5s" href="{{ $t['link'] }}">
-                      <span class="btn-text"><span>{{ $t['link_text'] }}</span></span>
+                      <span class="btn-text"><span>{!! pb_text($t['link_text']) !!}</span></span>
                       <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                     </a>
                   @endif

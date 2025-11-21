@@ -27,8 +27,8 @@
 
   /** @var \App\Models\Block $block */
   $d = $block->data ?? [];
-  $kicker        = $d['kicker']        ?? 'OUR FUN FACT';
-  $title         = $d['title']         ?? 'Numbers and facts that define performance.';
+  $kicker        = $d['kicker']        ?? null;
+  $title         = $d['title']         ?? null;
   $progressText  = $d[''] ?? null;
   $items         = is_array($d['items'] ?? null) ? $d['items'] : [];
 
@@ -44,7 +44,7 @@
 @endphp
 
 <!-- start: Fun fact Section (cards behave like "sections") -->
-<section class="tj-funfact-section section-gap section-gap-x" aria-label="Fun facts">
+<section class="tj-funfact-section section-gap section-gap-x pb-rich-text" aria-label="Fun facts">
   <div class="container">
     {{-- Heading --}}
     <div class="row">
@@ -53,14 +53,14 @@
           <div class="sec-heading">
             @if(!empty($kicker))
               <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                <i class="tji-box"></i>{{ $kicker }}
+                <i class="tji-box"></i>{!! pb_text($kicker) !!}
               </span>
             @endif
-            <h2 class="sec-title title-anim">{{ $title }}</h2>
+            <h2 class="sec-title title-anim">{!! pb_text($title) !!}</h2>
           </div>
 
           @if(!empty($progressText))
-            <p class="desc wow fadeInUp" data-wow-delay=".5s">{{ $progressText }}
+            <p class="desc wow fadeInUp" data-wow-delay=".5s">{!! pb_text($progressText) !!}
           @endif
         </div>
       </div>
@@ -70,7 +70,7 @@
     <div class="row row-gap-4">
       @forelse($items as $i => $item)
         @php
-          $icon  = $item['icon'] ?? 'tji-complete';
+          $icon  = $item['icon'] ?? null;
           $head  = $item['title'] ?? '';
           $sub   = $item['subtitle'] ?? null;      // replaces the inline number area
           $desc  = $item['description'] ?? null;
@@ -79,30 +79,33 @@
         @endphp
         <div class="col-lg-4 col-md-6">
           <div class="countup-item style-2 wow fadeInUp" data-wow-delay=".{{ [7,5,1][$i % 3] }}s">
-            <span class="count-icon"><i class="{{ $icon }}"></i></span>
+            @if(!blank($icon))
+              <span class="count-icon"><i class="{{ $icon }}"></i></span>
+            @endif
             <span class="steps">{{ $idx }}</span>
 
             <div class="count-inner">
               {{-- Title (like "count-text") --}}
               @if($head)
-                <span class="count-text d-block">{{ $head }}</span>
+                <span class="count-text d-block">{!! pb_text($head) !!}</span>
               @endif
 
               {{-- Replaced block: subtitle + description + list --}}
               @if($sub)
-                <div class="mt-2 fw-medium">{{ $sub }}</div>
+                <div class="mt-2 fw-medium">{!! pb_text($sub) !!}</div>
               @endif
 
               @if($desc)
-                <p class="mb-2 mt-1">{{ $desc }}</p>
+                <p class="mb-2 mt-1">{!! pb_text($desc) !!}</p>
               @endif
 
               @if(count($list))
                 <ul class="list-unstyled m-0">
                   @foreach($list as $li)
+                    @continue(blank($li))
                     <li class="d-flex align-items-start gap-2 mb-1">
                       <i class="tji-check-circle mt-1"></i>
-                      <span>{{ $li }}</span>
+                      <span>{!! pb_text($li) !!}</span>
                     </li>
                   @endforeach
                 </ul>

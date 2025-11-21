@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CartItem extends Model
 {
-    protected $fillable = ['user_id', 'course_id', 'price', 'quantity'];
+    protected $fillable = ['user_id', 'course_id', 'course_content_id', 'price', 'quantity'];
 
     public function user()
     {
@@ -16,6 +16,11 @@ class CartItem extends Model
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function courseContent()
+    {
+        return $this->belongsTo(CourseContent::class);
     }
 
     public function payments()

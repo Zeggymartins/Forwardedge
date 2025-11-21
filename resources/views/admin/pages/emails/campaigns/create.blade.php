@@ -54,6 +54,45 @@
                         </div>
                     </div>
 
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Audience</h5>
+                            @php
+                                $selectedSources = old('audience_sources', array_keys($sourceOptions ?? []));
+                            @endphp
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Contact sources</label>
+                                <p class="text-muted small mb-2">Choose where we should pull emails from when this campaign sends.</p>
+                                <div class="d-flex flex-column gap-2">
+                                    @foreach(($sourceOptions ?? []) as $value => $label)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="{{ $value }}"
+                                                id="audience_{{ $value }}"
+                                                name="audience_sources[]"
+                                                {{ in_array($value, $selectedSources ?? [], true) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="audience_{{ $value }}">
+                                                {{ $label }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                    @if(empty($sourceOptions))
+                                        <p class="text-muted small mb-0">No contact sources detected yet.</p>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Manually include</label>
+                                <textarea class="form-control" rows="2" name="include_emails" placeholder="alice@example.com, bob@example.com">{{ old('include_emails') }}</textarea>
+                                <small class="text-muted">Comma or line separated emails that must receive this campaign.</small>
+                            </div>
+                            <div>
+                                <label class="form-label fw-semibold">Exclude emails</label>
+                                <textarea class="form-control" rows="2" name="exclude_emails" placeholder="skip@example.com">{{ old('exclude_emails') }}</textarea>
+                                <small class="text-muted">We will skip these emails even if they exist in the selected sources.</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-3">CTA</h5>
@@ -64,6 +103,12 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Button link</label>
                                 <input type="url" class="form-control" name="cta_link" value="{{ old('cta_link') }}" placeholder="https://forwardedge.africa/...">
+                                <small class="text-muted">Use [[email]] token anywhere in your content to inject the reader email.</small>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Email query parameter</label>
+                                <input type="text" class="form-control" name="cta_email_param" value="{{ old('cta_email_param', 'email') }}" placeholder="email">
+                                <small class="text-muted">Optional. When set we append ?parameter=recipient@domain to the CTA URL.</small>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-send-check me-1"></i> Save campaign

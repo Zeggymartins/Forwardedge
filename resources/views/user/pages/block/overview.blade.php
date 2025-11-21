@@ -1,16 +1,9 @@
 @php
   use Illuminate\Support\Str;
 
-  /** Block data + sensible defaults */
+  /** Block data coming from builder */
   $d = $block->data ?? [];
-  $items = $d['items'] ?? [];
-  if (empty($items)) {
-      $items = [
-          ['subtitle' => 'Foundations (Live, 5 Weeks)', 'text' => '15 live classes, hands-on labs, certificate'],
-          ['subtitle' => 'Specializations (Self-Paced)', 'text' => 'Pentesting, SOC, or GRC — choose later'],
-          ['subtitle' => 'Tools & Projects', 'text' => 'Real tools across lab envs & 200+ exercises'],
-      ];
-  }
+  $items = is_array($d['items'] ?? null) ? $d['items'] : [];
 
   /** Keyword matcher tolerant to punctuation + casing */
   $has = function (string $hay, array $keywords): bool {
@@ -209,15 +202,19 @@
 </style>
 @endpush
 
-<section id="choose" class="tj-choose-section h6-choose h7-choose section-gap overview-section">
+<section id="choose" class="tj-choose-section h6-choose h7-choose section-gap overview-section pb-rich-text">
   <div class="container">
     <div class="row">
       <div class="col-12">
         <div class="sec-heading style-2 style-7 text-center">
-          <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-            <i class="bi bi-box"></i> {{ $d['kicker'] ?? 'Overview' }}
-          </span>
-          <h2 class="sec-title text-anim">{{ $d['title'] ?? 'Program Overview' }}</h2>
+          @if(!blank($d['kicker'] ?? null))
+            <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+              <i class="bi bi-box"></i> {!! pb_text($d['kicker'] ?? null) !!}
+            </span>
+          @endif
+          @if(!blank($d['title'] ?? null))
+            <h2 class="sec-title text-anim">{!! pb_text($d['title'] ?? null) !!}</h2>
+          @endif
         </div>
       </div>
     </div>
@@ -226,8 +223,8 @@
       @foreach ($items as $i => $it)
         @php
           $delay = 5 + $i;
-          $href  = $it['link'] ?? ($d['link'] ?? '#');
-          $label = $it['link_text'] ?? ($d['link_text'] ?? 'Learn More');
+          $href  = $it['link'] ?? ($d['link'] ?? null);
+          $label = $it['link_text'] ?? ($d['link_text'] ?? null);
           $biIcon = $pickIcon($it, $i);
         @endphp
 
@@ -235,13 +232,19 @@
           <div class="overview-card__icon" aria-hidden="true">
             <i class="bi {{ e($biIcon) }}"></i>
           </div>
-          <h4 class="overview-card__title">{{ $it['subtitle'] ?? '' }}</h4>
-          <p class="overview-card__desc">{{ $it['text'] ?? '' }}</p>
+          @if(!blank($it['subtitle'] ?? null))
+            <h4 class="overview-card__title">{!! pb_text($it['subtitle']) !!}</h4>
+          @endif
+          @if(!blank($it['text'] ?? null))
+            <p class="overview-card__desc">{!! pb_text($it['text']) !!}</p>
+          @endif
 
-          <a class="overview-card__cta" href="{{ $href }}">
-            <span class="btn-text">{{ $label }}</span>
-            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-          </a>
+          @if(!blank($href) && !blank($label))
+              <a class="overview-card__cta" href="{{ $href }}">
+                <span class="btn-text">{!! pb_text($label) !!}</span>
+                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+              </a>
+          @endif
         </div>
       @endforeach
     </div>

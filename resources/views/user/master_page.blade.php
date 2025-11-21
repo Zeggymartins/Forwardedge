@@ -119,6 +119,20 @@
         .modal-backdrop {
             z-index: 9998 !important;
         }
+
+        /* Preserve Page Builder line breaks */
+        .pb-rich-text :where(p, h1, h2, h3, h4, h5, h6, span, small, li, div, strong, em) {
+            white-space: pre-line;
+        }
+
+        .pb-rich-text .btn-text span,
+        .pb-rich-text .badge,
+        .pb-rich-text .price-number,
+        .pb-rich-text .package-currency,
+        .pb-rich-text .package-period,
+        .pb-rich-text .number {
+            white-space: normal;
+        }
     </style>
     @stack('styles')
 </head>
@@ -515,14 +529,15 @@
                                 let total = 0;
                                 cart.forEach(item => {
                                     total += (item.price * item.quantity);
-                                    dropdown.innerHTML += `
+                                dropdown.innerHTML += `
                     <li class="d-flex align-items-center mb-2">
                         <img src="${item.image}" style="width:64px;height:64px;object-fit:cover;" alt="" class="me-2">
                         <div>
                           <strong>${item.name}</strong>
+                          ${item.module ? `<div class="text-muted small">${item.module}</div>` : ''}
                           <div>${item.quantity} × ₦${Number(item.price).toLocaleString()}</div>
                         </div>
-                        <button class="btn btn-sm btn-link ms-auto" onclick="removeFromCart(${item.course_id})"><i class="fas fa-times"></i></button>
+                        <button class="btn btn-sm btn-link ms-auto" onclick="removeFromCart(${item.course_id}, ${item.course_content_id ?? null})"><i class="fas fa-times"></i></button>
                     </li>`;
                                 });
 
@@ -568,11 +583,12 @@
                             }
 
                             // Core actions
-                            function addToCart(courseId, quantity = 1) {
+                            function addToCart(courseId, quantity = 1, courseContentId = null) {
                                 console.log('Adding to cart:', courseId, quantity);
 
                                 $.post("{{ route('user.cart.add') }}", {
                                         course_id: courseId,
+                                        course_content_id: courseContentId,
                                         quantity: quantity
                                     })
                                     .done(res => {
@@ -586,6 +602,7 @@
                                             $('#pending_action').val('add_to_cart');
                                             $('#pending_payload').val(JSON.stringify({
                                                 course_id: courseId,
+                                                course_content_id: courseContentId,
                                                 quantity: quantity
                                             }));
                                             showAuthModal('Please login to add items to cart');
@@ -595,9 +612,10 @@
                                     });
                             }
 
-                            function removeFromCart(courseId) {
+                            function removeFromCart(courseId, courseContentId = null) {
                                 $.post("{{ route('user.cart.remove') }}", {
-                                        course_id: courseId
+                                        course_id: courseId,
+                                        course_content_id: courseContentId
                                     })
                                     .done(res => {
                                         toastr.success(res.message || 'Removed from cart');
@@ -687,6 +705,7 @@
                                 console.log('Cart button clicked');
 
                                 let courseId = $(this).data('course-id');
+                                let contentId = $(this).data('content-id') || null;
                                 let quantity = $(this).data('quantity') || 1;
 
                                 console.log('Course ID:', courseId, 'Quantity:', quantity);
@@ -697,7 +716,7 @@
                                     return;
                                 }
 
-                                addToCart(courseId, quantity);
+                                addToCart(courseId, quantity, contentId);
                             });
 
                             $(document).on('click', '.product-add-wishlist-btn button', function(e) {
@@ -721,9 +740,10 @@
                             $(document).on('click', '.woocommerce-cart-form__cart-item .product-remove .remove', function(e) {
                                 e.preventDefault();
                                 let courseId = $(this).data('course-id');
+                                let contentId = $(this).data('content-id') || null;
                                 if (!courseId) return toastr.error('Course ID not found');
 
-                                removeFromCart(courseId);
+                                removeFromCart(courseId, contentId);
 
                                 // Remove row from table immediately
                                 $(this).closest('tr').fadeOut(200, function() {

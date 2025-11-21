@@ -325,7 +325,7 @@ class CourseController extends Controller
     {
         return CourseContent::query()
             ->with([
-                'course:id,title,slug,description,thumbnail,price,discount_price',
+                'course:id,title,slug,description,thumbnail',
                 'phases.topics',
             ])
             ->withAvg('reviews', 'rating')
@@ -342,10 +342,10 @@ class CourseController extends Controller
                 $query->orderBy('title');
                 break;
             case 'price':
-                $query->orderByRaw('(SELECT COALESCE(discount_price, price) FROM courses WHERE courses.id = course_contents.course_id) ASC');
+                $query->orderByRaw('COALESCE(course_contents.discount_price, course_contents.price, 0) ASC');
                 break;
             case 'price-desc':
-                $query->orderByRaw('(SELECT COALESCE(discount_price, price) FROM courses WHERE courses.id = course_contents.course_id) DESC');
+                $query->orderByRaw('COALESCE(course_contents.discount_price, course_contents.price, 0) DESC');
                 break;
             case 'date':
             default:
@@ -363,6 +363,8 @@ class CourseController extends Controller
             ? asset('storage/' . $course->thumbnail)
             : asset('frontend/assets/images/product/product-1.webp');
         $descriptionSource = $module->content ?? $course?->description ?? '';
+        $regularPrice = $module->price ?? 0;
+        $salePrice = $module->discount_price ?? $regularPrice;
 
         return [
             'id'             => $module->id,
@@ -370,8 +372,8 @@ class CourseController extends Controller
             'course_slug'    => $course?->slug,
             'description'    => Str::limit(strip_tags($descriptionSource), 180),
             'thumbnail'      => $thumb,
-            'price'          => $course?->discount_price ?? $course?->price ?? 0,
-            'original_price' => $course?->price,
+            'price'          => (float) $salePrice,
+            'original_price' => $regularPrice,
             'rating'         => round((float) ($module->reviews_avg_rating ?? 0), 1),
             'reviews_count'  => $module->reviews_count ?? 0,
             'url'            => $course ? route('shop.details', ['slug' => $course->slug, 'content' => $module->id]) : null,

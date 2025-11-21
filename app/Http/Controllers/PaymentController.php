@@ -3,24 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendEnrollmentEmail;
-use App\Jobs\SendEventTicketEmail;
 use App\Jobs\SendOrderEmail;
 use App\Models\CartItem;
 use App\Models\Payment;
 use App\Models\Orders;
 use App\Models\Enrollment;
 use App\Models\EventRegistration;
-use App\Models\EventTicket;
+use App\Models\CourseContentAccessLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use App\Services\CourseBundleService;
+use App\Services\GoogleDriveService;
 
 class PaymentController extends Controller
 {
+    public function __construct(
+        protected GoogleDriveService $driveService
+    ){}
     /**
      * Handle Paystack callback after payment
      */
@@ -226,6 +228,10 @@ class PaymentController extends Controller
 
             $order->update(['status' => 'paid']);
             CartItem::where('user_id', $payment->user_id)->delete();
+            $order->loadMissing(['items.course.contents', 'items.courseContent']);
+
+            $customerEmail = $this->resolvePaymentEmail($payment, $verificationData);
+            $this->grantDriveAccessForOrder($order, $customerEmail);
 
             // Create ZIP bundle and dispatch email
             $zipPath = CourseBundleService::createZip($order);
@@ -267,56 +273,75 @@ class PaymentController extends Controller
             Log::info('Enrollment created and email dispatched', ['enrollment_id' => $enrollment->id]);
         }
 
-        // EVENT TICKETS
-        if ($payment->payable instanceof EventTicket) {
-            $ticket = $payment->payable;
-            $meta = $payment->metadata ?? [];
+        // EVENT TICKETS removed – registrations handled directly without Paystack branch
+    }
 
-            // 🔒 Prevent duplicate registrations
-            $existingRegistration = EventRegistration::where('payment_reference', $payment->reference)->first();
-            
-            if ($existingRegistration) {
-                Log::warning('Duplicate event registration prevented', [
-                    'payment_reference' => $payment->reference,
-                    'existing_registration_id' => $existingRegistration->id
-                ]);
-                return;
+    private function resolvePaymentEmail(Payment $payment, array $verificationData): ?string
+    {
+        if ($payment->user && $payment->user->email) {
+            return $payment->user->email;
+        }
+
+        return $verificationData['customer']['email'] ?? ($payment->metadata['customer_email'] ?? null);
+    }
+
+    private function grantDriveAccessForOrder(Orders $order, ?string $email): void
+    {
+        if (!$email) {
+            Log::warning('Drive access skipped: missing customer email', ['order_id' => $order->id]);
+            return;
+        }
+
+        if (!$this->driveService->isConfigured()) {
+            Log::info('Drive access skipped: Google Drive not configured');
+            return;
+        }
+
+        $order->loadMissing(['items.course.contents', 'items.courseContent']);
+
+        foreach ($order->items as $item) {
+            $course = $item->course;
+            if (!$course) {
+                continue;
             }
 
-            // Check ticket availability before creating registration
-            if ($ticket->quantity_available <= 0) {
-                Log::error('Ticket sold out during payment processing', [
-                    'ticket_id' => $ticket->id,
-                    'payment_id' => $payment->id
-                ]);
-                // Could send a refund notification here
-                return;
+            $targetContents = $item->course_content_id
+                ? collect([$item->courseContent])->filter()
+                : $course->contents;
+
+            if ($item->course_content_id && $targetContents->isEmpty() && $course->relationLoaded('contents')) {
+                $targetContents = $course->contents->where('id', $item->course_content_id);
             }
 
-            $registration = EventRegistration::create([
-                'event_id' => $meta['event_id'],
-                'ticket_id' => $ticket->id,
-                'first_name' => $meta['first_name'],
-                'last_name' => $meta['last_name'],
-                'email' => $meta['email'],
-                'phone' => $meta['phone'] ?? null,
-                'company' => $meta['company'] ?? null,
-                'job_title' => $meta['job_title'] ?? null,
-                'special_requirements' => $meta['special_requirements'] ?? null,
-                'registration_code' => Str::uuid(),
-                'registered_at' => now(),
-                'status' => 'confirmed',
-                'amount_paid' => $payment->amount,
-                'payment_status' => 'paid',
-                'payment_reference' => $payment->reference,
-            ]);
+            foreach ($targetContents as $content) {
+                if (!$content->auto_grant_access || !$content->drive_folder_id) {
+                    continue;
+                }
 
-            // Update ticket quantities
-            $ticket->decrement('quantity_available');
-            $ticket->increment('quantity_sold');
+                $alreadyGranted = CourseContentAccessLog::where('course_content_id', $content->id)
+                    ->where('email', $email)
+                    ->where('status', 'granted')
+                    ->exists();
 
-            SendEventTicketEmail::dispatch($registration);
-            Log::info('Event registration created and email dispatched', ['registration_id' => $registration->id]);
+                if ($alreadyGranted) {
+                    continue;
+                }
+
+                $granted = $this->driveService->grantReader($content->drive_folder_id, $email);
+
+                CourseContentAccessLog::create([
+                    'course_content_id' => $content->id,
+                    'email' => $email,
+                    'status' => $granted ? 'granted' : 'failed',
+                    'message' => $granted ? null : 'Unable to create Drive permission automatically',
+                ]);
+
+                Log::log($granted ? 'info' : 'warning', 'Drive access result', [
+                    'content_id' => $content->id,
+                    'email' => $email,
+                    'granted' => $granted,
+                ]);
+            }
         }
     }
 }

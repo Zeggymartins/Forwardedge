@@ -49,7 +49,7 @@ class SendEmailCampaign implements ShouldQueue
 
         try {
             Mail::to($recipient->email)->send(
-                new EmailCampaignMail($campaign, $recipient->name)
+                new EmailCampaignMail($campaign, $recipient->name, $recipient->email)
             );
 
             $recipient->update([

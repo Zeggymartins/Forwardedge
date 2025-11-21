@@ -10,14 +10,12 @@
                         <div class="tj-entry__content">
                             <div class="woocommerce">
                                 <div class="woo-login-form">
-                                    <h3>Event Registration</h3>
+                                    <h3>Register for {{ $event->title }}</h3>
 
                                     <form class="woocommerce-form woocommerce-form-login login" method="POST"
                                         action="{{ route('events.register') }}">
                                         @csrf
-                                        {{-- Add hidden inputs for event and ticket IDs --}}
                                         <input type="hidden" name="event_id" value="{{ $event->id ?? '' }}">
-                                        <input type="hidden" name="ticket_id" value="{{ $ticket->id ?? '' }}">
 
                                         <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                             <label for="first_name">First Name<span class="required"
@@ -63,7 +61,7 @@
                                                 <button type="submit"
                                                     class="woocommerce-button button woocommerce-form-login__submit"
                                                     name="register" value="Register">
-                                                    <span class="btn-text"><span>Proceed to pay</span></span>
+                                                    <span class="btn-text"><span>Submit Registration</span></span>
                                                 </button>
                                             </div>
                                         </div>

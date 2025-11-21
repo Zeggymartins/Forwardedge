@@ -378,8 +378,11 @@ class AdminCourseController extends Controller
             'type' => 'required|in:text,video,pdf,image,quiz,assignment',
             'content' => 'nullable|string',
             'file' => 'nullable|file|max:10240',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
+            'drive_folder_id' => 'nullable|string|max:255',
+            'drive_share_link' => 'nullable|url',
+            'auto_grant_access' => 'nullable|boolean',
             'phases' => 'nullable|array',
             'phases.*.title' => 'required_with:phases|string|max:255',
             'phases.*.order' => 'nullable|integer|min:1',
@@ -416,22 +419,15 @@ class AdminCourseController extends Controller
             'course_id' => $validated['course_id'],
             'title' => $validated['title'],
             'type' => $validated['type'],
+            'price' => $validated['price'],
+            'discount_price' => $request->input('discount_price'),
             'content' => $validated['type'] === 'text' ? $validated['content'] : null,
             'file_path' => $filePath,
             'order' => $nextOrder,
+            'drive_folder_id' => $validated['drive_folder_id'] ?? null,
+            'drive_share_link' => $validated['drive_share_link'] ?? null,
+            'auto_grant_access' => $request->boolean('auto_grant_access'),
         ]);
-
-        // ✅ Update course price & discount if provided
-        if ($request->filled('price') || $request->filled('discount_price')) {
-            $course = Course::find($request->course_id);
-            if ($request->filled('price')) {
-                $course->price = $request->price;
-            }
-            if ($request->filled('discount_price')) {
-                $course->discount_price = $request->discount_price;
-            }
-            $course->save();
-        }
 
         $phases = $request->input('phases', []);
         foreach ($phases as $index => $phaseData) {
@@ -476,6 +472,11 @@ class AdminCourseController extends Controller
             'type'  => 'required|in:text,video,pdf,image,quiz,assignment',
             'content' => 'nullable|string',
             'file' => 'nullable|file|max:10240',
+            'drive_folder_id' => 'nullable|string|max:255',
+            'drive_share_link' => 'nullable|url',
+            'auto_grant_access' => 'nullable|boolean',
+            'price' => 'required|numeric|min:0',
+            'discount_price' => 'nullable|numeric|min:0|lt:price',
         ]);
 
         $allowedMimes = [
@@ -522,8 +523,13 @@ class AdminCourseController extends Controller
         $courseContent->update([
             'title' => $data['title'],
             'type' => $data['type'],
+            'price' => $data['price'],
+            'discount_price' => $request->input('discount_price'),
             'content' => $data['type'] === 'text' ? $data['content'] : null,
             'file_path' => $data['type'] === 'text' ? null : ($data['file_path'] ?? $courseContent->file_path),
+            'drive_folder_id' => $data['drive_folder_id'] ?? null,
+            'drive_share_link' => $data['drive_share_link'] ?? null,
+            'auto_grant_access' => $request->boolean('auto_grant_access'),
         ]);
 
         return back()->with('success', 'Content updated successfully!');

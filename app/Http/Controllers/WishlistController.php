@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WishlistItem;
 use App\Models\Course;
+use App\Models\CourseContent;
+use App\Models\WishlistItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +19,12 @@ class WishlistController extends Controller
         $data = $request->validate(['course_id' => 'required|integer|exists:courses,id']);
 
         $course = Course::findOrFail($data['course_id']);
-        $price = $course->discount_price ?? $course->price ?? null;
+        $moduleForPricing = CourseContent::where('course_id', $course->id)
+            ->orderByRaw('COALESCE(discount_price, price, 0) ASC')
+            ->first();
+        $price = $moduleForPricing
+            ? ($moduleForPricing->discount_price ?? $moduleForPricing->price ?? null)
+            : null;
 
         $exists = WishlistItem::where('user_id', Auth::id())->where('course_id', $course->id)->first();
         if (!$exists) {

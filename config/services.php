@@ -58,4 +58,11 @@ return [
     'meta_pixel' => [
         'id' => env('META_PIXEL_ID'),
     ],
+
+    'google_drive' => [
+        'credentials' => env('GOOGLE_DRIVE_CREDENTIALS', storage_path('app/google/credentials.json')),
+        'token'       => env('GOOGLE_DRIVE_TOKEN', storage_path('app/google/token.json')),
+        'impersonate' => env('GOOGLE_DRIVE_IMPERSONATE'),
+        'notify'      => env('GOOGLE_DRIVE_SEND_NOTIFICATION', true),
+    ],
 ];

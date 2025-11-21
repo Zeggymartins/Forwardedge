@@ -26,7 +26,7 @@ class OrderController extends Controller
             $user = Auth::user();
 
             // Get cart items and calculate total
-            $cartItems = CartItem::where('user_id', $user->id)->with('course')->get();
+            $cartItems = CartItem::where('user_id', $user->id)->with(['course', 'courseContent'])->get();
 
             if ($cartItems->isEmpty()) {
                 return response()->json(['error' => 'Your cart is empty.'], 400);
@@ -100,6 +100,7 @@ class OrderController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'course_id' => $item->course_id,
+                    'course_content_id' => $item->course_content_id,
                     'price' => $item->price,
                     'quantity' => $item->quantity,
                 ]);

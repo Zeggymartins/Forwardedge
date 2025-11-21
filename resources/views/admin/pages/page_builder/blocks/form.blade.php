@@ -189,6 +189,7 @@
         const INTERNAL_ROUTES = @json($internalRoutes ?? []);
         const ROUTE_PARAM_OPTIONS = @json($routeBindingOptions ?? []);
         const ICON_OPTIONS = @json($iconOptions ?? []);
+        const COURSE_CATALOG = @json(($courseCatalog ?? collect())->values());
 
         /* ====== UTILITIES ====== */
         function html(markup) {
@@ -278,6 +279,85 @@
     <input type="hidden" name="${name}">
   </div>
 </div>`;
+        }
+
+        function getCourseCatalog() {
+            return Array.isArray(COURSE_CATALOG) ? COURSE_CATALOG : [];
+        }
+
+        function buildCourseOptions(selectedValue = '') {
+            const options = ['<option value="">No course link</option>'];
+            getCourseCatalog().forEach(course => {
+                const selected = selectedValue && String(selectedValue) === String(course.id) ? 'selected' : '';
+                options.push(`<option value="${course.id}" ${selected}>${course.title}</option>`);
+            });
+            return options.join('');
+        }
+
+        function buildContentOptions(courseId, selectedValue = '') {
+            const options = ['<option value="">Select module</option>'];
+            const course = getCourseCatalog().find(c => String(c.id) === String(courseId));
+            if (course && Array.isArray(course.contents)) {
+                course.contents.forEach(content => {
+                    const selected = selectedValue && String(selectedValue) === String(content.id) ? 'selected' : '';
+                    options.push(`<option value="${content.id}" ${selected}>${content.title}</option>`);
+                });
+            }
+            return options.join('');
+        }
+
+        function hydratePlanCourseSelectors(scope) {
+            const items = scope.querySelectorAll('[data-repeater][data-name="plans"] [data-repeater-item]');
+            items.forEach(item => {
+                const courseSelect = item.querySelector('[data-plan-course]');
+                const contentSelect = item.querySelector('[data-plan-content]');
+
+                if (courseSelect) {
+                    const current = courseSelect.value || courseSelect.dataset.selected || '';
+                    courseSelect.innerHTML = buildCourseOptions(current);
+                    courseSelect.value = current;
+                    courseSelect.dataset.selected = courseSelect.value;
+                }
+
+                if (contentSelect) {
+                    const courseId = courseSelect ? courseSelect.value : '';
+                    const current = contentSelect.value || contentSelect.dataset.selected || '';
+                    contentSelect.innerHTML = buildContentOptions(courseId, current);
+                    contentSelect.value = current;
+                    contentSelect.dataset.selected = contentSelect.value;
+                }
+            });
+        }
+
+        function initPricingPlanCourseBindings(scope) {
+            const plansRep = scope.querySelector('[data-repeater][data-name="plans"]');
+            if (!plansRep) return;
+
+            const hydrate = () => hydratePlanCourseSelectors(scope);
+            hydrate();
+            setTimeout(hydrate, 250);
+
+            if (plansRep.dataset.courseBindingReady === '1') {
+                return;
+            }
+
+            plansRep.dataset.courseBindingReady = '1';
+
+            plansRep.addEventListener('change', (event) => {
+                if (event.target.matches('[data-plan-course]')) {
+                    const wrap = event.target.closest('[data-repeater-item]');
+                    const contentSelect = wrap?.querySelector('[data-plan-content]');
+                    if (contentSelect) {
+                        contentSelect.value = '';
+                        hydrate();
+                    }
+                }
+            });
+
+            const observer = new MutationObserver(() => {
+                setTimeout(hydrate, 60);
+            });
+            observer.observe(plansRep, { childList: true, subtree: true });
         }
 
         function slugify(str) {
@@ -1635,6 +1715,19 @@
               <div class="col-md-6"><label class="form-label small-label">Subtitle</label><input class="form-control" name="data[plans][__INDEX__][subtitle]"></div>
               <div class="col-md-6"><label class="form-label small-label">Price</label><input class="form-control" name="data[plans][__INDEX__][price_naira]"></div>
               <div class="col-md-6"><label class="form-label small-label">Price USD</label><input class="form-control" name="data[plans][__INDEX__][price_usd]"></div>
+              <div class="col-md-6">
+                <label class="form-label small-label">Link to Course</label>
+                <select class="form-select" name="data[plans][__INDEX__][course_id]" data-plan-course>
+                  <option value="">No course link</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small-label">Course Module</label>
+                <select class="form-select" name="data[plans][__INDEX__][course_content_id]" data-plan-content>
+                  <option value="">Select course first</option>
+                </select>
+                <small class="text-muted">Buy buttons will redirect to this module’s checkout.</small>
+              </div>
 
               <div class="col-12">
                 <div class="d-flex justify-content-between mb-2 mt-1">
@@ -1791,6 +1884,10 @@
                         });
                     }, 100);
                 }
+            }
+
+            if (type === 'pricing') {
+                initPricingPlanCourseBindings(mount);
             }
         }
 

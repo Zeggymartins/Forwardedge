@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\GoogleDriveInit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -10,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        GoogleDriveInit::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         // Safe environment check at bootstrap time (no container usage)
         $appEnv = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';

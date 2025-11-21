@@ -43,10 +43,12 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4">
-                                <i class="bi bi-calendar-event text-primary me-1"></i>{{ $event->start_date }}
+                                <i class="bi bi-calendar-event text-primary me-1"></i>
+                                {{ optional($event->start_date)->format('M d, Y') ?? 'TBA' }}
                             </td>
                             <td class="py-4 px-4">
-                                <i class="bi bi-calendar-check text-success me-1"></i>{{ $event->end_date }}
+                                <i class="bi bi-calendar-check text-success me-1"></i>
+                                {{ optional($event->end_date)->format('M d, Y') ?? 'TBA' }}
                             </td>
                             <td class="py-4 px-4">
                                 <span class="badge bg-light text-dark border px-3 py-2">

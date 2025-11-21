@@ -1,7 +1,7 @@
 @php
   /** @var \App\Models\Block $block */
   $data  = $block->data ?? [];
-  $title = $data['title'] ?? 'We build lasting relationships through trust and innovation.';
+  $title = $data['title'] ?? null;
   $linkText = $data['link_text'] ?? null;
   $link = $data['link'] ?? null;
 
@@ -17,30 +17,32 @@
   };
 @endphp
 
-<section class="tj-about-section-2 section-gap section-gap-x" aria-label="Our Partners">
+<section class="tj-about-section-2 section-gap section-gap-x pb-rich-text" aria-label="Our Partners">
   <div class="container">
     <div class="row">
       <div class="col-12">
         <div class="about-content-area style-3 wow fadeInLeft" data-wow-delay=".3s">
           <div class="sec-heading style-4">
-            @if(!empty($data['kicker']))
+            @if(!blank($data['kicker'] ?? null))
               <div class="subtitle-text">
                 <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                  <i class="tji-box"></i>{{ $data['kicker'] }}
+                  <i class="tji-box"></i>{!! pb_text($data['kicker']) !!}
                 </span>
               </div>
             @endif
 
-            <h2 class="sec-title title-highlight">
-              {{ $title }}
-            </h2>
+            @if(!blank($title))
+              <h2 class="sec-title title-highlight">
+                {!! pb_text($title) !!}
+              </h2>
+            @endif
           </div>
 
           <div class="about-bottom-area">
-            @if($linkText && $link)
+            @if(!blank($linkText) && !blank($link))
               <div class="about-btn-area-2 wow fadeInUp" data-wow-delay="1s">
                 <a class="tj-primary-btn" href="{{ $link }}">
-                  <span class="btn-text"><span>{{ $linkText }}</span></span>
+                  <span class="btn-text"><span>{!! pb_text($linkText) !!}</span></span>
                   <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                 </a>
               </div>
@@ -60,7 +62,7 @@
             <div class="swiper-wrapper">
               @foreach($logos as $i => $logo)
                 @php
-                  $img = $src($logo['image'] ?? '');
+                  $img = $src($logo['image'] ?? null);
                   $alt = $logo['alt'] ?? ('Brand Logo ' . ($i+1));
                   $href = $logo['href'] ?? null;
                 @endphp
@@ -84,7 +86,7 @@
           <noscript>
             <div class="row g-3 mt-3">
               @foreach($logos as $i => $logo)
-                @php $img = $src($logo['image'] ?? ''); @endphp
+                @php $img = $src($logo['image'] ?? null); @endphp
                 @if($img)
                   <div class="col-6 col-md-3 col-lg-2">
                     <img class="img-fluid" src="{{ $img }}" alt="{{ $logo['alt'] ?? 'Brand Logo' }}">

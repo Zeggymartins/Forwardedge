@@ -2,13 +2,13 @@
     /** @var \App\Models\Block $block */
     $d = $block->data ?? [];
 
-    $heroTitle  = $d['title']      ?? ($heroTitle ?? 'Kickstart your journey');
-    $linkText   = $d['link_text']  ?? ($linkText  ?? null);
-    $link       = $d['link']       ?? ($link      ?? '#');
-    $desc       = trim($d['desc'] ?? ($Desc ?? 'Join immersive cohorts, earn job-ready skills, and plug into Forward Edge’s network of hiring partners.'));
-    $tagline    = $d['kicker']     ?? $d['tagline'] ?? 'Forward Edge ';
+    $heroTitle  = trim((string) ($d['title']      ?? ($heroTitle ?? '')));
+    $linkText   = trim((string) ($d['link_text']  ?? ($linkText  ?? '')));
+    $link       = $d['link']       ?? ($link      ?? null);
+    $desc       = trim((string) ($d['desc'] ?? ($Desc ?? '')));
+    $tagline    = trim((string) ($d['kicker']     ?? ($d['tagline'] ?? '')));
     $secondaryLink = $d['link_secondary'] ?? null;
-    $secondaryText = $d['link_text_secondary'] ?? null;
+    $secondaryText = trim((string) ($d['link_text_secondary'] ?? ''));
 
     $imgRaw = $d['hero_image'] ?? $d['banner_image'] ?? ($heroImage ?? null);
     $src = function ($path) {
@@ -16,17 +16,16 @@
         if (Str::startsWith($path, ['http://', 'https://', '//'])) return $path;
         return asset('storage/' . ltrim($path, '/'));
     };
-    $heroImage = $src($imgRaw) ?? asset('frontend/assets/images/banner/hero-fallback.webp');
+    $heroImage = $src($imgRaw);
 
     $year = $year
         ?? (function_exists('fe_current_year') ? fe_current_year() : null)
         ?? now()->format('Y');
 
-    $highlights = collect($d['highlights'] ?? [
-        ['value' => '3,500+', 'label' => 'Alumni across the globe'],
-        ['value' => '92%',    'label' => 'Hiring success & offers'],
-        ['value' => '12',     'label' => 'Live mentor-led sprints'],
-    ])->filter(fn ($item) => filled($item['label'] ?? null))->values()->take(3);
+    $highlights = collect($d['highlights'] ?? [])
+        ->filter(fn ($item) => filled($item['label'] ?? null) || filled($item['value'] ?? null))
+        ->values()
+        ->take(3);
 @endphp
 
 @push('styles')
@@ -198,27 +197,35 @@
     </style>
 @endpush
 
-<section class="fe-hero-two section-gap-x" aria-label="Hero">
+<section class="fe-hero-two section-gap-x pb-rich-text" aria-label="Hero">
     <div class="container">
         <div class="fe-hero-grid">
             <div class="fe-hero-copy">
-                <span class="fe-hero-tag">
-                    <i class="tji-pulse"></i> {{ $tagline }}
-                </span>
-                <h1 class="fe-hero-title">{{ $heroTitle }}</h1>
-                <p class="fe-hero-desc">{{ $desc }}</p>
+                @if(!blank($tagline))
+                    <span class="fe-hero-tag">
+                        <i class="tji-pulse"></i> {!! pb_text($tagline) !!}
+                    </span>
+                @endif
+
+                @if(!blank($heroTitle))
+                    <h1 class="fe-hero-title">{!! pb_text($heroTitle) !!}</h1>
+                @endif
+
+                @if(!blank($desc))
+                    <p class="fe-hero-desc">{!! pb_text($desc) !!}</p>
+                @endif
 
                 <div class="fe-hero-cta">
-                    @if ($linkText)
+                    @if (!blank($linkText) && !blank($link))
                     <a class="tj-primary-btn" href="{{ $link }}">
-                        <span class="btn-text"><span>{{ $linkText }}</span></span>
+                        <span class="btn-text"><span>{!! pb_text($linkText) !!}</span></span>
                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                     </a>
                      @endif
 
-                    @if ($secondaryLink)
+                    @if (!blank($secondaryLink) && !blank($secondaryText))
                         <a class="ghost-btn" href="{{ $secondaryLink }}">
-                            <span>{{ $secondaryText }}</span>
+                            <span>{!! pb_text($secondaryText) !!}</span>
                             <i class="tji-arrow-right-long"></i>
                         </a>
                     @endif
@@ -227,28 +234,33 @@
                 @if ($highlights->isNotEmpty())
                     <div class="fe-hero-metrics">
                         @foreach ($highlights as $metric)
+                            @php
+                                $value = $metric['value'] ?? '';
+                                $label = $metric['label'] ?? '';
+                            @endphp
+                            @continue(blank($value) && blank($label))
                             <div class="fe-metric-card">
-                                <span class="fe-metric-value">{{ $metric['value'] ?? '' }}</span>
-                                <span class="fe-metric-label">{{ $metric['label'] ?? '' }}</span>
+                                @if(!blank($value))
+                                    <span class="fe-metric-value">{!! pb_text($value) !!}</span>
+                                @endif
+                                @if(!blank($label))
+                                    <span class="fe-metric-label">{!! pb_text($label) !!}</span>
+                                @endif
                             </div>
                         @endforeach
                     </div>
                 @endif
             </div>
 
-            <div class="fe-hero-media">
-                <figure>
-                    <img src="{{ $heroImage }}" alt="Forward Edge">
-                </figure>
+            @if($heroImage)
+                <div class="fe-hero-media">
+                    <figure>
+                        <img src="{{ $heroImage }}" alt="Forward Edge">
+                    </figure>
 
-                {{-- <div class="fe-hero-card">
-                    <span>Next cohort</span>
-                    <strong>{{ $year }}</strong>
-                    <p class="mb-0" style="font-size:.95rem; color:rgba(226,232,240,.85);">
-                        Live bootcamps, career coaching & real-world cyber labs.
-                    </p>
-                </div> --}}
-            </div>
+                    {{-- optional hero card removed when not configured --}}
+                </div>
+            @endif
         </div>
     </div>
 </section>

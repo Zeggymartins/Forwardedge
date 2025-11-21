@@ -29,4 +29,9 @@ class Orders extends Model
     {
         return $this->morphMany(Payment::class, 'payable');
     }
+
+    public function getOrderItemsAttribute()
+    {
+        return $this->items;
+    }
 }

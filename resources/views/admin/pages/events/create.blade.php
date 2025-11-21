@@ -22,8 +22,8 @@
                 <input type="text" name="title" class="form-control form-control-lg" placeholder="Enter event title" required>
             </div>
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Slug</label>
-                <input type="text" name="slug" class="form-control" placeholder="event-slug" required>
+                <label class="form-label fw-semibold">Slug <span class="text-muted">(optional)</span></label>
+                <input type="text" name="slug" class="form-control" placeholder="event-slug">
             </div>
             <div class="col-12">
                 <label class="form-label fw-semibold">Short Description</label>
@@ -57,11 +57,11 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Start Date</label>
-                <input type="datetime-local" name="start_date" class="form-control" required>
+                <input type="date" name="start_date" class="form-control" placeholder="YYYY-MM-DD">
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">End Date</label>
-                <input type="datetime-local" name="end_date" class="form-control" required>
+                <input type="date" name="end_date" class="form-control" placeholder="YYYY-MM-DD">
             </div>
         </div>
 
@@ -94,7 +94,7 @@
         </div>
 
         <!-- Section: Ticketing -->
-        <div class="section-header mt-5 mb-3">Ticketing</div>
+        <div class="section-header mt-5 mb-3">Pricing</div>
         <div class="row g-4">
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Ticket Price (₦)</label>

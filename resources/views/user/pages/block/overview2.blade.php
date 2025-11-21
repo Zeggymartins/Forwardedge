@@ -26,13 +26,13 @@
 
   /** @var \App\Models\Block $block */
   $d         = $block->data ?? [];
-  $kicker    = $d['kicker']   ?? 'OUR PROGRAM';
-  $title     = $d['title']    ?? 'Program Includes:';
+  $kicker    = $d['kicker']   ?? ($Kicker ?? null);
+  $title     = $d['title']    ?? ($title ?? null);
   $subtitle  = $d['subtitle'] ?? null;
   $desc      = $d['desc']     ?? null;
   $topList   = is_array($d['list'] ?? null) ? $d['list'] : [];
-  $link      = $d['link']     ?? '#';
-  $linkText  = $d['link_text']?? 'Learn More';
+  $link      = $d['link']     ?? null;
+  $linkText  = $d['link_text']?? null;
   $items     = is_array($d['items'] ?? null) ? $d['items'] : [];
   $itemsCount  = count($items);
   $columnClass = match (true) {
@@ -51,7 +51,7 @@
   };
 
   $resolveProgramImage = function ($path, $i = 0) use ($src) {
-      return $src($path) ?? asset('frontend/assets/images/service/service-' . (($i % 6) + 1) . '.webp');
+      return $src($path);
   };
 
   // Normalize list: accept ["text", ...] or [{"text":"..."}]
@@ -65,7 +65,7 @@
   };
 @endphp
 
-<section class="h6-service section-gap" aria-label="Program Includes">
+<section class="h6-service section-gap pb-rich-text" aria-label="Program Includes">
   <div class="container">
     {{-- Header --}}
     <div class="row">
@@ -73,18 +73,20 @@
         <div class="sec-heading sec-heading-centered style-2 style-6">
           @if(!empty($kicker))
             <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-              <i class="tji-box"></i>{{ $kicker }}
+              <i class="tji-box"></i>{!! pb_text($kicker) !!}
             </span>
           @endif
 
-          <h2 class="sec-title title-anim">{{ $title }}</h2>
+          @if(!blank($title))
+            <h2 class="sec-title title-anim">{!! pb_text($title) !!}</h2>
+          @endif
 
           @if(!empty($subtitle))
-            <div class="mt-2 lead">{{ $subtitle }}</div>
+            <div class="mt-2 lead">{!! pb_text($subtitle) !!}</div>
           @endif
 
           @if(!empty($desc))
-            <p class="desc wow fadeInUp mt-2" data-wow-delay=".45s">{{ $desc }}</p>
+            <p class="desc wow fadeInUp mt-2" data-wow-delay=".45s">{!! pb_text($desc) !!}</p>
           @endif
 
           @if(count($asLines($topList)))
@@ -92,7 +94,7 @@
               @foreach($asLines($topList) as $li)
                 <li class="d-flex align-items-start gap-2 mb-1">
                   <i class="tji-check-circle mt-1"></i>
-                  <span>{{ $li }}</span>
+                  <span>{!! pb_text($li) !!}</span>
                 </li>
               @endforeach
             </ul>
@@ -113,26 +115,38 @@
                 $itList  = $asLines($item['list'] ?? []);
                 $img     = $resolveProgramImage($item['image'] ?? null, $i);
                 $idx     = str_pad($i + 1, 2, '0', STR_PAD_LEFT) . '.';
-                $itLink  = $item['link'] ?? $link ?? '#';
+                $itLink  = $item['link'] ?? $link ?? null;
               @endphp
 
               <div class="swiper-slide {{ $columnClass }}">
                 <div class="h6-service-item">
-                  <div class="h6-service-thumb">
-                    <a href="{{ $itLink }}"><img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}" style></a>
-                  </div>
+                  @if($img)
+                    <div class="h6-service-thumb">
+                      @if($itLink)
+                        <a href="{{ $itLink }}"><img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}" style></a>
+                      @else
+                        <img src="{{ $img }}" alt="{{ $itTitle ?: 'Program feature' }}" style>
+                      @endif
+                    </div>
+                  @endif
 
                   <div class="h6-service-content">
                     <h5 class="h6-service-index">{{ $idx }}</h5>
 
                     <div class="h6-service-title-wrap">
-                      <h4 class="title">
-                        <a href="{{ $itLink }}">{{ $itTitle }}</a>
+                      @if(!blank($itTitle))
+                        <h4 class="title">
+                        @if($itLink)
+                          <a href="{{ $itLink }}">{!! pb_text($itTitle) !!}</a>
+                        @else
+                          {!! pb_text($itTitle) !!}
+                        @endif
                       </h4>
+                      @endif
 
                       {{-- ===== Item description ===== --}}
                       @if(!empty($itDesc))
-                        <p class="mt-1 mb-2">{{ $itDesc }}</p>
+                        <p class="mt-1 mb-2">{!! pb_text($itDesc) !!}</p>
                       @endif
 
                       {{-- ===== Item list ===== --}}
@@ -141,36 +155,17 @@
                           @foreach($itList as $li)
                             <li class="d-flex align-items-start gap-2 mb-1">
                               <i class="tji-check-circle mt-1"></i>
-                              <span>{{ $li }}</span>
+                              <span>{!! pb_text($li) !!}</span>
                             </li>
                           @endforeach
                         </ul>
                       @endif
 
-                      <a class="text-btn" href="{{ $itLink }}">
-                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            @empty
-              {{-- Empty state card (uses link/linkText fallback) --}}
-              @php
-                $fallbackImg = $resolveProgramImage(null, 0);
-              @endphp
-              <div class="swiper-slide">
-                <div class="h6-service-item">
-                  <div class="h6-service-thumb">
-                    <img src="{{ $fallbackImg }}" alt="Program feature">
-                  </div>
-                  <div class="h6-service-content">
-                    <h5 class="h6-service-index">01.</h5>
-                    <div class="h6-service-title-wrap">
-                      <h4 class="title">{{ $linkText }}</h4>
-                      <a class="text-btn" href="{{ $link }}">
-                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                      </a>
+                      @if(!blank($itLink))
+                        <a class="text-btn" href="{{ $itLink }}">
+                          <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                        </a>
+                      @endif
                     </div>
                   </div>
                 </div>

@@ -10,6 +10,16 @@
     };
 
     $heroUrl = $resolveImage($campaign->hero_image);
+    $tokenMap = [
+        '[[email]]' => $recipientEmail ?? '',
+        '[[email_url]]' => isset($recipientEmail) ? urlencode($recipientEmail) : '',
+    ];
+    $renderCopy = function ($value) use ($tokenMap) {
+        if ($value === null) {
+            return '';
+        }
+        return strtr($value, $tokenMap);
+    };
 @endphp
 
 <!DOCTYPE html>
@@ -56,31 +66,31 @@
                             </p>
 
                             @if($campaign->intro)
-                                <p style="margin:0 0 24px;color:#1d2939;font-size:16px;line-height:1.7;">{!! nl2br(e($campaign->intro)) !!}</p>
+                                <p style="margin:0 0 24px;color:#1d2939;font-size:16px;line-height:1.7;">{!! nl2br(e($renderCopy($campaign->intro))) !!}</p>
                             @endif
 
                             @foreach($campaign->blocks ?? [] as $block)
                                 @if(($block['type'] ?? '') === 'text')
                                     <div style="margin-bottom:32px;">
                                         @if(!empty($block['heading']))
-                                            <h2 style="margin:0 0 12px;font-size:20px;color:#0f172a;">{{ $block['heading'] }}</h2>
+                                            <h2 style="margin:0 0 12px;font-size:20px;color:#0f172a;">{{ $renderCopy($block['heading']) }}</h2>
                                         @endif
                                         @if(!empty($block['body']))
-                                            <p style="margin:0;color:#475467;font-size:15px;line-height:1.7;">{!! nl2br(e($block['body'])) !!}</p>
+                                            <p style="margin:0;color:#475467;font-size:15px;line-height:1.7;">{!! nl2br(e($renderCopy($block['body']))) !!}</p>
                                         @endif
                                     </div>
                                 @elseif(($block['type'] ?? '') === 'list')
                                     <div style="margin-bottom:32px;padding:20px;border:1px solid #e4e7ec;border-radius:12px;background-color:#f8f9ff;">
                                         @if(!empty($block['heading']))
-                                            <h3 style="margin:0 0 12px;font-size:18px;color:#0f172a;">{{ $block['heading'] }}</h3>
+                                            <h3 style="margin:0 0 12px;font-size:18px;color:#0f172a;">{{ $renderCopy($block['heading']) }}</h3>
                                         @endif
                                         @if(!empty($block['body']))
-                                            <p style="margin:0 0 16px;color:#475467;font-size:15px;line-height:1.7;">{!! nl2br(e($block['body'])) !!}</p>
+                                            <p style="margin:0 0 16px;color:#475467;font-size:15px;line-height:1.7;">{!! nl2br(e($renderCopy($block['body']))) !!}</p>
                                         @endif
                                         @if(!empty($block['items']))
                                             <ul style="padding-left:20px;margin:0;color:#101828;line-height:1.7;">
                                                 @foreach($block['items'] as $item)
-                                                    <li style="margin-bottom:8px;">{{ $item }}</li>
+                                                    <li style="margin-bottom:8px;">{{ $renderCopy($item) }}</li>
                                                 @endforeach
                                             </ul>
                                         @endif
@@ -91,17 +101,17 @@
                                     <div style="margin-bottom:32px;text-align:center;">
                                             <img src="{{ $blockImage }}" alt="{{ $block['alt'] ?? 'Campaign asset' }}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;">
                                         @if(!empty($block['caption']))
-                                            <p style="margin:12px 0 0;color:#667085;font-size:13px;">{{ $block['caption'] }}</p>
+                                            <p style="margin:12px 0 0;color:#667085;font-size:13px;">{{ $renderCopy($block['caption']) }}</p>
                                         @endif
                                     </div>
                                     @endif
                                 @elseif(($block['type'] ?? '') === 'cards')
                                     <div style="margin-bottom:32px;">
                                         @if(!empty($block['heading']))
-                                            <h3 style="margin:0 0 12px;font-size:19px;color:#0f172a;">{{ $block['heading'] }}</h3>
+                                            <h3 style="margin:0 0 12px;font-size:19px;color:#0f172a;">{{ $renderCopy($block['heading']) }}</h3>
                                         @endif
                                         @if(!empty($block['body']))
-                                            <p style="margin:0 0 16px;color:#475467;">{!! nl2br(e($block['body'])) !!}</p>
+                                            <p style="margin:0 0 16px;color:#475467;">{!! nl2br(e($renderCopy($block['body']))) !!}</p>
                                         @endif
                                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                             <tr>
@@ -113,10 +123,10 @@
                                                                 <img src="{{ $cardImage }}" alt="" style="width:100%;border-radius:8px;margin-bottom:12px;max-height:140px;object-fit:cover;">
                                                             @endif
                                                             @if(!empty($card['title']))
-                                                                <h4 style="margin:0 0 8px;font-size:16px;color:#0f172a;">{{ $card['title'] }}</h4>
+                                                                <h4 style="margin:0 0 8px;font-size:16px;color:#0f172a;">{{ $renderCopy($card['title']) }}</h4>
                                                             @endif
                                                             @if(!empty($card['body']))
-                                                                <p style="margin:0;color:#475467;font-size:14px;line-height:1.6;">{!! nl2br(e($card['body'])) !!}</p>
+                                                                <p style="margin:0;color:#475467;font-size:14px;line-height:1.6;">{!! nl2br(e($renderCopy($card['body']))) !!}</p>
                                                             @endif
                                                         </div>
                                                     </td>
@@ -127,9 +137,12 @@
                                 @endif
                             @endforeach
 
-                            @if($campaign->cta_text && $campaign->cta_link)
+                            @php
+                                $finalCta = $ctaLink ?? $campaign->cta_link;
+                            @endphp
+                            @if($campaign->cta_text && $finalCta)
                                 <div style="text-align:center;margin:32px 0;">
-                                    <a href="{{ $campaign->cta_link }}" style="background-color:#f97316;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:999px;font-weight:600;display:inline-block;">
+                                    <a href="{{ $finalCta }}" style="background-color:#f97316;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:999px;font-weight:600;display:inline-block;">
                                         {{ $campaign->cta_text }}
                                     </a>
                                 </div>

@@ -89,7 +89,12 @@
                   $thumb = $parentCourse?->thumbnail
                       ? asset('storage/' . $parentCourse->thumbnail)
                       : asset('frontend/assets/images/product/product-1.webp');
-                  $price = $parentCourse?->discount_price ?? $parentCourse?->price ?? 0;
+                  $regularPrice = $module->price ?? 0;
+                  $salePrice = $module->discount_price ?? $regularPrice;
+                  $hasDiscount = $module->discount_price && $module->price && $module->discount_price < $module->price;
+                  $discountPercent = $hasDiscount
+                      ? round((($module->price - $module->discount_price) / max($module->price, 1)) * 100)
+                      : null;
                 @endphp
                 <div class="col">
                   <div class="tj-product">
@@ -99,13 +104,9 @@
                           <img src="{{ $thumb }}" alt="{{ $module->title }}" class="img-fluid">
                         </a>
 
-                        @if ($parentCourse && $parentCourse->discount_price)
+                        @if ($hasDiscount)
                           <div class="tj-product-badge product-on-sale">
-                            <span class="onsale">
-                              -{{ $price > 0 && $parentCourse->price
-                                  ? round((($parentCourse->price - $parentCourse->discount_price) / max($parentCourse->price,1)) * 100)
-                                  : 0 }}%
-                            </span>
+                            <span class="onsale">-{{ $discountPercent }}%</span>
                           </div>
                         @endif
 
@@ -120,10 +121,17 @@
                             </div>
 
                             <div class="tj-product-action-btn">
-                              <button type="button" class="open-cart-btn">
+                              <button
+                                type="button"
+                                class="cart-button"
+                                data-course-id="{{ $parentCourse?->id ?? $module->course_id }}"
+                                data-content-id="{{ $module->id }}"
+                                data-quantity="1"
+                                aria-label="Add {{ $module->title }} to cart"
+                              >
                                 <i class="fal fa-shopping-cart"></i>
                               </button>
-                              <span class="tj-product-action-btn-tooltip">Quick cart</span>
+                              <span class="tj-product-action-btn-tooltip">Add to cart</span>
                             </div>
                           </div>
                         </div>
@@ -132,7 +140,7 @@
                       <div class="tj-product-content">
                         {{-- optional hidden tag area like template --}}
                         <div class="tj-product-tag d-none">
-                          @if($parentCourse)
+                                @if($parentCourse)
                             <a href="{{ route('course.show', $parentCourse->slug) }}">
                               {{ $parentCourse->title ?? 'Course' }}
                             </a>
@@ -157,16 +165,16 @@
 
                           <div class="tj-product-price-wrapper">
                             <span class="price">
-                              @if ($parentCourse && $parentCourse->discount_price)
+                              @if ($hasDiscount)
                                 <del>
-                                  <span><bdi><span>₦</span>{{ number_format($parentCourse->price) }}</bdi></span>
+                                  <span><bdi><span>₦</span>{{ number_format($regularPrice) }}</bdi></span>
                                 </del>
                                 <ins>
-                                  <span><bdi><span>₦</span>{{ number_format($price) }}</bdi></span>
+                                  <span><bdi><span>₦</span>{{ number_format($salePrice) }}</bdi></span>
                                 </ins>
                               @else
                                 <ins>
-                                  <span><bdi><span>₦</span>{{ number_format($price) }}</bdi></span>
+                                  <span><bdi><span>₦</span>{{ number_format($salePrice) }}</bdi></span>
                                 </ins>
                               @endif
                             </span>
@@ -231,7 +239,9 @@
                     $thumb = $latestCourseParent?->thumbnail
                         ? asset('storage/' . $latestCourseParent->thumbnail)
                         : asset('frontend/assets/images/product/product-10.webp');
-                    $latestPrice = $latestCourseParent?->discount_price ?? $latestCourseParent?->price ?? 0;
+                    $latestRegular = $latest->price ?? 0;
+                    $latestSale = $latest->discount_price ?? $latestRegular;
+                    $latestHasDiscount = $latest->discount_price && $latest->price && $latest->discount_price < $latest->price;
                   @endphp
                   <li class="tj-recent-product-list sidebar-recent-post">
                     <div class="single-post d-flex align-items-center">
@@ -254,7 +264,12 @@
                           </a>
                         </h5>
                         <div class="tj-product-sidebar-rating-price tj-product-price">
-                          <span><span>₦</span>{{ number_format($latestPrice) }}</span>
+                          @if($latestHasDiscount)
+                            <del class="d-block small text-muted">
+                              <span>₦{{ number_format($latestRegular) }}</span>
+                            </del>
+                          @endif
+                          <span class="fw-semibold"><span>₦</span>{{ number_format($latestSale) }}</span>
                         </div>
                       </div>
                     </div>

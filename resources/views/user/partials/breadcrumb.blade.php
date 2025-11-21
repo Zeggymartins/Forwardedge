@@ -1,7 +1,9 @@
 @php
-    $fullTitle = trim(View::getSections()['title'] ?? 'Page');
+    $sections = View::getSections();
+    $fullTitle = trim($sections['title'] ?? 'Page');
     $pageTitle = explode('|', $fullTitle)[0];
     $pageTitle = trim($pageTitle);
+    $pageText = trim($sections['breadcrumb_text'] ?? '');
 
     // Map page titles to background images
     $bgImages = [
@@ -29,6 +31,9 @@
               <div class="col-lg-12">
                 <div class="tj-page-header-content text-center">
                   <h1 class="tj-page-title">{{ $pageTitle }}</h1>
+                  @if(!empty($pageText))
+                      <p class="lead text-white-50 mb-4">{{ $pageText }}</p>
+                  @endif
                   <div class="tj-page-link">
                     <span><i class="tji-home"></i></span>
                     <span>

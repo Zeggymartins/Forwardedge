@@ -97,10 +97,8 @@ Route::prefix('events')->name('events.')->group(function () {
     Route::get('/{slug}', [EventController::class, 'show'])->name('show');
 
     // Event registration routes
-    Route::get('/{event_id}/register/{ticket_id}', [EventController::class, 'register'])
-        ->name('register.form');
-    Route::post('/register', [EventController::class, 'submitRegistration'])
-        ->name('register');
+    Route::get('/{slug}/register', [EventController::class, 'register'])->name('register.form');
+    Route::post('/register', [EventController::class, 'submitRegistration'])->name('register');
 });
 
 /*
@@ -237,7 +235,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
     |--------------------------------------------------------------------------
     */
     Route::prefix('events')->name('admin.events.')->group(function () {
-        // Main events
         Route::get('/', [AdminEventController::class, 'index'])->name('list');
         Route::get('/create', [AdminEventController::class, 'create'])->name('create');
         Route::post('/', [AdminEventController::class, 'store'])->name('store');
@@ -245,27 +242,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::put('/{event}', [AdminEventController::class, 'update'])->name('update');
         Route::delete('/{event}', [AdminEventController::class, 'destroy'])->name('destroy');
         Route::get('/registrations', [AdminEventController::class, 'Registrations'])->name('registrations');
-
-    
-        // Tickets
-        Route::post('/{event}/tickets', [AdminEventController::class, 'storeTicket'])->name('tickets.store');
-        Route::put('/tickets/{ticket}', [AdminEventController::class, 'updateTicket'])->name('tickets.update');
-        Route::delete('/tickets/{ticket}', [AdminEventController::class, 'destroyTicket'])->name('tickets.destroy');
-
-        // Speakers
-        Route::post('/{event}/speakers', [AdminEventController::class, 'storeSpeaker'])->name('speakers.store');
-        Route::put('/speakers/{speaker}', [AdminEventController::class, 'updateSpeaker'])->name('speakers.update');
-        Route::delete('/speakers/{speaker}', [AdminEventController::class, 'destroySpeaker'])->name('speakers.destroy');
-
-        // Schedules
-        Route::post('/{event}/schedules', [AdminEventController::class, 'storeSchedule'])->name('schedules.store');
-        Route::put('/schedules/{schedule}', [AdminEventController::class, 'updateSchedule'])->name('schedules.update');
-        Route::delete('/schedules/{schedule}', [AdminEventController::class, 'destroySchedule'])->name('schedules.destroy');
-
-        // Sponsors
-        Route::post('/{event}/sponsors', [AdminEventController::class, 'storeSponsor'])->name('sponsors.store');
-        Route::put('/sponsors/{sponsor}', [AdminEventController::class, 'updateSponsor'])->name('sponsors.update');
-        Route::delete('/sponsors/{sponsor}', [AdminEventController::class, 'destroySponsor'])->name('sponsors.destroy');
     });
 
     /*

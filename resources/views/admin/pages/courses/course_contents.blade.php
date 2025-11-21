@@ -43,7 +43,21 @@
                                 @if ($content->file_path)
                                     <span class="badge bg-primary-subtle text-primary fw-semibold">File Attached</span>
                                 @endif
+                                @if (!is_null($content->price))
+                                    <span class="badge bg-primary-subtle text-primary fw-semibold">
+                                        ₦{{ number_format($content->discount_price ?? $content->price ?? 0, 2) }}
+                                    </span>
+                                    @if ($content->discount_price && $content->discount_price < $content->price)
+                                        <small class="text-muted text-decoration-line-through">₦{{ number_format($content->price, 2) }}</small>
+                                    @endif
+                                @endif
                                 <span class="text-muted small">Created {{ $content->created_at->format('d M, Y') }}</span>
+                                @if ($content->drive_folder_id)
+                                    <span class="badge bg-info-subtle text-info fw-semibold">Drive linked</span>
+                                @endif
+                                @if ($content->auto_grant_access)
+                                    <span class="badge bg-success-subtle text-success fw-semibold">Auto access</span>
+                                @endif
                             </div>
                         </div>
                         <div class="content-actions">
@@ -56,6 +70,11 @@
                                     'content'   => $content->content,
                                     'file_name' => $content->file_path ? basename($content->file_path) : null,
                                     'has_file'  => (bool) $content->file_path,
+                                    'price'     => $content->price,
+                                    'discount_price' => $content->discount_price,
+                                    'drive_folder_id' => $content->drive_folder_id,
+                                    'drive_share_link' => $content->drive_share_link,
+                                    'auto_grant_access' => $content->auto_grant_access,
                                 ];
                             @endphp
                             <button class="btn btn-sm btn-soft-neutral" data-bs-toggle="modal" data-bs-target="#editContentModal" data-action="{{ route('admin.course_contents.update', $content->id) }}" data-content='@json($contentPayload)'>Edit</button>
@@ -78,6 +97,14 @@
                             <h6 class="text-muted text-uppercase small">Resource</h6>
                             <p class="mb-2 text-muted">{{ basename($content->file_path) }}</p>
                             <a href="{{ asset('storage/' . $content->file_path) }}" target="_blank" class="btn btn-outline-primary btn-sm">Open File</a>
+                        </div>
+                    @endif
+
+                    @if ($content->drive_share_link)
+                        <div class="mb-4">
+                            <h6 class="text-muted text-uppercase small">Google Drive</h6>
+                            <a href="{{ $content->drive_share_link }}" target="_blank" class="btn btn-outline-success btn-sm">Open Shared Folder</a>
+                            <p class="text-muted small mb-0">Learners will be granted access to this folder after a successful payment.</p>
                         </div>
                     @endif
 

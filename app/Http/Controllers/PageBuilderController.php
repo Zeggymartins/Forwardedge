@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Page, Block, Course, Event, CourseSchedule};
+use App\Models\{Page, Block, Course, Event, CourseSchedule, CourseContent};
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\{DB, Storage, Log, Route as RouteFacade};
@@ -231,6 +231,22 @@ class PageBuilderController extends Controller
 
         $iconOptions = $this->loadBootstrapIcons();
 
+        $courseCatalog = Course::with(['contents:id,title,course_id'])
+            ->orderBy('title')
+            ->get(['id', 'title'])
+            ->map(function ($course) {
+                return [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'contents' => $course->contents->map(function ($content) {
+                        return [
+                            'id' => $content->id,
+                            'title' => $content->title,
+                        ];
+                    })->values(),
+                ];
+            });
+
         return view('admin.pages.page_builder.blocks.form', compact(
             'page',
             'blocks',
@@ -238,7 +254,8 @@ class PageBuilderController extends Controller
             'variants',
             'internalRoutes',
             'routeBindingOptions',
-            'iconOptions'
+            'iconOptions',
+            'courseCatalog'
         ));
     }
 
@@ -557,6 +574,23 @@ class PageBuilderController extends Controller
 
             // Remove old 'period' field if present (legacy cleanup)
             unset($plan['period']);
+
+            $plan['course_id'] = isset($plan['course_id']) && $plan['course_id'] !== ''
+                ? (int) $plan['course_id']
+                : null;
+            $plan['course_content_id'] = isset($plan['course_content_id']) && $plan['course_content_id'] !== ''
+                ? (int) $plan['course_content_id']
+                : null;
+
+            if ($plan['course_content_id']) {
+                $content = CourseContent::select('id', 'course_id')->find($plan['course_content_id']);
+                if ($content) {
+                    $plan['course_content_id'] = $content->id;
+                    $plan['course_id'] = $content->course_id;
+                } else {
+                    $plan['course_content_id'] = null;
+                }
+            }
 
             $cleanPlans[] = $plan;
         }

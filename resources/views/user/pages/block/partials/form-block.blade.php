@@ -58,8 +58,8 @@
         ->values();
 
     $buttonText = $d['button_text'] ?? 'Join the newsletter';
-    $sectionTitle = $d['title'] ?? 'Let’s work together';
-    $sectionSubtitle = $d['subtitle'] ?? 'Share a few details and our team will reach out within one business day.';
+    $sectionTitle = $d['title'] ?? null;
+    $sectionSubtitle = $d['subtitle'] ?? null;
     $formId = 'dynamic-form-' . $block->id;
 @endphp
 
@@ -491,15 +491,15 @@
     @endpush
 @endonce
 
-<section class="dynamic-form-block dynamic-form-block--{{ $theme }} section-gap-x">
+<section class="dynamic-form-block dynamic-form-block--{{ $theme }} section-gap-x pb-rich-text">
     <div class="container">
-        <div class="dynamic-form-card">
+        <div class="dynamic-form-card pb-rich-text">
             @if ($sectionTitle)
-                <h2>{{ $sectionTitle }}</h2>
+                <h2>{!! pb_text($sectionTitle) !!}</h2>
             @endif
 
             @if ($sectionSubtitle)
-                <p>{{ $sectionSubtitle }}</p>
+                <p>{!! pb_text($sectionSubtitle) !!}</p>
             @endif
 
             <form id="{{ $formId }}"
@@ -564,7 +564,7 @@
 
                 <div class="dynamic-form-submit">
                     <button class="tj-primary-btn" type="submit">
-                        <span class="btn-text"><span>{{ $buttonText }}</span></span>
+                        <span class="btn-text"><span>{!! pb_text($buttonText) !!}</span></span>
                         <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
                     </button>
                 </div>

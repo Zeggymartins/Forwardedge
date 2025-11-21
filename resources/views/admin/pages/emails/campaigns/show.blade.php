@@ -75,6 +75,55 @@
 
         <div class="card shadow-sm mb-4">
             <div class="card-body">
+                <h5 class="card-title mb-3">Audience targeting</h5>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <p class="text-muted small text-uppercase mb-1">Sources</p>
+                        @if($campaign->audience_sources)
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach($campaign->audience_sources as $source)
+                                    <span class="badge text-bg-secondary">{{ ucfirst($source) }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="mb-0">All sources</p>
+                        @endif
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted small text-uppercase mb-1">Manual include</p>
+                        @if($campaign->include_emails)
+                            <ul class="mb-0 ps-3">
+                                @foreach($campaign->include_emails as $email)
+                                    <li>{{ $email }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="mb-0 text-muted">None</p>
+                        @endif
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted small text-uppercase mb-1">Exclusions</p>
+                        @if($campaign->exclude_emails)
+                            <ul class="mb-0 ps-3">
+                                @foreach($campaign->exclude_emails as $email)
+                                    <li>{{ $email }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="mb-0 text-muted">None</p>
+                        @endif
+                    </div>
+                </div>
+                @if($campaign->cta_email_param)
+                    <p class="text-muted small mt-3 mb-0">
+                        CTA link auto-appends <code>?{{ $campaign->cta_email_param }}=email</code> for each recipient.
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
                 <h5 class="card-title mb-3">Campaign preview</h5>
                 <div class="ratio ratio-21x9 border rounded overflow-auto bg-light">
                     <iframe srcdoc="{{ htmlspecialchars(view('emails.campaign', ['campaign' => $campaign, 'recipientName' => 'Team'])->render(), ENT_QUOTES, 'UTF-8') }}"

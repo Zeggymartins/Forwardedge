@@ -19,7 +19,6 @@
                         <th class="py-3 px-4">Event</th>
                         <th class="py-3 px-4">Name</th>
                         <th class="py-3 px-4">Email</th>
-                        <th class="py-3 px-4">Ticket</th>
                         <th class="py-3 px-4">Status</th>
                         <th class="py-3 px-4">Payment</th>
                         <th class="py-3 px-4">Amount</th>
@@ -39,7 +38,6 @@
                                 <br><small class="text-muted">{{ $reg->company ?? '' }}</small>
                             </td>
                             <td class="py-3 px-4">{{ $reg->email }}</td>
-                            <td class="py-3 px-4">{{ $reg->ticket->name ?? '—' }}</td>
                             <td class="py-3 px-4">
                                 <span class="badge rounded-pill 
                                     @if($reg->status=='confirmed') bg-success
@@ -56,7 +54,7 @@
                             </td>
                             <td class="py-3 px-4">₦{{ number_format($reg->amount_paid,2) }}</td>
                             <td class="py-3 px-4">
-                                {{ $reg->registered_at->format('M d, Y H:i') }}
+                                {{ optional($reg->registered_at)->format('M d, Y H:i') ?? '—' }}
                             </td>
                             <td class="py-3 px-4 text-center">
                                 <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-2"
@@ -82,9 +80,6 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <strong>Event:</strong> {{ $reg->event->title ?? '—' }}
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <strong>Ticket:</strong> {{ $reg->ticket->name ?? '—' }}
                                                     </div>
                                                     <div class="col-md-6">
                                                         <strong>Email:</strong> {{ $reg->email }}
@@ -127,7 +122,7 @@
                                                         <strong>Payment Ref:</strong> {{ $reg->payment_reference ?? '—' }}
                                                     </div>
                                                     <div class="col-md-12">
-                                                        <strong>Registered At:</strong> {{ $reg->registered_at->format('M d, Y H:i') }}
+                                                        <strong>Registered At:</strong> {{ optional($reg->registered_at)->format('M d, Y H:i') ?? '—' }}
                                                     </div>
                                                 </div>
                                             </div>

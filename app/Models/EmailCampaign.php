@@ -17,15 +17,22 @@ class EmailCampaign extends Model
         'blocks',
         'cta_text',
         'cta_link',
+        'cta_email_param',
         'status',
         'sent_count',
         'total_count',
         'last_error',
         'user_id',
+        'audience_sources',
+        'include_emails',
+        'exclude_emails',
     ];
 
     protected $casts = [
         'blocks' => 'array',
+        'audience_sources' => 'array',
+        'include_emails' => 'array',
+        'exclude_emails' => 'array',
     ];
 
     public function user(): BelongsTo

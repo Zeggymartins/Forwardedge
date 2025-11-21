@@ -97,13 +97,32 @@
                 @endforeach
             </ul>
 
-            <p><strong>Total Paid:</strong> ${{ number_format($order->total_amount, 2) }}</p>
-            <p>Your course contents are attached as a ZIP file for easy access.</p>
-            @foreach($order->orderItems as $item)
-                @foreach ($item->course->contents as $content)
-                    <li>{{ $content->title }}.{{ $content->type === 'text' ? 'docx' : pathinfo($content->file_path, PATHINFO_EXTENSION) }}
-                    </li>
-                @endforeach
+            <p><strong>Total Paid:</strong> ₦{{ number_format($order->total_price ?? 0, 2) }}</p>
+            <p>Your secure download bundle is attached, and we’ve also linked each module below.</p>
+
+            @foreach ($order->orderItems as $item)
+                @php
+                    $driveLinks = $item->course?->contents?->filter(fn($content) => filled($content->drive_share_link)) ?? collect();
+                @endphp
+                <div style="margin-bottom:18px;">
+                    <strong>{{ $item->course->title ?? 'Course Module' }}</strong>
+                    <div>₦{{ number_format($item->price, 2) }}</div>
+                    @if ($driveLinks->isNotEmpty())
+                        <div style="margin-top:8px;">
+                            <span style="font-weight:600;">Google Drive access:</span>
+                            <ul style="padding-left:18px;margin:8px 0;">
+                                @foreach ($driveLinks as $driveContent)
+                                    <li>
+                                        <a href="{{ $driveContent->drive_share_link }}" target="_blank" rel="noopener">
+                                            {{ $driveContent->title }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <small style="color:#666;">We’ve also invited {{ $order->user->email }} to these folders via Google Drive.</small>
+                        </div>
+                    @endif
+                </div>
             @endforeach
         </div>
         <div class="footer">

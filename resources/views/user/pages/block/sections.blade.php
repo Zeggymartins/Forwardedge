@@ -37,43 +37,7 @@
 
 @php
     $d = $block->data ?? [];
-    $items = $d['items'] ?? [];
-
-    // sensible fallbacks so it never looks empty
-    if (empty($items)) {
-        $items = [
-            [
-                'icon' => 'tji-service-1',
-                'title' => 'Business Strategy Development',
-                'subtitle' => 'Plan. Execute. Grow.',
-                'text' => 'Data-driven strategy tailored to your goals.',
-                'list' => ['Market analysis', 'Roadmapping', 'KPI design'],
-                'link_text' => 'Learn More',
-                'link' => '#',
-                // 'image' => 'frontend/assets/images/service/service-6.webp',
-            ],
-            [
-                'icon' => 'tji-service-2',
-                'title' => 'Customer Experience Solutions',
-                'subtitle' => 'Delight every touchpoint',
-                'text' => 'Improve journeys from first click to support.',
-                'list' => ['Journey mapping', 'Automation', 'VOC loops'],
-                'link_text' => 'Learn More',
-                'link' => '#',
-                'image' => 'frontend/assets/images/service/service-1.webp',
-            ],
-            [
-                'icon' => 'tji-service-3',
-                'title' => 'Sustainability & ESG Consulting',
-                'subtitle' => 'Profit with purpose',
-                'text' => 'Build long-term value and trust.',
-                'list' => ['Materiality', 'Reporting', 'Change mgmt'],
-                'link_text' => 'Learn More',
-                'link' => '#',
-                'image' => 'frontend/assets/images/service/service-7.webp',
-            ],
-        ];
-    }
+    $items = is_array($d['items'] ?? null) ? $d['items'] : [];
 
     // slider mode (optional): add 'as_slider' => true in $d
 
@@ -95,19 +59,23 @@
     }
 @endphp
 
-<section class="tj-service-section-5 section-gap">
+<section class="tj-service-section-5 section-gap pb-rich-text">
     <div class="container">
 
         {{-- heading --}}
         <div class="row">
             <div class="col-lg-12">
                 <div class="sec-heading style-4 text-center">
-                    <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
-                        <i class="tji-box"></i>{{ $d['kicker'] ?? 'Our Solutions' }}
-                    </span>
-                    <h2 class="sec-title title-anim">
-                        {{ $d['title'] ?? 'Tailor Business Solutions for Corporates.' }}
-                    </h2>
+                    @if(!blank($d['kicker'] ?? null))
+                        <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
+                            <i class="tji-box"></i>{!! pb_text($d['kicker']) !!}
+                        </span>
+                    @endif
+                    @if(!blank($d['title'] ?? null))
+                        <h2 class="sec-title title-anim">
+                            {!! pb_text($d['title']) !!}
+                        </h2>
+                    @endif
                 </div>
             </div>
         </div>
@@ -119,46 +87,60 @@
                     @foreach ($items as $it)
                         <div class="service-item style-5 service-stack">
                             <div class="service-content-area">
-                                <div class="service-icon">
-                                    <i class="{{ $it['icon'] ?? 'tji-service-1' }}"></i>
-                                </div>
+                                @if(!blank($it['icon'] ?? null))
+                                    <div class="service-icon">
+                                        <i class="{{ $it['icon'] }}"></i>
+                                    </div>
+                                @endif
                                 <div class="service-content">
                                     {{-- numbers removed --}}
-                                    <h3 class="title">
-                                        <a href="{{ $it['link'] ?? '#' }}">{{ $it['title'] ?? '' }}</a>
-                                    </h3>
+                                    @if(!blank($it['title'] ?? null))
+                                        <h3 class="title">
+                                            @if(!blank($it['link'] ?? null))
+                                                <a href="{{ $it['link'] }}">{!! pb_text($it['title']) !!}</a>
+                                            @else
+                                                {!! pb_text($it['title']) !!}
+                                            @endif
+                                        </h3>
+                                    @endif
 
                                     @if (!empty($it['subtitle']))
                                         <div>
-                                            <h4 class="subtitle ">{{ $it['subtitle'] }}<h4>
+                                            <h4 class="subtitle ">{!! pb_text($it['subtitle']) !!}<h4>
                                         </div>
                                     @endif
 
                                     @if (!empty($it['text']))
-                                        <p class="desc">{{ $it['text'] }}</p>
+                                        <p class="desc">{!! pb_text($it['text']) !!}</p>
                                     @endif
 
                                     @if (!empty($it['list']) && is_array($it['list']))
                                         <ul class="mb-3">
                                             @foreach ($it['list'] as $li)
-                                                <li>{{ $li }}</li>
+                                                @continue(blank($li))
+                                                <li>{!! pb_text($li) !!}</li>
                                             @endforeach
                                         </ul>
                                     @endif
 
-                                    <a class="tj-primary-btn" href="{{ $it['link'] ?? '#' }}">
-                                        <span
-                                            class="btn-text"><span>{{ $it['link_text'] ?? 'Learn More' }}</span></span>
-                                        <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                    </a>
+                                    @if(!blank($it['link'] ?? null) && !blank($it['link_text'] ?? null))
+                                        <a class="tj-primary-btn" href="{{ $it['link'] }}">
+                                            <span
+                                                class="btn-text"><span>{!! pb_text($it['link_text']) !!}</span></span>
+                                            <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                        </a>
+                                    @endif
                                 </div>
 
                             </div>
 
-                            <div class="service-img">
-                                <img src="{{ $imgUrl(data_get($it, 'image'), 'frontend/assets/images/service/service-6.webp') }}"
-                                    alt="{{ e(data_get($it, 'title', 'Service')) }}">
-                            </div>
+                            @php $serviceImage = $imgUrl(data_get($it, 'image')); @endphp
+                            @if($serviceImage)
+                                <div class="service-img">
+                                    <img src="{{ $serviceImage }}"
+                                        alt="{{ e(data_get($it, 'title', 'Service')) }}">
+                                </div>
+                            @endif
 
                         </div>
                     @endforeach
