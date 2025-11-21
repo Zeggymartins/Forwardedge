@@ -121,18 +121,18 @@
         }
 
         /* Preserve Page Builder line breaks */
-        .pb-rich-text :where(p, h1, h2, h3, h4, h5, h6, span, small, li, div, strong, em) {
+        /* .pb-rich-text :where(p, h1, h2, h3, h4, h5, h6, span, small, li, div, strong, em) {
             white-space: pre-line;
-        }
+        } */
 
-        .pb-rich-text .btn-text span,
+        /* .pb-rich-text .btn-text span,
         .pb-rich-text .badge,
         .pb-rich-text .price-number,
         .pb-rich-text .package-currency,
         .pb-rich-text .package-period,
         .pb-rich-text .number {
             white-space: normal;
-        }
+        } */
     </style>
     @stack('styles')
 </head>

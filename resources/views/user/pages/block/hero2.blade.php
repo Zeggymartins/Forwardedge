@@ -26,6 +26,14 @@
         ->filter(fn ($item) => filled($item['label'] ?? null) || filled($item['value'] ?? null))
         ->values()
         ->take(3);
+
+    if ($highlights->isEmpty()) {
+        $highlights = collect([
+            ['value' => '3,500+', 'label' => 'Alumni across the globe'],
+            ['value' => '92%', 'label' => 'Hiring success & offers'],
+            ['value' => '12', 'label' => 'Live mentor-led sprints'],
+        ]);
+    }
 @endphp
 
 @push('styles')
