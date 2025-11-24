@@ -21700,7 +21700,7 @@ START: Hero CSS
   content: "";
   position: absolute;
   inset-inline-start: 0;
-  top: 90px;
+  top: 50px;
   width: 100%;
   height: 1px;
   background-color: var(--tj-color-border-2);
