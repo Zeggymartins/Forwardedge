@@ -47,7 +47,7 @@
                                 <h1 class="h7-hero-title text-anim pb-rich-text">
                                     <span>
                                         {{-- optional badge/icon removed when missing --}}
-                                        {!! pb_text($title) !!}
+                                        {{ $title }}
                                     </span>
                                 </h1>
                             @endif
@@ -59,7 +59,7 @@
                         @if($image)
                         <div class="h7-hero-banner">
                              <img class="wow fadeInUpBig" data-wow-delay=".8s" src="{{ $image }}"
-                                 alt="Hero Banner" style="width: 651px; height:839px">
+                                 alt="Hero Banner" style="width: 651px; height:850px">
                          </div>
                         @endif
                      </div>
