@@ -6,8 +6,24 @@
 
 @section('main')
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-dark">📋 Event Registrations</h1>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h1 class="fw-bold text-dark mb-0">📋 Event Registrations</h1>
+        @if(!empty($events ?? []))
+            <form method="GET" class="d-flex gap-2 align-items-center">
+                <select name="event" class="form-select">
+                    <option value="">All events</option>
+                    @foreach($events as $eventOption)
+                        <option value="{{ $eventOption->id }}" @selected(($selectedEvent ?? null) == $eventOption->id)>
+                            {{ $eventOption->title }}
+                        </option>
+                    @endforeach
+                </select>
+                <button class="btn btn-primary">Filter</button>
+                @if(!empty($selectedEvent))
+                    <a href="{{ route('admin.events.registrations') }}" class="btn btn-outline-secondary">Reset</a>
+                @endif
+            </form>
+        @endif
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">

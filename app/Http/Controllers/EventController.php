@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Models\Page;
 use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class EventController extends Controller
 {
@@ -23,18 +24,28 @@ class EventController extends Controller
  
     public function show($slug)
     {
-        $event = Event::with('page')
-            ->where('slug', $slug)
+        $event = Event::where('slug', $slug)
             ->where('status', 'published')
             ->firstOrFail();
 
-        seo()->set([
-            'title'       => "{$event->title} | " . config('seo.site_name', config('app.name')) . ' Events',
-            'description' => Str::limit(strip_tags($event->short_description ?? $event->title), 160),
-            'image'       => $event->banner_image ? asset('storage/' . $event->banner_image) : ($event->thumbnail ? asset('storage/' . $event->thumbnail) : null),
-        ], true);
+        $pageQuery = Page::query()
+            ->where('pageable_type', Event::class)
+            ->where('pageable_id', $event->id)
+            ->when(
+                Schema::hasColumn('pages', 'is_published'),
+                fn($q) => $q->where('is_published', true)
+            )
+            ->when(
+                Schema::hasColumn('pages', 'status'),
+                fn($q) => $q->where('status', 'published')
+            )
+            ->orderByDesc('updated_at');
 
-        return view('user.pages.events_details', compact('event'));
+        if ($page = $pageQuery->first()) {
+            return redirect()->route('page.show', $page->slug);
+        }
+
+        abort(404, 'No page associated with this event.');
     }
 
 

@@ -120,7 +120,7 @@
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 class="mb-0">Recent Registrations</h5>
-                <a href="{{ route('admin.events.registrations') }}" class="btn btn-outline-secondary btn-sm">View all</a>
+                <a href="{{ route('admin.events.registrations', ['event' => $event->id]) }}" class="btn btn-outline-secondary btn-sm">View all</a>
             </div>
             <div class="card-body p-0">
                 <table class="table mb-0">
@@ -172,7 +172,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Slug</label>
-                            <input type="text" name="slug" class="form-control" value="{{ $event->slug }}">
+                            <input type="text" name="slug" class="form-control" value="{{ $event->slug }}" readonly>
+                            <small class="text-muted">Slug is auto-generated and cannot be edited.</small>
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">Short Description</label>

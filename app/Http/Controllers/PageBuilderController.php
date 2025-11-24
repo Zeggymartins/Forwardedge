@@ -58,6 +58,7 @@ class PageBuilderController extends Controller
             'meta_keywords'    => 'nullable|string|max:255',
             'meta_image'       => 'nullable|string|max:500',
             'meta_canonical'   => 'nullable|string|max:500',
+            'meta_image_file'  => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
         $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
@@ -79,7 +80,7 @@ class PageBuilderController extends Controller
         unset($data['owner_type'], $data['owner_id']);
 
         $data['meta'] = $this->extractMetaFromRequest($request);
-        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical']);
+        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical'], $data['meta_image_file']);
 
         $page = Page::create($data);
 
@@ -107,6 +108,7 @@ class PageBuilderController extends Controller
             'meta_keywords'    => 'nullable|string|max:255',
             'meta_image'       => 'nullable|string|max:500',
             'meta_canonical'   => 'nullable|string|max:500',
+            'meta_image_file'  => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
         $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
@@ -134,7 +136,7 @@ class PageBuilderController extends Controller
         unset($data['owner_type'], $data['owner_id']);
 
         $data['meta'] = $this->extractMetaFromRequest($request);
-        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical']);
+        unset($data['meta_title'], $data['meta_description'], $data['meta_keywords'], $data['meta_image'], $data['meta_canonical'], $data['meta_image_file']);
 
         $page->update($data);
 
@@ -184,7 +186,7 @@ class PageBuilderController extends Controller
             'closing_cta'  => ['default', 'split'],
         ];
 
-        $allowedRouteParams = ['course', 'schedule', 'event', 'event_id'];
+        $allowedRouteParams = ['course', 'course_id', 'schedule', 'event', 'event_id', 'page', 'page_id', 'slug'];
 
         $internalRoutes = collect(RouteFacade::getRoutes())
             ->filter(fn($route) => $route->getName() && in_array('GET', $route->methods()))
@@ -218,7 +220,7 @@ class PageBuilderController extends Controller
             })
             ->filter(function ($route) use ($allowedRouteParams) {
                 if (empty($route['placeholders'])) {
-                    return false;
+                    return true;
                 }
 
                 return collect($route['placeholders'])
@@ -414,9 +416,11 @@ class PageBuilderController extends Controller
     {
         $options = [];
 
-        $courseOptions = Course::query()
+        $courseRecords = Course::query()
             ->orderBy('title')
-            ->get(['id', 'title', 'slug'])
+            ->get(['id', 'title', 'slug']);
+
+        $courseOptions = $courseRecords
             ->map(fn($course) => [
                 'value' => (string) $course->id,
                 'label' => $course->title ?: "Course #{$course->id}",
@@ -424,8 +428,8 @@ class PageBuilderController extends Controller
             ])
             ->all();
 
-        $options['course'] = $courseOptions;
         if (!empty($courseOptions)) {
+            $options['course'] = $courseOptions;
             $options['course_id'] = $courseOptions;
         }
 
@@ -450,9 +454,11 @@ class PageBuilderController extends Controller
             })
             ->all();
 
-        $eventOptions = Event::query()
+        $eventRecords = Event::query()
             ->orderBy('title')
-            ->get(['id', 'title'])
+            ->get(['id', 'title', 'slug']);
+
+        $eventOptions = $eventRecords
             ->map(fn($event) => [
                 'value' => (string) $event->id,
                 'label' => $event->title ?: "Event #{$event->id}",
@@ -460,20 +466,64 @@ class PageBuilderController extends Controller
             ])
             ->all();
 
-        $options['event'] = $eventOptions;
         if (!empty($eventOptions)) {
+            $options['event'] = $eventOptions;
             $options['event_id'] = $eventOptions;
         }
 
-        $options['page'] = Page::query()
+        $pageRecords = Page::query()
             ->orderBy('title')
-            ->get(['id', 'title', 'slug'])
+            ->get(['id', 'title', 'slug']);
+
+        $pageOptions = $pageRecords
             ->map(fn($page) => [
                 'value' => (string) $page->id,
                 'label' => $page->title ?: "Page #{$page->id}",
                 'hint'  => $page->slug ? "Slug: {$page->slug}" : null,
             ])
             ->all();
+
+        if (!empty($pageOptions)) {
+            $options['page'] = $pageOptions;
+            $options['page_id'] = $pageOptions;
+        }
+
+        $slugOptions = collect();
+
+        $slugOptions = $slugOptions->merge(
+            $courseRecords
+                ->filter(fn($course) => filled($course->slug))
+                ->map(fn($course) => [
+                    'value' => $course->slug,
+                    'label' => ($course->title ?: "Course #{$course->id}") . ' • Course',
+                    'hint'  => "Slug: {$course->slug}",
+                ])
+        );
+
+        $slugOptions = $slugOptions->merge(
+            $eventRecords
+                ->filter(fn($event) => filled($event->slug))
+                ->map(fn($event) => [
+                    'value' => $event->slug,
+                    'label' => ($event->title ?: "Event #{$event->id}") . ' • Event',
+                    'hint'  => "Slug: {$event->slug}",
+                ])
+        );
+
+        $slugOptions = $slugOptions->merge(
+            $pageRecords
+                ->filter(fn($page) => filled($page->slug))
+                ->map(fn($page) => [
+                    'value' => $page->slug,
+                    'label' => ($page->title ?: "Page #{$page->id}") . ' • Page',
+                    'hint'  => "Slug: {$page->slug}",
+                ])
+        );
+
+        $slugOptions = $slugOptions->unique('value')->values()->all();
+        if (!empty($slugOptions)) {
+            $options['slug'] = $slugOptions;
+        }
 
         return array_filter($options, fn($list) => !empty($list));
     }
@@ -816,11 +866,18 @@ class PageBuilderController extends Controller
 
     private function extractMetaFromRequest(Request $request): ?array
     {
+        $metaImage = $request->input('meta_image');
+
+        if ($request->hasFile('meta_image_file')) {
+            $path = $request->file('meta_image_file')->store('pages/meta', 'public');
+            $metaImage = Storage::url($path);
+        }
+
         $meta = array_filter([
             'title'       => $request->input('meta_title'),
             'description' => $request->input('meta_description'),
             'keywords'    => $request->input('meta_keywords'),
-            'image'       => $request->input('meta_image'),
+            'image'       => $metaImage,
             'canonical'   => $request->input('meta_canonical'),
         ], fn($value) => filled($value));
 

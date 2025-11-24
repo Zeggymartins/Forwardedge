@@ -408,7 +408,7 @@
         }
 
         /* ====== FILE PREVIEW HANDLER ====== */
-        function setupFilePreviewHandlers(scope, publicRoot, existingData) {
+        function setupFilePreviewHandlers(scope) {
             // Universal file change handler
             scope.addEventListener('change', (e) => {
                 const input = e.target;
@@ -423,11 +423,6 @@
                     img.style.display = 'block';
                 }
             });
-
-            // Show existing images
-            if (existingData && typeof existingData === 'object') {
-                showExistingImages(scope, publicRoot, existingData);
-            }
         }
 
         function isAbsoluteUrl(value = '') {
@@ -479,6 +474,11 @@
                     showExistingImages(scope, publicRoot, val, fullKey);
                 }
             }
+        }
+
+        function refreshExistingImagePreviews(scope, data) {
+            if (!scope || !data || typeof data !== 'object') return;
+            showExistingImages(scope, PUBLIC_ROOT, data);
         }
 
         function escapeHtml(str = '') {
@@ -871,11 +871,12 @@
                         initLinkPickers(mount);
                         initIconPickers(mount);
                         syncIconPickers(mount);
+                        refreshExistingImagePreviews(mount, data.data || {});
                     }, 200); // 👈 Increased delay
                 }
 
                 // 3. Setup file previews
-                setupFilePreviewHandlers(mount, PUBLIC_ROOT, data.data || {});
+                setupFilePreviewHandlers(mount);
 
                 // 4. Type-specific bindings
                 attachTypeBindings(typeSel.value, mount, mode, data.data || {});
@@ -891,7 +892,7 @@
                     initRepeater(mount);
                     initLinkPickers(mount);
                     initIconPickers(mount);
-                    setupFilePreviewHandlers(mount, PUBLIC_ROOT, {});
+                    setupFilePreviewHandlers(mount);
                     attachTypeBindings(typeSel.value, mount, 'create', {});
                 }
             };

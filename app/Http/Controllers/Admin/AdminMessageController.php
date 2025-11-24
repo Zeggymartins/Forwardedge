@@ -72,4 +72,51 @@ class AdminMessageController extends Controller
             ]))
         ]);
     }
+
+    public function reply(Message $message, Request $request)
+    {
+        $data = $request->validate([
+            'to' => ['required', 'email'],
+            'subject' => ['nullable', 'string', 'max:180'],
+            'body' => ['required', 'string'],
+        ]);
+
+        if (is_null($message->read_at)) {
+            $message->update(['read_at' => now()]);
+        }
+
+        $reply = $message->replies()->create([
+            'admin_id' => Auth::id(),
+            'to_email' => $data['to'],
+            'subject' => $data['subject'] ?: 'Re: ' . ($message->subject ?? ('Message #' . $message->id)),
+            'body' => $data['body'],
+        ]);
+
+        try {
+            Mail::to($reply->to_email)->send(new ReplyToMessageMail($reply));
+            $reply->forceFill(['mailed_at' => now()])->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'ok' => false,
+                'message' => 'Reply saved but email failed to send. Please try again later.',
+            ], 500);
+        }
+
+        $reply->load('admin');
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Reply sent successfully.',
+            'reply' => [
+                'id' => $reply->id,
+                'subject' => $reply->subject,
+                'body' => $reply->body,
+                'to_email' => $reply->to_email,
+                'admin' => $reply->admin?->name,
+                'created_at' => optional($reply->created_at)->toDateTimeString(),
+                'mailed_at' => optional($reply->mailed_at)->toDateTimeString(),
+            ],
+        ]);
+    }
 }

@@ -153,9 +153,22 @@ class AdminEventController extends Controller
         }
     }
 
-    public function Registrations()
+    public function Registrations(Request $request)
     {
-        $registrations = EventRegistration::with('event')->latest('registered_at')->paginate(15);
-        return view('admin.pages.events.registrations', compact('registrations'));
+        $eventId = $request->integer('event');
+
+        $registrations = EventRegistration::with('event')
+            ->when($eventId, fn($query) => $query->where('event_id', $eventId))
+            ->latest('registered_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $events = Event::orderBy('title')->get(['id', 'title']);
+
+        return view('admin.pages.events.registrations', [
+            'registrations' => $registrations,
+            'events' => $events,
+            'selectedEvent' => $eventId,
+        ]);
     }
 }

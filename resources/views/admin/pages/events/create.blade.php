@@ -22,8 +22,9 @@
                 <input type="text" name="title" class="form-control form-control-lg" placeholder="Enter event title" required>
             </div>
             <div class="col-md-6">
-                <label class="form-label fw-semibold">Slug <span class="text-muted">(optional)</span></label>
-                <input type="text" name="slug" class="form-control" placeholder="event-slug">
+                <label class="form-label fw-semibold">Slug <span class="text-muted">(auto)</span></label>
+                <input type="text" name="slug" class="form-control" placeholder="auto-generated" readonly>
+                <small class="text-muted">Slug updates automatically from the title.</small>
             </div>
             <div class="col-12">
                 <label class="form-label fw-semibold">Short Description</label>
@@ -138,3 +139,30 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const titleInput = document.querySelector('input[name="title"]');
+    const slugInput = document.querySelector('input[name="slug"]');
+    if (!titleInput || !slugInput) return;
+
+    slugInput.readOnly = true;
+
+    const slugify = (value = '') => {
+        return value.normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .replace(/-{2,}/g, '-');
+    };
+
+    const updateSlug = () => {
+        slugInput.value = slugify(titleInput.value || '');
+    };
+
+    titleInput.addEventListener('input', updateSlug);
+});
+</script>
+@endpush

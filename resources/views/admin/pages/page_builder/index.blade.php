@@ -151,7 +151,7 @@
 <div class="modal fade" id="pageModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form id="pageForm" method="POST">
+      <form id="pageForm" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title" id="pageModalTitle">Create Page</h5>
@@ -247,9 +247,18 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Social Preview Image URL</label>
-              <input class="form-control" name="meta_image" id="metaImage" maxlength="500" placeholder="{{ asset('frontend/assets/images/logos/logo.png') }}">
-              <small class="text-muted">Use a full URL to the hero image (1200×630px).</small>
+              <label class="form-label">Social Preview Image</label>
+              <div class="input-group">
+                <input class="form-control" name="meta_image" id="metaImage" maxlength="500" placeholder="{{ asset('frontend/assets/images/logos/logo.png') }}">
+                <button class="btn btn-outline-secondary" type="button" id="metaImageSelectBtn">
+                  <i class="bi bi-cloud-upload"></i>
+                </button>
+              </div>
+              <input type="file" class="d-none" name="meta_image_file" id="metaImageFile" accept="image/*">
+              <div class="mt-2">
+                <img id="metaImagePreview" src="" alt="Meta preview" style="max-width:100%;height:auto;display:none;border-radius:12px;">
+              </div>
+              <small class="text-muted d-block">Paste a URL or choose an image from your computer (1200×630px recommended).</small>
             </div>
           </div>
         </div>
@@ -301,8 +310,63 @@ document.addEventListener('DOMContentLoaded', () => {
     metaDescription: document.getElementById('metaDescription'),
     metaKeywords: document.getElementById('metaKeywords'),
     metaImage: document.getElementById('metaImage'),
+    metaImageFile: document.getElementById('metaImageFile'),
+    metaImagePreview: document.getElementById('metaImagePreview'),
+    metaImageSelectBtn: document.getElementById('metaImageSelectBtn'),
     metaCanonical: document.getElementById('metaCanonical')
   };
+
+  function resolveMetaImageSrc(value = '') {
+    if (!value) return '';
+    if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:')) {
+      if (value.startsWith('//')) {
+        return window.location.protocol + value;
+      }
+      return value;
+    }
+    if (value.startsWith('/')) {
+      return value;
+    }
+    return '/' + value.replace(/^\/+/, '');
+  }
+
+  function updateMetaImagePreview(value = '') {
+    const preview = elements.metaImagePreview;
+    if (!preview) return;
+    if (!value) {
+      preview.style.display = 'none';
+      preview.removeAttribute('src');
+      return;
+    }
+    preview.src = resolveMetaImageSrc(value);
+    preview.style.display = 'block';
+  }
+
+  function bindMetaImageHandlers() {
+    if (elements.metaImage) {
+      elements.metaImage.addEventListener('input', () => {
+        if (elements.metaImageFile) elements.metaImageFile.value = '';
+        updateMetaImagePreview(elements.metaImage.value.trim());
+      });
+    }
+
+    if (elements.metaImageSelectBtn && elements.metaImageFile) {
+      elements.metaImageSelectBtn.addEventListener('click', () => {
+        elements.metaImageFile.click();
+      });
+
+      elements.metaImageFile.addEventListener('change', () => {
+        const file = elements.metaImageFile.files[0];
+        if (file) {
+          const previewUrl = URL.createObjectURL(file);
+          elements.metaImage.value = '';
+          updateMetaImagePreview(previewUrl);
+        } else {
+          updateMetaImagePreview(elements.metaImage.value.trim());
+        }
+      });
+    }
+  }
 
   function setOwnerRequired(which) {
     if (elements.ownerCourse) elements.ownerCourse.required = (which === 'course');
@@ -330,6 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.metaDescription) elements.metaDescription.value = '';
     if (elements.metaKeywords) elements.metaKeywords.value = '';
     if (elements.metaImage) elements.metaImage.value = '';
+    if (elements.metaImageFile) elements.metaImageFile.value = '';
+    updateMetaImagePreview('');
     if (elements.metaCanonical) elements.metaCanonical.value = '';
   }
 
@@ -345,6 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.metaDescription) elements.metaDescription.value = meta.description || '';
     if (elements.metaKeywords) elements.metaKeywords.value = meta.keywords || '';
     if (elements.metaImage) elements.metaImage.value = meta.image || '';
+    if (elements.metaImageFile) elements.metaImageFile.value = '';
+    updateMetaImagePreview(meta.image || '');
     if (elements.metaCanonical) elements.metaCanonical.value = meta.canonical || '';
 
     // Set owner type radio
@@ -523,6 +591,11 @@ document.addEventListener('DOMContentLoaded', () => {
     populateForm(oldData);
     bsModal.show();
   @endif
+
+  bindMetaImageHandlers();
+  if (elements.metaImage) {
+    updateMetaImagePreview(elements.metaImage.value.trim());
+  }
 
   console.log('Page Builder Index: Ready!');
 });
