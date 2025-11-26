@@ -95,7 +95,7 @@ class ScolarshipApplicationController extends Controller
             'attitude_commitment'        => ['required', Rule::in(array_keys($options['yes_no']))],
 
             'bonus_willing_challenge'    => ['required', Rule::in(array_keys($options['yes_no']))],
-
+            'hp_field'                   => ['nullable', 'prohibited'],
             'recaptcha_token' => ['required', new Recaptcha('scholarship_form')],
         ]);
 

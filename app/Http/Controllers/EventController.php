@@ -103,6 +103,7 @@ class EventController extends Controller
             'company'    => 'nullable|string|max:255',
             'job_title'  => 'nullable|string|max:255',
             'special_requirements' => 'nullable|string|max:500',
+            'hp_field'   => ['nullable', 'prohibited'],
             'recaptcha_token' => ['required', new Recaptcha('event_registration')],
         ]);
 

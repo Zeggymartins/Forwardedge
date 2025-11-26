@@ -345,9 +345,12 @@
                     value: input.value.trim(),
                 }));
 
+                const honeypot = form.querySelector('input[name="hp_field"]')?.value || '';
+
                 const payload = {
                     source: 'builder_form',
                     block_id: blockId,
+                    hp_field: honeypot,
                     fields,
                     tags: JSON.parse(form.dataset.tags || '[]'),
                 };
@@ -512,6 +515,7 @@
                 @csrf
                 <input type="hidden" name="block_id" value="{{ $block->id }}">
                 <input type="hidden" name="form_tags" value="{{ $tags->implode(',') }}">
+                <x-honeypot />
 
                 <div class="dynamic-form-grid">
                     @foreach ($fields as $field)

@@ -874,11 +874,11 @@
                 foreach ($eventItems as $event) {
                     $cards->push([
                         'type' => 'event',
-                        'img' => $event->banner_image
-                            ? asset('storage/' . $event->banner_image)
+                        'img' => $event->thumbnail
+                            ? asset('storage/' . $event->thumbnail)
                             : asset('frontend/assets/images/project/project-6.webp'),
-                        'date' => \Carbon\Carbon::parse($event->start_date)->format('d'),
-                        'month' => \Carbon\Carbon::parse($event->start_date)->format('M'),
+                        'date' => optional($event->start_date)->format('d'),
+                        'month' => optional($event->start_date)->format('M'),
                         'badge' => 'Event',
                         'meta_right' => $event->location ?? 'Online',
                         'title' => $event->title,
@@ -887,44 +887,32 @@
                     ]);
                 }
 
-            // $upcomingPerCourse should be from Option A in your controller
-            // ->whereHas('schedules', fn($q) => $q->where('start_date','>=',now()))
-            // ->with(['schedules' => fn($q) => $q->where('start_date','>=',now())->orderBy('start_date')->limit(1)])
-            // ->withMin(['schedules as next_start' => fn($q) => $q->where('start_date','>=',now())], 'start_date')
-            // ->orderBy('next_start','asc')->take(12)->get();
+                // Upcoming course schedules
+                foreach ($scheduleItems as $course) {
+                    $schedule = optional($course->schedules)->first();
+                    if (!$schedule) {
+                        continue;
+                    }
 
-    $cards = collect();
+                    $thumb = (!empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail))
+                        ? asset('storage/' . $course->thumbnail)
+                        : asset('frontend/assets/images/service/service-1.webp');
 
-    foreach ($upcomingSchedules as $course) {
-        // nearest schedule per course (because you limited to 1 in the relation)
-        $schedule = optional($course->schedules)->first();
-        if (!$schedule) {
-            continue; // safety: only courses that truly have an upcoming schedule
-        }
+                    $slug = $course->slug ?? null;
 
-        // safe thumbnail (only if file exists on public disk)
-        $thumb = (!empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail))
-            ? asset('storage/' . $course->thumbnail)
-            : asset('frontend/assets/images/service/service-1.webp');
-
-        $title = $course->title ?? 'Bootcamp';
-        $slug  = $course->slug ?? null;
-
-        // Build card
-        $cards->push([
-            'type'       => 'schedule',
-            'img'        => $thumb,
-            'date'       => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('d') : '',
-            'month'      => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('M') : '',
-            'badge'      => ucfirst($schedule->type ?? 'virtual'),
-            'meta_right' => $schedule->location ?: 'Online',
-            // Prefer course details page; fall back to enroll link if needed
-            'title'      => $title,
-            'url'        => $slug ? route('course.show', $course->slug) : route('course.enroll'),
-            'cta'        => $slug ? 'View Details' : 'Enroll Now',
-        ]);
-    }
-@endphp
+                    $cards->push([
+                        'type'       => 'schedule',
+                        'img'        => $thumb,
+                        'date'       => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('d') : '',
+                        'month'      => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('M') : '',
+                        'badge'      => ucfirst($schedule->type ?? 'virtual'),
+                        'meta_right' => $schedule->location ?: 'Online',
+                        'title'      => $course->title ?? 'Bootcamp',
+                        'url'        => $slug ? route('course.show', $course->slug) : route('course.enroll'),
+                        'cta'        => $slug ? 'View Details' : 'Enroll Now',
+                    ]);
+                }
+            @endphp
 
 <div class="row row-gap-4 mt-4">
     @if ($cards->isEmpty())
@@ -934,7 +922,7 @@
                 <div class="blog-thumb d-flex align-items-center justify-content-center"
                      style="height:250px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);">
                     {{-- your SVG empty state --}}
-                    <span class="text-muted">New bootcamps coming soon</span>
+                    <span class="text-muted">New events or bootcamps coming soon</span>
                 </div>
                 <div class="blog-content text-center">
                     <h4 class="title mb-1">Stay tuned</h4>

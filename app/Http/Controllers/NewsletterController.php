@@ -35,6 +35,7 @@ class NewsletterController extends Controller
             'double_optin' => 'nullable|boolean',
             'tags'         => 'nullable|array|max:10',
             'tags.*'       => 'nullable|string|max:50',
+            'hp_field'     => ['nullable', 'prohibited'],
         ]);
 
         $email = strtolower($data['email']);
@@ -108,6 +109,7 @@ class NewsletterController extends Controller
             'fields.*.required' => 'nullable|boolean',
             'tags'           => 'nullable|array|max:10',
             'tags.*'         => 'nullable|string|max:50',
+            'hp_field'       => ['nullable', 'prohibited'],
         ]);
 
         $fields = collect($payload['fields']);

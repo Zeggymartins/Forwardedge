@@ -429,6 +429,7 @@
                         <div class="application-submit row g-3 align-items-center">
                             <div class="col-lg-8">
                                 <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <x-honeypot />
                                     <x-recaptcha action="scholarship_form" />
                                     <p class="text-muted small mb-0">Submitting this form means you agree to our participation rules and code of conduct.</p>
                                 </div>
