@@ -127,7 +127,7 @@
                                     <button type="submit"><i class="tji-plane"></i></button>
                                     <label for="footer-agree">
                                         <input id="footer-agree" type="checkbox" required>
-                                        Agree to our <a href="{{ url('/terms') }}">Terms & Condition?</a>
+                                        Agree to our <a href="{{ route('terms') }}">Terms & Conditions</a>?
                                     </label>
                                     <div class="dynamic-form-feedback" role="status" aria-live="polite"></div>
                                 </form>
@@ -175,6 +175,12 @@
 " target="_blank"><i
                                                  class="fa-brands fa-linkedin-in"></i></a>
                                      </li>
+                                 </ul>
+                             </div>
+                             <div class="footer-legal-links">
+                                 <ul>
+                                     <li><a href="{{ route('terms') }}">Terms & Conditions</a></li>
+                                     <li><a href="{{ route('privacy') }}">Privacy Policy</a></li>
                                  </ul>
                              </div>
                              <div class="copyright-text">

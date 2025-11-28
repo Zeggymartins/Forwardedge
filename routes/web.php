@@ -43,6 +43,8 @@ Route::get('/', [WelcomeController::class, 'index'])->name('home');
 Route::get('/about', function () {
     return view('user.pages.about');
 })->name('about');
+Route::view('/terms', 'user.pages.terms')->name('terms');
+Route::view('/privacy-policy', 'user.pages.privacy')->name('privacy');
 
 /*
 |--------------------------------------------------------------------------
@@ -475,6 +477,8 @@ $pageReservedSlugs = [
     'up',
     'user',
     'verify-email',
+    'privacy-policy',
+    'terms',
     'p',
 ];
 
