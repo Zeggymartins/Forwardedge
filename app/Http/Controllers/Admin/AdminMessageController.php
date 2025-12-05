@@ -9,6 +9,7 @@ use App\Models\MessageReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\JsonResponse;
 
 class AdminMessageController extends Controller
 {
@@ -117,6 +118,26 @@ class AdminMessageController extends Controller
                 'created_at' => optional($reply->created_at)->toDateTimeString(),
                 'mailed_at' => optional($reply->mailed_at)->toDateTimeString(),
             ],
+        ]);
+    }
+
+    public function destroy(Message $message): JsonResponse
+    {
+        $message->delete();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Message deleted.',
+        ]);
+    }
+
+    public function destroyAll(): JsonResponse
+    {
+        Message::query()->delete();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'All messages deleted.',
         ]);
     }
 }

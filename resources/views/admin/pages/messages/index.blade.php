@@ -34,7 +34,13 @@
         <a class="btn btn-ghost btn-sm {{ ($filter??'all')==='unread'?'active':'' }}" href="{{ route('messages.index',['filter'=>'unread','q'=>$q,'sort'=>$sort]) }}">Unread <span class="pill ms-1">{{ $stats['unread'] ?? '—' }}</span></a>
         <a class="btn btn-ghost btn-sm {{ ($filter??'all')==='read'?'active':'' }}" href="{{ route('messages.index',['filter'=>'read','q'=>$q,'sort'=>$sort]) }}">Read <span class="pill ms-1">{{ $stats['read'] ?? '—' }}</span></a>
       </div>
-      <div class="ms-auto">
+      <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+        <button type="button"
+                class="btn btn-outline-danger btn-sm"
+                id="clearMessagesBtn"
+                {{ ($stats['all'] ?? 0) ? '' : 'disabled' }}>
+          <i class="bi bi-trash me-1"></i> Clear all
+        </button>
         <div class="dropdown">
           <button class="btn btn-ghost btn-sm dropdown-toggle" data-bs-toggle="dropdown">
             <i class="bi bi-sort-down me-1"></i>{{ ($sort??'new')==='old' ? 'Oldest first' : 'Newest first' }}
@@ -58,14 +64,22 @@
         <div class="message-row p-3 d-flex align-items-start gap-3 open-message {{ $isUnread ? 'is-unread' : '' }}"
              data-id="{{ $m->id }}">
           <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
               <div class="d-flex align-items-center gap-2">
                 <span class="badge {{ $isUnread ? 'bg-primary' : 'bg-secondary' }} align-middle" style="width:8px;height:8px;border-radius:50%;"></span>
                 <a class="subject text-decoration-none" href="#" onclick="return false;" title="{{ $m->subject ?? ('Message #'.$m->id) }}">
                   {{ $m->subject ?? ('Message #'.$m->id) }}
                 </a>
               </div>
-              <div class="text-muted small mono">{{ optional($m->created_at)->diffForHumans() }}</div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="text-muted small mono">{{ optional($m->created_at)->diffForHumans() }}</div>
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm delete-message-btn"
+                        data-id="{{ $m->id }}"
+                        title="Delete message">
+                  <i class="bi bi-trash me-1"></i> Delete
+                </button>
+              </div>
             </div>
             <div class="text-muted small mt-1">
               <strong>{{ $m->name ?? 'Unknown' }}</strong>
@@ -83,7 +97,16 @@
     </div>
 
     @if(method_exists($messages,'links'))
-      <div class="p-3">{{ $messages->appends(['q'=>$q,'filter'=>$filter,'sort'=>$sort])->links() }}</div>
+      <div class="p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="text-muted small">
+          Showing
+          {{ $messages->firstItem() ?? 0 }}-{{ $messages->lastItem() ?? 0 }}
+          of {{ $messages->total() }}
+        </div>
+        <div>
+          {{ $messages->appends(['q'=>$q,'filter'=>$filter,'sort'=>$sort])->onEachSide(1)->links('pagination::bootstrap-5') }}
+        </div>
+      </div>
     @endif
   </div>
 </section>
@@ -147,6 +170,7 @@
 <script>
 (function(){
   const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const baseUrl = `{{ url('ctrl-panel-v2/messages') }}`;
   let modal, bsModal;
 
   function el(id){ return document.getElementById(id); }
@@ -175,7 +199,7 @@
   }
 
   async function openMessage(id){
-    const res = await fetch(`{{ url('ctrl-panel-v2/messages') }}/${id}/json`, { credentials: 'same-origin' });
+    const res = await fetch(`${baseUrl}/${id}/json`, { credentials: 'same-origin' });
     if(!res.ok){ alert('Failed to load message.'); return; }
     const data = await res.json();
     const m = data.message;
@@ -210,7 +234,7 @@
     const id = el('replyMessageId').value;
     const fd = new FormData(el('replyForm'));
 
-    const res = await fetch(`{{ url('ctrl-panel-v2/messages') }}/${id}/reply`, {
+    const res = await fetch(`${baseUrl}/${id}/reply`, {
       method: 'POST',
       headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
       body: fd,
@@ -232,10 +256,56 @@
     }
   }
 
+  async function handleDelete(id, row){
+    if(!confirm('Delete this message permanently? This cannot be undone.')) return;
+    const res = await fetch(`${baseUrl}/${id}`, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    });
+    if(!res.ok){
+      alert('Failed to delete this message.');
+      return;
+    }
+    if(row){ row.remove(); }
+    if(document.querySelectorAll('.message-row').length === 0){
+      window.location.reload();
+    }
+  }
+
+  async function clearAllMessages(){
+    if(!confirm('Delete ALL messages permanently? This cannot be undone.')) return;
+    const res = await fetch(baseUrl, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    });
+    if(!res.ok){
+      alert('Failed to clear messages.');
+      return;
+    }
+    window.location.reload();
+  }
+
   document.querySelectorAll('.open-message').forEach(elm => {
     elm.addEventListener('click', () => openMessage(elm.dataset.id));
   });
   document.getElementById('replyForm').addEventListener('submit', sendReply);
+  document.querySelectorAll('.delete-message-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleDelete(btn.dataset.id, btn.closest('.message-row'));
+    });
+  });
+  const clearBtn = document.getElementById('clearMessagesBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if(clearBtn.disabled) return;
+      clearAllMessages();
+    });
+  }
 })();
 </script>
 @endsection

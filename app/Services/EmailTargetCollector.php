@@ -7,8 +7,10 @@ use App\Models\EventRegistration;
 use App\Models\Message;
 use App\Models\ScholarshipApplication;
 use App\Models\User;
+use App\Services\Mailchimp;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class EmailTargetCollector
 {
@@ -18,6 +20,7 @@ class EmailTargetCollector
         'messages' => 'Contact form leads',
         'events' => 'Event registrations',
         'scholarships' => 'Scholarship applicants',
+        'mailchimp' => 'Mailchimp list',
     ];
 
     public function availableSources(): array
@@ -110,6 +113,10 @@ class EmailTargetCollector
             );
         }
 
+        if ($shouldInclude('mailchimp')) {
+            $targets = $targets->merge($this->fetchMailchimpContacts());
+        }
+
         $targets = $this->sanitize($targets);
 
         $include = collect($options['include'] ?? [])->filter(fn ($value) => is_string($value))->map(fn ($email) => strtolower(trim($email)))->filter()->values();
@@ -132,6 +139,86 @@ class EmailTargetCollector
         }
 
         return $targets;
+    }
+
+    protected function fetchMailchimpContacts(): Collection
+    {
+        $key = config('services.mailchimp.key');
+        $server = config('services.mailchimp.server_prefix');
+
+        if (blank($key) || blank($server)) {
+            return collect();
+        }
+
+        try {
+            $client = Mailchimp::client();
+            $listId = Mailchimp::listId();
+        } catch (\Throwable $e) {
+            Log::warning('Mailchimp contacts skipped: configuration issue.', [
+                'message' => $e->getMessage(),
+            ]);
+            return collect();
+        }
+
+        $contacts = collect();
+        $offset = 0;
+        $count = 500;
+        $total = null;
+
+        try {
+            do {
+                $response = $client->lists->getListMembersInfo($listId, [
+                    'count' => $count,
+                    'offset' => $offset,
+                    'fields' => 'members.email_address,members.merge_fields,members.status,total_items',
+                ]);
+
+                $responseData = (array) $response;
+                $members = collect($responseData['members'] ?? []);
+
+                if ($members->isEmpty()) {
+                    break;
+                }
+
+                $contacts = $contacts->merge(
+                    $members
+                        ->filter(function ($member) {
+                            $data = is_array($member) ? $member : (array) $member;
+                            $status = strtolower($data['status'] ?? '');
+                            return in_array($status, ['subscribed', 'pending'], true);
+                        })
+                        ->map(function ($member) {
+                            $data = is_array($member) ? $member : (array) $member;
+                            $merge = [];
+                            if (isset($data['merge_fields'])) {
+                                $merge = is_array($data['merge_fields']) ? $data['merge_fields'] : (array) $data['merge_fields'];
+                            }
+
+                            $first = $merge['FNAME'] ?? null;
+                            $last = $merge['LNAME'] ?? null;
+
+                            return [
+                                'email' => $data['email_address'] ?? null,
+                                'name'  => trim(implode(' ', array_filter([$first, $last]))) ?: null,
+                                'source' => 'mailchimp',
+                            ];
+                        })
+                );
+
+                $offset += $count;
+                $total = $responseData['total_items'] ?? null;
+
+                if (is_null($total) && $members->count() < $count) {
+                    break;
+                }
+            } while (is_null($total) ? true : $offset < $total);
+        } catch (\Throwable $e) {
+            Log::error('Failed to fetch Mailchimp contacts.', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        return $contacts;
     }
 
     protected function sanitize(Collection $targets): Collection

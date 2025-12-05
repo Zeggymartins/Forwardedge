@@ -402,6 +402,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
     Route::get('/messages', [AdminMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{message}/json', [AdminMessageController::class, 'showJson'])->name('messages.json');
     Route::post('/messages/{message}/reply', [AdminMessageController::class, 'reply'])->name('messages.reply');
+    Route::delete('/messages/{message}', [AdminMessageController::class, 'destroy'])->name('messages.destroy');
+    Route::delete('/messages', [AdminMessageController::class, 'destroyAll'])->name('messages.destroyAll');
 
     /*
     |--------------------------------------------------------------------------
