@@ -170,6 +170,8 @@
                   </div>
                 </div>
               </div>
+            @empty
+              {{-- Intentionally left blank when there are no items --}}
             @endforelse
           </div>
 
