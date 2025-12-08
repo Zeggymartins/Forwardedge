@@ -22,7 +22,7 @@
             <table width="620" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#0c1530;border-radius:28px;padding:40px 48px;box-shadow:0 25px 70px rgba(0,0,0,0.35);">
                 <tr>
                     <td style="text-align:center;padding-bottom:24px;">
-                        <img src="{{ asset('frontend/assets/images/logo/logo.png') }}" alt="Forward Edge" width="140" style="display:block;margin:0 auto 16px;">
+                        <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge" width="140" style="display:block;margin:0 auto 16px;">
                         <h1 style="margin:0;font-size:26px;color:#f8fafc;">
                             @if($isApproved)
                                 Congratulations!
@@ -90,12 +90,12 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:center;">
+                    {{-- <td style="text-align:center;">
                         <a href="{{ url('/scholarships') }}"
                            style="display:inline-block;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,#0891b2,#6366f1);color:#fff;text-decoration:none;font-weight:600;">
                             View Scholarships
                         </a>
-                    </td>
+                    </td> --}}
                 </tr>
             </table>
         </td>
