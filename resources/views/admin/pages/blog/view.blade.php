@@ -151,6 +151,28 @@
                                             </blockquote>
                                         @break
 
+                                        @case('video')
+                                            @php $videoUrl = $detail->videoUrl(); @endphp
+                                            @if ($videoUrl)
+                                                <p class="small text-muted mb-1">
+                                                    <i class="bi bi-camera-video me-1"></i>
+                                                    {{ ucfirst($detail->videoSource()) }} video •
+                                                    {{ ucfirst($detail->videoOrientation()) }}
+                                                </p>
+                                                @if ($detail->videoIsLocal())
+                                                    <video src="{{ $videoUrl }}" muted controls
+                                                        style="max-width:260px; border-radius:8px;"></video>
+                                                @else
+                                                    <a href="{{ $videoUrl }}" target="_blank"
+                                                        class="btn btn-outline-primary btn-sm">
+                                                        Open Video Link
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <p class="text-muted mb-0">No video configured.</p>
+                                            @endif
+                                        @break
+
                                         @default
                                             <p class="mb-0">{{ \Illuminate\Support\Str::limit($detail->contentString(), 150) }}
                                             </p>
@@ -235,6 +257,50 @@
                                                             class="btn btn-outline-secondary btn-sm mt-2"
                                                             data-action="add-list-item">+ Add Item</button>
                                                     </div>
+                                                </div>
+                                            @elseif ($detail->type === 'video')
+                                                @php
+                                                    $videoSwitchKey = 'detail-video-' . $detail->id;
+                                                @endphp
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Orientation</label>
+                                                    <select name="orientation" class="form-select">
+                                                        <option value="landscape"
+                                                            {{ $detail->videoOrientation() === 'landscape' ? 'selected' : '' }}>
+                                                            Landscape</option>
+                                                        <option value="portrait"
+                                                            {{ $detail->videoOrientation() === 'portrait' ? 'selected' : '' }}>
+                                                            Portrait</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Video Source</label>
+                                                    <select name="video_source" class="form-select"
+                                                        data-video-switch="{{ $videoSwitchKey }}">
+                                                        <option value="upload"
+                                                            {{ $detail->videoIsLocal() ? 'selected' : '' }}>Upload
+                                                            file
+                                                        </option>
+                                                        <option value="url"
+                                                            {{ $detail->videoIsExternal() ? 'selected' : '' }}>External
+                                                            URL</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 mb-2 {{ $detail->videoIsLocal() ? '' : 'd-none' }}"
+                                                    data-video-upload="{{ $videoSwitchKey }}">
+                                                    <label class="form-label">Replace Video File</label>
+                                                    <input type="file" name="video_file" class="form-control"
+                                                        accept="video/*">
+                                                    <div class="form-text">Leave blank to keep the current file.</div>
+                                                </div>
+                                                <div class="col-12 {{ $detail->videoIsExternal() ? '' : 'd-none' }}"
+                                                    data-video-url="{{ $videoSwitchKey }}">
+                                                    <label class="form-label">Video URL</label>
+                                                    <input type="url" name="video_url" class="form-control"
+                                                        value="{{ $detail->videoIsExternal() ? $detail->rawContent() : '' }}"
+                                                        placeholder="https://youtu.be/...">
+                                                    <div class="form-text">Provide an embeddable URL (YouTube, Vimeo,
+                                                        etc.).</div>
                                                 </div>
                                             @else
                                                 <div class="col-12">
@@ -350,6 +416,7 @@
                                                 <option value="quote">Quote</option>
                                                 <option value="image">Image</option>
                                                 <option value="list">List</option>
+                                                <option value="video">Video</option>
                                             </select>
                                         </div>
                                         <div class="col-md-4">
@@ -410,6 +477,33 @@
                     });
                 }
 
+                function toggleVideoSource(select) {
+                    const key = select.dataset.videoSwitch;
+                    if (!key) return;
+                    const showUpload = select.value !== 'url';
+                    document.querySelectorAll(`[data-video-upload="${key}"]`).forEach(el => {
+                        el.classList.toggle('d-none', !showUpload);
+                    });
+                    document.querySelectorAll(`[data-video-url="${key}"]`).forEach(el => {
+                        el.classList.toggle('d-none', showUpload);
+                    });
+                }
+
+                function initVideoSwitchers(scope = document) {
+                    scope.querySelectorAll('[data-video-switch]').forEach(select => {
+                        if (select.dataset.videoSwitchBound) return;
+                        select.dataset.videoSwitchBound = '1';
+                        select.addEventListener('change', () => toggleVideoSource(select));
+                        toggleVideoSource(select);
+                    });
+                }
+
+                function bindBlockType(select) {
+                    if (select.dataset.blockTypeBound) return;
+                    select.dataset.blockTypeBound = '1';
+                    select.addEventListener('change', () => handleBlockTypeChange(select));
+                }
+
                 function notifyWarning(message) {
                     if (window.iziToast) {
                         iziToast.warning({
@@ -460,6 +554,7 @@
                                     <option value="quote">Quote</option>
                                     <option value="image">Image</option>
                                     <option value="list">List</option>
+                                    <option value="video">Video</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -475,6 +570,10 @@
 
                 addBtn.addEventListener('click', () => {
                     container.insertAdjacentHTML('beforeend', blockTemplate());
+                    const newBlock = container.querySelector('.content-block:last-child .block-type');
+                    if (newBlock) {
+                        bindBlockType(newBlock);
+                    }
                     blockIndex++;
                 });
 
@@ -518,9 +617,37 @@
                     <label class="form-label">List Items</label>
                     <div class="list-editor" data-list-editor data-name="blocks[${index}][content][]" data-compact="1">
                         <div data-list-items>
-                            ${listInputTemplate(\`blocks[\${index}][content][]\`, '', true)}
+                            ${listInputTemplate(`blocks[${index}][content][]`, '', true)}
                         </div>
                         <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-action="add-list-item">+ Add item</button>
+                    </div>`;
+                            break;
+                        case 'video':
+                            inputHtml = `
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Video Source</label>
+                            <select class="form-select" name="blocks[${index}][video_source]" data-video-switch="block-${index}">
+                                <option value="upload" selected>Upload file</option>
+                                <option value="url">External URL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Orientation</label>
+                            <select class="form-select" name="blocks[${index}][video_orientation]">
+                                <option value="landscape" selected>Landscape</option>
+                                <option value="portrait">Portrait</option>
+                            </select>
+                        </div>
+                        <div class="col-12" data-video-upload="block-${index}">
+                            <label class="form-label">Upload Video</label>
+                            <input type="file" class="form-control" name="blocks[${index}][video_file]" accept="video/*">
+                            <div class="form-text">MP4, MOV, AVI, MKV up to 100MB.</div>
+                        </div>
+                        <div class="col-12 d-none" data-video-url="block-${index}">
+                            <label class="form-label">Video URL</label>
+                            <input type="url" class="form-control" name="blocks[${index}][video_url]" placeholder="https://youtu.be/...">
+                        </div>
                     </div>`;
                             break;
                         default:
@@ -529,15 +656,12 @@
 
                     area.innerHTML = inputHtml;
                     initListEditors(area);
+                    initVideoSwitchers(area);
                 }
 
-                document.addEventListener('change', (event) => {
-                    if (event.target.matches('.block-type')) {
-                        handleBlockTypeChange(event.target);
-                    }
-                });
-
+                document.querySelectorAll('.block-type').forEach(bindBlockType);
                 initListEditors(document);
+                initVideoSwitchers(document);
             });
         </script>
     @endsection

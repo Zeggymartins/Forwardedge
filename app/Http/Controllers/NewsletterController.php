@@ -6,6 +6,7 @@ use App\Jobs\Mailchimp\UpsertMember;
 use App\Mail\BuilderFormAutoReply;
 use App\Mail\NewsletterWelcomeMail;
 use App\Models\Block;
+use App\Rules\TrustedEmailDomain;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class NewsletterController extends Controller
         }
 
         $data = $request->validate([
-            'email'        => 'required|email:rfc,dns',
+            'email'        => ['required', 'email:rfc,dns', new TrustedEmailDomain()],
             'first_name'   => 'nullable|string|max:100',
             'last_name'    => 'nullable|string|max:100',
             'double_optin' => 'nullable|boolean',
@@ -129,6 +130,8 @@ class NewsletterController extends Controller
             ]);
         }
 
+        $this->assertTrustedEmail($emailValue);
+
         $normalizedMerge = $this->buildMergeFields($fields);
 
         try {
@@ -175,6 +178,20 @@ class NewsletterController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    protected function assertTrustedEmail(string $email): void
+    {
+        $validator = validator(
+            ['email' => $email],
+            ['email' => ['required', 'email:rfc,dns', new TrustedEmailDomain()]]
+        );
+
+        if ($validator->fails()) {
+            throw ValidationException::withMessages([
+                'fields' => $validator->errors()->first('email'),
+            ]);
+        }
     }
 
     protected function mapLegacyFieldsToPayload(Request $request, $blockId): array

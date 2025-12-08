@@ -1,5 +1,41 @@
 @extends('user.master_page')
 @section('title', ($blog->title ?? 'Read Blog') . ' | Forward Edge Consulting')
+@push('styles')
+    <style>
+        .blog-video-frame {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .blog-video-frame.landscape::before,
+        .blog-video-frame.portrait::before {
+            content: "";
+            display: block;
+        }
+
+        .blog-video-frame.landscape::before {
+            padding-top: 56.25%;
+        }
+
+        .blog-video-frame.portrait::before {
+            padding-top: 125%;
+        }
+
+        .blog-video-frame iframe,
+        .blog-video-frame video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            object-fit: cover;
+            background: #000;
+        }
+    </style>
+@endpush
 @section('main')
     @include('user.partials.breadcrumb')
     <section class="tj-blog-section section-gap slidebar-stickiy-container">
@@ -94,14 +130,44 @@
                                             @endif
                                             @break
                                         @case('video')
-                                            <div class="blog-video wow fadeInUp" data-wow-delay=".3s">
-                                                <img src="{{ $block->extras['thumbnail'] ?? asset('frontend/assets/images/service/service-3.webp') }}"
-                                                    alt="Video Thumbnail" class="img-fluid">
-                                                <a class="video-btn video-popup" data-autoplay="true" data-vbtype="video"
-                                                    href="{{ $block->content ?? 'https://www.youtube.com/watch?v=MLpWrANjFbI' }}">
-                                                    <span><i class="tji-play"></i></span>
-                                                </a>
-                                            </div>
+                                            @php
+                                                $videoUrl = $block->videoUrl();
+                                                $orientation = $block->videoOrientation();
+                                                $isExternal = $block->videoIsExternal();
+                                                $isYouTube = $isExternal && \Illuminate\Support\Str::contains(strtolower($videoUrl), ['youtube.com', 'youtu.be']);
+                                                $isVimeo = $isExternal && \Illuminate\Support\Str::contains(strtolower($videoUrl), ['vimeo.com']);
+
+                                                $embedUrl = null;
+                                                if ($isYouTube) {
+                                                    if (preg_match('/v=([^&]+)/', $videoUrl, $matches)) {
+                                                        $embedUrl = 'https://www.youtube.com/embed/' . $matches[1];
+                                                    } elseif (preg_match('#youtu\\.be/([^?]+)#', $videoUrl, $matches)) {
+                                                        $embedUrl = 'https://www.youtube.com/embed/' . $matches[1];
+                                                    }
+                                                } elseif ($isVimeo && preg_match('#vimeo\\.com/(\\d+)#', $videoUrl, $matches)) {
+                                                    $embedUrl = 'https://player.vimeo.com/video/' . $matches[1];
+                                                }
+                                            @endphp
+                                            @if ($videoUrl)
+                                                <div class="blog-video-frame {{ $orientation === 'portrait' ? 'portrait' : 'landscape' }} wow fadeInUp"
+                                                    data-wow-delay=".3s">
+                                                    @if ($embedUrl)
+                                                        <iframe src="{{ $embedUrl }}" frameborder="0"
+                                                            allow="autoplay; fullscreen; picture-in-picture"
+                                                            allowfullscreen></iframe>
+                                                    @elseif ($isExternal)
+                                                        <a class="btn btn-outline-primary w-100 h-100 d-flex align-items-center justify-content-center text-center"
+                                                            href="{{ $videoUrl }}" target="_blank" rel="noopener">
+                                                            Watch video
+                                                        </a>
+                                                    @else
+                                                        <video controls preload="metadata" playsinline>
+                                                            <source src="{{ $videoUrl }}">
+                                                            Your browser does not support HTML5 video.
+                                                        </video>
+                                                    @endif
+                                                </div>
+                                            @endif
                                             @break
                                         @default
                                             <p class="wow fadeInUp" data-wow-delay=".3s">{{ $block->contentString() }}</p>

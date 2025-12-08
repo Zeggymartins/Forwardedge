@@ -317,7 +317,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::put('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'updateSchedule'])->name('schedules.update');
         Route::delete('/{courseId}/schedules/{scheduleId}', [AdminCourseController::class, 'destroySchedule'])->name('schedules.destroy');
 
-        // TESTIMONIALS (index is per-course; store is global with course_id in form)
+        // TESTIMONIALS (index is per   -course; store is global with course_id in form)
         Route::get('/testimonials', [AdminCourseController::class, 'testimonialsIndex'])
             ->name('testimonials.index');
 

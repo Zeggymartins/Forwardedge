@@ -61,11 +61,35 @@ class Recaptcha implements ValidationRule
         $score    = (float) ($payload['score'] ?? 0);
 
         if ($score < $minScore) {
+            Log::warning('recaptcha.low_score', [
+                'score' => $score,
+                'threshold' => $minScore,
+                'action' => $payload['action'] ?? null,
+            ]);
             $fail('Captcha verification failed, please try again.');
             return;
         }
 
+        $allowedHosts = array_filter((array) config('services.recaptcha.allowed_hostnames', []));
+        if (!empty($allowedHosts)) {
+            $hostname = strtolower((string) ($payload['hostname'] ?? ''));
+            $allowed = collect($allowedHosts)->map(fn ($host) => strtolower($host))->contains($hostname);
+
+            if (!$hostname || !$allowed) {
+                Log::warning('recaptcha.hostname_mismatch', [
+                    'hostname' => $hostname,
+                    'allowed'  => $allowedHosts,
+                ]);
+                $fail('Captcha verification failed, please try again.');
+                return;
+            }
+        }
+
         if ($this->action && isset($payload['action']) && $payload['action'] !== $this->action) {
+            Log::warning('recaptcha.action_mismatch', [
+                'expected' => $this->action,
+                'received' => $payload['action'],
+            ]);
             $fail('Captcha verification failed, please try again.');
         }
     }

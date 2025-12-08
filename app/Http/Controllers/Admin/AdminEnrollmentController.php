@@ -51,18 +51,19 @@ class AdminEnrollmentController extends Controller
 
     public function approve(ScholarshipApplication $application)
     {
-        if ($application->status !== 'pending') {
-            return back()->with('warning', 'Already processed');
+        if ($application->status === 'approved') {
+            return back()->with('warning', 'Application already approved.');
         }
 
         // Create enrollment for free schedule
         Enrollment::create([
-            'course_id'         => $application->course_id,
+            'course_id'          => $application->course_id,
             'course_schedule_id' => $application->course_schedule_id,
-            'user_id'           => $application->user_id,
-            'status'            => 'active', // or 'confirmed'
-            'price_paid'        => 0,
-            // add other fields as your Enrollment requires
+            'user_id'            => $application->user_id,
+            'payment_plan'       => 'full',
+            'total_amount'       => 0,
+            'balance'            => 0,
+            'status'             => 'active',
         ]);
 
         $application->update([
@@ -81,8 +82,8 @@ class AdminEnrollmentController extends Controller
 
     public function reject(Request $request, ScholarshipApplication $application)
     {
-        if ($application->status !== 'pending') {
-            return back()->with('warning', 'Already processed');
+        if ($application->status === 'rejected') {
+            return back()->with('warning', 'Application already rejected.');
         }
 
         $data = $request->validate([

@@ -117,4 +117,14 @@ return [
 
     'contact_recipient' => env('MAIL_CONTACT_RECIPIENT', env('MAIL_FROM_ADDRESS', 'info@forwardedgeconsulting.com')),
 
+    'blocked_domains' => array_values(array_filter(array_map(
+        fn ($domain) => strtolower(trim($domain)),
+        explode(',', (string) env('MAIL_BLOCKED_DOMAINS', ''))
+    ))),
+
+    'blocked_tlds' => array_values(array_filter(array_map(
+        fn ($tld) => strtolower(trim(ltrim($tld, '.'))),
+        explode(',', (string) env('MAIL_BLOCKED_TLDS', 'xyz,top,icu,click,work'))
+    ))),
+
 ];

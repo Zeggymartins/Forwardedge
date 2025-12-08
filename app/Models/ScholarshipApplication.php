@@ -12,6 +12,9 @@ class ScholarshipApplication extends Model
         'user_id',
         'status',
         'form_data',
+        'score',
+        'auto_decision',
+        'decision_notes',
         'admin_notes',
         'approved_at',
         'rejected_at'
@@ -19,6 +22,7 @@ class ScholarshipApplication extends Model
 
     protected $casts = [
         'form_data'  => 'array',
+        'score'      => 'integer',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];

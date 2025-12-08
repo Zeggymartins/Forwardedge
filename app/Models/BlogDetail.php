@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BlogDetail extends Model
 {
@@ -51,5 +52,49 @@ class BlogDetail extends Model
     public function quoteAuthor(): string
     {
         return $this->extras['author'] ?? $this->extras['cite'] ?? 'Forward Edge Consulting';
+    }
+
+    public function videoOrientation(): string
+    {
+        return $this->extras['orientation'] ?? 'landscape';
+    }
+
+    public function videoSource(): string
+    {
+        if (!empty($this->extras['source'])) {
+            return $this->extras['source'];
+        }
+
+        $content = $this->attributes['content'] ?? '';
+        return Str::startsWith((string) $content, ['http://', 'https://']) ? 'url' : 'upload';
+    }
+
+    public function videoUrl(): ?string
+    {
+        $content = $this->attributes['content'] ?? null;
+        if (!$content) {
+            return null;
+        }
+
+        if ($this->videoSource() === 'upload') {
+            return Storage::url($content);
+        }
+
+        return $content;
+    }
+
+    public function videoIsLocal(): bool
+    {
+        return $this->videoSource() === 'upload' && !empty($this->attributes['content']);
+    }
+
+    public function videoIsExternal(): bool
+    {
+        return !$this->videoIsLocal();
+    }
+
+    public function rawContent()
+    {
+        return $this->attributes['content'] ?? null;
     }
 }

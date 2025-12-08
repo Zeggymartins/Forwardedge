@@ -1,6 +1,8 @@
 @php
     $application = $application->fresh(['course', 'schedule', 'user']);
     $isApproved = $status === 'approved';
+    $isRejected = $status === 'rejected';
+    $isPending = !$isApproved && !$isRejected;
     $courseTitle = $application->course->title ?? 'Forward Edge Academy Training';
     $schedule = $application->schedule;
     $startDate = $schedule?->start_date ? $schedule->start_date->format('M j, Y') : null;
@@ -22,7 +24,13 @@
                     <td style="text-align:center;padding-bottom:24px;">
                         <img src="{{ asset('frontend/assets/images/logo/logo.png') }}" alt="Forward Edge" width="140" style="display:block;margin:0 auto 16px;">
                         <h1 style="margin:0;font-size:26px;color:#f8fafc;">
-                            {{ $isApproved ? 'Congratulations!' : 'Thanks for applying' }}
+                            @if($isApproved)
+                                Congratulations!
+                            @elseif($isRejected)
+                                Update on your application
+                            @else
+                                Thanks for applying
+                            @endif
                         </h1>
                         <p style="margin:8px 0 0;color:#cbd5f5;font-size:16px;">
                             Forward Edge Cyber1000 Scholarship
@@ -47,7 +55,7 @@
                                 Our enrollments team will reach out shortly with onboarding instructions, community invites,
                                 and the resources you need to hit the ground running.
                             </p>
-                        @else
+                        @elseif($isRejected)
                             <p style="margin:0 0 18px;">
                                 Thank you for taking the time to apply for the <strong>{{ $courseTitle }}</strong> scholarship.
                                 After careful review we’re unable to offer you a seat in this cohort.
@@ -60,6 +68,21 @@
                             <p style="margin:0 0 24px;">
                                 We encourage you to stay plugged into Forward Edge — we’ll have more scholarships, pop-up
                                 intensives, and events built for Cyber1000 applicants.
+                            </p>
+                        @else
+                            <p style="margin:0 0 18px;">
+                                Thanks for submitting your application for the <strong>{{ $courseTitle }}</strong> cohort.
+                                Our admissions team is reviewing every submission carefully, and you’ll receive another email as soon
+                                as a decision is made.
+                            </p>
+                            @if($startDate || $endDate)
+                                <p style="margin:0 0 18px;">
+                                    <strong>Program timeline:</strong> {{ $startDate ?? 'TBA' }} – {{ $endDate ?? 'TBA' }}
+                                </p>
+                            @endif
+                            <p style="margin:0 0 24px;">
+                                In the meantime, watch out for invites to community events, cyber career resources, and other
+                                Forward Edge opportunities designed for applicants like you.
                             </p>
                         @endif
 

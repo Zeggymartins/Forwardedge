@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use App\Models\Service;
 use App\Rules\Recaptcha;
+use App\Rules\TrustedEmailDomain;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,7 +21,7 @@ class MessageController extends Controller
     {
         $validated = $request->validate([
             'cfName2'    => 'required|string|max:255',
-            'cfEmail2'   => 'required|email',
+            'cfEmail2'   => ['required', 'email:rfc,dns', new TrustedEmailDomain()],
             'cfPhone2'   => 'nullable|string|max:20',
             'cfSubject2' => 'required|exists:services,id',
             'cfMessage2' => 'required|string',

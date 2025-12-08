@@ -21,9 +21,13 @@ class ScholarshipStatusMail extends Mailable
 
     public function build(): self
     {
-        $subject = $this->status === 'approved'
-            ? '🎉 Your Forward Edge scholarship application was approved'
-            : 'Update on your Forward Edge scholarship application';
+        if ($this->status === 'approved') {
+            $subject = '🎉 Your Forward Edge scholarship application was approved';
+        } elseif ($this->status === 'rejected') {
+            $subject = 'Update on your Forward Edge scholarship application';
+        } else {
+            $subject = 'Thanks for applying for the Forward Edge scholarship';
+        }
 
         return $this->subject($subject)
             ->view('emails.scholarship.status');

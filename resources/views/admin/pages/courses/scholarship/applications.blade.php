@@ -31,6 +31,7 @@
                         <th class="py-3 px-4">Course</th>
                         <th class="py-3 px-4">Schedule</th>
                         <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Score</th>
                         <th class="py-3 px-4">Submitted</th>
                         <th class="py-3 px-4 text-center">Actions</th>
                     </tr>
@@ -77,6 +78,23 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4">
+                                <div class="d-flex flex-column gap-1">
+                                    <strong>{{ $application->score ?? '—' }}</strong>
+                                    @if($application->auto_decision)
+                                        <span class="badge rounded-pill
+                                            @class([
+                                                'bg-success' => $application->auto_decision === 'approve',
+                                                'bg-danger' => $application->auto_decision === 'reject',
+                                                'bg-secondary' => $application->auto_decision === 'pending',
+                                            ])">
+                                            Auto: {{ ucfirst($application->auto_decision) }}
+                                        </span>
+                                    @else
+                                        <span class="badge rounded-pill bg-secondary-subtle text-muted">Manual</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
                                 {{ $application->created_at?->format('M j, Y g:i A') ?? '—' }}
                             </td>
                             <td class="py-3 px-4 text-center">
@@ -86,7 +104,7 @@
                                             data-bs-target="#viewApplication{{ $application->id }}">
                                         View
                                     </button>
-                                    @if($application->status === 'pending')
+                                    @if($application->status !== 'approved')
                                         <form action="{{ route('admin.scholarships.approve', $application) }}" method="POST">
                                             @csrf
                                             <button class="btn btn-sm btn-success"
@@ -94,6 +112,8 @@
                                                 Approve
                                             </button>
                                         </form>
+                                    @endif
+                                    @if($application->status !== 'rejected')
                                         <button class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#rejectApplication{{ $application->id }}">
@@ -132,6 +152,18 @@
                                                 @endif
                                             </div>
                                             <div class="col-12">
+                                                <div class="alert bg-light border rounded-3 d-flex flex-wrap justify-content-between gap-3">
+                                                    <div>
+                                                        <strong>Score:</strong> {{ $application->score ?? '—' }}<br>
+                                                        <strong>Auto decision:</strong> {{ ucfirst($application->auto_decision ?? 'manual') }}
+                                                    </div>
+                                                    @if($application->decision_notes)
+                                                        <div class="text-muted small">
+                                                            <strong>Notes:</strong> {{ $application->decision_notes }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+
                                                 <h6 class="fw-semibold mb-2">Personal</h6>
                                                 <ul class="mini-list mb-3">
                                                     <li><strong>Full name:</strong> {{ $personal['full_name'] ?? $contact['name'] ?? '—' }}</li>

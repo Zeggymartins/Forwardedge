@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ScholarshipStatusMail;
 use App\Models\Course;
 use App\Models\CourseSchedule;
 use App\Models\Scholarship;
@@ -9,11 +10,12 @@ use App\Models\ScholarshipApplication;
 use App\Models\User;
 use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ScolarshipApplicationController extends Controller
 {
@@ -51,7 +53,7 @@ class ScolarshipApplicationController extends Controller
         $authUser = $request->user();
         $options = $this->formOptions();
 
-        $data = $request->validate([
+        $rules = [
             'full_name'  => ['required', 'string', 'max:255'],
             'email'      => ['required', 'email:rfc,dns', 'max:255'],
             'phone'      => ['required', 'string', 'max:40'],
@@ -97,7 +99,59 @@ class ScolarshipApplicationController extends Controller
             'bonus_willing_challenge'    => ['required', Rule::in(array_keys($options['yes_no']))],
             'hp_field'                   => ['nullable', 'prohibited'],
             'recaptcha_token' => ['required', new Recaptcha('scholarship_form')],
-        ]);
+        ];
+
+        $messages = [
+            'required' => 'Please provide your :attribute.',
+            'required_if' => 'Please provide your :attribute when :other is :value.',
+            'email' => 'Please enter a valid :attribute.',
+            'string' => 'Please enter text for :attribute.',
+            'max' => ':Attribute must not exceed :max characters.',
+            'in' => 'Please choose one of the available options for :attribute.',
+            'array' => 'Please select at least one option for :attribute.',
+        ];
+
+        $attributes = [
+            'full_name' => 'full name',
+            'email' => 'email address',
+            'phone' => 'phone number',
+            'gender' => 'gender',
+            'age_range' => 'age range',
+            'location' => 'location/city',
+            'occupation_status' => 'current occupation status',
+            'education_level' => 'highest education level',
+            'education_field' => 'field of study',
+            'education_currently_in_school' => 'current schooling status',
+            'education_institution' => 'name of institution',
+            'education_institution_level' => 'current level in school',
+            'commit_available' => 'availability selection',
+            'commit_hours' => 'hours you can commit weekly',
+            'commit_strategy' => 'consistency strategy',
+            'tech_has_laptop' => 'laptop access',
+            'tech_laptop_specs' => 'laptop specifications',
+            'tech_internet' => 'internet quality',
+            'tech_tools' => 'tools you currently use',
+            'tech_tools.*' => 'selected tool',
+            'tech_experience' => 'previous tech experience',
+            'motivation_reason' => 'motivation statement',
+            'motivation_future' => 'future plans',
+            'motivation_prev_training' => 'previous training response',
+            'motivation_prev_details' => 'details about previous training',
+            'motivation_unselected_plan' => 'plan if not selected',
+            'motivation_interest_area' => 'interest area',
+            'motivation_interest_other' => 'other interest details',
+            'skill_level' => 'skill level',
+            'skill_project_response' => 'project response',
+            'skill_familiarity' => 'skills familiarity',
+            'attitude_teamwork' => 'teamwork style',
+            'attitude_participation' => 'participation commitment',
+            'attitude_discovery_channel' => 'how you discovered us',
+            'attitude_commitment' => 'commitment agreement',
+            'bonus_willing_challenge' => 'challenge opt-in',
+            'recaptcha_token' => 'captcha verification',
+        ];
+
+        $data = $request->validate($rules, $messages, $attributes);
 
         // Determine the user to attach the application to
         $user = $authUser;
@@ -155,7 +209,7 @@ class ScolarshipApplicationController extends Controller
         }
         $source = $authUser ? 'registered' : 'guest_to_user';
         // Create application
-        DB::transaction(function () use ($schedule, $user, $data, $source, $options, $contactName, $contactEmail, $contactPhone) {
+        $application = DB::transaction(function () use ($schedule, $user, $data, $source, $options, $contactName, $contactEmail, $contactPhone) {
             $formPayload = [
                 'personal' => [
                     'full_name' => $contactName,
@@ -222,15 +276,43 @@ class ScolarshipApplicationController extends Controller
                 'experience' => $data['tech_experience'] ?? null,
             ];
 
-            ScholarshipApplication::create([
+            $application = ScholarshipApplication::create([
                 'course_id'          => $schedule->course_id,
                 'course_schedule_id' => $schedule->id,
                 'user_id'            => $user->id,
                 'status'             => 'pending',
                 'form_data'          => $formPayload,
             ]);
+
+            $scorer = app(\App\Services\ScholarshipScoring::class);
+            $result = $scorer->score($application);
+            $application->forceFill([
+                'score' => $result['score'],
+                'auto_decision' => $result['decision'],
+                'decision_notes' => implode('; ', $result['reasons']),
+            ])->save();
+
+            return $application;
         });
 
+        $application->load(['course', 'schedule', 'user']);
+
+        if ($application->auto_decision === 'approve') {
+            $adminController = app(\App\Http\Controllers\Admin\AdminEnrollmentController::class);
+            $adminController->approve($application);
+        } elseif ($application->auto_decision === 'reject') {
+            $application->forceFill([
+                'status'      => 'rejected',
+                'rejected_at' => now(),
+                'admin_notes' => 'Automatically rejected during screening.',
+            ])->save();
+
+            if ($contactEmail) {
+                Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'rejected', 'Automated screening'));
+            }
+        } elseif ($contactEmail) {
+            Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'pending'));
+        }
 
         // Send them to the Thank You page
         return redirect()
