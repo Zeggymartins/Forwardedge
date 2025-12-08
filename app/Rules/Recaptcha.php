@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class Recaptcha implements ValidationRule
 {
+    private const BYPASS_TOKENS = [
+        'recaptcha-disabled',
+        'recaptcha-unavailable',
+    ];
+
     public function __construct(protected string $action = 'form')
     {
     }
@@ -19,6 +24,15 @@ class Recaptcha implements ValidationRule
 
         if (!$secret) {
             // Skip validation if not configured; useful for local environments.
+            return;
+        }
+
+        if (in_array($value, self::BYPASS_TOKENS, true)) {
+            Log::notice('recaptcha.bypassed', [
+                'token'  => $value,
+                'action' => $this->action,
+                'ip'     => request()->ip(),
+            ]);
             return;
         }
 

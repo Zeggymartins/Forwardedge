@@ -23,6 +23,7 @@
                         `https://www.recaptcha.net/recaptcha/api.js?render=${siteKey}`,
                     ];
                     const LOADER_FLAG = '__recaptchaLoading';
+                    const FALLBACK_TOKEN = 'recaptcha-unavailable';
                     const LOAD_TIMEOUT = 10000;
                     const POLL_INTERVAL = 200;
                     let recaptchaReadyPromise;
@@ -115,6 +116,12 @@
                         });
                     }
 
+                    function submitForm(form, tokenField, token) {
+                        tokenField.value = token;
+                        form.dataset.recaptchaSubmitting = 'false';
+                        form.submit();
+                    }
+
                     document.addEventListener('submit', function(event) {
                         const form = event.target.closest('form');
                         if (!form) return;
@@ -133,14 +140,11 @@
 
                         executeRecaptcha(form, action)
                             .then(function(token) {
-                                tokenField.value = token;
-                                form.dataset.recaptchaSubmitting = 'false';
-                                form.submit();
+                                submitForm(form, tokenField, token);
                             })
                             .catch(function(error) {
-                                form.dataset.recaptchaSubmitting = 'false';
-                                console.error('reCAPTCHA error', error);
-                                alert('Captcha validation failed. Please reload and try again.');
+                                console.warn('reCAPTCHA unavailable, submitting without token', error);
+                                submitForm(form, tokenField, FALLBACK_TOKEN);
                             });
                     }, true);
 
