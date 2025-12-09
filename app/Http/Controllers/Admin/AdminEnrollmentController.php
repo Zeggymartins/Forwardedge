@@ -7,6 +7,7 @@ use App\Mail\ScholarshipStatusMail;
 use App\Models\Enrollment;
 use App\Models\OrderItem;
 use App\Models\ScholarshipApplication;
+use App\Services\ScholarshipApplicationManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -49,33 +50,13 @@ class AdminEnrollmentController extends Controller
         return view('admin.pages.courses.scholarship.applications', compact('applications'));
     }
 
-    public function approve(ScholarshipApplication $application)
+    public function approve(ScholarshipApplication $application, ScholarshipApplicationManager $manager)
     {
         if ($application->status === 'approved') {
             return back()->with('warning', 'Application already approved.');
         }
 
-        // Create enrollment for free schedule
-        Enrollment::create([
-            'course_id'          => $application->course_id,
-            'course_schedule_id' => $application->course_schedule_id,
-            'user_id'            => $application->user_id,
-            'payment_plan'       => 'full',
-            'total_amount'       => 0,
-            'balance'            => 0,
-            'status'             => 'active',
-        ]);
-
-        $application->update([
-            'status'      => 'approved',
-            'approved_at' => now(),
-        ]);
-
-        $application->refresh();
-
-        if ($application->user?->email) {
-            Mail::to($application->user->email)->send(new ScholarshipStatusMail($application, 'approved'));
-        }
+        $manager->approve($application);
 
         return back()->with('success', 'Application approved & enrollment created.');
     }

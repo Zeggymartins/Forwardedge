@@ -155,13 +155,23 @@ class ScholarshipScoring
         }
 
         $value = $points;
+
         if ($category) {
-            $used = $this->categoryTotals[$category] ?? 0;
+            $this->categoryTotals[$category] ??= 0;
             $cap = $this->caps[$category] ?? null;
-            if ($cap !== null) {
+
+            if ($cap !== null && $value > 0) {
+                $used = $this->categoryTotals[$category];
                 $available = max($cap - $used, 0);
-                $value = min($value, $available);
-                $this->categoryTotals[$category] = $used + $value;
+
+                if ($available <= 0) {
+                    $value = 0.0;
+                } else {
+                    $value = min($value, $available);
+                    $this->categoryTotals[$category] = $used + $value;
+                }
+            } elseif ($value > 0) {
+                $this->categoryTotals[$category] += $value;
             }
         }
 

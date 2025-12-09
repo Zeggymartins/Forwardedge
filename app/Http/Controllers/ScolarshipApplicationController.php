@@ -9,6 +9,7 @@ use App\Models\Scholarship;
 use App\Models\ScholarshipApplication;
 use App\Models\User;
 use App\Rules\Recaptcha;
+use App\Services\ScholarshipApplicationManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -298,8 +299,8 @@ class ScolarshipApplicationController extends Controller
         $application->load(['course', 'schedule', 'user']);
 
         if ($application->auto_decision === 'approve') {
-            $adminController = app(\App\Http\Controllers\Admin\AdminEnrollmentController::class);
-            $adminController->approve($application);
+            $manager = app(ScholarshipApplicationManager::class);
+            $manager->approve($application, $contactEmail);
         } elseif ($application->auto_decision === 'reject') {
             $application->forceFill([
                 'status'      => 'rejected',
