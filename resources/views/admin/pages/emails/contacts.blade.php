@@ -40,9 +40,10 @@
                         <div class="d-flex flex-wrap gap-2">
                             @forelse($sourceBreakdown as $source => $count)
                                 @php
-                                    $label = \Illuminate\Support\Str::of($source ?? 'other')
+                                    $label = $sourceLabels[$source] ?? \Illuminate\Support\Str::of($source ?? 'other')
                                         ->replace(['_', '-'], ' ')
-                                        ->title();
+                                        ->title()
+                                        ->value();
                                 @endphp
                                 <span class="badge bg-light text-dark border fw-semibold">
                                     {{ $label }} <span class="text-muted fw-normal ms-1">{{ number_format($count) }}</span>
@@ -88,9 +89,10 @@
                                     <td>{{ $contact['name'] ?: '—' }}</td>
                                     <td>
                                         @php
-                                            $label = \Illuminate\Support\Str::of($contact['source'] ?? 'Other')
+                                            $label = $sourceLabels[$contact['source'] ?? ''] ?? \Illuminate\Support\Str::of($contact['source'] ?? 'Other')
                                                 ->replace(['_', '-'], ' ')
-                                                ->title();
+                                                ->title()
+                                                ->value();
                                         @endphp
                                         <span class="badge bg-light text-dark border">{{ $label }}</span>
                                     </td>

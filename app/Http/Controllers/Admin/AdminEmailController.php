@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Campaigns\PrepareEmailCampaign;
 use App\Models\EmailCampaign;
 use App\Services\EmailTargetCollector;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -53,6 +54,7 @@ class AdminEmailController extends Controller
             'totalContacts' => $totalContacts,
             'sourceBreakdown' => $sourceBreakdown,
             'search' => $search,
+            'sourceLabels' => $this->collector->availableSources(),
         ]);
     }
 

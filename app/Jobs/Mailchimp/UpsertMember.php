@@ -33,10 +33,10 @@ class UpsertMember implements ShouldQueue
             $listId    = $this->options['list_id'] ?? Mailchimp::listId();
             $status    = ($this->options['double_opt_in'] ?? config('services.mailchimp.double_opt_in')) ? 'pending' : 'subscribed';
             $tags      = Arr::wrap($this->options['tags'] ?? []);
-            $client    = Mailchimp::client();
+            $listsApi  = Mailchimp::listsApi();
             $hash      = md5($this->email);
 
-            $client->lists->setListMember($listId, $hash, [
+            $listsApi->setListMember($listId, $hash, [
                 'email_address' => $this->email,
                 'status'        => $status,
                 'status_if_new' => $status,

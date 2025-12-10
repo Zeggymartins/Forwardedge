@@ -36,8 +36,8 @@ class UpdateTags implements ShouldQueue
         }
 
         try {
-            $client = Mailchimp::client();
-            $client->lists->updateListMemberTags(
+            $listsApi = Mailchimp::listsApi();
+            $listsApi->updateListMemberTags(
                 $this->listId ?? Mailchimp::listId(),
                 md5($this->email),
                 ['tags' => $tags]

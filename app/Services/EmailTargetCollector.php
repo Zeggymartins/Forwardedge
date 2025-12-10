@@ -20,7 +20,7 @@ class EmailTargetCollector
         'messages' => 'Contact form leads',
         'events' => 'Event registrations',
         'scholarships' => 'Scholarship applicants',
-        'mailchimp' => 'Mailchimp list',
+        'mailchimp' => 'API - Forward Edge key (Mailchimp)',
     ];
 
     public function availableSources(): array
@@ -151,8 +151,8 @@ class EmailTargetCollector
         }
 
         try {
-            $client = Mailchimp::client();
             $listId = Mailchimp::listId();
+            $listsApi = Mailchimp::listsApi();
         } catch (\Throwable $e) {
             Log::warning('Mailchimp contacts skipped: configuration issue.', [
                 'message' => $e->getMessage(),
@@ -167,7 +167,7 @@ class EmailTargetCollector
 
         try {
             do {
-                $response = $client->lists->getListMembersInfo($listId, [
+                $response = $listsApi->getListMembersInfo($listId, [
                     'count' => $count,
                     'offset' => $offset,
                     'fields' => 'members.email_address,members.merge_fields,members.status,total_items',

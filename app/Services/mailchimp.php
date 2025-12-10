@@ -4,6 +4,7 @@ namespace App\Services;
 
 use InvalidArgumentException;
 use MailchimpMarketing\ApiClient;
+use MailchimpMarketing\Api\ListsApi;
 
 class Mailchimp
 {
@@ -23,6 +24,19 @@ class Mailchimp
         ]);
 
         return $mc;
+    }
+
+    /**
+     * Typed helper for the Lists API to keep static analysis happy.
+     */
+    public static function listsApi(): ListsApi
+    {
+        $client = self::client();
+
+        /** @var ListsApi $lists */
+        $lists = $client->lists;
+
+        return $lists;
     }
 
     public static function listId(): string
