@@ -8,7 +8,6 @@ use App\Models\CourseSchedule;
 use App\Models\Scholarship;
 use App\Models\ScholarshipApplication;
 use App\Models\User;
-use App\Rules\Recaptcha;
 use App\Services\ScholarshipApplicationManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -99,7 +98,6 @@ class ScolarshipApplicationController extends Controller
 
             'bonus_willing_challenge'    => ['required', Rule::in(array_keys($options['yes_no']))],
             'hp_field'                   => ['nullable', 'prohibited'],
-            'recaptcha_token' => ['required', new Recaptcha('scholarship_form')],
         ];
 
         $messages = [
@@ -149,7 +147,6 @@ class ScolarshipApplicationController extends Controller
             'attitude_discovery_channel' => 'how you discovered us',
             'attitude_commitment' => 'commitment agreement',
             'bonus_willing_challenge' => 'challenge opt-in',
-            'recaptcha_token' => 'captcha verification',
         ];
 
         $data = $request->validate($rules, $messages, $attributes);

@@ -1,12 +1,15 @@
 @php
     use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Facades\URL;
     use Illuminate\Support\Str;
 
     $resolveImage = function ($path) {
         if (!$path) {
             return null;
         }
-        return Str::startsWith($path, ['http://', 'https://']) ? $path : Storage::url($path);
+        return Str::startsWith($path, ['http://', 'https://'])
+            ? $path
+            : URL::to(Storage::url($path));
     };
 
     $heroUrl = $resolveImage($campaign->hero_image);
@@ -38,7 +41,7 @@
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(9,12,36,0.25);">
                     <tr>
                         <td style="background:linear-gradient(135deg,#0f172a,#111c44);padding:32px;text-align:center;">
-                            <img src="{{ asset('frontend/assets/images/logo/logo.png') }}" alt="Forward Edge" width="160" style="display:block;margin:0 auto 16px;">
+                            <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge" width="160" style="display:block;margin:0 auto 16px;">
                             <p style="color:#9fb4ff;margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Forward Edge Communications</p>
                             <h1 style="color:#ffffff;margin:12px 0 8px;font-size:26px;font-weight:700;">{{ $campaign->title }}</h1>
                             @if($campaign->subtitle)
