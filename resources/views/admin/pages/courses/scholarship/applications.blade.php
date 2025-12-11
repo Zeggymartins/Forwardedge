@@ -311,9 +311,21 @@
             <strong>{{ $applications->total() }}</strong>
             applications
         </div>
-        <div>
-            {{ $applications->links() }}
-        </div>
+        @if ($applications->hasPages())
+            <nav class="d-inline-flex align-items-center gap-2">
+                <a href="{{ $applications->previousPageUrl() ?: '#' }}"
+                   class="btn btn-sm btn-outline-secondary @if(!$applications->previousPageUrl()) disabled @endif">
+                    Previous
+                </a>
+                <span class="text-muted small">
+                    Page <strong>{{ $applications->currentPage() }}</strong> of <strong>{{ $applications->lastPage() }}</strong>
+                </span>
+                <a href="{{ $applications->nextPageUrl() ?: '#' }}"
+                   class="btn btn-sm btn-outline-secondary @if(!$applications->hasMorePages()) disabled @endif">
+                    Next
+                </a>
+            </nav>
+        @endif
     </div>
 </div>
 @endsection
