@@ -26,6 +26,12 @@ class AdminEmailController extends Controller
         $totalContacts = $allContacts->count();
         $sourceBreakdown = $allContacts->groupBy('source')->map->count()->sortDesc();
 
+        $perPageOptions = [25, 50, 100, 200];
+        $perPage = (int) $request->input('per_page', 50);
+        if (!in_array($perPage, $perPageOptions, true)) {
+            $perPage = 50;
+        }
+
         $search = trim((string) $request->input('q'));
         $filtered = $allContacts;
 
@@ -36,7 +42,6 @@ class AdminEmailController extends Controller
             })->values();
         }
 
-        $perPage = 50;
         $page = LengthAwarePaginator::resolveCurrentPage();
         $paginated = new LengthAwarePaginator(
             $filtered->slice(($page - 1) * $perPage, $perPage)->values(),
@@ -55,6 +60,8 @@ class AdminEmailController extends Controller
             'sourceBreakdown' => $sourceBreakdown,
             'search' => $search,
             'sourceLabels' => $this->collector->availableSources(),
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
         ]);
     }
 
