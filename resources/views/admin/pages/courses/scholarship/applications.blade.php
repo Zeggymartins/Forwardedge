@@ -20,6 +20,14 @@
             <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
             <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
         </div>
+        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="d-flex align-items-center gap-2">
+            <label for="per_page" class="text-muted small mb-0">Per page</label>
+            <select name="per_page" id="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                @foreach($perPageOptions ?? [10,20,50,100] as $option)
+                    <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
+                @endforeach
+            </select>
+        </form>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
@@ -295,8 +303,17 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $applications->links() }}
+    <div class="mt-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="text-muted small">
+            Showing
+            <strong>{{ $applications->firstItem() ?? 0 }}-{{ $applications->lastItem() ?? 0 }}</strong>
+            of
+            <strong>{{ $applications->total() }}</strong>
+            applications
+        </div>
+        <div>
+            {{ $applications->links() }}
+        </div>
     </div>
 </div>
 @endsection

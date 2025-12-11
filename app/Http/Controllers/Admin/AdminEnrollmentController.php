@@ -41,13 +41,24 @@ class AdminEnrollmentController extends Controller
         return response()->json($enrollment);
     }
 
-    public function applications()
+    public function applications(Request $request)
     {
+        $perPageOptions = [10, 20, 50, 100];
+        $perPage = (int) $request->input('per_page', 20);
+        if (!in_array($perPage, $perPageOptions, true)) {
+            $perPage = 20;
+        }
+
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
             ->latest()
-            ->paginate(20);
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('admin.pages.courses.scholarship.applications', compact('applications'));
+        return view('admin.pages.courses.scholarship.applications', [
+            'applications' => $applications,
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
+        ]);
     }
 
     public function approve(ScholarshipApplication $application, ScholarshipApplicationManager $manager)
