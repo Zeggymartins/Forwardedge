@@ -96,8 +96,8 @@ class AdminEmailController extends Controller
             'blocks.*.type' => 'required|string|in:text,list,image,cards',
             'audience_sources' => 'nullable|array',
             'audience_sources.*' => 'string',
-            'include_emails' => 'nullable|string|max:2000',
-            'exclude_emails' => 'nullable|string|max:2000',
+            'include_emails' => 'nullable|string|max:10000',
+            'exclude_emails' => 'nullable|string|max:10000',
         ]);
 
         $blocks = $this->normalizeBlocks($request, $request->input('blocks', []));
