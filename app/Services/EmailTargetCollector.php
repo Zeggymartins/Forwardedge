@@ -30,12 +30,18 @@ class EmailTargetCollector
 
     public function all(array $options = []): Collection
     {
-        $allowedSources = collect($options['sources'] ?? [])->filter()->map(fn($source) => strtolower($source))->values()->all();
-        $shouldInclude = function (string $source) use ($allowedSources): bool {
-            if (empty($allowedSources)) {
-                return true;
+        $hasExplicitSources = array_key_exists('sources', $options);
+        $allowedSources = collect($options['sources'] ?? [])
+            ->filter()
+            ->map(fn($source) => strtolower($source))
+            ->values()
+            ->all();
+
+        $shouldInclude = function (string $source) use ($allowedSources, $hasExplicitSources): bool {
+            if ($hasExplicitSources) {
+                return in_array(strtolower($source), $allowedSources, true);
             }
-            return in_array(strtolower($source), $allowedSources, true);
+            return true;
         };
 
         $targets = collect();

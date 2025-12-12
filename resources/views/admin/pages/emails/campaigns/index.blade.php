@@ -90,8 +90,29 @@
                 </table>
             </div>
 
-            <div class="card-footer bg-white">
-                {{ $campaigns->links() }}
+            <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="text-muted small">
+                    Showing
+                    <strong>{{ $campaigns->firstItem() ?? 0 }}-{{ $campaigns->lastItem() ?? 0 }}</strong>
+                    of
+                    <strong>{{ $campaigns->total() }}</strong>
+                    campaigns
+                </div>
+                @if($campaigns->hasPages())
+                    <nav class="d-inline-flex align-items-center gap-2">
+                        <a href="{{ $campaigns->previousPageUrl() ?: '#' }}"
+                           class="btn btn-sm btn-outline-secondary @if(!$campaigns->previousPageUrl()) disabled @endif">
+                            Previous
+                        </a>
+                        <span class="text-muted small">
+                            Page <strong>{{ $campaigns->currentPage() }}</strong> of <strong>{{ $campaigns->lastPage() }}</strong>
+                        </span>
+                        <a href="{{ $campaigns->nextPageUrl() ?: '#' }}"
+                           class="btn btn-sm btn-outline-secondary @if(!$campaigns->hasMorePages()) disabled @endif">
+                            Next
+                        </a>
+                    </nav>
+                @endif
             </div>
         </div>
     </div>

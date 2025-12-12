@@ -66,6 +66,7 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         <form action="{{ route('admin.emails.contacts') }}" method="GET" class="d-flex gap-2">
+                            <input type="hidden" name="per_page" value="{{ $perPage }}">
                             <input type="search" name="q" value="{{ $search }}" class="form-control" placeholder="Search name, email or source">
                             @if($search)
                                 <a href="{{ route('admin.emails.contacts') }}" class="btn btn-light">Reset</a>

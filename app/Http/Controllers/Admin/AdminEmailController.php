@@ -108,12 +108,19 @@ class AdminEmailController extends Controller
             ])->withInput();
         }
 
+        $selectedSources = array_values(array_unique($validated['audience_sources'] ?? []));
+        $includeEmails = $this->parseEmailList($request->input('include_emails'));
+        $excludeEmails = $this->parseEmailList($request->input('exclude_emails'));
+
+        if (empty($selectedSources) && empty($includeEmails)) {
+            return back()->withErrors([
+                'audience_sources' => 'Select at least one audience source or add manual emails to send to.',
+            ])->withInput();
+        }
+
         $heroPath = $request->hasFile('hero_image')
             ? $request->file('hero_image')->store('campaigns/hero', 'public')
             : null;
-
-        $includeEmails = $this->parseEmailList($request->input('include_emails'));
-        $excludeEmails = $this->parseEmailList($request->input('exclude_emails'));
 
         EmailCampaign::create([
             'title'      => $validated['title'],
@@ -125,7 +132,7 @@ class AdminEmailController extends Controller
             'cta_text'   => $validated['cta_text'] ?? null,
             'cta_link'   => $validated['cta_link'] ?? null,
             'cta_email_param' => $validated['cta_email_param'] ?? null,
-            'audience_sources' => !empty($validated['audience_sources']) ? array_values(array_unique($validated['audience_sources'])) : null,
+            'audience_sources' => !empty($selectedSources) ? $selectedSources : [],
             'include_emails' => !empty($includeEmails) ? $includeEmails : null,
             'exclude_emails' => !empty($excludeEmails) ? $excludeEmails : null,
             'status'     => 'draft',

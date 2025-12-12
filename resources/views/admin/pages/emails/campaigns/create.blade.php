@@ -58,7 +58,7 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Audience</h5>
                             @php
-                                $selectedSources = old('audience_sources', array_keys($sourceOptions ?? []));
+                                $selectedSources = old('audience_sources', []);
                             @endphp
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Contact sources</label>
