@@ -187,8 +187,29 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    {{ $recentRecipients->links() }}
+                <div class="mt-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="text-muted small">
+                        Showing
+                        <strong>{{ $recentRecipients->firstItem() ?? 0 }}-{{ $recentRecipients->lastItem() ?? 0 }}</strong>
+                        of
+                        <strong>{{ $recentRecipients->total() }}</strong>
+                        recipients
+                    </div>
+                    @if ($recentRecipients->hasPages())
+                        <nav class="d-inline-flex align-items-center gap-2">
+                            <a href="{{ $recentRecipients->previousPageUrl() ?: '#' }}"
+                               class="btn btn-sm btn-outline-secondary @if(!$recentRecipients->previousPageUrl()) disabled @endif">
+                                Previous
+                            </a>
+                            <span class="text-muted small">
+                                Page <strong>{{ $recentRecipients->currentPage() }}</strong> of <strong>{{ $recentRecipients->lastPage() }}</strong>
+                            </span>
+                            <a href="{{ $recentRecipients->nextPageUrl() ?: '#' }}"
+                               class="btn btn-sm btn-outline-secondary @if(!$recentRecipients->hasMorePages()) disabled @endif">
+                                Next
+                            </a>
+                        </nav>
+                    @endif
                 </div>
             </div>
         </div>
