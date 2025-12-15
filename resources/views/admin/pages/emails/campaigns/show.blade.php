@@ -25,6 +25,15 @@
                         </button>
                     </form>
                 @endif
+                @if($campaign->status !== 'sending')
+                    <form action="{{ route('admin.emails.campaigns.destroy', $campaign) }}" method="POST" onsubmit="return confirm('Delete this campaign?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
 
@@ -69,6 +78,14 @@
                 <i class="bi bi-exclamation-octagon me-2"></i>
                 <div>
                     <strong>Last error:</strong> {{ $campaign->last_error }}
+                </div>
+            </div>
+        @elseif(isset($latestFailed) && $latestFailed)
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <div>
+                    <strong>Some emails failed.</strong>
+                    Latest failure: {{ $latestFailed->error ?? 'Unknown error' }} ({{ $latestFailed->email }})
                 </div>
             </div>
         @endif

@@ -299,14 +299,15 @@ class ScolarshipApplicationController extends Controller
             $manager = app(ScholarshipApplicationManager::class);
             $manager->approve($application, $contactEmail);
         } elseif ($application->auto_decision === 'reject') {
+            // Do not auto-reject; hold for manual review and notify as pending
             $application->forceFill([
-                'status'      => 'rejected',
-                'rejected_at' => now(),
-                'admin_notes' => 'Automatically rejected during screening.',
+                'status'      => 'pending',
+                'auto_decision' => 'pending',
+                'admin_notes' => 'Flagged by automated screening; pending manual review.',
             ])->save();
 
             if ($contactEmail) {
-                Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'rejected', 'Automated screening'));
+                Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'pending'));
             }
         } elseif ($contactEmail) {
             Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'pending'));

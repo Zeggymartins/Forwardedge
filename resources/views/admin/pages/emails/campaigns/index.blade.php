@@ -76,6 +76,11 @@
                                     @else
                                         <button type="button" class="btn btn-secondary" disabled>Sending…</button>
                                     @endif
+                                    <form action="{{ route('admin.emails.campaigns.destroy', $campaign) }}" method="POST" onsubmit="return confirm('Delete this campaign?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

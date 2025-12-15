@@ -52,10 +52,16 @@ class AdminEnrollmentController extends Controller
         $scoreMin = $request->input('score_min');
         $scoreMax = $request->input('score_max');
         $scoreSort = $request->input('score_sort');
+        $status = $request->input('status');
+        $allowedStatuses = ['pending', 'approved', 'rejected'];
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = null;
+        }
 
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
             ->when($scoreMin !== null && $scoreMin !== '', fn ($q) => $q->where('score', '>=', (int) $scoreMin))
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
+            ->when($status, fn ($q) => $q->where('status', $status))
             ->when(in_array($scoreSort, ['asc', 'desc'], true), function ($q) use ($scoreSort) {
                 $q->orderBy('score', $scoreSort)->orderBy('created_at', 'desc');
             }, fn ($q) => $q->latest())
@@ -69,6 +75,8 @@ class AdminEnrollmentController extends Controller
             'scoreMin' => $scoreMin,
             'scoreMax' => $scoreMax,
             'scoreSort' => $scoreSort,
+            'status' => $status,
+            'statusOptions' => $allowedStatuses,
         ]);
     }
 

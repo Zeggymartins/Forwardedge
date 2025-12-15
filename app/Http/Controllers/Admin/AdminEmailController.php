@@ -155,8 +155,9 @@ class AdminEmailController extends Controller
         ]);
 
         $recentRecipients = $campaign->recipients()->latest()->paginate(25);
+        $latestFailed = $campaign->recipients()->where('status', 'failed')->latest()->first();
 
-        return view('admin.pages.emails.campaigns.show', compact('campaign', 'recentRecipients'));
+        return view('admin.pages.emails.campaigns.show', compact('campaign', 'recentRecipients', 'latestFailed'));
     }
 
     public function campaignsSend(Request $request, EmailCampaign $campaign): RedirectResponse
@@ -209,6 +210,19 @@ class AdminEmailController extends Controller
         PrepareEmailCampaign::dispatch($campaign->id, false);
 
         return back()->with('success', 'Retry started. We will re-send to the pending addresses.');
+    }
+
+    public function campaignsDestroy(EmailCampaign $campaign): RedirectResponse
+    {
+        if ($campaign->status === 'sending') {
+            return back()->with('warning', 'Cannot delete a campaign that is currently sending.');
+        }
+
+        $campaign->recipients()->delete();
+        $campaign->delete();
+
+        return redirect()->route('admin.emails.campaigns.index')
+            ->with('success', 'Campaign deleted.');
     }
 
     protected function normalizeBlocks(Request $request, array $blocks): Collection

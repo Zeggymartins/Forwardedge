@@ -419,6 +419,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::get('/campaigns/{campaign}', [AdminEmailController::class, 'campaignsShow'])->name('campaigns.show');
         Route::post('/campaigns/{campaign}/send', [AdminEmailController::class, 'campaignsSend'])->name('campaigns.send');
         Route::post('/campaigns/{campaign}/retry', [AdminEmailController::class, 'campaignsRetry'])->name('campaigns.retry');
+        Route::delete('/campaigns/{campaign}', [AdminEmailController::class, 'campaignsDestroy'])->name('campaigns.destroy');
     });
 
 

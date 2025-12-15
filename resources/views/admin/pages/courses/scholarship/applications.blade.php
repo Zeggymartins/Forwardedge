@@ -29,6 +29,12 @@
                 <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
                 <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
             </select>
+            <select name="status" class="form-select form-select-sm">
+                <option value="">Status</option>
+                @foreach($statusOptions ?? ['pending','approved','rejected'] as $option)
+                    <option value="{{ $option }}" @selected(($status ?? '') === $option)>{{ ucfirst($option) }}</option>
+                @endforeach
+            </select>
             <label for="per_page" class="text-muted small mb-0 ms-2">Per page</label>
             <select name="per_page" id="per_page" class="form-select form-select-sm">
                 @foreach($perPageOptions ?? [10,20,50,100] as $option)
