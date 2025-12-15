@@ -49,8 +49,16 @@ class AdminEnrollmentController extends Controller
             $perPage = 20;
         }
 
+        $scoreMin = $request->input('score_min');
+        $scoreMax = $request->input('score_max');
+        $scoreSort = $request->input('score_sort');
+
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
-            ->latest()
+            ->when($scoreMin !== null && $scoreMin !== '', fn ($q) => $q->where('score', '>=', (int) $scoreMin))
+            ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
+            ->when(in_array($scoreSort, ['asc', 'desc'], true), function ($q) use ($scoreSort) {
+                $q->orderBy('score', $scoreSort)->orderBy('created_at', 'desc');
+            }, fn ($q) => $q->latest())
             ->paginate($perPage)
             ->withQueryString();
 
@@ -58,6 +66,9 @@ class AdminEnrollmentController extends Controller
             'applications' => $applications,
             'perPage' => $perPage,
             'perPageOptions' => $perPageOptions,
+            'scoreMin' => $scoreMin,
+            'scoreMax' => $scoreMax,
+            'scoreSort' => $scoreSort,
         ]);
     }
 

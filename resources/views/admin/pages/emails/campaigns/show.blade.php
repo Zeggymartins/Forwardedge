@@ -214,6 +214,30 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Add recipients and resend</h5>
+                    <p class="text-muted small">Paste up to 20 additional emails to send this campaign again. We will merge with existing includes and de-duplicate.</p>
+                    <form action="{{ route('admin.emails.campaigns.send', $campaign) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Additional recipients (max 20)</label>
+                            <textarea name="additional_emails" class="form-control" rows="3" placeholder="alice@example.com, bob@example.com"></textarea>
+                            @error('additional_emails')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send-check me-1"></i> Send to added recipients
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')

@@ -159,10 +159,28 @@ class AdminEmailController extends Controller
         return view('admin.pages.emails.campaigns.show', compact('campaign', 'recentRecipients'));
     }
 
-    public function campaignsSend(EmailCampaign $campaign): RedirectResponse
+    public function campaignsSend(Request $request, EmailCampaign $campaign): RedirectResponse
     {
         if ($campaign->status === 'sending') {
             return back()->with('info', 'This campaign is already sending.');
+        }
+
+        $additional = $this->parseEmailList($request->input('additional_emails'));
+        if (count($additional) > 20) {
+            return back()->withErrors([
+                'additional_emails' => 'You can add at most 20 additional recipients per send.',
+            ]);
+        }
+
+        if (!empty($additional)) {
+            $merged = collect($campaign->include_emails ?? [])
+                ->merge($additional)
+                ->unique()
+                ->values()
+                ->all();
+            $campaign->forceFill([
+                'include_emails' => $merged,
+            ])->save();
         }
 
         $campaign->forceFill([

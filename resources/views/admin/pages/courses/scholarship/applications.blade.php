@@ -20,13 +20,23 @@
             <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
             <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
         </div>
-        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="d-flex align-items-center gap-2">
-            <label for="per_page" class="text-muted small mb-0">Per page</label>
-            <select name="per_page" id="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
+            <label for="score_min" class="text-muted small mb-0">Score</label>
+            <input type="number" name="score_min" id="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
+            <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
+            <select name="score_sort" class="form-select form-select-sm">
+                <option value="">Sort</option>
+                <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
+                <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
+            </select>
+            <label for="per_page" class="text-muted small mb-0 ms-2">Per page</label>
+            <select name="per_page" id="per_page" class="form-select form-select-sm">
                 @foreach($perPageOptions ?? [10,20,50,100] as $option)
                     <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
                 @endforeach
             </select>
+            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light">Reset</a>
         </form>
     </div>
 
