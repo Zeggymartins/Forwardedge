@@ -167,13 +167,26 @@ class AdminEmailController extends Controller
         }
 
         $additional = $this->parseEmailList($request->input('additional_emails'));
+        $onlyAdditional = $request->boolean('only_additional');
+
         if (count($additional) > 20) {
             return back()->withErrors([
                 'additional_emails' => 'You can add at most 20 additional recipients per send.',
             ]);
         }
 
-        if (!empty($additional)) {
+        if ($onlyAdditional && empty($additional)) {
+            return back()->withErrors([
+                'additional_emails' => 'Provide at least one email or uncheck "Only send to these emails".',
+            ]);
+        }
+
+        if ($onlyAdditional) {
+            $campaign->forceFill([
+                'audience_sources' => [],
+                'include_emails' => $additional,
+            ])->save();
+        } elseif (!empty($additional)) {
             $merged = collect($campaign->include_emails ?? [])
                 ->merge($additional)
                 ->unique()

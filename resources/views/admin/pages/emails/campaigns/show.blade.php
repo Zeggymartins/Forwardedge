@@ -237,7 +237,7 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Add recipients and resend</h5>
-                    <p class="text-muted small">Paste up to 20 additional emails to send this campaign again. We will merge with existing includes and de-duplicate.</p>
+                    <p class="text-muted small">Paste up to 20 additional emails to send this campaign again. Choose whether to send only to these emails or merge with existing audience.</p>
                     <form action="{{ route('admin.emails.campaigns.send', $campaign) }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -246,6 +246,12 @@
                             @error('additional_emails')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="1" id="only_additional" name="only_additional">
+                            <label class="form-check-label" for="only_additional">
+                                Only send to these emails (ignore saved audience sources)
+                            </label>
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-send-check me-1"></i> Send to added recipients
