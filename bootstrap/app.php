@@ -1,6 +1,8 @@
 <?php
 
 use App\Console\Commands\GoogleDriveInit;
+use App\Console\Commands\ResetAutoRejectScholarships;
+use App\Console\Commands\SendAutoRejectApology;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         GoogleDriveInit::class,
+        ResetAutoRejectScholarships::class,
+        SendAutoRejectApology::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         // Safe environment check at bootstrap time (no container usage)
