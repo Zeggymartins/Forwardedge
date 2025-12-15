@@ -55,7 +55,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-6 col-md-2">
+                        <div class="col-4 col-md-2">
                             <label class="text-muted small mb-1">Per page</label>
                             <select name="per_page" id="per_page" class="form-select form-select-sm">
                                 @foreach($perPageOptions ?? [10,20,50,100] as $option)
