@@ -24,12 +24,18 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body py-3">
                     <div class="row g-2 align-items-center">
-                        <div class="col-12 col-md-2">
+                        <div class="col-12 col-md-3 col-lg-4">
                             <label class="text-muted small mb-1">Score range</label>
-                            <div class="d-flex align-items-center gap-1">
-                                <input type="number" name="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
-                                <span class="text-muted small">–</span>
-                                <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
+                            <div class="row g-1 align-items-center">
+                                <div class="col-5">
+                                    <input type="number" name="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
+                                </div>
+                                <div class="col-2 text-center">
+                                    <span class="text-muted small">to</span>
+                                </div>
+                                <div class="col-5">
+                                    <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
@@ -113,12 +119,15 @@
                                 @endif
                             </td>
                             <td class="py-3 px-4">
-                                <span class="badge rounded-pill
-                                    @class([
-                                        'bg-warning text-dark' => $application->status === 'pending',
-                                        'bg-success' => $application->status === 'approved',
-                                        'bg-danger' => $application->status === 'rejected',
-                                    ])">
+                                @php
+                                    $statusClass = match($application->status) {
+                                        'approved' => 'bg-success text-white',
+                                        'rejected' => 'bg-danger text-white',
+                                        'pending' => 'bg-warning text-dark',
+                                        default => 'bg-secondary text-white',
+                                    };
+                                @endphp
+                                <span class="badge rounded-pill {{ $statusClass }}">
                                     {{ ucfirst($application->status) }}
                                 </span>
                             </td>
