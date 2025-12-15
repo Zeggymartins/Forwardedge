@@ -15,34 +15,55 @@
     };
 @endphp
 <div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
             <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
             <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
         </div>
-        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
-            <label for="score_min" class="text-muted small mb-0">Score</label>
-            <input type="number" name="score_min" id="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
-            <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
-            <select name="score_sort" class="form-select form-select-sm">
-                <option value="">Sort</option>
-                <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
-                <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
-            </select>
-            <select name="status" class="form-select form-select-sm">
-                <option value="">Status</option>
-                @foreach($statusOptions ?? ['pending','approved','rejected'] as $option)
-                    <option value="{{ $option }}" @selected(($status ?? '') === $option)>{{ ucfirst($option) }}</option>
-                @endforeach
-            </select>
-            <label for="per_page" class="text-muted small mb-0 ms-2">Per page</label>
-            <select name="per_page" id="per_page" class="form-select form-select-sm">
-                @foreach($perPageOptions ?? [10,20,50,100] as $option)
-                    <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
-            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light">Reset</a>
+        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="w-100">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-12 col-md-2">
+                            <label class="text-muted small mb-1">Score range</label>
+                            <div class="d-flex align-items-center gap-1">
+                                <input type="number" name="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
+                                <span class="text-muted small">–</span>
+                                <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="text-muted small mb-1">Score sort</label>
+                            <select name="score_sort" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
+                                <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="text-muted small mb-1">Status</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">Any</option>
+                                @foreach($statusOptions ?? ['pending','approved','rejected'] as $option)
+                                    <option value="{{ $option }}" @selected(($status ?? '') === $option)>{{ ucfirst($option) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="text-muted small mb-1">Per page</label>
+                            <select name="per_page" id="per_page" class="form-select form-select-sm">
+                                @foreach($perPageOptions ?? [10,20,50,100] as $option)
+                                    <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 d-flex gap-2 justify-content-end">
+                            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+                            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light">Reset</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 
