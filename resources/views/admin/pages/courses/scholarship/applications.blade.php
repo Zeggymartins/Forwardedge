@@ -63,9 +63,9 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-md-4 d-flex gap-2 justify-content-end">
-                            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
-                            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light">Reset</a>
+                        <div class="col-12 col-md-3 col-lg-2 d-flex gap-2 align-items-end justify-content-end">
+                            <button type="submit" class="btn btn-sm btn-primary flex-fill">Apply</button>
+                            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light flex-fill">Reset</a>
                         </div>
                     </div>
                 </div>
