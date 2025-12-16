@@ -32,6 +32,8 @@ class AdminBlogController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'nullable|string|max:100',
             'thumbnail' => 'nullable|image|max:4096',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:300',
         ]);
 
         try {
@@ -58,6 +60,8 @@ class AdminBlogController extends Controller
                 'category' => $validated['category'] ?? null,
                 'thumbnail' => $thumbnailPath,
                 'author_id' => Auth::id(),
+                'meta_title' => $validated['meta_title'] ?? null,
+                'meta_description' => $validated['meta_description'] ?? null,
             ]);
 
             DB::commit();
@@ -91,6 +95,8 @@ class AdminBlogController extends Controller
             'category' => 'nullable|string|max:100',
             'thumbnail' => 'nullable|image|max:4096',
             'is_published' => 'nullable|boolean',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:300',
         ]);
 
         if ($request->hasFile('thumbnail')) {

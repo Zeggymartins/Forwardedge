@@ -57,6 +57,9 @@ Route::prefix('blog')->name('blog')->group(function () {
     Route::get('/{slug}', [BlogController::class, 'show'])->name('s.show');
 });
 
+Route::post('/blog/{slug}/comments', [\App\Http\Controllers\BlogCommentController::class, 'store'])->name('blog.comment.store');
+Route::post('/blog/{slug}/comments/{comment}/reply', [\App\Http\Controllers\BlogCommentController::class, 'reply'])->name('blog.comment.reply');
+
 // Service routes  
 Route::prefix('services')->name('services')->group(function () {
     Route::get('/', [ServiceController::class, 'ServiceList']);

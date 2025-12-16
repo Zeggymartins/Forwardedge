@@ -362,6 +362,21 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Thumbnail (4MB Max) - Leave blank to keep current</label>
                                     <input type="file" name="thumbnail" class="form-control">
+                                    <div class="mt-2">
+                                        @if($blog->thumbnail)
+                                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="Current thumbnail" class="img-fluid rounded shadow-sm" style="max-height: 140px;">
+                                        @else
+                                            <span class="text-muted small">No thumbnail set.</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Meta Title</label>
+                                    <input type="text" name="meta_title" value="{{ $blog->meta_title }}" class="form-control" placeholder="SEO title">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Meta Description</label>
+                                    <textarea name="meta_description" class="form-control" rows="2" placeholder="SEO description">{{ $blog->meta_description }}</textarea>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-bold">Publication Status</label>

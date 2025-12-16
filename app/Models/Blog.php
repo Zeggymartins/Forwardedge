@@ -13,7 +13,9 @@ class Blog extends Model
         'thumbnail',
         'author_id',
         'category',
-        'is_published'
+        'is_published',
+        'meta_title',
+        'meta_description',
     ];
 
     public function details()
@@ -24,5 +26,10 @@ class Blog extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(BlogComment::class);
     }
 }

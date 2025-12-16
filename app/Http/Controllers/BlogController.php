@@ -49,14 +49,20 @@ class BlogController extends Controller
             ->pluck('count', 'category');
 
         $firstSection = $blog->details->first();
-        $excerpt = Str::limit(strip_tags($firstSection->content ?? $blog->short_description ?? $blog->title), 160);
+        $excerpt = Str::limit(strip_tags($blog->meta_description ?? ($firstSection->content ?? $blog->title)), 160);
 
         seo()->set([
-            'title'       => "{$blog->title} | " . config('seo.site_name', config('app.name')),
+            'title'       => ($blog->meta_title ?: $blog->title) . ' | ' . config('seo.site_name', config('app.name')),
             'description' => $excerpt,
             'image'       => $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : null,
         ], true);
 
-        return view('user.pages.blog_details', compact('blog', 'relatedBlogs', 'categories'));
+        $comments = \App\Models\BlogComment::with(['replies', 'user'])
+            ->where('blog_id', $blog->id)
+            ->whereNull('parent_id')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.pages.blog_details', compact('blog', 'relatedBlogs', 'categories', 'comments'));
     }
 }

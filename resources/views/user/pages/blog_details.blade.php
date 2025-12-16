@@ -1,5 +1,20 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('user.master_page')
-@section('title', ($blog->title ?? 'Read Blog') . ' | Forward Edge Consulting')
+@php
+    $seoTitle = $blog->meta_title ?: $blog->title ?: 'Read Blog';
+    $excerpt = $blog->meta_description
+        ?? Str::limit(strip_tags(optional($blog->details->first())->content ?? $blog->title), 160);
+    $seoImage = $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : null;
+@endphp
+@section('title', $seoTitle . ' | Forward Edge Consulting')
+@section('meta')
+    <meta name="description" content="{{ $excerpt }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $excerpt }}">
+    @if($seoImage)
+        <meta property="og:image" content="{{ $seoImage }}">
+    @endif
+@endsection
 @push('styles')
     <style>
         .blog-video-frame {
@@ -36,6 +51,29 @@
         }
     </style>
 @endpush
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.reply-trigger').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const canReply = btn.dataset.canReply === '1';
+                    const targetId = btn.dataset.replyId;
+                    if (!canReply) {
+                        alert('Only Forward Edge admins can reply.');
+                        return;
+                    }
+                    const target = document.getElementById(`reply-${targetId}`);
+                    if (target) {
+                        target.classList.toggle('d-none');
+                        const textarea = target.querySelector('textarea');
+                        if (textarea) textarea.focus();
+                    }
+                });
+            });
+        });
+    </script>
+@endpush
 @section('main')
     @include('user.partials.breadcrumb')
     <section class="tj-blog-section section-gap slidebar-stickiy-container">
@@ -63,7 +101,7 @@
                                 <div class="cate-images">
                                     <img src="{{ $blog->author && $blog->author->avatar
                                         ? asset($blog->author->avatar)
-                                        : asset('frontend/assets/images/testimonial/client-2.webp') }}"
+                                        : asset('backend/assets/img/avatar-2.jpg') }}"
                                         alt="Author" class="rounded-circle"
                                         style="width: 50px; height: 50px; object-fit: cover;">
                                 </div>
@@ -92,19 +130,25 @@
 
                         {{-- Blog Body --}}
                         <div class="blog-text">
-                            @php $blocks = $blog->details->sortBy('order'); @endphp
+                            @php
+                                $blocks = $blog->details->sortBy('order');
+                                $linkify = function ($text) {
+                                    $escaped = e($text);
+                                    return preg_replace('~(https?://[^\s<]+)~i', '<a href="$1" target="_blank" rel="noopener" class="text-primary text-decoration-underline">$1</a>', $escaped);
+                                };
+                            @endphp
                             @if ($blocks->isNotEmpty())
                                 @foreach ($blocks as $block)
                                     @switch($block->type)
                                         @case('heading')
-                                            <h3 class="wow fadeInUp" data-wow-delay=".3s">{{ $block->contentString() }}</h3>
+                                            <h3 class="wow fadeInUp" data-wow-delay=".3s">{!! $linkify($block->contentString()) !!}</h3>
                                             @break
                                         @case('paragraph')
-                                            <p class="wow fadeInUp" data-wow-delay=".3s">{!! nl2br(e($block->contentString())) !!}</p>
+                                            <p class="wow fadeInUp" data-wow-delay=".3s">{!! nl2br($linkify($block->contentString())) !!}</p>
                                             @break
                                         @case('quote')
                                             <blockquote class="wow fadeInUp" data-wow-delay=".3s">
-                                                <p>{{ $block->contentString() }}</p>
+                                                <p>{!! $linkify($block->contentString()) !!}</p>
                                                 <cite>{{ $block->quoteAuthor() }}</cite>
                                             </blockquote>
                                             @break
@@ -113,7 +157,7 @@
                                             @if ($items)
                                                 <ul class="wow fadeInUp" data-wow-delay=".3s">
                                                     @foreach ($items as $item)
-                                                        <li><span><i class="tji-check"></i></span>{{ $item }}</li>
+                                                        <li><span><i class="tji-check"></i></span>{!! $linkify($item) !!}</li>
                                                     @endforeach
                                                 </ul>
                                             @endif
@@ -296,66 +340,86 @@
 
                         {{-- Comments Section --}}
                         <div class="tj-comments-container">
-                            <div class="tj-comments-wrap">
+                            <div class="tj-comments-wrap mb-4">
                                 <div class="comments-title">
-                                    <h3 class="title">Top Comments (02)</h3>
+                                    <h3 class="title">Comments ({{ $comments->total() }})</h3>
                                 </div>
                                 <div class="tj-latest-comments">
-                                    <ul>
-                                        <li class="tj-comment">
-                                            <div class="comment-content">
-                                                <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-1.webp') }}"
-                                                        alt="Commenter" class="rounded-circle"
-                                                        style="width: 60px; height: 60px; object-fit: cover;">
+                                    <ul class="comments-list">
+                                        @forelse($comments as $comment)
+                                            <li class="tj-comment">
+                                                <div class="comment-content">
+                                                    <div class="comment-avatar">
+                                                        <img src="{{ asset('frontend/assets/images/blog/avatar-1.jpg') }}"
+                                                             alt="Author" class="rounded-circle"
+                                                             style="width: 60px; height: 60px; object-fit: cover;">
+                                                    </div>
+                                                    <div class="comments-header">
+                                                        <div class="avatar-name d-flex align-items-center gap-2">
+                                                            <h6 class="title mb-0">{{ $comment->name ?? $comment->user?->name ?? 'Guest' }}</h6>
+                                                            @if($comment->is_admin_reply)
+                                                                <span class="badge bg-primary">Admin</span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="comment-text d-flex align-items-center gap-2">
+                                                            <span class="date">{{ optional($comment->created_at)->format('M j, Y \\a\\t H:i') }}</span>
+                                                            <a class="reply btn btn-link p-0 reply-trigger"
+                                                               data-reply-id="{{ $comment->id }}"
+                                                               data-can-reply="{{ auth()->check() && auth()->user()->role === 'admin' ? '1' : '0' }}">
+                                                                Reply
+                                                            </a>
+                                                        </div>
+                                                        <div class="desc">
+                                                            <p>{!! nl2br(e($comment->body)) !!}</p>
+                                                        </div>
+                                                        @if($comment->replies->isNotEmpty())
+                                                            <ul class="comments-list ms-4 mt-3">
+                                                                @foreach($comment->replies as $reply)
+                                                                    <li class="tj-comment">
+                                                                        <div class="comment-content">
+                                                                            <div class="comment-avatar">
+                                                                                <img src="{{ asset('frontend/assets/images/blog/avatar-2.jpg') }}"
+                                                                                     alt="Author" class="rounded-circle"
+                                                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                                                            </div>
+                                                                            <div class="comments-header">
+                                                                                <div class="avatar-name d-flex align-items-center gap-2">
+                                                                                    <h6 class="title mb-0">{{ $reply->name ?? 'Admin' }}</h6>
+                                                                                    @if($reply->is_admin_reply)
+                                                                                        <span class="badge bg-primary">Admin</span>
+                                                                                    @endif
+                                                                                </div>
+                                                                                <div class="comment-text">
+                                                                                    <span class="date">{{ optional($reply->created_at)->format('M j, Y \\a\\t H:i') }}</span>
+                                                                                </div>
+                                                                                <div class="desc">
+                                                                                    <p>{!! nl2br(e($reply->body)) !!}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        @endif
+                                                        <div id="reply-{{ $comment->id }}" class="mt-3 d-none">
+                                                            <form method="POST" action="{{ route('blog.comment.reply', [$blog->slug, $comment->id]) }}">
+                                                                @csrf
+                                                                <div class="mb-2">
+                                                                    <textarea name="body" class="form-control" rows="4" style="min-height:120px" placeholder="Write your reply" required></textarea>
+                                                                </div>
+                                                                <button type="submit" class="btn btn-sm btn-primary">Send reply</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="comments-header">
-                                                    <div class="avatar-name">
-                                                        <h6 class="title">Sarah Johnson</h6>
-                                                    </div>
-                                                    <div class="comment-text">
-                                                        <span class="date">{{ now()->subDays(2)->format('M j, Y') }} at
-                                                            2:30 pm</span>
-                                                        <a class="reply" href="#">Reply</a>
-                                                    </div>
-                                                    <div class="desc">
-                                                        <p>Excellent insights on business transformation! The strategic
-                                                            framework
-                                                            you've outlined really resonates with the challenges we're
-                                                            facing in our
-                                                            organization. Looking forward to implementing some of these
-                                                            strategies.</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li class="tj-comment">
-                                            <div class="comment-content">
-                                                <div class="comment-avatar">
-                                                    <img src="{{ asset('frontend/assets/images/blog/avatar-2.webp') }}"
-                                                        alt="Commenter" class="rounded-circle"
-                                                        style="width: 60px; height: 60px; object-fit: cover;">
-                                                </div>
-                                                <div class="comments-header">
-                                                    <div class="avatar-name">
-                                                        <h6 class="title">Michael Chen</h6>
-                                                    </div>
-                                                    <div class="comment-text">
-                                                        <span class="date">{{ now()->subDays(1)->format('M j, Y') }} at
-                                                            10:15 am</span>
-                                                        <a class="reply" href="#">Reply</a>
-                                                    </div>
-                                                    <div class="desc">
-                                                        <p>The focus on customer-centric design thinking is spot on. We've
-                                                            seen
-                                                            significant improvements in our customer satisfaction scores
-                                                            after
-                                                            applying similar principles. Great article!</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
+                                            </li>
+                                        @empty
+                                            <li class="text-muted">No comments yet.</li>
+                                        @endforelse
                                     </ul>
+                                    <div class="mt-3">
+                                        {{ $comments->links() }}
+                                    </div>
                                 </div>
                             </div>
 
@@ -363,38 +427,37 @@
                             <div class="tj-comments__container">
                                 <div class="comment-respond">
                                     <h3 class="comment-reply-title">Leave a Comment</h3>
-                                    <form class="comment-form" method="post" action="#">
+                                    <form class="comment-form" method="post" action="{{ route('blog.comment.store', $blog->slug) }}">
                                         @csrf
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="form-input">
-                                                    <textarea id="comment" name="message" placeholder="Write Your Comment *" rows="5" required></textarea>
+                                        <div class="row g-3">
+                                            <div class="col-lg-6">
+                                                <div class="tj-input-field">
+                                                    <label for="cmt_name mb-1">Your Name</label>
+                                                    <input type="text" id="cmt_name" name="name" placeholder="Name"
+                                                           value="{{ auth()->user()->name ?? '' }}"
+                                                           @auth readonly @endauth required>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4">
-                                                <div class="form-input">
-                                                    <input type="text" id="name" name="name"
-                                                        placeholder="Full Name *" required>
+                                            <div class="col-lg-6">
+                                                <div class="tj-input-field">
+                                                    <label for="cmt_email mb-1">Email</label>
+                                                    <input type="email" id="cmt_email" name="email" placeholder="Email"
+                                                           value="{{ auth()->user()->email ?? '' }}"
+                                                           @auth readonly @endauth required>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4">
-                                                <div class="form-input">
-                                                    <input type="email" id="emailOne" name="email"
-                                                        placeholder="Your Email *" required>
+                                            <div class="col-12">
+                                                <div class="tj-input-field">
+                                                    <label for="cmt_message mb-1">Write Comments</label>
+                                                    <textarea id="cmt_message" name="body" placeholder="Your Message" rows="5" required></textarea>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4">
-                                                <div class="form-input">
-                                                    <input type="url" id="website" name="website"
-                                                        placeholder="Website (Optional)">
-                                                </div>
+                                            <div class="col-12 mt-3">
+                                                <button type="submit" class="tj-primary-btn">
+                                                    <span class="btn-text"><span>Post a comment</span></span>
+                                                    <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="comments-btn">
-                                            <button class="tj-primary-btn" type="submit">
-                                                <span class="btn-text"><span>Submit Comment</span></span>
-                                                <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
-                                            </button>
                                         </div>
                                     </form>
                                 </div>

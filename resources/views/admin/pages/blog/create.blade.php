@@ -39,6 +39,17 @@
             <input type="file" name="thumbnail" class="form-control" accept="image/*">
             <div class="form-text">Upload a JPG/PNG (Max 4MB).</div>
         </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Meta Title (optional)</label>
+            <input type="text" name="meta_title" value="{{ old('meta_title') }}"
+                   class="form-control"
+                   placeholder="SEO title for this post">
+        </div>
+        <div class="col-12">
+            <label class="form-label fw-semibold">Meta Description (optional)</label>
+            <textarea name="meta_description" class="form-control" rows="2"
+                      placeholder="Short SEO description (max ~300 chars)">{{ old('meta_description') }}</textarea>
+        </div>
     </div>
 
     <!-- Submit -->
