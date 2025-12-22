@@ -298,7 +298,7 @@
                                                                     <div class="comment_container">
                                                                         <img class="avatar" src="{{ asset('frontend/assets/images/blog/avatar-1.jpg') }}" alt="">
                                                                         <div class="comment-text">
-                                                                            <div class="star-rating">
+                                                                            <div class="stinear-rating">
                                                                                 <span style="width:{{ ($review->rating / 5) * 100 }}%"></span>
                                                                             </div>
                                                                             <p class="meta">

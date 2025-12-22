@@ -552,6 +552,42 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.application-form');
+            if (form) {
+                const showBanner = (message) => {
+                    let banner = document.getElementById('application-error-banner');
+                    if (!banner) {
+                        banner = document.createElement('div');
+                        banner.id = 'application-error-banner';
+                        banner.className = 'alert alert-danger rounded-4 border-0 shadow-sm mb-4';
+                        form.parentNode.insertBefore(banner, form);
+                    }
+                    banner.textContent = message;
+                };
+
+                const focusFirstInvalid = () => {
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        firstInvalid.focus({preventScroll: true});
+                    }
+                };
+
+                form.addEventListener('invalid', function (event) {
+                    event.preventDefault();
+                    showBanner('Please complete the highlighted fields before submitting.');
+                    focusFirstInvalid();
+                }, true);
+
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        showBanner('Please complete the highlighted fields before submitting.');
+                        focusFirstInvalid();
+                    }
+                });
+            }
+
             function toggleTargets(select) {
                 const targetClass = select.dataset.toggleTarget;
                 if (!targetClass) return;

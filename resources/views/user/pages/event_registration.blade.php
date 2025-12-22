@@ -57,7 +57,6 @@
 
                                         <div class="row form-row algin-items-center rg-15">
                                             <x-honeypot />
-                                            <x-recaptcha action="event_registration" />
                                             <div class="col-sm-12">
                                                 <button type="submit"
                                                     class="woocommerce-button button woocommerce-form-login__submit"

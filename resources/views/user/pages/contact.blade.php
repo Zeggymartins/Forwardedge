@@ -102,7 +102,6 @@
                                     </div>
                                 </div>
                                 <x-honeypot />
-                                <x-recaptcha action="contact_form" />
                                 <div class="submit-btn">
                                     <button class="tj-primary-btn" type="submit">
                                         <span class="btn-text"><span>Send Message</span></span>

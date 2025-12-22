@@ -1084,38 +1084,6 @@
                                 console.log('✅ Quick-register href guard active for /enroll*, scholarships allowed');
                             })();
                         </script>
-                        @if (config('services.recaptcha.key'))
-                            <script>
-                                (function () {
-                                    const siteKey = "{{ config('services.recaptcha.key') }}";
-                                    const sources = [
-                                        `https://www.google.com/recaptcha/api.js?render=${siteKey}`,
-                                        `https://www.recaptcha.net/recaptcha/api.js?render=${siteKey}`,
-                                    ];
-
-                                    window.RECAPTCHA_SITE_KEY = siteKey;
-
-                                    function injectNext() {
-                                        if (!sources.length) return;
-                                        const src = sources.shift();
-                                        const script = document.createElement('script');
-                                        script.src = src;
-                                        script.async = true;
-                                        script.defer = true;
-                                        script.onload = () => {
-                                            document.dispatchEvent(new CustomEvent('recaptcha:loaded'));
-                                        };
-                                        script.onerror = () => {
-                                            injectNext();
-                                        };
-                                        document.head.appendChild(script);
-                                    }
-
-                                    injectNext();
-                                })();
-                            </script>
-                        @endif
-
                         <script>
                             window.IS_AUTH = @json(auth()->check()); // true/false from server
                         </script>

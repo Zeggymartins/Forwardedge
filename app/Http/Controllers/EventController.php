@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Page;
-use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -104,7 +103,6 @@ class EventController extends Controller
             'job_title'  => 'nullable|string|max:255',
             'special_requirements' => 'nullable|string|max:500',
             'hp_field'   => ['nullable', 'prohibited'],
-            'recaptcha_token' => ['required', new Recaptcha('event_registration')],
         ]);
 
         $event = Event::findOrFail($request->event_id);

@@ -6,6 +6,8 @@ use App\Console\Commands\SendAutoRejectApology;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,6 +38,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Gracefully handle expired/invalid CSRF tokens so users see a clear message instead of a blank/419 page.
+        $exceptions->render(function (TokenMismatchException $e, $request) {
+            Log::warning('CSRF token mismatch', [
+                'url' => $request->fullUrl(),
+                'route' => optional($request->route())->getName(),
+                'session_exists' => $request->hasSession() && $request->session()->isStarted(),
+                'user_id' => optional($request->user())->id,
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Your session expired—please retry the form.');
+        });
     })
     ->create();
