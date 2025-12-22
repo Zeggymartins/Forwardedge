@@ -198,6 +198,28 @@
                                         alt="">
                                 </div>
                             </div>
+                            <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/client7.jpg') }}" alt="">
+                                </div>
+                            </div><div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/client8.jpg') }}" alt="">
+                                </div>
+                            </div><div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/client9.jpg') }}" alt="">
+                                </div>
+                            </div>
+                            <div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/client10.png') }}" alt="">
+                                </div>
+                            </div><div class="swiper-slide client-item">
+                                <div class="">
+                                    <img src="{{ asset('frontend/assets/images/brands/client11.jpg') }}" alt="">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
