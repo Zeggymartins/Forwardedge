@@ -20,51 +20,97 @@
             <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
             <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
         </div>
-        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="w-100">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body py-3">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-12 col-md-3 col-lg-4">
-                            <label class="text-muted small mb-1">Score range</label>
-                            <div class="row g-1 align-items-center">
-                                <div class="col-5">
-                                    <input type="number" name="score_min" class="form-control form-control-sm" placeholder="Min" value="{{ $scoreMin }}">
+        <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="w-100 scholarship-filters">
+            <div class="card border-0 shadow-sm filter-card">
+                <div class="card-body p-3 p-lg-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <div class="filter-title">Filter applications</div>
+                            <div class="filter-subtitle">Search by applicant, score, status, or submitted date.</div>
+                        </div>
+                        <span class="filter-pill">Smart filters</span>
+                    </div>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-lg-4 filter-field">
+                            <label class="form-label mb-1" for="filter_name_email">Name or email</label>
+                            <input type="text"
+                                   id="filter_name_email"
+                                   name="name_email"
+                                   class="form-control form-control-sm filter-input"
+                                   placeholder="e.g. Ada Lovelace or ada@email.com"
+                                   value="{{ $nameEmail }}">
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 filter-field">
+                            <label class="form-label mb-1">Submitted date</label>
+                            <div class="row g-1">
+                                <div class="col-6">
+                                    <label class="form-label filter-sub-label mb-1" for="filter_date_from">From</label>
+                                    <input type="date"
+                                           id="filter_date_from"
+                                           name="date_from"
+                                           class="form-control form-control-sm filter-input"
+                                           value="{{ $dateFrom }}">
                                 </div>
-                                <div class="col-2 text-center">
-                                    <span class="text-muted small">to</span>
-                                </div>
-                                <div class="col-5">
-                                    <input type="number" name="score_max" class="form-control form-control-sm" placeholder="Max" value="{{ $scoreMax }}">
+                                <div class="col-6">
+                                    <label class="form-label filter-sub-label mb-1" for="filter_date_to">To</label>
+                                    <input type="date"
+                                           id="filter_date_to"
+                                           name="date_to"
+                                           class="form-control form-control-sm filter-input"
+                                           value="{{ $dateTo }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-2">
-                            <label class="text-muted small mb-1">Score sort</label>
-                            <select name="score_sort" class="form-select form-select-sm">
+                        <div class="col-12 col-md-6 col-lg-3 filter-field">
+                            <label class="form-label mb-1">Score range</label>
+                            <div class="row g-1">
+                                <div class="col-6">
+                                    <label class="form-label filter-sub-label mb-1" for="filter_score_min">Min</label>
+                                    <input type="number"
+                                           id="filter_score_min"
+                                           name="score_min"
+                                           class="form-control form-control-sm filter-input"
+                                           placeholder="0"
+                                           value="{{ $scoreMin }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label filter-sub-label mb-1" for="filter_score_max">Max</label>
+                                    <input type="number"
+                                           id="filter_score_max"
+                                           name="score_max"
+                                           class="form-control form-control-sm filter-input"
+                                           placeholder="100"
+                                           value="{{ $scoreMax }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2 filter-field">
+                            <label class="form-label mb-1" for="filter_score_sort">Score sort</label>
+                            <select name="score_sort" id="filter_score_sort" class="form-select form-select-sm filter-select">
                                 <option value="">Any</option>
                                 <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
                                 <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
                             </select>
                         </div>
-                        <div class="col-6 col-md-2">
-                            <label class="text-muted small mb-1">Status</label>
-                            <select name="status" class="form-select form-select-sm">
+                        <div class="col-6 col-md-3 col-lg-2 filter-field">
+                            <label class="form-label mb-1" for="filter_status">Status</label>
+                            <select name="status" id="filter_status" class="form-select form-select-sm filter-select">
                                 <option value="">Any</option>
                                 @foreach($statusOptions ?? ['pending','approved','rejected'] as $option)
                                     <option value="{{ $option }}" @selected(($status ?? '') === $option)>{{ ucfirst($option) }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-4 col-md-2">
-                            <label class="text-muted small mb-1">Per page</label>
-                            <select name="per_page" id="per_page" class="form-select form-select-sm">
+                        <div class="col-6 col-md-3 col-lg-2 filter-field">
+                            <label class="form-label mb-1" for="per_page">Per page</label>
+                            <select name="per_page" id="per_page" class="form-select form-select-sm filter-select">
                                 @foreach($perPageOptions ?? [10,20,50,100] as $option)
                                     <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-md-3 col-lg-2 d-flex gap-2 align-items-end justify-content-end">
-                            <button type="submit" class="btn btn-sm btn-primary flex-fill">Apply</button>
+                        <div class="col-12 col-lg-3 filter-actions d-grid d-md-flex gap-2">
+                            <button type="submit" class="btn btn-sm btn-primary flex-fill">Apply filters</button>
                             <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light flex-fill">Reset</a>
                         </div>
                     </div>
@@ -385,6 +431,84 @@
     }
     .mini-list li {
         margin-bottom: .35rem;
+    }
+    .scholarship-filters .filter-card {
+        background: radial-gradient(circle at top right, rgba(14, 116, 144, 0.12), transparent 55%),
+            radial-gradient(circle at bottom left, rgba(30, 64, 175, 0.12), transparent 55%),
+            linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .scholarship-filters .filter-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+        pointer-events: none;
+    }
+    .scholarship-filters .card-body {
+        position: relative;
+        z-index: 1;
+    }
+    .filter-title {
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.01em;
+        color: #0f172a;
+    }
+    .filter-subtitle {
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+    .filter-pill {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    .filter-field .form-label {
+        font-weight: 600;
+        color: #475569;
+    }
+    .filter-sub-label {
+        font-weight: 500;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    .filter-input,
+    .filter-select {
+        border-radius: 0.85rem;
+        border-color: #cbd5e1;
+        background-color: rgba(255, 255, 255, 0.92);
+    }
+    .filter-input:focus,
+    .filter-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    }
+    .filter-actions .btn-primary {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        box-shadow: 0 10px 20px rgba(29, 78, 216, 0.2);
+    }
+    .filter-actions .btn-light {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+        color: #0f172a;
+    }
+    @media (max-width: 767.98px) {
+        .filter-pill {
+            width: 100%;
+            text-align: center;
+        }
     }
 </style>
 @endpush

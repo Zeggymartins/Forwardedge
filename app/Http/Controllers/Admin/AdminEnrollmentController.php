@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\ScholarshipApplication;
 use App\Services\ScholarshipApplicationManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 
 class AdminEnrollmentController extends Controller
@@ -49,6 +50,32 @@ class AdminEnrollmentController extends Controller
             $perPage = 20;
         }
 
+        $nameEmail = trim((string) $request->input('name_email', ''));
+        if ($nameEmail === '') {
+            $nameEmail = null;
+        }
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $fromDate = null;
+        $toDate = null;
+
+        if ($dateFrom) {
+            try {
+                $fromDate = Carbon::createFromFormat('Y-m-d', $dateFrom)->startOfDay();
+            } catch (\Throwable $e) {
+                $dateFrom = null;
+            }
+        }
+
+        if ($dateTo) {
+            try {
+                $toDate = Carbon::createFromFormat('Y-m-d', $dateTo)->endOfDay();
+            } catch (\Throwable $e) {
+                $dateTo = null;
+            }
+        }
+
         $scoreMin = $request->input('score_min');
         $scoreMax = $request->input('score_max');
         $scoreSort = $request->input('score_sort');
@@ -59,6 +86,21 @@ class AdminEnrollmentController extends Controller
         }
 
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
+            ->when($nameEmail, function ($q) use ($nameEmail) {
+                $term = '%' . $nameEmail . '%';
+                $q->where(function ($query) use ($term) {
+                    $query->whereHas('user', function ($userQuery) use ($term) {
+                        $userQuery->where('name', 'like', $term)
+                            ->orWhere('email', 'like', $term);
+                    })
+                        ->orWhere('form_data->contact->name', 'like', $term)
+                        ->orWhere('form_data->contact->email', 'like', $term)
+                        ->orWhere('form_data->personal->full_name', 'like', $term)
+                        ->orWhere('form_data->personal->email', 'like', $term);
+                });
+            })
+            ->when($fromDate, fn ($q) => $q->where('created_at', '>=', $fromDate))
+            ->when($toDate, fn ($q) => $q->where('created_at', '<=', $toDate))
             ->when($scoreMin !== null && $scoreMin !== '', fn ($q) => $q->where('score', '>=', (int) $scoreMin))
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
             ->when($status, fn ($q) => $q->where('status', $status))
@@ -77,6 +119,9 @@ class AdminEnrollmentController extends Controller
             'scoreSort' => $scoreSort,
             'status' => $status,
             'statusOptions' => $allowedStatuses,
+            'nameEmail' => $nameEmail,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
         ]);
     }
 
