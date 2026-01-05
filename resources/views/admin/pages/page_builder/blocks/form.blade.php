@@ -190,6 +190,29 @@
         const ROUTE_PARAM_OPTIONS = @json($routeBindingOptions ?? []);
         const ICON_OPTIONS = @json($iconOptions ?? []);
         const COURSE_CATALOG = @json(($courseCatalog ?? collect())->values());
+        const TABLE_COLUMN_OPTIONS = {
+            enrollments: [
+                { value: 'id', label: 'Enrollment ID' },
+                { value: 'user_name', label: 'Student Name' },
+                { value: 'user_email', label: 'Student Email' },
+                { value: 'course_title', label: 'Course' },
+                { value: 'schedule_dates', label: 'Schedule Dates' },
+                { value: 'payment_plan', label: 'Payment Plan' },
+                { value: 'total_amount', label: 'Total Amount' },
+                { value: 'balance', label: 'Balance' },
+                { value: 'status', label: 'Status' },
+                { value: 'created_at', label: 'Created Date' },
+            ],
+            course_contents: [
+                { value: 'id', label: 'Content ID' },
+                { value: 'title', label: 'Title' },
+                { value: 'type', label: 'Type' },
+                { value: 'price', label: 'Price' },
+                { value: 'discount_price', label: 'Discount Price' },
+                { value: 'order', label: 'Order' },
+                { value: 'created_at', label: 'Created Date' },
+            ],
+        };
 
         /* ====== UTILITIES ====== */
         function html(markup) {
@@ -358,6 +381,94 @@
                 setTimeout(hydrate, 60);
             });
             observer.observe(plansRep, { childList: true, subtree: true });
+        }
+
+        function buildTableColumnOptions(table, selectedValue = '') {
+            const cols = TABLE_COLUMN_OPTIONS[table] || [];
+            const options = ['<option value="">Select column</option>'];
+            cols.forEach(col => {
+                const selected = String(selectedValue) === String(col.value) ? 'selected' : '';
+                options.push(`<option value="${col.value}" ${selected}>${col.label}</option>`);
+            });
+            return options.join('');
+        }
+
+        function refreshTableColumnSelects(scope, table) {
+            scope.querySelectorAll('[data-table-column-select]').forEach(select => {
+                const current = select.value || select.dataset.selected || '';
+                select.innerHTML = buildTableColumnOptions(table, current);
+                select.value = current;
+                select.dataset.selected = select.value;
+            });
+        }
+
+        function initTableBlockBindings(scope) {
+            const sourceSelect = scope.querySelector('[data-table-source]');
+            const countInput = scope.querySelector('[data-header-count]');
+            const repeater = scope.querySelector('.repeater[data-name="headers"]');
+            const addBtn = scope.querySelector('[data-repeater-add="headers"]');
+            const enrollmentsOnly = scope.querySelector('[data-enrollment-only]');
+
+            if (!sourceSelect || !countInput || !repeater || !addBtn) return;
+
+            const clampCount = (value) => {
+                let count = parseInt(value, 10);
+                if (!Number.isFinite(count) || count < 1) count = 1;
+                if (count > 8) count = 8;
+                return count;
+            };
+
+            const syncVisibility = () => {
+                if (!enrollmentsOnly) return;
+                enrollmentsOnly.style.display = sourceSelect.value === 'course_contents' ? 'none' : '';
+            };
+
+            const refreshColumns = () => {
+                const table = sourceSelect.value || 'enrollments';
+                refreshTableColumnSelects(scope, table);
+            };
+
+            const setHeaderCount = (value) => {
+                const target = clampCount(value);
+                const items = [...repeater.querySelectorAll(':scope > [data-repeater-item]')];
+
+                if (items.length < target) {
+                    for (let i = 0; i < target - items.length; i++) {
+                        addBtn.click();
+                    }
+                } else if (items.length > target) {
+                    items.slice(target).forEach(item => item.remove());
+                    renumberRepeater(repeater);
+                }
+
+                countInput.value = target;
+            };
+
+            sourceSelect.addEventListener('change', () => {
+                syncVisibility();
+                refreshColumns();
+            });
+
+            countInput.addEventListener('change', () => {
+                setHeaderCount(countInput.value);
+                refreshColumns();
+            });
+
+            const observer = new MutationObserver(() => {
+                const itemsCount = repeater.querySelectorAll(':scope > [data-repeater-item]').length;
+                if (itemsCount) {
+                    countInput.value = itemsCount;
+                }
+                refreshColumns();
+            });
+            observer.observe(repeater, { childList: true });
+
+            setTimeout(() => {
+                const initial = parseInt(countInput.value, 10);
+                setHeaderCount(Number.isFinite(initial) ? initial : 3);
+                syncVisibility();
+                refreshColumns();
+            }, 250);
         }
 
         function slugify(str) {
@@ -1020,6 +1131,60 @@
         </div>
       </template>
     </div>
+  </div>
+</div>`);
+        }
+
+        function renderTableBlockFields() {
+            return html(`
+<div class="row g-3">
+  <div class="col-md-6">
+    <label class="form-label small-label">Table Source</label>
+    <select class="form-select" name="data[table_source]" data-table-source>
+      <option value="enrollments">Enrollments</option>
+      <option value="course_contents">Course Contents</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label small-label">Header Count</label>
+    <input class="form-control" type="number" min="1" max="8" name="data[header_count]" value="3" data-header-count>
+  </div>
+  <div class="col-md-3" data-enrollment-only>
+    <label class="form-label small-label">Amount Filter</label>
+    <select class="form-select" name="data[amount_filter]">
+      <option value="any">Any</option>
+      <option value="free" selected>Free (0)</option>
+      <option value="paid">Paid</option>
+    </select>
+  </div>
+
+  <div class="col-12"><div class="section-divider"><span class="section-divider-label">Headers</span></div></div>
+  <div class="col-12 d-flex justify-content-between align-items-center">
+    <label class="form-label small-label mb-0">Columns</label>
+    <button type="button" class="btn btn-dark btn-sm" data-repeater-add="headers">Add Header</button>
+  </div>
+  <div class="col-12">
+    <div class="repeater" data-repeater data-name="headers" data-max="8">
+      <template data-repeater-template>
+        <div class="repeater-item border rounded-12 p-3 mb-3" data-repeater-item draggable="true">
+          <div class="d-flex gap-3 align-items-start">
+            <span class="drag-handle">☰</span>
+            <div class="row g-2 flex-grow-1">
+              <div class="col-12">
+                <label class="form-label small-label">Column</label>
+                <select class="form-select" name="data[headers][__INDEX__][column]" data-table-column-select>
+                  <option value="">Select column</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-outline-danger btn-sm" type="button" data-repeater-remove>Remove</button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <div class="col-12 text-muted small">
+    Uses the course linked to this page. If no course is selected, the table will be empty.
   </div>
 </div>`);
         }
@@ -1844,6 +2009,8 @@
                 case 'form_dark':
                 case 'form_light':
                     return renderFormBuilderFields();
+                case 'table':
+                    return renderTableBlockFields();
 
                 default:
                     return html(`<div class="alert alert-info">Select a block type to see its fields.</div>`);
@@ -1889,6 +2056,10 @@
 
             if (type === 'pricing') {
                 initPricingPlanCourseBindings(mount);
+            }
+
+            if (type === 'table') {
+                initTableBlockBindings(mount);
             }
         }
 

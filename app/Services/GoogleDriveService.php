@@ -75,7 +75,7 @@ class GoogleDriveService
         return $this->drive = new Google_Service_Drive($client);
     }
 
-    public function grantReader(string $folderId, string $email): bool
+    public function grantReader(string $folderId, string $email, bool $restrictSharing = true): bool
     {
         if (!$folderId || !$email) {
             return false;
@@ -87,20 +87,135 @@ class GoogleDriveService
         }
 
         try {
+            // Create permission with security restrictions
             $permission = new Google_Service_Drive_Permission([
                 'type' => 'user',
                 'role' => 'reader',
                 'emailAddress' => $email,
+                'allowFileDiscovery' => false, // Hide from search/discovery
             ]);
 
+            // Grant permission
             $service->permissions->create($folderId, $permission, [
                 'sendNotificationEmail' => (bool) config('services.google_drive.notify', true),
-                'emailMessage' => 'Forward Edge just granted you access to your course resources.',
+                'emailMessage' => 'Forward Edge has granted you access to your course materials. Please log in to the Forward Edge platform to view your content.',
             ]);
+
+            // Apply folder-level security restrictions
+            if ($restrictSharing) {
+                $this->restrictFolderSharing($folderId);
+            }
 
             return true;
         } catch (\Throwable $e) {
             Log::error('Google Drive permission failed', [
+                'folder_id' => $folderId,
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Apply security restrictions to a folder to prevent unauthorized sharing
+     */
+    protected function restrictFolderSharing(string $folderId): void
+    {
+        $service = $this->drive();
+        if (!$service) {
+            return;
+        }
+
+        try {
+            $file = new \Google_Service_Drive_DriveFile();
+
+            // Prevent readers from copying/downloading
+            $file->setCopyRequiresWriterPermission(true);
+
+            // Update the folder with restrictions
+            $service->files->update($folderId, $file, [
+                'fields' => 'copyRequiresWriterPermission',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to apply folder restrictions', [
+                'folder_id' => $folderId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Revoke access for a specific email
+     */
+    public function revokeAccess(string $folderId, string $email): bool
+    {
+        $service = $this->drive();
+        if (!$service) {
+            return false;
+        }
+
+        try {
+            // List all permissions for the folder
+            $permissions = $service->permissions->listPermissions($folderId, [
+                'fields' => 'permissions(id,emailAddress)',
+            ]);
+
+            // Find and delete the permission for this email
+            foreach ($permissions->getPermissions() as $permission) {
+                if ($permission->getEmailAddress() === $email) {
+                    $service->permissions->delete($folderId, $permission->getId());
+                    Log::info('Revoked Google Drive access', [
+                        'folder_id' => $folderId,
+                        'email' => $email,
+                    ]);
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            Log::error('Failed to revoke Google Drive access', [
+                'folder_id' => $folderId,
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Get the Drive service instance for advanced operations
+     */
+    public function getDriveService(): ?Google_Service_Drive
+    {
+        return $this->drive();
+    }
+
+    /**
+     * Check if a user has access to a folder
+     */
+    public function hasAccess(string $folderId, string $email): bool
+    {
+        $service = $this->drive();
+        if (!$service) {
+            return false;
+        }
+
+        try {
+            $permissions = $service->permissions->listPermissions($folderId, [
+                'fields' => 'permissions(emailAddress)',
+            ]);
+
+            foreach ($permissions->getPermissions() as $permission) {
+                if ($permission->getEmailAddress() === $email) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            Log::error('Failed to check Google Drive access', [
                 'folder_id' => $folderId,
                 'email' => $email,
                 'error' => $e->getMessage(),

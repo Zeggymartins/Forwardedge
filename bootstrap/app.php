@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Existing aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'verify.content.access' => \App\Http\Middleware\VerifyCourseContentAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

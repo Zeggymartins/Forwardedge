@@ -33,6 +33,7 @@ final class PageBlueprint
             'pricing',
             'faq',
             'closing_cta',
+            'table',
         ];
     }
 
@@ -363,6 +364,14 @@ final class PageBlueprint
                 'brands.*.image' => $fileImg,
                 'brands.*.alt'  => ['nullable', 'string', 'max:120'],
                 'brands.*.href' => self::linkRule(),
+            ],
+
+            'table' => [
+                'table_source' => ['required', Rule::in(['enrollments', 'course_contents'])],
+                'header_count' => ['nullable', 'integer', 'min:1', 'max:8'],
+                'headers' => ['required', 'array', 'min:1', 'max:8'],
+                'headers.*.column' => ['required', 'string', 'max:120'],
+                'amount_filter' => ['nullable', Rule::in(['any', 'free', 'paid', 'zero'])],
             ],
 
   

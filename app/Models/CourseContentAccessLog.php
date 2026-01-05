@@ -15,6 +15,17 @@ class CourseContentAccessLog extends Model
         'provider',
         'status',
         'message',
+        'expires_at',
+        'last_accessed_at',
+        'access_count',
+        'ip_address',
+        'user_agent',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
+        'last_accessed_at' => 'datetime',
+        'access_count' => 'integer',
     ];
 
     public function content()

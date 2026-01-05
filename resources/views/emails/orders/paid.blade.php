@@ -98,29 +98,22 @@
             </ul>
 
             <p><strong>Total Paid:</strong> ₦{{ number_format($order->total_price ?? 0, 2) }}</p>
-            <p>Your secure download bundle is attached, and we’ve also linked each module below.</p>
+            <p>Your secure download bundle is attached. To access your course materials online, please log in to your student dashboard.</p>
 
             @foreach ($order->orderItems as $item)
-                @php
-                    $driveLinks = $item->course?->contents?->filter(fn($content) => filled($content->drive_share_link)) ?? collect();
-                @endphp
                 <div style="margin-bottom:18px;">
                     <strong>{{ $item->course->title ?? 'Course Module' }}</strong>
                     <div>₦{{ number_format($item->price, 2) }}</div>
-                    @if ($driveLinks->isNotEmpty())
+                    @if ($item->course)
                         <div style="margin-top:8px;">
-                            <span style="font-weight:600;">Google Drive access:</span>
-                            <ul style="padding-left:18px;margin:8px 0;">
-                                @foreach ($driveLinks as $driveContent)
-                                    <li>
-                                        <a href="{{ $driveContent->drive_share_link }}" target="_blank" rel="noopener">
-                                            {{ $driveContent->title }}
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                            <small style="color:#666;">We’ve also invited {{ $order->user->email }} to these folders via Google Drive.</small>
+                            <a href="{{ route('student.courses.content', $item->course->id) }}"
+                               style="display:inline-block;background-color:#ffc107;color:#333;text-decoration:none;padding:10px 20px;border-radius:5px;font-weight:bold;margin-top:8px;">
+                                Access Course Materials
+                            </a>
                         </div>
+                        <small style="color:#666;display:block;margin-top:8px;">
+                            Your course materials are securely protected and can only be accessed through your Forward Edge account.
+                        </small>
                     @endif
                 </div>
             @endforeach

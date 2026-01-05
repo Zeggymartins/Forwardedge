@@ -327,13 +327,20 @@ class PaymentController extends Controller
                     continue;
                 }
 
-                $granted = $this->driveService->grantReader($content->drive_folder_id, $email);
+                // Grant access with enhanced security restrictions
+                $granted = $this->driveService->grantReader($content->drive_folder_id, $email, true);
 
                 CourseContentAccessLog::create([
                     'course_content_id' => $content->id,
                     'email' => $email,
+                    'provider' => 'google_drive',
                     'status' => $granted ? 'granted' : 'failed',
-                    'message' => $granted ? null : 'Unable to create Drive permission automatically',
+                    'message' => $granted ? 'Access granted with security restrictions (view-only, no sharing)' : 'Unable to create Drive permission automatically',
+                    'expires_at' => null, // Lifetime access as per requirements
+                    'last_accessed_at' => null,
+                    'access_count' => 0,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
                 ]);
 
                 Log::log($granted ? 'info' : 'warning', 'Drive access result', [

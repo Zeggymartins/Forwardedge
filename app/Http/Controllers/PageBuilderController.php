@@ -184,6 +184,7 @@ class PageBuilderController extends Controller
             'pricing'      => ['default', 'comparison'],
             'faq'          => ['accordion', 'tabs'],
             'closing_cta'  => ['default', 'split'],
+            'table'        => ['default'],
         ];
 
         $allowedRouteParams = ['course', 'course_id', 'schedule', 'event', 'event_id', 'page', 'page_id', 'slug'];
@@ -543,6 +544,7 @@ class PageBuilderController extends Controller
             'hero3'       => $this->cleanHero3Data($data),
             'form_dark',
             'form_light'  => $this->normalizeFormFields($data),
+            'table'       => $this->normalizeTableBlock($data),
             default       => $data,
         };
     }
@@ -700,6 +702,48 @@ class PageBuilderController extends Controller
 
         $data['email_subject'] = $subject !== '' ? $subject : null;
         $data['email_body'] = $body !== '' ? $body : null;
+
+        return $data;
+    }
+
+    private function normalizeTableBlock(array $data): array
+    {
+        $source = $data['table_source'] ?? 'enrollments';
+        $allowedSources = ['enrollments', 'course_contents'];
+        $data['table_source'] = in_array($source, $allowedSources, true) ? $source : 'enrollments';
+
+        $headers = [];
+        if (isset($data['headers']) && is_array($data['headers'])) {
+            foreach ($data['headers'] as $header) {
+                $column = trim((string) ($header['column'] ?? ''));
+                if ($column === '') {
+                    continue;
+                }
+                $headers[] = ['column' => $column];
+            }
+        }
+
+        $count = isset($data['header_count']) ? (int) $data['header_count'] : 0;
+        if ($count < 1) {
+            $count = count($headers);
+        }
+        if ($count < 1) {
+            $count = 1;
+        }
+        if ($count > 8) {
+            $count = 8;
+        }
+
+        if (count($headers) > $count) {
+            $headers = array_slice($headers, 0, $count);
+        }
+
+        $data['headers'] = array_values($headers);
+        $data['header_count'] = $count;
+
+        $allowedFilters = ['any', 'free', 'paid', 'zero'];
+        $filter = $data['amount_filter'] ?? null;
+        $data['amount_filter'] = in_array($filter, $allowedFilters, true) ? $filter : null;
 
         return $data;
     }

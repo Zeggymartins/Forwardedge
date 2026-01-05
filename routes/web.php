@@ -13,6 +13,7 @@ use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseContentController;
 use App\Http\Controllers\CourseContentReviewController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EventController;
@@ -193,6 +194,43 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::post('/store', [OrderController::class, 'store'])->name('store');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Secure Course Content Access Routes
+    |--------------------------------------------------------------------------
+    | These routes provide authenticated, proxy access to course content
+    | stored in Google Drive, preventing unauthorized sharing
+    */
+    Route::prefix('student')->name('student.')->group(function () {
+        // View course contents list
+        Route::get('/courses/{course}/content', [CourseContentController::class, 'show'])
+            ->name('courses.content');
+
+        // Secure content viewing routes with access verification middleware
+        Route::middleware([\App\Http\Middleware\VerifyCourseContentAccess::class])->group(function () {
+            // View specific content (auto-detects Gmail vs non-Gmail)
+            Route::get('/content/{content}/view', [CourseContentController::class, 'view'])
+                ->name('content.view')
+                ->middleware('throttle:60,1'); // Rate limit: 60 requests per minute
+
+            // Direct redirect to Google Drive (for Gmail users who want native experience)
+            Route::get('/content/{content}/drive', [CourseContentController::class, 'redirect'])
+                ->name('content.drive')
+                ->middleware('throttle:60,1');
+
+            // Embed view for iframe
+            Route::get('/content/{content}/embed', [CourseContentController::class, 'embed'])
+                ->name('content.embed')
+                ->middleware('throttle:60,1');
+
+            // Download is disabled by default (view-only)
+            // Uncomment if you want to enable downloads with strict rate limiting
+            // Route::get('/content/{content}/download', [CourseContentController::class, 'downloadFile'])
+            //     ->name('content.download')
+            //     ->middleware('throttle:5,1'); // Very strict: 5 downloads per minute
+        });
     });
 });
 
