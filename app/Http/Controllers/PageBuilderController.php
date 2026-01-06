@@ -708,6 +708,9 @@ class PageBuilderController extends Controller
 
     private function normalizeTableBlock(array $data): array
     {
+        $data['title'] = trim((string) ($data['title'] ?? '')) ?: null;
+        $data['subtitle'] = trim((string) ($data['subtitle'] ?? '')) ?: null;
+
         $source = $data['table_source'] ?? 'enrollments';
         $allowedSources = ['enrollments', 'course_contents'];
         $data['table_source'] = in_array($source, $allowedSources, true) ? $source : 'enrollments';

@@ -1139,6 +1139,14 @@
             return html(`
 <div class="row g-3">
   <div class="col-md-6">
+    <label class="form-label small-label">Title</label>
+    <input class="form-control" name="data[title]" placeholder="Active Enrollments">
+  </div>
+  <div class="col-md-6">
+    <label class="form-label small-label">Subtitle</label>
+    <input class="form-control" name="data[subtitle]" placeholder="Active enrollments for this course">
+  </div>
+  <div class="col-md-6">
     <label class="form-label small-label">Table Source</label>
     <select class="form-select" name="data[table_source]" data-table-source>
       <option value="enrollments">Enrollments</option>

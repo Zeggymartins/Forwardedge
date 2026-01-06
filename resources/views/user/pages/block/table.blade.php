@@ -133,10 +133,17 @@
       }
   }
 
-  $title = $tableSource === 'course_contents' ? 'Course Contents' : 'Active Enrollments';
-  $subtitle = $tableSource === 'course_contents'
-      ? 'Content linked to this course'
-      : 'Active enrollments for this course';
+  $title = trim((string) ($d['title'] ?? ''));
+  if ($title === '') {
+      $title = $tableSource === 'course_contents' ? 'Course Contents' : 'Active Enrollments';
+  }
+
+  $subtitle = trim((string) ($d['subtitle'] ?? ''));
+  if ($subtitle === '') {
+      $subtitle = $tableSource === 'course_contents'
+          ? 'Content linked to this course'
+          : 'Active enrollments for this course';
+  }
 @endphp
 
 <section class="pb-table-section section-gap">

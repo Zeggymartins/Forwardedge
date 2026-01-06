@@ -102,6 +102,12 @@
                                     </div>
                                 </div>
                                 <x-honeypot />
+                                <div class="col-sm-12 mb-3">
+                                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.key') }}"></div>
+                                    @error('g-recaptcha-response')
+                                        <div class="text-danger mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
                                 <div class="submit-btn">
                                     <button class="tj-primary-btn" type="submit">
                                         <span class="btn-text"><span>Send Message</span></span>
@@ -122,3 +128,7 @@
     </section>
     <!-- end: Contact Section -->
 @endsection
+
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endpush

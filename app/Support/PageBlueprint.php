@@ -367,6 +367,8 @@ final class PageBlueprint
             ],
 
             'table' => [
+                'title' => ['nullable', 'string', 'max:180'],
+                'subtitle' => ['nullable', 'string', 'max:320'],
                 'table_source' => ['required', Rule::in(['enrollments', 'course_contents'])],
                 'header_count' => ['nullable', 'integer', 'min:1', 'max:8'],
                 'headers' => ['required', 'array', 'min:1', 'max:8'],

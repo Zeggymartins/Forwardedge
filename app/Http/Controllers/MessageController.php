@@ -25,7 +25,11 @@ class MessageController extends Controller
             'cfSubject2' => 'required|exists:services,id',
             'cfMessage2' => 'required|string',
             'hp_field'   => ['nullable', 'prohibited'],
+            'g-recaptcha-response' => ['required', new \App\Rules\Recaptcha('contact')],
         ]);
+
+        // Detect and block spam patterns
+        $this->detectSpam($validated['cfName2'], $validated['cfEmail2'], $validated['cfMessage2'], $request->ip());
 
         // Save to DB
         $message = Message::create([
@@ -45,5 +49,60 @@ class MessageController extends Controller
         });
 
         return back()->with('success', 'Message sent successfully!');
+    }
+
+    /**
+     * Detect and block spam patterns
+     */
+    protected function detectSpam(string $name, string $email, string $message, string $ip): void
+    {
+        // Spam name patterns (case-insensitive)
+        $spamNamePatterns = [
+            'roberthen',
+            'robert hen',
+            'robert-hen',
+            'robert_hen',
+        ];
+
+        $nameLower = strtolower(trim($name));
+        $nameLower = preg_replace('/\s+/', '', $nameLower); // Remove all spaces
+
+        foreach ($spamNamePatterns as $pattern) {
+            $patternNoSpaces = preg_replace('/\s+/', '', $pattern);
+            if (str_contains($nameLower, $patternNoSpaces)) {
+                \Log::warning('Spam detected - Name pattern match', [
+                    'name' => $name,
+                    'email' => $email,
+                    'ip' => $ip,
+                    'pattern' => $pattern,
+                ]);
+
+                abort(422, 'Your submission could not be processed. Please contact us directly if you need assistance.');
+            }
+        }
+
+        // Check blacklisted emails
+        $blacklistedEmails = config('spam.blacklisted_emails', []);
+        if (in_array(strtolower($email), array_map('strtolower', $blacklistedEmails))) {
+            \Log::warning('Spam detected - Blacklisted email', [
+                'name' => $name,
+                'email' => $email,
+                'ip' => $ip,
+            ]);
+
+            abort(422, 'Your submission could not be processed. Please contact us directly if you need assistance.');
+        }
+
+        // Check blacklisted IPs
+        $blacklistedIps = config('spam.blacklisted_ips', []);
+        if (in_array($ip, $blacklistedIps)) {
+            \Log::warning('Spam detected - Blacklisted IP', [
+                'name' => $name,
+                'email' => $email,
+                'ip' => $ip,
+            ]);
+
+            abort(422, 'Your submission could not be processed. Please contact us directly if you need assistance.');
+        }
     }
 }

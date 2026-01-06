@@ -68,7 +68,9 @@ Route::prefix('services')->name('services')->group(function () {
 });
 
 Route::get('/contact', [MessageController::class, 'create'])->name('contact');
-Route::post('/contact', [MessageController::class, 'store'])->name('contact.store');
+Route::post('/contact', [MessageController::class, 'store'])
+    ->name('contact.store')
+    ->middleware('throttle:3,10'); // 3 submissions per 10 minutes
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
 
