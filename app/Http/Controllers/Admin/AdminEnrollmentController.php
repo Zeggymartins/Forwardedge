@@ -84,6 +84,11 @@ class AdminEnrollmentController extends Controller
         if (!in_array($status, $allowedStatuses, true)) {
             $status = null;
         }
+        $discoveryChannel = $request->input('discovery_channel');
+        $allowedDiscovery = array_keys(config('scholarship.form_options.discovery_channels', []));
+        if (!in_array($discoveryChannel, $allowedDiscovery, true)) {
+            $discoveryChannel = null;
+        }
 
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
             ->when($nameEmail, function ($q) use ($nameEmail) {
@@ -104,6 +109,7 @@ class AdminEnrollmentController extends Controller
             ->when($scoreMin !== null && $scoreMin !== '', fn ($q) => $q->where('score', '>=', (int) $scoreMin))
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
             ->when($status, fn ($q) => $q->where('status', $status))
+            ->when($discoveryChannel, fn ($q) => $q->where('form_data->attitude->discovery_channel', $discoveryChannel))
             ->when(in_array($scoreSort, ['asc', 'desc'], true), function ($q) use ($scoreSort) {
                 $q->orderBy('score', $scoreSort)->orderBy('created_at', 'desc');
             }, fn ($q) => $q->latest())
@@ -122,6 +128,7 @@ class AdminEnrollmentController extends Controller
             'nameEmail' => $nameEmail,
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
+            'discoveryChannel' => $discoveryChannel,
         ]);
     }
 

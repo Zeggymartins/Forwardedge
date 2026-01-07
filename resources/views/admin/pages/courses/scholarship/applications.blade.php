@@ -102,6 +102,15 @@
                             </select>
                         </div>
                         <div class="col-6 col-md-3 col-lg-2 filter-field">
+                            <label class="form-label mb-1" for="filter_discovery_channel">Referral</label>
+                            <select name="discovery_channel" id="filter_discovery_channel" class="form-select form-select-sm filter-select">
+                                <option value="">Any</option>
+                                @foreach(($scholarshipOptions['discovery_channels'] ?? []) as $value => $label)
+                                    <option value="{{ $value }}" @selected(($discoveryChannel ?? '') === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2 filter-field">
                             <label class="form-label mb-1" for="per_page">Per page</label>
                             <select name="per_page" id="per_page" class="form-select form-select-sm filter-select">
                                 @foreach($perPageOptions ?? [10,20,50,100] as $option)

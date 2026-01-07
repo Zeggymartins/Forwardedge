@@ -88,7 +88,8 @@ return [
         ],
         'discovery_channels' => [
             'social'   => 'Social media (Instagram / Twitter / LinkedIn)',
-            'referral' => 'Referral / Friend',
+            'referral' => 'Referral',
+            'waaw'     => 'WAAW',
             'whatsapp' => 'WhatsApp group',
             'other'    => 'Other',
         ],
