@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\AdminTransactionsController;
 use App\Http\Controllers\Admin\SecretAdminSetupController;
 use App\Http\Controllers\AjaxAuthController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CourseController;
@@ -256,6 +257,14 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 | Change "ctrl-panel-v2" to something unique and memorable for your team
 |--------------------------------------------------------------------------
 */
+
+// Admin login route (accessible without auth)
+Route::middleware('guest')->prefix('ctrl-panel-v2')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('admin.login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+});
+
+// Admin authenticated routes
 Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(function () {
 
     // Dashboard (Login Landing)

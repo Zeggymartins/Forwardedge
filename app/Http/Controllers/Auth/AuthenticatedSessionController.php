@@ -45,15 +45,14 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         // Redirect based on user role
-        // Admin logout -> Login page with redirect back to admin dashboard
+        // Admin logout -> Admin login page at /ctrl-panel-v2/login
         if ($wasAdmin) {
             return redirect()
-                ->route('login')
-                ->with('status', 'You have been logged out successfully.')
-                ->with('intended', route('dashboard')); // Remember to go to dashboard after login
+                ->route('admin.login')
+                ->with('status', 'You have been logged out successfully.');
         }
 
-        // Regular users -> Home page
-        return redirect('/');
+        // Regular users -> Home page (they use AJAX auth, not this route normally)
+        return redirect('/')->with('status', 'You have been logged out successfully.');
     }
 }
