@@ -839,6 +839,7 @@
                             // Auth Forms
                             $('#registerForm').submit(function(e) {
                                 e.preventDefault();
+                                syncCsrfToken();
                                 $.post("{{ route('ajax.register') }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
@@ -858,6 +859,7 @@
 
                             $('#loginForm').submit(function(e) {
                                 e.preventDefault();
+                                syncCsrfToken();
                                 $.post("{{ route('ajax.login') }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
@@ -883,6 +885,7 @@
 
                             $('#otpForm').submit(function(e) {
                                 e.preventDefault();
+                                syncCsrfToken();
                                 $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
@@ -896,6 +899,7 @@
 
                             $('#forgotForm').submit(function(e) {
                                 e.preventDefault();
+                                syncCsrfToken();
                                 $.post("{{ route('ajax.forgotPassword') }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
@@ -909,6 +913,7 @@
 
                             $('#resetPasswordForm').submit(function(e) {
                                 e.preventDefault();
+                                syncCsrfToken();
                                 $.post("{{ route('ajax.resetPassword') }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);

@@ -6,8 +6,23 @@
 (function() {
     'use strict';
 
-    // Get CSRF token from meta tag
+    function getCookieValue(name) {
+        const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+        return match ? match[2] : null;
+    }
+
+    // Get CSRF token from cookie first, fallback to meta tag
     function getCsrfToken() {
+        const cookieToken = getCookieValue('XSRF-TOKEN');
+        const token = cookieToken ? decodeURIComponent(cookieToken) : null;
+        if (token) {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta && meta.getAttribute('content') !== token) {
+                meta.setAttribute('content', token);
+            }
+            return token;
+        }
+
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta ? meta.getAttribute('content') : null;
     }
@@ -17,15 +32,21 @@
     window.fetch = function(url, options = {}) {
         const token = getCsrfToken();
 
+        if (!options.credentials) {
+            options.credentials = 'same-origin';
+        }
+
         if (token) {
             options.headers = options.headers || {};
 
             // Add CSRF token if it's a POST, PUT, PATCH, or DELETE request
             if (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase())) {
                 if (options.headers instanceof Headers) {
-                    options.headers.append('X-CSRF-TOKEN', token);
+                    options.headers.set('X-CSRF-TOKEN', token);
+                    options.headers.set('X-XSRF-TOKEN', token);
                 } else {
                     options.headers['X-CSRF-TOKEN'] = token;
+                    options.headers['X-XSRF-TOKEN'] = token;
                 }
             }
         }
@@ -36,13 +57,15 @@
     // Add CSRF token to jQuery AJAX requests if jQuery is available
     if (typeof jQuery !== 'undefined') {
         jQuery.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': getCsrfToken()
-            },
+            headers: (function() {
+                const token = getCsrfToken();
+                return token ? { 'X-CSRF-TOKEN': token, 'X-XSRF-TOKEN': token } : {};
+            })(),
             beforeSend: function(xhr, settings) {
                 const token = getCsrfToken();
                 if (token && ['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(settings.type) !== -1) {
                     xhr.setRequestHeader('X-CSRF-TOKEN', token);
+                    xhr.setRequestHeader('X-XSRF-TOKEN', token);
                 }
             },
             error: function(xhr, status, error) {
@@ -71,6 +94,7 @@
 
         if (token && this._method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(this._method.toUpperCase())) {
             this.setRequestHeader('X-CSRF-TOKEN', token);
+            this.setRequestHeader('X-XSRF-TOKEN', token);
         }
 
         return originalSend.apply(this, arguments);
