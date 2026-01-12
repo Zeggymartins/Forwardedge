@@ -439,9 +439,15 @@
                                 return match ? match[2] : null;
                             }
 
+                            function isLikelyEncryptedToken(token) {
+                                return typeof token === 'string' && token.startsWith('eyJpdiI6');
+                            }
+
                             function syncCsrfToken() {
+                                const metaToken = $('meta[name="csrf-token"]').attr('content');
                                 const cookieToken = getCookieValue('XSRF-TOKEN');
-                                const token = cookieToken ? decodeURIComponent(cookieToken) : $('meta[name="csrf-token"]').attr('content');
+                                const rawCookie = cookieToken ? decodeURIComponent(cookieToken) : null;
+                                const token = metaToken || (rawCookie && !isLikelyEncryptedToken(rawCookie) ? rawCookie : null);
 
                                 if (!token) {
                                     return;
@@ -464,13 +470,19 @@
                             }
 
                             function ensureFreshCsrf(forceRefresh = false) {
-                                const cookieToken = getCookieValue('XSRF-TOKEN');
-                                if (!forceRefresh && cookieToken) {
+                                const metaToken = $('meta[name="csrf-token"]').attr('content');
+                                if (!forceRefresh && metaToken) {
                                     syncCsrfToken();
                                     return $.Deferred().resolve().promise();
                                 }
 
                                 return $.get('/csrf-refresh')
+                                    .done(function(response) {
+                                        if (response && response.token) {
+                                            $('meta[name="csrf-token"]').attr('content', response.token);
+                                            $('input[name="_token"]').val(response.token);
+                                        }
+                                    })
                                     .always(function() {
                                         syncCsrfToken();
                                     });

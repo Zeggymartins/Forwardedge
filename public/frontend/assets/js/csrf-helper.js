@@ -11,20 +11,25 @@
         return match ? match[2] : null;
     }
 
-    // Get CSRF token from cookie first, fallback to meta tag
+    function isLikelyEncryptedToken(token) {
+        return typeof token === 'string' && token.startsWith('eyJpdiI6');
+    }
+
+    // Prefer meta tag token first; fallback to cookie only if needed.
     function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        const metaToken = meta ? meta.getAttribute('content') : null;
+        if (metaToken) {
+            return metaToken;
+        }
+
         const cookieToken = getCookieValue('XSRF-TOKEN');
         const token = cookieToken ? decodeURIComponent(cookieToken) : null;
-        if (token) {
-            const meta = document.querySelector('meta[name="csrf-token"]');
-            if (meta && meta.getAttribute('content') !== token) {
-                meta.setAttribute('content', token);
-            }
+        if (token && !isLikelyEncryptedToken(token)) {
             return token;
         }
 
-        const meta = document.querySelector('meta[name="csrf-token"]');
-        return meta ? meta.getAttribute('content') : null;
+        return null;
     }
 
     // Add CSRF token to fetch requests
@@ -74,9 +79,14 @@
                         console.warn('CSRF token mismatch detected. Refreshing token.');
                     }
                     fetch('/csrf-refresh', { credentials: 'same-origin' })
-                        .then(() => {
-                            const token = getCsrfToken();
+                        .then((response) => response.json().catch(() => ({})))
+                        .then((data) => {
+                            const token = data?.token || getCsrfToken();
                             if (token) {
+                                const meta = document.querySelector('meta[name="csrf-token"]');
+                                if (meta) {
+                                    meta.setAttribute('content', token);
+                                }
                                 jQuery.ajaxSetup({
                                     headers: {
                                         'X-CSRF-TOKEN': token,
