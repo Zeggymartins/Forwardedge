@@ -1,0 +1,68 @@
+========================================
+SECRET ADMIN SETUP INSTRUCTIONS
+========================================
+
+## STEP 1: ADD TO YOUR .ENV FILE
+
+Add these two lines to your .env file:
+
+ADMIN_SECRET_SETUP_KEY=your-secret-key-here-change-this-to-something-random
+ADMIN_SECRET_SETUP_PATH=your-custom-secret-path-here
+
+Example:
+ADMIN_SECRET_SETUP_KEY=xK9mP2nQ5rT8wZ3vB6cE1dF4gH7jL0sA
+ADMIN_SECRET_SETUP_PATH=my-secret-admin-panel-xk9p
+
+IMPORTANT:
+- Change both values to something unique and hard to guess
+- Keep the SECRET_KEY safe - you'll need it to access the setup page
+- The SECRET_PATH should be hard to guess (don't use common words like "admin-setup")
+
+## STEP 2: ACCESS THE SECRET SETUP PAGE
+
+Visit: https://forwardedgeconsulting.com/your-custom-secret-path-here
+
+Example: https://forwardedgeconsulting.com/my-secret-admin-panel-xk9p
+
+## STEP 3: FILL IN THE FORM
+
+You'll see a secure form asking for:
+
+1. Secret Key - Enter the ADMIN_SECRET_SETUP_KEY from your .env
+2. Admin Name - Your full name
+3. Admin Email - Your email address
+4. New Password - Choose a strong password (min 8 characters)
+5. Confirm Password - Re-enter the password
+
+## STEP 4: SUBMIT
+
+Click "Update Admin Credentials" or "Create Admin Account"
+
+The system will:
+- Create the admin account if none exists
+- Update the existing admin credentials if one exists
+- Automatically demote any other users who tried to become admin
+
+## SECURITY FEATURES
+
+✓ Only ONE admin can exist at any time
+✓ Secret URL path protects against unauthorized access
+✓ Secret key required to make changes
+✓ Users cannot promote themselves to admin through normal registration
+✓ Any attempt to create a second admin will automatically fail
+
+## HOW TO CHANGE ADMIN PASSWORD LATER
+
+1. Visit the same secret URL
+2. Enter the secret key
+3. Fill in new admin details
+4. Submit - the current admin will be updated
+
+## NOTES
+
+- This page is NOT accessible through normal navigation
+- Only you should know the secret URL and secret key
+- Never share these credentials
+- The secret URL won't appear in any logs or analytics
+
+========================================

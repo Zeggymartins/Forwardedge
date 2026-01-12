@@ -428,12 +428,31 @@
                         <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
 
                         <script>
-                            // Setup
-                            $.ajaxSetup({
-                                headers: {
-                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            function getCookieValue(name) {
+                                const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+                                return match ? match[2] : null;
+                            }
+
+                            function syncCsrfToken() {
+                                const cookieToken = getCookieValue('XSRF-TOKEN');
+                                const token = cookieToken ? decodeURIComponent(cookieToken) : $('meta[name="csrf-token"]').attr('content');
+
+                                if (!token) {
+                                    return;
                                 }
-                            });
+
+                                $('meta[name="csrf-token"]').attr('content', token);
+                                $('input[name="_token"]').val(token);
+
+                                $.ajaxSetup({
+                                    headers: {
+                                        'X-CSRF-TOKEN': token,
+                                        'X-XSRF-TOKEN': token
+                                    }
+                                });
+                            }
+
+                            syncCsrfToken();
 
                             // Toastr defaults
                             toastr.options = {
@@ -874,9 +893,12 @@
 
                             $('#forgotForm').submit(function(e) {
                                 e.preventDefault();
-                                $.post("{{ route('password.email') }}", $(this).serialize())
-                                    .done(res => $('#forgotPasswordMessage').html(
-                                        `<div class="text-success small">${res.message}</div>`))
+                                $.post("{{ route('ajax.forgotPassword') }}", $(this).serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#forgotPasswordMessage').html(
+                                            `<div class="text-success small">${res.message}</div>`);
+                                    })
                                     .fail(xhr => $('#forgotPasswordMessage').html(
                                         `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
                                     ));
@@ -884,9 +906,12 @@
 
                             $('#resetPasswordForm').submit(function(e) {
                                 e.preventDefault();
-                                $.post("{{ route('password.update') }}", $(this).serialize())
-                                    .done(res => $('#resetPasswordMessage').html(
-                                        `<div class="text-success small">${res.message}</div>`))
+                                $.post("{{ route('ajax.resetPassword') }}", $(this).serialize())
+                                    .done(res => {
+                                        toastr.success(res.message);
+                                        $('#resetPasswordMessage').html(
+                                            `<div class="text-success small">${res.message}</div>`);
+                                    })
                                     .fail(xhr => $('#resetPasswordMessage').html(
                                         `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
                                     ));

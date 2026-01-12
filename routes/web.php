@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminEnrollmentController;
 use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\AdminTransactionsController;
+use App\Http\Controllers\Admin\SecretAdminSetupController;
 use App\Http\Controllers\AjaxAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
@@ -33,6 +34,19 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use App\Models\Scholarship;
 use Illuminate\Http\Request;
+
+/*
+|--------------------------------------------------------------------------
+| Secret Admin Setup Route
+|--------------------------------------------------------------------------
+| This route is protected by a secret key and custom URL path.
+| Only accessible to those who know the secret path and key.
+*/
+
+Route::get(config('admin.secret_setup_path'), [SecretAdminSetupController::class, 'show'])
+    ->name('admin.secret.show');
+Route::post(config('admin.secret_setup_path'), [SecretAdminSetupController::class, 'update'])
+    ->name('admin.secret.update');
 
 /*
 |--------------------------------------------------------------------------

@@ -90,6 +90,18 @@ class AdminEnrollmentController extends Controller
             $discoveryChannel = null;
         }
 
+        // Get country filter
+        $country = $request->input('country');
+
+        // Get all unique countries from applications for filter dropdown
+        $allCountries = ScholarshipApplication::select('form_data')
+            ->get()
+            ->pluck('form_data.personal.location')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
             ->when($nameEmail, function ($q) use ($nameEmail) {
                 $term = '%' . $nameEmail . '%';
@@ -110,6 +122,7 @@ class AdminEnrollmentController extends Controller
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->when($discoveryChannel, fn ($q) => $q->where('form_data->attitude->discovery_channel', $discoveryChannel))
+            ->when($country, fn ($q) => $q->where('form_data->personal->location', $country))
             ->when(in_array($scoreSort, ['asc', 'desc'], true), function ($q) use ($scoreSort) {
                 $q->orderBy('score', $scoreSort)->orderBy('created_at', 'desc');
             }, fn ($q) => $q->latest())
@@ -129,6 +142,8 @@ class AdminEnrollmentController extends Controller
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
             'discoveryChannel' => $discoveryChannel,
+            'country' => $country,
+            'allCountries' => $allCountries,
         ]);
     }
 

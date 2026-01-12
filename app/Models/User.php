@@ -20,6 +20,29 @@ class User extends Authenticatable
     protected $guarded = [];
 
     /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Enforce single admin rule on create/update
+        static::saving(function ($user) {
+            if ($user->role === 'admin') {
+                // Check if another admin exists
+                $existingAdmin = self::where('role', 'admin')
+                    ->where('id', '!=', $user->id)
+                    ->first();
+
+                if ($existingAdmin) {
+                    // Another admin exists, prevent this user from being admin
+                    $user->role = 'user';
+                }
+            }
+        });
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>

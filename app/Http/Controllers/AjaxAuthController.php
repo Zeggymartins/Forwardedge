@@ -181,7 +181,7 @@ class AjaxAuthController extends Controller
         $request->validate(['email' => 'required|email']);
         $status = Password::sendResetLink($request->only('email'));
         return $status === Password::RESET_LINK_SENT
-            ? response()->json(['status' => 'success', 'message' => 'Password reset link sent'])
+            ? response()->json(['status' => 'success', 'message' => 'Password reset link sent. Please check your email.'])
             : response()->json(['status' => 'error', 'message' => 'Unable to send reset link'], 500);
     }
 

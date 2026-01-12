@@ -61,6 +61,10 @@ class PrepareEmailCampaign implements ShouldQueue
             'sent_count' => $campaign->recipients()->where('status', 'sent')->count(),
         ])->save();
 
+        $batchSize = 20;
+        $batchWindowSeconds = 600;
+        $dispatchIndex = 0;
+
         foreach ($targets->chunk(100) as $chunk) {
             foreach ($chunk as $target) {
                 $recipient = EmailCampaignRecipient::firstOrNew([
@@ -81,7 +85,11 @@ class PrepareEmailCampaign implements ShouldQueue
                 $recipient->save();
 
                 if ($this->refreshRecipients || !$wasSent) {
-                    SendEmailCampaign::dispatch($campaign->id, $recipient->id);
+                    $batchIndex = intdiv($dispatchIndex, $batchSize);
+                    $delay = $batchIndex * $batchWindowSeconds;
+                    SendEmailCampaign::dispatch($campaign->id, $recipient->id)
+                        ->delay(now()->addSeconds($delay));
+                    $dispatchIndex++;
                 }
             }
         }

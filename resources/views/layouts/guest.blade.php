@@ -9,22 +9,38 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="auth-shell">
+        <div class="auth-bg">
+            <main class="auth-wrapper">
+                <div class="auth-panel">
+                    <section class="auth-brand">
+                        <a class="auth-logo" href="/">
+                            <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge">
+                            <span>Forward Edge</span>
+                        </a>
+                        <h1 class="auth-brand-title">Secure your next career leap.</h1>
+                        <p class="auth-brand-copy">
+                            Access scholarships, labs, and cohorts built for serious cybersecurity growth.
+                        </p>
+                        <div class="auth-brand-badges">
+                            <span>Scholarship-ready</span>
+                            <span>Hands-on labs</span>
+                            <span>Mentor support</span>
+                        </div>
+                    </section>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+                    <section class="auth-card">
+                        <div class="auth-card-inner">
+                            {{ $slot }}
+                        </div>
+                    </section>
+                </div>
+            </main>
         </div>
     </body>
 </html>
