@@ -28,29 +28,50 @@
         @else
             <link rel="stylesheet" href="{{ asset('frontend/assets/css/auth-fallback.css') }}">
         @endif
+
+        <style>
+            .auth-panel--single {
+                grid-template-columns: minmax(0, 1fr);
+                max-width: 520px;
+                margin: 0 auto;
+            }
+
+            .auth-panel--single .auth-card {
+                width: 100%;
+            }
+
+            .auth-panel--single .auth-header {
+                text-align: center;
+            }
+
+            .auth-logo-mark {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 0.75rem;
+            }
+
+            .auth-logo-mark img {
+                width: 64px;
+                height: 64px;
+                object-fit: contain;
+            }
+
+            @media (max-width: 640px) {
+                .auth-panel--single {
+                    max-width: 100%;
+                }
+            }
+        </style>
     </head>
     <body class="auth-shell">
         <div class="auth-bg">
             <main class="auth-wrapper">
-                <div class="auth-panel">
-                    <section class="auth-brand">
-                        <a class="auth-logo" href="/">
-                            <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge">
-                            <span>Forward Edge</span>
-                        </a>
-                        <h1 class="auth-brand-title">Secure your next career leap.</h1>
-                        <p class="auth-brand-copy">
-                            Access scholarships, labs, and cohorts built for serious cybersecurity growth.
-                        </p>
-                        <div class="auth-brand-badges">
-                            <span>Scholarship-ready</span>
-                            <span>Hands-on labs</span>
-                            <span>Mentor support</span>
-                        </div>
-                    </section>
-
+                <div class="auth-panel auth-panel--single">
                     <section class="auth-card">
                         <div class="auth-card-inner">
+                            <div class="auth-logo-mark">
+                                <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge Logo">
+                            </div>
                             {{ $slot }}
                         </div>
                     </section>

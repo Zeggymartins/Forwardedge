@@ -1,18 +1,18 @@
-<x-guest-layout>
-    <div class="auth-header">
-        <div class="auth-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="auth-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-            </svg>
-        </div>
-        <h2 class="auth-title">{{ __('Welcome Back') }}</h2>
-        <p class="auth-subtitle">{{ __('Sign in to access your account') }}</p>
-    </div>
-
+<x-guest-layout :show-auth-brand="false">
     <x-auth-session-status class="auth-status" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}" class="auth-form" id="loginForm">
         @csrf
+
+        <div class="auth-header">
+            <div class="auth-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="auth-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                </svg>
+            </div>
+            <h2 class="auth-title">{{ __('Welcome Back') }}</h2>
+            <p class="auth-subtitle">{{ __('Sign in to access your account') }}</p>
+        </div>
 
         <div class="auth-field">
             <x-input-label for="email" :value="__('Email Address')" />
@@ -61,11 +61,6 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </x-primary-button>
-
-        <div class="auth-footer">
-            {{ __("Don't have an account?") }}
-            <a href="{{ route('register') }}" class="auth-footer-link">{{ __('Create one') }}</a>
-        </div>
     </form>
 
     <script>

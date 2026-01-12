@@ -163,6 +163,9 @@ return [
         }
 
         $domain = env('SESSION_DOMAIN');
+        if (is_string($domain) && in_array(strtolower($domain), ['null', 'false'], true)) {
+            $domain = null;
+        }
         if ($domain) {
             return $domain;
         }
