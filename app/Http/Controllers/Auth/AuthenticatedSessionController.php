@@ -51,16 +51,4 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
-
-    /**
-     * Determine the redirect path based on user role.
-     */
-    protected function redirectPathFor($user): string
-    {
-        if ($user->role === 'admin') {
-            return route('admin.dashboard');
-        }
-
-        return route('home');
-    }
 }
