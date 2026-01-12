@@ -44,11 +44,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        // Redirect admin to login page, regular users to home
+        // Redirect based on user role
+        // Admin logout -> Login page with redirect back to admin dashboard
         if ($wasAdmin) {
-            return redirect()->route('login')->with('status', 'You have been logged out successfully.');
+            return redirect()
+                ->route('login')
+                ->with('status', 'You have been logged out successfully.')
+                ->with('intended', route('dashboard')); // Remember to go to dashboard after login
         }
 
+        // Regular users -> Home page
         return redirect('/');
     }
 }
