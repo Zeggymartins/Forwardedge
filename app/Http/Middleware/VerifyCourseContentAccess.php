@@ -30,7 +30,7 @@ class VerifyCourseContentAccess
                     'message' => 'Please login to access this content'
                 ], 401);
             }
-            return redirect()->route('login')->with('error', 'Please login to access course content');
+            return redirect()->route('home')->with('error', 'Please login to access course content');
         }
 
         $user = Auth::user();

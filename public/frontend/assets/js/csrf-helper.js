@@ -70,10 +70,24 @@
             },
             error: function(xhr, status, error) {
                 if (xhr.status === 419) {
-                    // CSRF token mismatch - reload the page to get a fresh token
-                    console.error('CSRF token mismatch detected. Please refresh the page.');
-                    alert('Your session has expired. The page will reload to refresh your session.');
-                    window.location.reload();
+                    if (window.DEBUG_CSRF) {
+                        console.warn('CSRF token mismatch detected. Refreshing token.');
+                    }
+                    fetch('/csrf-refresh', { credentials: 'same-origin' })
+                        .then(() => {
+                            const token = getCsrfToken();
+                            if (token) {
+                                jQuery.ajaxSetup({
+                                    headers: {
+                                        'X-CSRF-TOKEN': token,
+                                        'X-XSRF-TOKEN': token
+                                    }
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            window.location.reload();
+                        });
                 }
             }
         });

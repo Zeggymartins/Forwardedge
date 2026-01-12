@@ -89,6 +89,12 @@ Route::post('/contact', [MessageController::class, 'store'])
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
 
+Route::get('/csrf-refresh', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Academy & Course Routes
@@ -258,13 +264,12 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// Admin login route (accessible without auth)
 Route::middleware('guest')->prefix('ctrl-panel-v2')->group(function () {
-    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('admin.login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::get('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'create'])
+        ->name('login');
+    Route::post('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
 });
 
-// Admin authenticated routes
 Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(function () {
 
     // Dashboard (Login Landing)

@@ -156,7 +156,27 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => (function () {
+        $appEnv = env('APP_ENV', 'production');
+        if (in_array($appEnv, ['local', 'testing'], true)) {
+            return null;
+        }
+
+        $domain = env('SESSION_DOMAIN');
+        if ($domain) {
+            return $domain;
+        }
+
+        $host = parse_url((string) env('APP_URL', ''), PHP_URL_HOST);
+        if ($host && in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+            return null;
+        }
+        if ($host && Str::endsWith($host, 'forwardedgeconsulting.com')) {
+            return '.forwardedgeconsulting.com';
+        }
+
+        return null;
+    })(),
 
     /*
     |--------------------------------------------------------------------------

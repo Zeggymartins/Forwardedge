@@ -411,8 +411,11 @@
                         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+                        @php
+                            $csrfHelperVersion = @filemtime(public_path('frontend/assets/js/csrf-helper.js')) ?: time();
+                        @endphp
                         <!-- CSRF Token Helper - Must load after jQuery -->
-                        <script src="{{ asset('frontend/assets/js/csrf-helper.js') }}"></script>
+                        <script src="{{ asset('frontend/assets/js/csrf-helper.js') }}?v={{ $csrfHelperVersion }}"></script>
 
                         <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
                         <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
@@ -456,6 +459,50 @@
                             }
 
                             syncCsrfToken();
+                            if (!getCookieValue('XSRF-TOKEN')) {
+                                ensureFreshCsrf(true);
+                            }
+
+                            function ensureFreshCsrf(forceRefresh = false) {
+                                const cookieToken = getCookieValue('XSRF-TOKEN');
+                                if (!forceRefresh && cookieToken) {
+                                    syncCsrfToken();
+                                    return $.Deferred().resolve().promise();
+                                }
+
+                                return $.get('/csrf-refresh')
+                                    .always(function() {
+                                        syncCsrfToken();
+                                    });
+                            }
+
+                            function postWithCsrfRetry(url, data, retries = 1) {
+                                const deferred = $.Deferred();
+
+                                function attempt(remaining) {
+                                    $.ajax({
+                                        url,
+                                        method: 'POST',
+                                        data,
+                                    })
+                                        .done(function(response) {
+                                            deferred.resolve(response);
+                                        })
+                                        .fail(function(xhr) {
+                                            if (xhr.status === 419 && remaining > 0) {
+                                                ensureFreshCsrf(true).always(function() {
+                                                    attempt(remaining - 1);
+                                                });
+                                                return;
+                                            }
+
+                                            deferred.reject(xhr);
+                                        });
+                                }
+
+                                attempt(retries);
+                                return deferred.promise();
+                            }
 
                             // Toastr defaults
                             toastr.options = {
@@ -839,8 +886,8 @@
                             // Auth Forms
                             $('#registerForm').submit(function(e) {
                                 e.preventDefault();
-                                syncCsrfToken();
-                                $.post("{{ route('ajax.register') }}", $(this).serialize())
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.register', absolute: false) }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
                                         $('#authModal').modal('hide');
@@ -855,12 +902,13 @@
                                         }
                                         toastr.error(message);
                                     });
+                                });
                             });
 
                             $('#loginForm').submit(function(e) {
                                 e.preventDefault();
-                                syncCsrfToken();
-                                $.post("{{ route('ajax.login') }}", $(this).serialize())
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.login', absolute: false) }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
                                         $('#authModal').modal('hide');
@@ -872,21 +920,24 @@
                                         let message = xhr.responseJSON?.message || 'Login failed';
                                         toastr.error(message);
                                     });
+                                });
                             });
 
                             $('#sendOtpBtn').click(function() {
-                                $.post("{{ route('ajax.sendOtp') }}", $('#otpForm').serialize())
-                                    .done(res => {
-                                        toastr.success(res.message);
-                                        $('#otpMessage').html(`<div class="text-success small">${res.message}</div>`);
-                                    })
-                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.sendOtp', absolute: false) }}", $('#otpForm').serialize())
+                                        .done(res => {
+                                            toastr.success(res.message);
+                                            $('#otpMessage').html(`<div class="text-success small">${res.message}</div>`);
+                                        })
+                                        .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Failed to send OTP'));
+                                });
                             });
 
                             $('#otpForm').submit(function(e) {
                                 e.preventDefault();
-                                syncCsrfToken();
-                                $.post("{{ route('ajax.verifyOtp') }}", $(this).serialize())
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.verifyOtp', absolute: false) }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
                                         $('#authModal').modal('hide');
@@ -895,12 +946,13 @@
                                         updateWishlistCount();
                                     })
                                     .fail(xhr => toastr.error(xhr.responseJSON?.message || 'OTP verification failed'));
+                                });
                             });
 
                             $('#forgotForm').submit(function(e) {
                                 e.preventDefault();
-                                syncCsrfToken();
-                                $.post("{{ route('ajax.forgotPassword') }}", $(this).serialize())
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.forgotPassword', absolute: false) }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
                                         $('#forgotPasswordMessage').html(
@@ -909,12 +961,13 @@
                                     .fail(xhr => $('#forgotPasswordMessage').html(
                                         `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to send reset link'}</div>`
                                     ));
+                                });
                             });
 
                             $('#resetPasswordForm').submit(function(e) {
                                 e.preventDefault();
-                                syncCsrfToken();
-                                $.post("{{ route('ajax.resetPassword') }}", $(this).serialize())
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.resetPassword', absolute: false) }}", $(this).serialize())
                                     .done(res => {
                                         toastr.success(res.message);
                                         $('#resetPasswordMessage').html(
@@ -923,6 +976,7 @@
                                     .fail(xhr => $('#resetPasswordMessage').html(
                                         `<div class="text-danger small">${xhr.responseJSON?.message || 'Failed to reset password'}</div>`
                                     ));
+                                });
                             });
 
                             function retryPendingAction() {

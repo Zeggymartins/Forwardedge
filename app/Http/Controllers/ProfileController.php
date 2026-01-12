@@ -47,6 +47,7 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $wasAdmin = $user?->role === 'admin';
 
         Auth::logout();
 
@@ -54,6 +55,10 @@ class ProfileController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($wasAdmin) {
+            return Redirect::route('login');
+        }
 
         return Redirect::to('/');
     }

@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         SendAutoRejectApology::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // Allow JS to read the CSRF token cookie for AJAX auth.
+        $middleware->encryptCookies(except: ['XSRF-TOKEN']);
+
         // Safe environment check at bootstrap time (no container usage)
         $appEnv = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';
 

@@ -48,7 +48,7 @@ class AuthenticatedSessionController extends Controller
         // Admin logout -> Admin login page at /ctrl-panel-v2/login
         if ($wasAdmin) {
             return redirect()
-                ->route('admin.login')
+                ->route('login')
                 ->with('status', 'You have been logged out successfully.');
         }
 
