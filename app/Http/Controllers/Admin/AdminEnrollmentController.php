@@ -94,13 +94,23 @@ class AdminEnrollmentController extends Controller
         $country = $request->input('country');
 
         // Get all unique countries from applications for filter dropdown
-        $allCountries = ScholarshipApplication::select('form_data')
+        $allLocations = ScholarshipApplication::select('form_data')
             ->get()
             ->pluck('form_data.personal.location')
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+            ->filter();
+
+        // Extract clean country names and map them to original locations
+        $locationMap = [];
+        foreach ($allLocations as $location) {
+            $cleanCountry = $this->extractCountryFromLocation($location);
+            if (!isset($locationMap[$cleanCountry])) {
+                $locationMap[$cleanCountry] = [];
+            }
+            $locationMap[$cleanCountry][] = $location;
+        }
+
+        // Get unique country names sorted alphabetically
+        $allCountries = collect(array_keys($locationMap))->sort()->values();
 
         $applications = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
             ->when($nameEmail, function ($q) use ($nameEmail) {
@@ -122,7 +132,13 @@ class AdminEnrollmentController extends Controller
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->when($discoveryChannel, fn ($q) => $q->where('form_data->attitude->discovery_channel', $discoveryChannel))
-            ->when($country, fn ($q) => $q->where('form_data->personal->location', $country))
+            ->when($country, function ($q) use ($country, $locationMap) {
+                // Get all original location strings that map to this country
+                $matchingLocations = $locationMap[$country] ?? [];
+                if (!empty($matchingLocations)) {
+                    $q->whereIn('form_data->personal->location', $matchingLocations);
+                }
+            })
             ->when(in_array($scoreSort, ['asc', 'desc'], true), function ($q) use ($scoreSort) {
                 $q->orderBy('score', $scoreSort)->orderBy('created_at', 'desc');
             }, fn ($q) => $q->latest())
@@ -183,5 +199,46 @@ class AdminEnrollmentController extends Controller
         }
 
         return back()->with('success', 'Application rejected.');
+    }
+
+    /**
+     * Extract clean country name from location string
+     *
+     * Examples:
+     * "Yaba, Lagos, Nigeria" -> "Nigeria"
+     * "Lagos, Nigeria" -> "Nigeria"
+     * "Kigali, Rwanda" -> "Rwanda"
+     * "Karachi, Pakistan" -> "Pakistan"
+     * "Nigeria" -> "Nigeria"
+     * "Yaba" -> "Yaba" (if no other parts)
+     */
+    protected function extractCountryFromLocation(string $location): string
+    {
+        // Clean and normalize location strings
+        $location = trim($location);
+
+        // Split by common delimiters (comma, hyphen, pipe)
+        $parts = preg_split('/[,\-|]/', $location);
+        $parts = array_map('trim', $parts);
+        $parts = array_filter($parts); // Remove empty parts
+
+        // Get the last part (usually country) and trim
+        $lastPart = trim(end($parts));
+
+        // Common city/state names that should be skipped
+        $cities = [
+            'yaba', 'lagos', 'abuja', 'kano', 'ibadan', 'port harcourt',
+            'benin city', 'enugu', 'kaduna', 'jos', 'calabar', 'warri',
+            'onitsha', 'aba', 'ilorin', 'abeokuta', 'owerri', 'maiduguri'
+        ];
+
+        // If the last part is a known city and we have more parts, use second-to-last
+        if (count($parts) > 1 && in_array(strtolower($lastPart), $cities)) {
+            $secondLast = trim($parts[count($parts) - 2]);
+            return ucwords(strtolower($secondLast));
+        }
+
+        // Return the cleaned country/location (capitalize properly)
+        return ucwords(strtolower($lastPart));
     }
 }

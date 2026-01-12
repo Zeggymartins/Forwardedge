@@ -36,12 +36,31 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $wasAdmin = $request->user()?->role === 'admin';
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
+        // Redirect admin to login page, regular users to home
+        if ($wasAdmin) {
+            return redirect()->route('login')->with('status', 'You have been logged out successfully.');
+        }
+
         return redirect('/');
+    }
+
+    /**
+     * Determine the redirect path based on user role.
+     */
+    protected function redirectPathFor($user): string
+    {
+        if ($user->role === 'admin') {
+            return route('admin.dashboard');
+        }
+
+        return route('home');
     }
 }
