@@ -991,6 +991,25 @@
                                 });
                             });
 
+                            $(document).on('submit', '.ajax-logout-form', function(e) {
+                                e.preventDefault();
+                                const form = this;
+
+                                ensureFreshCsrf().always(() => {
+                                    postWithCsrfRetry("{{ route('logout', absolute: false) }}", $(form).serialize())
+                                    .done(() => {
+                                        if (window.location.pathname === '/') {
+                                            window.location.reload();
+                                        } else {
+                                            window.location.href = '/';
+                                        }
+                                    })
+                                    .fail(() => {
+                                        window.location.href = '/';
+                                    });
+                                });
+                            });
+
                             function retryPendingAction() {
                                 try {
                                     const action = $('#pending_action').val();

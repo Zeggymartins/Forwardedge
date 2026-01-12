@@ -71,8 +71,8 @@
                                        style="min-width:200px;">
                                     
                                        <li>
-                                           <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                               class="m-0">
+                                           <form action="{{ route('logout', absolute: false) }}" method="POST"
+                                               class="m-0 ajax-logout-form">
                                                @csrf
                                                <button type="submit" class="dropdown-item">Logout</button>
                                            </form>
@@ -223,8 +223,8 @@
                                            <hr class="dropdown-divider">
                                        </li>
                                        <li>
-                                           <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                               class="m-0">
+                                           <form action="{{ route('logout', absolute: false) }}" method="POST"
+                                               class="m-0 ajax-logout-form">
                                                @csrf
                                                <button type="submit" class="dropdown-item">Logout</button>
                                            </form>
