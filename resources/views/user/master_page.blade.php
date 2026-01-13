@@ -667,80 +667,88 @@
                             function addToCart(courseId, quantity = 1, courseContentId = null) {
                                 console.log('Adding to cart:', courseId, quantity);
 
-                                $.post("{{ route('user.cart.add') }}", {
-                                        course_id: courseId,
-                                        course_content_id: courseContentId,
-                                        quantity: quantity
-                                    })
-                                    .done(res => {
-                                        toastr.success(res.message || 'Added to cart');
-                                        updateCartUI(res.cart);
-                                        updateCartCount();
-                                    })
-                                    .fail(xhr => {
-                                        console.log('Cart add failed:', xhr.status, xhr.responseJSON);
-                                        if (xhr.status === 401 || xhr.status === 403) {
-                                            $('#pending_action').val('add_to_cart');
-                                            $('#pending_payload').val(JSON.stringify({
-                                                course_id: courseId,
-                                                course_content_id: courseContentId,
-                                                quantity: quantity
-                                            }));
-                                            showAuthModal('Please login to add items to cart');
-                                            return;
-                                        }
-                                        toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
-                                    });
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('user.cart.add', absolute: false) }}", {
+                                            course_id: courseId,
+                                            course_content_id: courseContentId,
+                                            quantity: quantity
+                                        })
+                                        .done(res => {
+                                            toastr.success(res.message || 'Added to cart');
+                                            updateCartUI(res.cart);
+                                            updateCartCount();
+                                        })
+                                        .fail(xhr => {
+                                            console.log('Cart add failed:', xhr.status, xhr.responseJSON);
+                                            if (xhr.status === 401 || xhr.status === 403) {
+                                                $('#pending_action').val('add_to_cart');
+                                                $('#pending_payload').val(JSON.stringify({
+                                                    course_id: courseId,
+                                                    course_content_id: courseContentId,
+                                                    quantity: quantity
+                                                }));
+                                                showAuthModal('Please login to add items to cart');
+                                                return;
+                                            }
+                                            toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+                                        });
+                                });
                             }
 
                             function removeFromCart(courseId, courseContentId = null) {
-                                $.post("{{ route('user.cart.remove') }}", {
-                                        course_id: courseId,
-                                        course_content_id: courseContentId
-                                    })
-                                    .done(res => {
-                                        toastr.success(res.message || 'Removed from cart');
-                                        updateCartUI(res.cart);
-                                        updateCartCount();
-                                    })
-                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('user.cart.remove', absolute: false) }}", {
+                                            course_id: courseId,
+                                            course_content_id: courseContentId
+                                        })
+                                        .done(res => {
+                                            toastr.success(res.message || 'Removed from cart');
+                                            updateCartUI(res.cart);
+                                            updateCartCount();
+                                        })
+                                        .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove item'));
+                                });
                             }
 
                             function addToWishlist(courseId) {
                                 console.log('Adding to wishlist:', courseId);
 
-                                $.post("{{ route('user.wishlist.add') }}", {
-                                        course_id: courseId
-                                    })
-                                    .done(res => {
-                                        toastr.success(res.message || 'Added to wishlist');
-                                        updateWishlistUI(res.wishlist);
-                                        updateWishlistCount();
-                                    })
-                                    .fail(xhr => {
-                                        console.log('Wishlist add failed:', xhr.status, xhr.responseJSON);
-                                        if (xhr.status === 401 || xhr.status === 403) {
-                                            $('#pending_action').val('add_to_wishlist');
-                                            $('#pending_payload').val(JSON.stringify({
-                                                course_id: courseId
-                                            }));
-                                            showAuthModal('Please login to add items to wishlist');
-                                            return;
-                                        }
-                                        toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
-                                    });
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('user.wishlist.add', absolute: false) }}", {
+                                            course_id: courseId
+                                        })
+                                        .done(res => {
+                                            toastr.success(res.message || 'Added to wishlist');
+                                            updateWishlistUI(res.wishlist);
+                                            updateWishlistCount();
+                                        })
+                                        .fail(xhr => {
+                                            console.log('Wishlist add failed:', xhr.status, xhr.responseJSON);
+                                            if (xhr.status === 401 || xhr.status === 403) {
+                                                $('#pending_action').val('add_to_wishlist');
+                                                $('#pending_payload').val(JSON.stringify({
+                                                    course_id: courseId
+                                                }));
+                                                showAuthModal('Please login to add items to wishlist');
+                                                return;
+                                            }
+                                            toastr.error(xhr.responseJSON?.message || 'Could not add to wishlist');
+                                        });
+                                });
                             }
 
                             function removeFromWishlist(courseId) {
-                                $.post("{{ route('user.wishlist.remove') }}", {
-                                        course_id: courseId
-                                    })
-                                    .done(res => {
-                                        toastr.success(res.message || 'Removed from wishlist');
-                                        updateWishlistUI(res.wishlist);
-                                        updateWishlistCount();
-                                    })
-                                    .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('user.wishlist.remove', absolute: false) }}", {
+                                            course_id: courseId
+                                        })
+                                        .done(res => {
+                                            toastr.success(res.message || 'Removed from wishlist');
+                                            updateWishlistUI(res.wishlist);
+                                            updateWishlistCount();
+                                        })
+                                        .fail(xhr => toastr.error(xhr.responseJSON?.message || 'Could not remove from wishlist'));
+                                });
                             }
 
                             // Event Handlers
@@ -753,32 +761,34 @@
 
                                 console.log('Adding to cart from wishlist:', courseId);
 
-                                $.post("{{ route('user.cart.add') }}", {
-                                        course_id: courseId,
-                                        quantity: 1
-                                    })
-                                    .done(res => {
-                                        toastr.success(res.message || 'Added to cart');
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('user.cart.add', absolute: false) }}", {
+                                            course_id: courseId,
+                                            quantity: 1
+                                        })
+                                        .done(res => {
+                                            toastr.success(res.message || 'Added to cart');
 
-                                        // Update cart UI
-                                        updateCartUI(res.cart);
-                                        updateCartCount();
+                                            // Update cart UI
+                                            updateCartUI(res.cart);
+                                            updateCartCount();
 
-                                        // Remove from wishlist UI
-                                        removeFromWishlist(courseId);
-                                    })
-                                    .fail(xhr => {
-                                        console.log('Failed to add from wishlist:', xhr.status, xhr.responseJSON);
-                                        if (xhr.status === 401 || xhr.status === 403) {
-                                            $('#pending_action').val('add_to_cart');
-                                            $('#pending_payload').val(JSON.stringify({
-                                                course_id: courseId
-                                            }));
-                                            showAuthModal('Please login to add items to cart');
-                                            return;
-                                        }
-                                        toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
-                                    });
+                                            // Remove from wishlist UI
+                                            removeFromWishlist(courseId);
+                                        })
+                                        .fail(xhr => {
+                                            console.log('Failed to add from wishlist:', xhr.status, xhr.responseJSON);
+                                            if (xhr.status === 401 || xhr.status === 403) {
+                                                $('#pending_action').val('add_to_cart');
+                                                $('#pending_payload').val(JSON.stringify({
+                                                    course_id: courseId
+                                                }));
+                                                showAuthModal('Please login to add items to cart');
+                                                return;
+                                            }
+                                            toastr.error(xhr.responseJSON?.message || 'Could not add to cart');
+                                        });
+                                });
                             });
 
                             $(document).on('click', '.cart-button', function(e) {
@@ -1065,7 +1075,7 @@
                             }
                             // Live counts
                             function updateCartCount() {
-                                $.get("{{ route('user.cart.count') }}", function(data) {
+                                $.get("{{ route('user.cart.count', absolute: false) }}", function(data) {
                                     if (data.cart_count !== undefined) {
                                         $('#cart-count').text(data.cart_count);
                                     }
@@ -1075,7 +1085,7 @@
                             }
 
                             function updateWishlistCount() {
-                                $.get("{{ route('user.wishlist.count') }}", function(data) {
+                                $.get("{{ route('user.wishlist.count', absolute: false) }}", function(data) {
                                     if (data.wishlist_count !== undefined) {
                                         $('#wishlist-count').text(data.wishlist_count);
                                     }
