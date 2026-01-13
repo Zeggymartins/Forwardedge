@@ -56,6 +56,23 @@ Route::post(config('admin.secret_setup_path'), [SecretAdminSetupController::clas
 */
 
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+
+// CSRF Debug endpoint - returns fresh token
+Route::get('/csrf-check', function () {
+    return response()->json([
+        'token' => csrf_token(),
+        'session_id' => session()->getId(),
+        'has_session' => session()->isStarted(),
+    ]);
+})->name('csrf.check');
+
+// CSRF Refresh endpoint - for AJAX token refresh (both GET and POST)
+Route::match(['get', 'post'], '/csrf-refresh', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+})->name('csrf.refresh');
+
 Route::get('/about', function () {
     return view('user.pages.about');
 })->name('about');

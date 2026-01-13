@@ -411,11 +411,7 @@
                         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-                        @php
-                            $csrfHelperVersion = @filemtime(public_path('frontend/assets/js/csrf-helper.js')) ?: time();
-                        @endphp
-                        <!-- CSRF Token Helper - Must load after jQuery -->
-                        <script src="{{ asset('frontend/assets/js/csrf-helper.js') }}?v={{ $csrfHelperVersion }}"></script>
+                        <!-- Note: CSRF helper removed - inline syncCsrfToken() below handles it -->
 
                         <script src="{{ asset('frontend/assets/js/bootstrap.bundle.min.js') }}"></script>
                         <script src="{{ asset('frontend/assets/js/gsap.min.js') }}"></script>
@@ -434,40 +430,29 @@
                         <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
 
                         <script>
-                            function getCookieValue(name) {
-                                const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
-                                return match ? match[2] : null;
-                            }
-
-                            function isLikelyEncryptedToken(token) {
-                                return typeof token === 'string' && token.startsWith('eyJpdiI6');
-                            }
-
+                            // CSRF Token Management
                             function syncCsrfToken() {
-                                const metaToken = $('meta[name="csrf-token"]').attr('content');
-                                const cookieToken = getCookieValue('XSRF-TOKEN');
-                                const rawCookie = cookieToken ? decodeURIComponent(cookieToken) : null;
-                                const token = metaToken || (rawCookie && !isLikelyEncryptedToken(rawCookie) ? rawCookie : null);
+                                // Always use meta tag token - most reliable
+                                const token = $('meta[name="csrf-token"]').attr('content');
 
                                 if (!token) {
+                                    console.warn('CSRF token not found in meta tag');
                                     return;
                                 }
 
-                                $('meta[name="csrf-token"]').attr('content', token);
+                                // Update all token fields
                                 $('input[name="_token"]').val(token);
 
+                                // Set up jQuery AJAX to include CSRF token
                                 $.ajaxSetup({
                                     headers: {
-                                        'X-CSRF-TOKEN': token,
-                                        'X-XSRF-TOKEN': token
+                                        'X-CSRF-TOKEN': token
                                     }
                                 });
                             }
 
+                            // Initialize CSRF token on page load
                             syncCsrfToken();
-                            if (!getCookieValue('XSRF-TOKEN')) {
-                                ensureFreshCsrf(true);
-                            }
 
                             function ensureFreshCsrf(forceRefresh = false) {
                                 const metaToken = $('meta[name="csrf-token"]').attr('content');
