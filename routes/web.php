@@ -138,6 +138,7 @@ Route::prefix('events')->name('events.')->group(function () {
 Route::prefix('ajax')->name('ajax.')->group(function () {
     Route::post('/register', [AjaxAuthController::class, 'register'])->name('register');
     Route::post('/login', [AjaxAuthController::class, 'login'])->name('login');
+    Route::post('/logout', [AjaxAuthController::class, 'logout'])->name('logout');
     Route::post('/send-otp', [AjaxAuthController::class, 'sendOtp'])->name('sendOtp');
     Route::post('/verify-otp', [AjaxAuthController::class, 'verifyOtp'])->name('verifyOtp');
     Route::post('/forgot-password', [AjaxAuthController::class, 'forgotPassword'])->name('forgotPassword');

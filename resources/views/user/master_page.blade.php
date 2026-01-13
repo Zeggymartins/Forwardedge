@@ -995,8 +995,8 @@
                                 e.preventDefault();
                                 const form = this;
 
-                                ensureFreshCsrf().always(() => {
-                                    postWithCsrfRetry("{{ route('logout', absolute: false) }}", $(form).serialize())
+                                ensureFreshCsrf(true).always(() => {
+                                    postWithCsrfRetry("{{ route('ajax.logout', absolute: false) }}", $(form).serialize())
                                     .done(() => {
                                         if (window.location.pathname === '/') {
                                             window.location.reload();
@@ -1005,7 +1005,7 @@
                                         }
                                     })
                                     .fail(() => {
-                                        window.location.href = '/';
+                                        form.submit();
                                     });
                                 });
                             });

@@ -230,4 +230,14 @@ class AjaxAuthController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Password updated']);
     }
+
+    /* ========== LOGOUT (AJAX) ========== */
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(['status' => 'success']);
+    }
 }
