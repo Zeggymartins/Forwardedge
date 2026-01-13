@@ -11,23 +11,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700&display=swap" rel="stylesheet" />
 
-        @php
-            $manifestPath = public_path('build/manifest.json');
-            $manifest = file_exists($manifestPath)
-                ? json_decode(file_get_contents($manifestPath), true)
-                : null;
-            $cssAsset = $manifest['resources/css/app.css']['file'] ?? null;
-            $jsAsset = $manifest['resources/js/app.js']['file'] ?? null;
-            $useVite = !$cssAsset && app()->environment('local');
-        @endphp
-
-        @if ($cssAsset)
-            <link rel="stylesheet" href="{{ asset('build/' . $cssAsset) }}">
-        @elseif ($useVite)
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @else
-            <link rel="stylesheet" href="{{ asset('frontend/assets/css/auth-fallback.css') }}">
-        @endif
+        <link rel="stylesheet" href="{{ asset('frontend/assets/css/auth-fallback.css') }}">
 
         <style>
             .auth-panel--single {
@@ -79,8 +63,5 @@
             </main>
         </div>
 
-        @if ($jsAsset)
-            <script type="module" src="{{ asset('build/' . $jsAsset) }}"></script>
-        @endif
     </body>
 </html>
