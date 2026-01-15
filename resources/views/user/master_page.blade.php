@@ -531,6 +531,27 @@
                                 toastr.info(message);
                                 openAuthModal(tab);
                             }
+
+                            (function () {
+                                const authRequired = @json(session('auth_required'));
+                                const intendedUrl = @json(session('url.intended'));
+                                if (!authRequired || !intendedUrl) {
+                                    return;
+                                }
+
+                                let nextUrl = intendedUrl;
+                                if (nextUrl.startsWith(window.location.origin)) {
+                                    nextUrl = nextUrl.replace(window.location.origin, '');
+                                }
+
+                                if (!nextUrl.startsWith('/')) {
+                                    return;
+                                }
+
+                                $('#pending_action').val('redirect');
+                                $('#pending_payload').val(JSON.stringify({ url: nextUrl }));
+                                showAuthModal('Please login to access your course content');
+                            })();
                             $(document).on('click', '.open-cart-btn', function(e) {
                                 e.preventDefault();
                                 openCart();
@@ -1047,6 +1068,13 @@
                                                 window.location.href = "/enroll/price/" + payload.schedule_id;
                                             } else {
                                                 toastr.error('Could not resume enrollment');
+                                            }
+                                            break;
+                                        case 'redirect':
+                                            if (payload.url) {
+                                                window.location.href = payload.url;
+                                            } else {
+                                                toastr.error('Could not resume your request');
                                             }
                                             break;
                                     }

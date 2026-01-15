@@ -56,10 +56,7 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($wasAdmin) {
-            return Redirect::route('login');
-        }
-
+        // Everyone goes to home after account deletion - never expose admin login
         return Redirect::to('/');
     }
 }

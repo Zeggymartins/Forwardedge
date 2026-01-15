@@ -1,7 +1,7 @@
 <x-guest-layout :show-auth-brand="false">
     <x-auth-session-status class="auth-status" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}" class="auth-form" id="loginForm">
+    <form method="POST" action="{{ route('admin.login') }}" class="auth-form" id="loginForm">
         @csrf
 
         <div class="auth-header">

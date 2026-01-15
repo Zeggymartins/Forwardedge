@@ -37,7 +37,7 @@
 
         <div class="auth-footer">
             {{ __('Already registered?') }}
-            <a href="{{ route('login') }}">{{ __('Sign in instead') }}</a>
+            <a href="{{ route('admin.login') }}">{{ __('Sign in instead') }}</a>
         </div>
     </form>
 </x-guest-layout>

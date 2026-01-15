@@ -28,16 +28,18 @@ class RoleMiddleware
                 ], 401);
             }
 
-            // For admin routes, redirect to Laravel login
+            // For admin routes, just abort 404 - don't reveal admin panel exists
             if ($role === 'admin') {
-                return redirect()->route('login')->with('error', 'Please login to access admin panel');
+                abort(404);
             }
 
-            // For user routes, return 401 so the modal triggers
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Authentication required'
-            ], 401);
+            // For user routes (regular page access), redirect to home with message
+            // Store the intended URL so after login they can continue
+            session()->put('url.intended', $request->fullUrl());
+
+            return redirect('/')
+                ->with('auth_required', true)
+                ->with('error', 'Please login to access your course content.');
         }
 
         $user = Auth::user();

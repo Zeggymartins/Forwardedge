@@ -106,7 +106,7 @@
                     <div>₦{{ number_format($item->price, 2) }}</div>
                     @if ($item->course)
                         <div style="margin-top:8px;">
-                            <a href="{{ route('student.courses.content', $item->course->id) }}"
+                            <a href="{{ $accessLinks[$item->id] ?? '#' }}"
                                style="display:inline-block;background-color:#ffc107;color:#333;text-decoration:none;padding:10px 20px;border-radius:5px;font-weight:bold;margin-top:8px;">
                                 Access Course Materials
                             </a>

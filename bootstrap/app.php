@@ -40,6 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'verify.content.access' => \App\Http\Middleware\VerifyCourseContentAccess::class,
         ]);
+
+        // NEVER redirect to login page - always go home
+        // Users use AJAX auth modal, admins know the secret URL
+        $middleware->redirectGuestsTo('/');
+        $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Gracefully handle expired/invalid CSRF tokens so users see a clear message instead of a blank/419 page.

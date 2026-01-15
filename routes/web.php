@@ -112,6 +112,22 @@ Route::get('/csrf-refresh', function () {
     ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 });
 
+Route::get('/email-access/course/{course}/{user}', [\App\Http\Controllers\EmailAccessController::class, 'course'])
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('email.access.course');
+
+Route::get('/email-access/token/{token}', [\App\Http\Controllers\EmailAccessController::class, 'token'])
+    ->middleware(['throttle:30,1'])
+    ->name('email.access.token');
+
+Route::post('/email-access/token/{token}/send-otp', [\App\Http\Controllers\EmailAccessController::class, 'sendOtp'])
+    ->middleware(['throttle:10,1'])
+    ->name('email.access.token.sendOtp');
+
+Route::post('/email-access/token/{token}/verify-otp', [\App\Http\Controllers\EmailAccessController::class, 'verifyOtp'])
+    ->middleware(['throttle:10,1'])
+    ->name('email.access.token.verifyOtp');
+
 /*
 |--------------------------------------------------------------------------
 | Academy & Course Routes
@@ -284,7 +300,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 Route::middleware('guest')->prefix('ctrl-panel-v2')->group(function () {
     Route::get('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+        ->name('admin.login');
     Route::post('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store']);
 });
 
