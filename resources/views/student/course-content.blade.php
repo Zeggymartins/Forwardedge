@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('user.master_page')
 
 @section('title', $course->title . ' - Course Materials')
 
-@section('content')
+@section('main')
 <div class="container py-5">
     <div class="row">
         <div class="col-12">

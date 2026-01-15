@@ -22,7 +22,7 @@ class CourseContentController extends Controller
     /**
      * Show course content page for authenticated student
      */
-    public function show(Course $course)
+    public function show(Course $course, Request $request)
     {
         $user = Auth::user();
 
@@ -36,6 +36,17 @@ class CourseContentController extends Controller
         $accessibleContents = $course->contents->filter(function ($content) use ($accessibleContentIds) {
             return in_array($content->id, $accessibleContentIds);
         });
+
+        // Gmail users: if there's a single accessible Drive item, jump straight to Drive.
+        if ($this->isGoogleEmail($user->email)) {
+            $driveTarget = $accessibleContents->first(function ($content) {
+                return !empty($content->drive_share_link);
+            });
+
+            if ($driveTarget && $accessibleContents->count() === 1 && !$request->boolean('list')) {
+                return redirect()->route('student.content.view', $driveTarget->id);
+            }
+        }
 
         return view('student.course-content', [
             'course' => $course,
