@@ -37,13 +37,13 @@ class CourseContentController extends Controller
             return in_array($content->id, $accessibleContentIds);
         });
 
-        // Gmail users: if there's a single accessible Drive item, jump straight to Drive.
-        if ($this->isGoogleEmail($user->email)) {
+        // Gmail users: jump straight to Drive (unless list=1 is explicitly set).
+        if ($this->isGoogleEmail($user->email) && !$request->boolean('list')) {
             $driveTarget = $accessibleContents->first(function ($content) {
                 return !empty($content->drive_share_link);
             });
 
-            if ($driveTarget && $accessibleContents->count() === 1 && !$request->boolean('list')) {
+            if ($driveTarget) {
                 return redirect()->route('student.content.view', $driveTarget->id);
             }
         }

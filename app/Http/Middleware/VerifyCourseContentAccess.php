@@ -34,10 +34,18 @@ class VerifyCourseContentAccess
         }
 
         $user = Auth::user();
-        $contentId = $request->route('content');
+        $contentParam = $request->route('content');
+
+        // Normalize route param into a CourseContent model
+        if ($contentParam instanceof CourseContent) {
+            $content = $contentParam;
+        } elseif ($contentParam instanceof \Illuminate\Database\Eloquent\Collection) {
+            $content = $contentParam->first();
+        } else {
+            $content = CourseContent::find($contentParam);
+        }
 
         // Find the course content
-        $content = CourseContent::find($contentId);
         if (!$content) {
             abort(404, 'Content not found');
         }
