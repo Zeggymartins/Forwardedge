@@ -64,40 +64,50 @@ class CourseContentController extends Controller
         // Middleware already verified access
         $user = Auth::user();
 
-        // If no drive_folder_id, this might be local content
-        if (!$content->drive_folder_id) {
-            // Handle local file content if applicable
-            if ($content->file_path && file_exists(storage_path('app/' . $content->file_path))) {
-                return response()->file(storage_path('app/' . $content->file_path));
-            }
-
-            abort(404, 'Content not available');
-        }
+        // Log the access
+        $this->logAccess($content->id, $user->email);
 
         // Check if user wants to force embedded view
         $forceEmbed = $request->query('embed', false);
 
-        // If user has Gmail and didn't force embed, redirect to Drive
+        // PRIORITY 1: Gmail users with drive_share_link -> Redirect directly to Drive
         if (!$forceEmbed && $this->isGoogleEmail($user->email) && $content->drive_share_link) {
-            // Log the access
-            $this->logAccess($content->id, $user->email);
-
-            // Redirect to Google Drive folder
             return redirect()->away($content->drive_share_link);
         }
 
-        // For non-Gmail users or forced embed, show embedded viewer
-        try {
-            return $this->streamFromDrive($content, $user->email, $request);
-        } catch (\Exception $e) {
-            Log::error('Failed to stream content from Drive', [
-                'content_id' => $content->id,
-                'user_email' => $user->email,
-                'error' => $e->getMessage(),
-            ]);
-
-            abort(500, 'Unable to load content. Please try again later.');
+        // PRIORITY 2: If we have a drive_folder_id, try to stream from Drive API
+        if ($content->drive_folder_id) {
+            try {
+                return $this->streamFromDrive($content, $user->email, $request);
+            } catch (\Exception $e) {
+                Log::error('Failed to stream content from Drive', [
+                    'content_id' => $content->id,
+                    'user_email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+                // Fall through to other options
+            }
         }
+
+        // PRIORITY 3: If we have a drive_share_link but no folder_id (for non-Gmail), show redirect page
+        if ($content->drive_share_link) {
+            return view('student.content-redirect', [
+                'content' => $content,
+                'driveUrl' => $content->drive_share_link,
+                'userEmail' => $user->email,
+            ]);
+        }
+
+        // PRIORITY 4: Handle local file content
+        if ($content->file_path && file_exists(storage_path('app/' . $content->file_path))) {
+            return response()->file(storage_path('app/' . $content->file_path));
+        }
+
+        // PRIORITY 5: No content available - show helpful message
+        return view('student.content-unavailable', [
+            'content' => $content,
+            'course' => $content->course,
+        ]);
     }
 
     /**

@@ -50,22 +50,36 @@ class VerifyCourseContentAccess
             abort(404, 'Content not found');
         }
 
-        // Check if user has access via purchase (OrderItem)
-        $hasPurchased = OrderItem::where('course_content_id', $content->id)
+        // Check if user has access via purchase of specific content (OrderItem with course_content_id)
+        $hasPurchasedContent = OrderItem::where('course_content_id', $content->id)
             ->whereHas('order', function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->where('status', 'paid');
             })
             ->exists();
 
-        if ($hasPurchased) {
+        if ($hasPurchasedContent) {
             // Log this access attempt
             $this->logAccess($content->id, $user->email);
             return $next($request);
         }
 
-        // Check if user has access via course enrollment
+        // Check if user has access via purchasing the ENTIRE COURSE
         if ($content->course_id) {
+            $hasPurchasedCourse = OrderItem::where('course_id', $content->course_id)
+                ->whereHas('order', function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                        ->where('status', 'paid');
+                })
+                ->exists();
+
+            if ($hasPurchasedCourse) {
+                // Log this access attempt
+                $this->logAccess($content->id, $user->email);
+                return $next($request);
+            }
+
+            // Check if user has access via course enrollment
             $hasEnrollment = Enrollment::where('user_id', $user->id)
                 ->where('course_id', $content->course_id)
                 ->exists();
