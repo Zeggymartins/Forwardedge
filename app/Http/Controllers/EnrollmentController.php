@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CourseContent;
 use App\Models\CourseSchedule;
 use App\Models\Enrollment;
 use App\Models\Page;
@@ -47,6 +48,10 @@ class EnrollmentController extends Controller
         $p = $plans[$planIdx];
 
         $courseId = (int) ($p['course_id'] ?? 0);
+        $courseContentId = (int) ($p['course_content_id'] ?? 0);
+        if ($courseId <= 0 && $courseContentId > 0) {
+            $courseId = (int) CourseContent::where('id', $courseContentId)->value('course_id');
+        }
         $scheduleId = null;
         if ($courseId > 0) {
             $schedule = CourseSchedule::where('course_id', $courseId)
@@ -93,6 +98,7 @@ class EnrollmentController extends Controller
             'return_url'   => route('page.show', $page->slug), // back to the same dynamic page
             'course_id'    => $courseId ?: null,
             'schedule_id'  => $scheduleId,
+            'course_content_id' => $courseContentId ?: null,
         ];
 
         session(['enroll.selected_plan' => $plan]);
@@ -117,32 +123,41 @@ class EnrollmentController extends Controller
         }
 
         $scheduleId = (int) ($plan['schedule_id'] ?? 0);
-        if ($scheduleId <= 0 && !empty($plan['course_id'])) {
-            $schedule = CourseSchedule::where('course_id', (int) $plan['course_id'])
+        if ($scheduleId <= 0) {
+            $courseId = (int) ($plan['course_id'] ?? 0);
+            if ($courseId <= 0 && !empty($plan['course_content_id'])) {
+                $courseId = (int) CourseContent::where('id', (int) $plan['course_content_id'])->value('course_id');
+            }
+
+            if ($courseId > 0) {
+                $schedule = CourseSchedule::where('course_id', $courseId)
                 ->upcoming()
                 ->orderBy('start_date')
                 ->first();
-            if (!$schedule) {
-                $schedule = CourseSchedule::where('course_id', (int) $plan['course_id'])
-                    ->orderBy('start_date')
-                    ->first();
-            }
+                if (!$schedule) {
+                    $schedule = CourseSchedule::where('course_id', $courseId)
+                        ->orderBy('start_date')
+                        ->first();
+                }
 
-            if (!$schedule) {
-                $schedule = CourseSchedule::create([
-                    'course_id' => (int) $plan['course_id'],
-                    'start_date' => now()->toDateString(),
-                    'end_date' => null,
-                    'location' => 'Online',
-                    'type' => 'self-paced',
-                ]);
-            }
+                if (!$schedule) {
+                    $schedule = CourseSchedule::create([
+                        'course_id' => $courseId,
+                        'start_date' => now()->toDateString(),
+                        'end_date' => null,
+                        'location' => 'Online',
+                        'type' => 'self-paced',
+                    ]);
+                }
 
-            $scheduleId = $schedule?->id ?? 0;
+                $scheduleId = $schedule?->id ?? 0;
+            }
         }
 
         if ($scheduleId <= 0) {
-            return response()->json(['error' => 'Enrollment schedule not found. Please contact support.'], 422);
+            return response()->json([
+                'error' => 'Enrollment schedule not found. Please link a course to this pricing plan in Page Builder.',
+            ], 422);
         }
 
         $priceNgn = (float) ($plan['price_naira'] ?? 0);

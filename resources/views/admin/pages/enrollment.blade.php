@@ -134,6 +134,75 @@
                                                 <p><strong>Date of Birth:</strong> {{ $enrollment->user->date_of_birth?->format('M d, Y') ?? '—' }}</p>
                                                 <p><strong>Nationality:</strong> {{ $enrollment->user->nationality ?? '—' }}</p>
                                                 <p><strong>State of Origin:</strong> {{ $enrollment->user->state_of_origin ?? '—' }}</p>
+                                                <div class="row mt-3 g-3">
+                                                    <div class="col-md-4 text-center">
+                                                        <div class="small text-muted mb-2">Photo</div>
+                                                        @if($enrollment->user?->photo)
+                                                            <img src="{{ route('admin.verifications.document', [$enrollment->user, 'photo']) }}"
+                                                                alt="User photo"
+                                                                class="rounded-3 border"
+                                                                style="width:120px;height:120px;object-fit:cover;">
+                                                        @else
+                                                            <img src="{{ asset('backend/assets/img/avatar-2.jpg') }}"
+                                                                alt="Default avatar"
+                                                                class="rounded-3 border"
+                                                                style="width:120px;height:120px;object-fit:cover;">
+                                                        @endif
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="small text-muted mb-2">Documents</div>
+                                                        @php
+                                                            $idFront = $enrollment->user?->id_front;
+                                                            $idBack = $enrollment->user?->id_back;
+                                                            $frontExt = $idFront ? strtolower(pathinfo($idFront, PATHINFO_EXTENSION)) : null;
+                                                            $backExt = $idBack ? strtolower(pathinfo($idBack, PATHINFO_EXTENSION)) : null;
+                                                            $imageExts = ['jpg', 'jpeg', 'png', 'webp'];
+                                                        @endphp
+                                                        <div class="d-flex flex-wrap gap-3">
+                                                            @if($idFront)
+                                                                <div class="text-center">
+                                                                    <div class="small text-muted mb-1">ID Front</div>
+                                                                    @if(in_array($frontExt, $imageExts, true))
+                                                                        <a href="{{ route('admin.verifications.document', [$enrollment->user, 'id_front']) }}" target="_blank">
+                                                                            <img src="{{ route('admin.verifications.document', [$enrollment->user, 'id_front']) }}"
+                                                                                alt="ID front"
+                                                                                class="rounded-3 border"
+                                                                                style="width:140px;height:90px;object-fit:cover;">
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="{{ route('admin.verifications.document', [$enrollment->user, 'id_front']) }}"
+                                                                           target="_blank"
+                                                                           class="btn btn-sm btn-outline-primary">
+                                                                            <i class="bi bi-file-earmark-text"></i> View PDF
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                            @if($idBack)
+                                                                <div class="text-center">
+                                                                    <div class="small text-muted mb-1">ID Back</div>
+                                                                    @if(in_array($backExt, $imageExts, true))
+                                                                        <a href="{{ route('admin.verifications.document', [$enrollment->user, 'id_back']) }}" target="_blank">
+                                                                            <img src="{{ route('admin.verifications.document', [$enrollment->user, 'id_back']) }}"
+                                                                                alt="ID back"
+                                                                                class="rounded-3 border"
+                                                                                style="width:140px;height:90px;object-fit:cover;">
+                                                                        </a>
+                                                                    @else
+                                                                        <a href="{{ route('admin.verifications.document', [$enrollment->user, 'id_back']) }}"
+                                                                           target="_blank"
+                                                                           class="btn btn-sm btn-outline-primary">
+                                                                            <i class="bi bi-file-earmark-text"></i> View PDF
+                                                                        </a>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                            @if(!$idFront && !$idBack)
+                                                                <span class="text-muted">No documents uploaded.</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 

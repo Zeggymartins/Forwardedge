@@ -269,7 +269,13 @@ class PageBuilderController extends Controller
 
         // Get and clean data
         $rawData = $request->input('data', []);
-        $cleanedData = $this->cleanBlockData($rawData, $type);
+        try {
+            $cleanedData = $this->cleanBlockData($rawData, $type);
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withErrors(['data' => $e->getMessage()])
+                ->withInput();
+        }
 
         // Merge back for validation
         $request->merge(['data' => $cleanedData]);
@@ -311,7 +317,13 @@ class PageBuilderController extends Controller
 
         // Get and clean data
         $rawData = $request->input('data', []);
-        $cleanedData = $this->cleanBlockData($rawData, $type);
+        try {
+            $cleanedData = $this->cleanBlockData($rawData, $type);
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withErrors(['data' => $e->getMessage()])
+                ->withInput();
+        }
 
         // Merge back for validation
         $request->merge(['data' => $cleanedData]);
@@ -642,6 +654,12 @@ class PageBuilderController extends Controller
                 } else {
                     $plan['course_content_id'] = null;
                 }
+            }
+
+            if (empty($plan['course_id']) && empty($plan['course_content_id'])) {
+                throw new \InvalidArgumentException(
+                    'Pricing plan must link to a course or module before it can be saved.'
+                );
             }
 
             $cleanPlans[] = $plan;
