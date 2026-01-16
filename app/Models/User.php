@@ -62,6 +62,31 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
+            'verification_token_expires_at' => 'datetime',
+            'verified_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Generate a unique 10-character enrollment ID
+     */
+    public static function generateEnrollmentId(): string
+    {
+        do {
+            $id = strtoupper(substr(bin2hex(random_bytes(5)), 0, 10));
+        } while (self::where('enrollment_id', $id)->exists());
+
+        return $id;
+    }
+
+    /**
+     * Check if verification token is valid and not expired
+     */
+    public function hasValidVerificationToken(): bool
+    {
+        return $this->verification_token
+            && $this->verification_token_expires_at
+            && $this->verification_token_expires_at->isFuture();
     }
 }

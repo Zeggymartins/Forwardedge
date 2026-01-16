@@ -55,10 +55,22 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-center">
-                                <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-2" 
+                                <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-2"
                                     data-bs-toggle="modal" data-bs-target="#viewEnrollmentModal{{ $enrollment->id }}">
                                     <i class="bi bi-eye"></i> View
                                 </button>
+                                @if($enrollment->user && !in_array($enrollment->user->verification_status ?? 'unverified', ['pending', 'verified']))
+                                    <form action="{{ route('admin.verifications.resend', $enrollment->user) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 py-2" title="Send verification email">
+                                            <i class="bi bi-shield-check"></i> Verify
+                                        </button>
+                                    </form>
+                                @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'verified')
+                                    <span class="badge bg-success rounded-pill ms-1"><i class="bi bi-patch-check"></i> Verified</span>
+                                @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'pending')
+                                    <span class="badge bg-warning text-dark rounded-pill ms-1"><i class="bi bi-hourglass-split"></i> Pending</span>
+                                @endif
                             </td>
                         </tr>
 

@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\OrderItem;
 use App\Models\Orders;
 use App\Models\Payment;
+use App\Services\CurrencyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -25,14 +26,22 @@ class OrderController extends Controller
 
             $user = Auth::user();
 
-            // Get cart items and calculate total
+            // Detect currency based on user location
+            $currency = CurrencyHelper::current();
+
+            // Get cart items and calculate total in user's currency
             $cartItems = CartItem::where('user_id', $user->id)->with(['course', 'courseContent'])->get();
 
             if ($cartItems->isEmpty()) {
                 return response()->json(['error' => 'Your cart is empty.'], 400);
             }
 
-            $amount = $cartItems->sum(function ($item) {
+            // Calculate total using the appropriate price field for the currency
+            $amount = $cartItems->sum(function ($item) use ($currency) {
+                // Use USD price if available and user is international
+                if ($currency === 'USD' && $item->courseContent && $item->courseContent->price_usd) {
+                    return $item->courseContent->price_usd * $item->quantity;
+                }
                 return $item->price * $item->quantity;
             });
 
@@ -42,6 +51,7 @@ class OrderController extends Controller
             Log::info('Starting payment initialization', [
                 'user_id' => $user->id,
                 'amount' => $amount,
+                'currency' => $currency,
                 'reference' => $reference
             ]);
 
@@ -51,17 +61,18 @@ class OrderController extends Controller
                 'Content-Type' => 'application/json',
             ])->post('https://api.paystack.co/transaction/initialize', [
                 'email' => $user->email,
-                'amount' => intval($amount * 100), // Convert to kobo
+                'amount' => CurrencyHelper::toSmallestUnit($amount), // Convert to kobo/cents
                 'reference' => $reference,
-                'currency' => 'NGN',
+                'currency' => $currency, // NGN or USD based on detection
                 'callback_url' => route('payment.callback'),
                 'metadata' => [
                     'user_id' => $user->id,
+                    'currency' => $currency,
                     'cart_items_count' => $cartItems->count(),
                     'items' => $cartItems->map(function ($item) {
                         return [
                             'course_id' => $item->course_id,
-                            'course_name' => $item->course->name,
+                            'course_name' => $item->course->name ?? $item->course->title ?? 'Course',
                             'price' => $item->price,
                             'quantity' => $item->quantity
                         ];
@@ -88,31 +99,39 @@ class OrderController extends Controller
 
             // 🎉 SUCCESS! Now create DB records since Paystack accepted the transaction
 
-            // Create Order
+            // Create Order with currency
             $order = Orders::create([
                 'user_id' => $user->id,
                 'status' => 'pending', // Will change to 'paid' after verification
                 'total_price' => $amount,
+                'currency' => $currency,
             ]);
 
-            // Create order items (if you have OrderItem model)
+            // Create order items with currency
             foreach ($cartItems as $item) {
+                // Get the correct price for the currency
+                $itemPrice = $item->price;
+                if ($currency === 'USD' && $item->courseContent && $item->courseContent->price_usd) {
+                    $itemPrice = $item->courseContent->price_usd;
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'course_id' => $item->course_id,
                     'course_content_id' => $item->course_content_id,
-                    'price' => $item->price,
+                    'price' => $itemPrice,
+                    'currency' => $currency,
                     'quantity' => $item->quantity,
                 ]);
             }
 
-            // Create Payment record
+            // Create Payment record with currency
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'payable_id' => $order->id,
                 'payable_type' => Orders::class,
                 'amount' => $amount,
-                'currency' => 'NGN',
+                'currency' => $currency,
                 'status' => 'pending', // Will change to 'successful' after verification
                 'reference' => $reference,
                 'method' => 'paystack',

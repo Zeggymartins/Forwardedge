@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Services\CourseBundleService;
 use App\Services\GoogleDriveService;
+use App\Http\Controllers\IdentityVerificationController;
 
 class PaymentController extends Controller
 {
@@ -236,7 +237,14 @@ class PaymentController extends Controller
             // Create ZIP bundle and dispatch email
             $zipPath = CourseBundleService::createZip($order);
             SendOrderEmail::dispatch($order, $zipPath);
-            
+
+            // Send identity verification email if user hasn't verified yet
+            $user = $payment->user;
+            if ($user && $user->verification_status !== 'verified') {
+                IdentityVerificationController::sendVerificationEmail($user);
+                Log::info('Verification email sent after order', ['user_id' => $user->id, 'order_id' => $order->id]);
+            }
+
             Log::info('Order fulfilled and email dispatched', ['order_id' => $order->id]);
         }
 
@@ -270,6 +278,14 @@ class PaymentController extends Controller
             ]);
 
             SendEnrollmentEmail::dispatch($enrollment);
+
+            // Send identity verification email if user hasn't verified yet
+            $user = $payment->user;
+            if ($user && $user->verification_status !== 'verified') {
+                IdentityVerificationController::sendVerificationEmail($user);
+                Log::info('Verification email sent after enrollment', ['user_id' => $user->id, 'enrollment_id' => $enrollment->id]);
+            }
+
             Log::info('Enrollment created and email dispatched', ['enrollment_id' => $enrollment->id]);
         }
 

@@ -46,6 +46,23 @@ class EnrollmentController extends Controller
 
         $p = $plans[$planIdx];
 
+        $courseId = (int) ($p['course_id'] ?? 0);
+        $scheduleId = null;
+        if ($courseId > 0) {
+            $schedule = CourseSchedule::where('course_id', $courseId)
+                ->upcoming()
+                ->orderBy('start_date')
+                ->first();
+
+            if (!$schedule) {
+                $schedule = CourseSchedule::where('course_id', $courseId)
+                    ->orderBy('start_date')
+                    ->first();
+            }
+
+            $scheduleId = $schedule?->id;
+        }
+
         // Normalize numeric prices
         $ngnRaw = preg_replace('/[^\d.]/', '', (string)($p['price_naira'] ?? '0'));
         $usdRaw = preg_replace('/[^\d.]/', '', (string)($p['price_usd']   ?? ''));
@@ -64,6 +81,8 @@ class EnrollmentController extends Controller
             'block_id'     => $blockId,
             'plan_index'   => $planIdx,
             'return_url'   => route('page.show', $page->slug), // back to the same dynamic page
+            'course_id'    => $courseId ?: null,
+            'schedule_id'  => $scheduleId,
         ];
 
         session(['enroll.selected_plan' => $plan]);
@@ -87,6 +106,19 @@ class EnrollmentController extends Controller
             return response()->json(['error' => 'Your pricing context has expired. Please re-open the pricing page.'], 422);
         }
 
+        $scheduleId = (int) ($plan['schedule_id'] ?? 0);
+        if ($scheduleId <= 0 && !empty($plan['course_id'])) {
+            $schedule = CourseSchedule::where('course_id', (int) $plan['course_id'])
+                ->upcoming()
+                ->orderBy('start_date')
+                ->first();
+            $scheduleId = $schedule?->id ?? 0;
+        }
+
+        if ($scheduleId <= 0) {
+            return response()->json(['error' => 'Enrollment schedule not found. Please contact support.'], 422);
+        }
+
         $priceNgn = (float) ($plan['price_naira'] ?? 0);
         if ($priceNgn <= 0) {
             return response()->json(['error' => 'Invalid plan price.'], 422);
@@ -98,14 +130,16 @@ class EnrollmentController extends Controller
 
         $payment = Payment::create([
             'user_id'       => $user->id,
-            'payable_id'    => null,
-            'payable_type'  => null,
+            'payable_id'    => $scheduleId,
+            'payable_type'  => CourseSchedule::class,
             'amount'        => $initialNgn,           // NGN amount
             'status'        => 'pending',
             'method'        => 'paystack',
             'reference'     => Str::uuid()->toString(),
             'currency'      => 'NGN',
             'metadata'      => [
+                'payment_plan' => $planType,
+                'total'        => $totalNgn,
                 'plan_type'     => $planType,
                 'page_id'       => $plan['page_id'] ?? null,
                 'block_id'      => $plan['block_id'] ?? null,
@@ -119,6 +153,7 @@ class EnrollmentController extends Controller
                 'total_ngn'     => $totalNgn,
                 'initial_ngn'   => $initialNgn,
                 'user_id'       => $user->id,
+                'schedule_id'   => $scheduleId,
                 'return_url'    => $plan['return_url'] ?? url('/'),
             ],
         ]);

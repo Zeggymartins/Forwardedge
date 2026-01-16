@@ -46,6 +46,11 @@
                                 <i class="bi bi-circle"></i><span>Scholarship Applications</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.verifications.index') }}">
+                                <i class="bi bi-circle"></i><span>Identity Verifications</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

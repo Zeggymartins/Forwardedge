@@ -106,6 +106,16 @@ Route::post('/contact', [MessageController::class, 'store'])
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/gallery', [GalleryController::class, 'getPhotos'])->name('gallery');
 
+/*
+|--------------------------------------------------------------------------
+| Identity Verification Routes (Public - Token Based)
+|--------------------------------------------------------------------------
+*/
+Route::get('/verify/{token}', [\App\Http\Controllers\IdentityVerificationController::class, 'show'])
+    ->name('verify.show');
+Route::post('/verify/{token}', [\App\Http\Controllers\IdentityVerificationController::class, 'store'])
+    ->name('verify.store');
+
 Route::get('/csrf-refresh', function () {
     return response()->json([
         'token' => csrf_token(),
@@ -365,6 +375,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         Route::get('/applications', [AdminEnrollmentController::class, 'applications'])->name('applications');
         Route::post('/applications/{application}/approve', [AdminEnrollmentController::class, 'approve'])->name('approve');
         Route::post('/applications/{application}/reject', [AdminEnrollmentController::class, 'reject'])->name('reject');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin - Identity Verifications
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('verifications')->name('admin.verifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'index'])->name('index');
+        Route::get('/{user}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'show'])->name('show');
+        Route::get('/{user}/document/{type}', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'viewDocument'])->name('document');
+        Route::post('/{user}/resend', [\App\Http\Controllers\Admin\AdminVerificationController::class, 'resend'])->name('resend');
     });
 
     /*

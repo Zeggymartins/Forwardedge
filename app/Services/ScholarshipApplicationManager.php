@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\IdentityVerificationController;
 use App\Mail\ScholarshipStatusMail;
 use App\Models\Enrollment;
 use App\Models\ScholarshipApplication;
@@ -25,6 +26,11 @@ class ScholarshipApplicationManager
 
         if ($email) {
             Mail::to($email)->send(new ScholarshipStatusMail($fresh, 'approved'));
+        }
+
+        // Send identity verification email if user exists and not already verified
+        if ($fresh->user && $fresh->user->verification_status !== 'verified') {
+            IdentityVerificationController::sendVerificationEmail($fresh->user);
         }
 
         return $fresh;

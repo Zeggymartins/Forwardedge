@@ -34,6 +34,22 @@ class VerifyCourseContentAccess
         }
 
         $user = Auth::user();
+
+        // Check if user needs to complete identity verification first
+        if ($user->verification_status !== 'verified' && $user->verification_token) {
+            // User has a verification token but hasn't completed/approved verification
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Please complete your identity verification first',
+                    'redirect' => route('verify.show', $user->verification_token)
+                ], 403);
+            }
+
+            return redirect()->route('verify.show', $user->verification_token)
+                ->with('info', 'Please complete your identity verification to access your course content.');
+        }
+
         $contentParam = $request->route('content');
 
         // Normalize route param into a CourseContent model

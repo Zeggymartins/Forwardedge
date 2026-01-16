@@ -2,8 +2,18 @@
 @section('title', 'Cart | Forward Edge Consulting')
 @section('main')
     @php
-        $currencySymbol = '₦';
-        $cartSubtotal = $cartItems->sum(fn($item) => ($item->price ?? 0) * ($item->quantity ?? 1));
+        use App\Services\CurrencyHelper;
+        $currency = CurrencyHelper::current();
+        $currencySymbol = CurrencyHelper::symbol();
+
+        // Calculate subtotal using the appropriate price for the currency
+        $cartSubtotal = $cartItems->sum(function($item) use ($currency) {
+            // Use USD price if available and user is international
+            if ($currency === 'USD' && $item->courseContent && $item->courseContent->price_usd) {
+                return $item->courseContent->price_usd * ($item->quantity ?? 1);
+            }
+            return ($item->price ?? 0) * ($item->quantity ?? 1);
+        });
     @endphp
     @include('user.partials.breadcrumb')
     <section class="full-width tj-page__area section-gap">
@@ -53,11 +63,18 @@
                                                                     </small>
                                                                 @endif
                                                             </td>
+                                                            @php
+                                                                // Get the correct price for user's currency
+                                                                $itemPrice = $item->price;
+                                                                if ($currency === 'USD' && $item->courseContent && $item->courseContent->price_usd) {
+                                                                    $itemPrice = $item->courseContent->price_usd;
+                                                                }
+                                                            @endphp
                                                             <td class="product-price" data-title="Price">
                                                                 <span class="woocommerce-Price-amount amount">
                                                                     <bdi>
                                                                         <span
-                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($item->price, 2) }}
+                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($itemPrice, 2) }}
                                                                     </bdi>
                                                                 </span>
                                                             </td>
@@ -89,7 +106,7 @@
                                                                 <span class="woocommerce-Price-amount amount">
                                                                     <bdi>
                                                                         <span
-                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($item->price * $item->quantity, 2) }}
+                                                                            class="woocommerce-Price-currencySymbol">{{ $currencySymbol }}</span>{{ number_format($itemPrice * $item->quantity, 2) }}
                                                                     </bdi>
                                                                 </span>
                                                             </td>
