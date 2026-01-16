@@ -2,17 +2,17 @@
 
 @section('title', 'Identity Verification - Forward Edge')
 
-@section('hide_header', true)
+{{-- @section('hide_header', true) --}}
 
 @push('styles')
 <style>
     .verify-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%);
+        /* background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%); */
         padding: 40px 20px;
     }
     .verify-card {
-        background: #0c1530;
+        background: #092c72e2;
         border-radius: 20px;
         box-shadow: 0 25px 70px rgba(0,0,0,0.35);
         max-width: 700px;
@@ -71,9 +71,14 @@
     .form-control::placeholder {
         color: #64748b;
     }
-    .form-select option {
-        background: #1e293b;
-        color: #f8fafc;
+    .verify-card .form-select {
+        color-scheme: light;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+    }
+    .verify-card .form-select option {
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
     }
     .file-upload {
         border: 2px dashed rgba(255,255,255,0.2);
@@ -105,6 +110,11 @@
         color: #22c55e;
         font-weight: 500;
         margin-top: 8px;
+        font-size: 13px;
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     .btn-submit {
         background: linear-gradient(135deg, #0891b2, #6366f1);

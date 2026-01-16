@@ -15,6 +15,7 @@
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Student</th>
+                        <th class="py-3 px-4">Enrollment ID</th>
                         <th class="py-3 px-4">Course</th>
                         <th class="py-3 px-4">Plan</th>
                         <th class="py-3 px-4">Total</th>
@@ -26,10 +27,17 @@
                 <tbody>
                     @forelse($enrollments as $index=>$enrollment)
                         <tr class="table-row-hover">
-                            <td class="fw-semibold py-3 px-4">{{ $index + 1 }}</td>
+                            <td class="fw-semibold py-3 px-4">{{ $enrollments->firstItem() + $index }}</td>
                             <td class="py-3 px-4">
                                 <span class="fw-bold">{{ $enrollment->user->name ?? '—' }}</span><br>
                                 <small class="text-muted">{{ $enrollment->user->email ?? '' }}</small>
+                            </td>
+                            <td class="py-3 px-4">
+                                @if($enrollment->user && $enrollment->user->enrollment_id)
+                                    <code class="fw-bold">{{ $enrollment->user->enrollment_id }}</code>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
                             </td>
                             <td class="py-3 px-4">
                                 @if($enrollment->course)
@@ -55,22 +63,27 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-center">
-                                <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-2"
-                                    data-bs-toggle="modal" data-bs-target="#viewEnrollmentModal{{ $enrollment->id }}">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                                @if($enrollment->user && !in_array($enrollment->user->verification_status ?? 'unverified', ['pending', 'verified']))
-                                    <form action="{{ route('admin.verifications.resend', $enrollment->user) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 py-2" title="Send verification email">
-                                            <i class="bi bi-shield-check"></i> Verify
-                                        </button>
-                                    </form>
-                                @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'verified')
-                                    <span class="badge bg-success rounded-pill ms-1"><i class="bi bi-patch-check"></i> Verified</span>
-                                @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'pending')
-                                    <span class="badge bg-warning text-dark rounded-pill ms-1"><i class="bi bi-hourglass-split"></i> Pending</span>
-                                @endif
+                                <div class="d-inline-flex flex-wrap justify-content-center align-items-center gap-2">
+                                    <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-2"
+                                        data-bs-toggle="modal" data-bs-target="#viewEnrollmentModal{{ $enrollment->id }}">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                    @if($enrollment->user && ($enrollment->user->verification_status ?? '') !== 'verified')
+                                        <form action="{{ route('admin.verifications.resend', $enrollment->user) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 py-2" title="Send verification email">
+                                                <i class="bi bi-shield-check"></i> Send Link
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if($enrollment->user && ($enrollment->user->verification_status ?? '') === 'verified')
+                                        <span class="badge bg-success rounded-pill"><i class="bi bi-patch-check"></i> Verified</span>
+                                    @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'pending')
+                                        <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-hourglass-split"></i> Processing</span>
+                                    @elseif($enrollment->user && ($enrollment->user->verification_status ?? '') === 'rejected')
+                                        <span class="badge bg-danger rounded-pill"><i class="bi bi-arrow-repeat"></i> Resubmit</span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
 
@@ -88,6 +101,39 @@
                                                 <h5 class="fw-bold mb-3">👤 Student Info</h5>
                                                 <p><strong>Name:</strong> {{ $enrollment->user->name ?? '—' }}</p>
                                                 <p><strong>Email:</strong> {{ $enrollment->user->email ?? '—' }}</p>
+                                                <p><strong>Enrollment ID:</strong> {{ $enrollment->user->enrollment_id ?? '—' }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                            <div class="card-body">
+                                                <h5 class="fw-bold mb-3">🛡️ Verification Details</h5>
+                                                <p><strong>Status:</strong>
+                                                    @php($v = $enrollment->user->verification_status ?? 'unverified')
+                                                    @if($v === 'verified')
+                                                        <span class="badge bg-success">Verified</span>
+                                                    @elseif($v === 'pending')
+                                                        <span class="badge bg-warning text-dark">Processing</span>
+                                                    @elseif($v === 'rejected')
+                                                        <span class="badge bg-danger">Resubmit</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Unverified</span>
+                                                    @endif
+                                                </p>
+                                                <p><strong>Legal Name:</strong> {{ $enrollment->user->legal_name ?? '—' }}</p>
+                                                <p><strong>ID Type:</strong>
+                                                    @switch($enrollment->user->id_type ?? '')
+                                                        @case('nin') National ID (NIN) @break
+                                                        @case('voters_card') Voter's Card @break
+                                                        @case('drivers_license') Driver's License @break
+                                                        @case('intl_passport') International Passport @break
+                                                        @default —
+                                                    @endswitch
+                                                </p>
+                                                <p><strong>ID Number:</strong> {{ $enrollment->user->id_number ?? '—' }}</p>
+                                                <p><strong>Date of Birth:</strong> {{ $enrollment->user->date_of_birth?->format('M d, Y') ?? '—' }}</p>
+                                                <p><strong>Nationality:</strong> {{ $enrollment->user->nationality ?? '—' }}</p>
+                                                <p><strong>State of Origin:</strong> {{ $enrollment->user->state_of_origin ?? '—' }}</p>
                                             </div>
                                         </div>
 

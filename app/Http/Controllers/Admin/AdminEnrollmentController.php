@@ -22,12 +22,14 @@ class AdminEnrollmentController extends Controller
         // eager-load related models (user, course, courseSchedule+course)
         $enrollments = Enrollment::with(['user', 'course', 'courseSchedule.course'])
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $moduleEnrollments = OrderItem::with(['order.user', 'course', 'courseContent'])
             ->whereNotNull('course_content_id')
             ->latest()
-            ->paginate(10, ['*'], 'modules_page');
+            ->paginate(10, ['*'], 'modules_page')
+            ->withQueryString();
 
         return view('admin.pages.enrollment', compact('enrollments', 'moduleEnrollments'));
     }

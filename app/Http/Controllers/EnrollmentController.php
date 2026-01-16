@@ -60,6 +60,16 @@ class EnrollmentController extends Controller
                     ->first();
             }
 
+            if (!$schedule) {
+                $schedule = CourseSchedule::create([
+                    'course_id' => $courseId,
+                    'start_date' => now()->toDateString(),
+                    'end_date' => null,
+                    'location' => 'Online',
+                    'type' => 'self-paced',
+                ]);
+            }
+
             $scheduleId = $schedule?->id;
         }
 
@@ -112,6 +122,22 @@ class EnrollmentController extends Controller
                 ->upcoming()
                 ->orderBy('start_date')
                 ->first();
+            if (!$schedule) {
+                $schedule = CourseSchedule::where('course_id', (int) $plan['course_id'])
+                    ->orderBy('start_date')
+                    ->first();
+            }
+
+            if (!$schedule) {
+                $schedule = CourseSchedule::create([
+                    'course_id' => (int) $plan['course_id'],
+                    'start_date' => now()->toDateString(),
+                    'end_date' => null,
+                    'location' => 'Online',
+                    'type' => 'self-paced',
+                ]);
+            }
+
             $scheduleId = $schedule?->id ?? 0;
         }
 
