@@ -368,6 +368,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
     */
     Route::prefix('enrollments')->name('admin.enrollments.')->group(function () {
         Route::get('/', [AdminEnrollmentController::class, 'index'])->name('index');
+        Route::get('/export/excel', [AdminEnrollmentController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf', [AdminEnrollmentController::class, 'exportPdf'])->name('export.pdf');
         Route::get('/{id}', [AdminEnrollmentController::class, 'show'])->name('show');
     });
 

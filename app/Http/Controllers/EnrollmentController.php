@@ -20,6 +20,28 @@ class EnrollmentController extends Controller
 
     public function pricingPage(Request $request)
     {
+        $user = Auth::user();
+
+        // Require login first
+        if (!$user) {
+            session(['url.intended' => $request->fullUrl()]);
+            return redirect()->route('login')
+                ->with('info', 'Please login to continue with enrollment.');
+        }
+
+        // Require identity verification before showing pricing
+        if ($user->verification_status !== 'verified') {
+            session(['url.intended' => $request->fullUrl()]);
+
+            // Generate token if user doesn't have one or it's expired
+            if (!$user->hasValidVerificationToken()) {
+                IdentityVerificationController::sendVerificationEmail($user);
+            }
+
+            return redirect()->route('verify.show', $user->verification_token)
+                ->with('info', 'Please complete identity verification to proceed with enrollment.');
+        }
+
         $pageId  = (int) $request->query('page');
         $blockId = (int) $request->query('block');
         $planIdx = (int) $request->query('plan', -1);

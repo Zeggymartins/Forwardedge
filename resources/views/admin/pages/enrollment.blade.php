@@ -6,6 +6,14 @@
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-bold text-dark">📚 Course Enrollments</h1>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('admin.enrollments.export.excel') }}" class="btn btn-outline-success rounded-pill px-3">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Export Excel
+            </a>
+            <a href="{{ route('admin.enrollments.export.pdf') }}" class="btn btn-outline-danger rounded-pill px-3">
+                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+            </a>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">

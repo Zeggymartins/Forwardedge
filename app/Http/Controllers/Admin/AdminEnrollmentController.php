@@ -8,6 +8,8 @@ use App\Models\Enrollment;
 use App\Models\OrderItem;
 use App\Models\ScholarshipApplication;
 use App\Services\ScholarshipApplicationManager;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -32,6 +34,79 @@ class AdminEnrollmentController extends Controller
             ->withQueryString();
 
         return view('admin.pages.enrollment', compact('enrollments', 'moduleEnrollments'));
+    }
+
+    public function exportExcel()
+    {
+        $rows = $this->buildExportRows();
+        $filename = 'enrollments-' . now()->format('Ymd-His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, array_keys($rows[0] ?? []));
+            foreach ($rows as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdf()
+    {
+        $rows = $this->buildExportRows();
+        $html = view('admin.pages.enrollment-export-pdf', [
+            'rows' => $rows,
+            'generatedAt' => now(),
+        ])->render();
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'enrollments-' . now()->format('Ymd-His') . '.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    private function buildExportRows(): array
+    {
+        $enrollments = Enrollment::with(['user', 'course', 'courseSchedule.course'])
+            ->latest()
+            ->get();
+
+        return $enrollments->map(function (Enrollment $enrollment) {
+            $user = $enrollment->user;
+            $course = $enrollment->course ?: $enrollment->courseSchedule?->course;
+            $courseType = $enrollment->course ? 'Self-paced' : ($enrollment->courseSchedule ? 'Bootcamp' : '—');
+
+            return [
+                'Enrollment ID' => $user?->enrollment_id ?? '',
+                'Name' => $user?->name ?? '',
+                'Email' => $user?->email ?? '',
+                'Course' => $course?->title ?? '',
+                'Course Type' => $courseType,
+                'Plan' => $enrollment->payment_plan,
+                'Total' => $enrollment->total_amount,
+                'Balance' => $enrollment->balance,
+                'Status' => $enrollment->status,
+                'Verification Status' => $user?->verification_status ?? 'unverified',
+                'Created At' => optional($enrollment->created_at)->format('Y-m-d H:i:s'),
+            ];
+        })->values()->all();
     }
 
     /**

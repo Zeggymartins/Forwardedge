@@ -104,6 +104,13 @@ class IdentityVerificationController extends Controller
 
             Mail::to($user->email)->send(new IdentityVerificationMail($user, 'verified'));
 
+            // Redirect to intended URL (e.g., pricing page) if set
+            $intended = session()->pull('url.intended');
+            if ($intended) {
+                return redirect($intended)
+                    ->with('success', 'Verification complete! You can now proceed with enrollment.');
+            }
+
             return redirect()->route('verify.show', $token)
                 ->with('success', 'Verification complete. You can now access your course content.');
         }
