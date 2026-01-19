@@ -6,6 +6,7 @@ use App\Http\Controllers\IdentityVerificationController;
 use App\Mail\ScholarshipStatusMail;
 use App\Models\Enrollment;
 use App\Models\ScholarshipApplication;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class ScholarshipApplicationManager
@@ -25,7 +26,12 @@ class ScholarshipApplicationManager
         $email = $notifyEmail ?: ($fresh->user?->email);
 
         if ($email) {
-            Mail::to($email)->send(new ScholarshipStatusMail($fresh, 'approved'));
+            // Queue the email - will retry automatically if rate limited
+            try {
+                Mail::to($email)->queue(new ScholarshipStatusMail($fresh, 'approved'));
+            } catch (\Exception $e) {
+                Log::error('Failed to queue scholarship approval email', ['application_id' => $application->id, 'error' => $e->getMessage()]);
+            }
         }
 
         // Send identity verification email if user exists and not already verified

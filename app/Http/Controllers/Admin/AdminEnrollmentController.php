@@ -270,9 +270,13 @@ class AdminEnrollmentController extends Controller
         $application->refresh();
 
         if ($application->user?->email) {
-            Mail::to($application->user->email)->send(
-                new ScholarshipStatusMail($application, 'rejected', $data['notes'] ?? null)
-            );
+            try {
+                Mail::to($application->user->email)->queue(
+                    new ScholarshipStatusMail($application, 'rejected', $data['notes'] ?? null)
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to queue rejection email', ['application_id' => $application->id, 'error' => $e->getMessage()]);
+            }
         }
 
         return back()->with('success', 'Application rejected.');

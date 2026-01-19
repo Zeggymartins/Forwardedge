@@ -4,16 +4,27 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class IdentityVerificationMail extends Mailable
+class IdentityVerificationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /**
+     * Number of times the job may be attempted.
+     */
+    public int $tries = 5;
+
+    /**
+     * Seconds to wait before retrying after failure.
+     */
+    public int $backoff = 300; // 5 minutes between retries
+
     public function __construct(
         public User $user,
-        public string $type // 'link', 'approved', 'rejected'
+        public string $type // 'link', 'verified', 'resubmit'
     ) {
         $this->type = strtolower($type);
     }

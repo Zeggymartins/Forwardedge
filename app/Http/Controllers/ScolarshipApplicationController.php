@@ -307,10 +307,18 @@ class ScolarshipApplicationController extends Controller
             ])->save();
 
             if ($contactEmail) {
-                Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'pending'));
+                try {
+                    Mail::to($contactEmail)->queue(new ScholarshipStatusMail($application, 'pending'));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to queue scholarship pending email', ['error' => $e->getMessage()]);
+                }
             }
         } elseif ($contactEmail) {
-            Mail::to($contactEmail)->send(new ScholarshipStatusMail($application, 'pending'));
+            try {
+                Mail::to($contactEmail)->queue(new ScholarshipStatusMail($application, 'pending'));
+            } catch (\Exception $e) {
+                \Log::error('Failed to queue scholarship pending email', ['error' => $e->getMessage()]);
+            }
         }
 
         // Send them to the Thank You page

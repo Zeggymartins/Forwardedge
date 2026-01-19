@@ -82,8 +82,13 @@ class AdminVerificationController extends Controller
             'verification_status' => 'unverified',
         ]);
 
-        Mail::to($user->email)->send(new IdentityVerificationMail($user, 'link'));
+        try {
+            Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'link'));
+        } catch (\Exception $e) {
+            \Log::error('Failed to queue resend verification email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to queue email, but token was reset.');
+        }
 
-        return back()->with('success', 'Verification email has been resent.');
+        return back()->with('success', 'Verification email has been queued.');
     }
 }

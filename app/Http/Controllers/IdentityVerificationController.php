@@ -112,7 +112,12 @@ class IdentityVerificationController extends Controller
                 'verification_token_expires_at' => now()->addDays(7),
             ]);
 
-            Mail::to($user->email)->send(new IdentityVerificationMail($user, 'verified'));
+            // Queue the email - will retry automatically if rate limited
+            try {
+                Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'verified'));
+            } catch (\Exception $e) {
+                Log::error('Failed to queue verification email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            }
 
             // Redirect to intended URL (e.g., pricing page) if set
             $intended = session()->pull('url.intended');
@@ -132,7 +137,12 @@ class IdentityVerificationController extends Controller
             'verification_token_expires_at' => now()->addDays(7),
         ]);
 
-        Mail::to($user->email)->send(new IdentityVerificationMail($user, 'resubmit'));
+        // Queue the email - will retry automatically if rate limited
+        try {
+            Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'resubmit'));
+        } catch (\Exception $e) {
+            Log::error('Failed to queue resubmit email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
 
         return redirect()->route('verify.show', $token)
             ->with('error', 'We need a quick update to complete your verification. Please check the notes and resubmit.');
@@ -149,7 +159,12 @@ class IdentityVerificationController extends Controller
             'verification_status' => 'unverified',
         ]);
 
-        Mail::to($user->email)->send(new IdentityVerificationMail($user, 'link'));
+        // Queue the email - will retry automatically if rate limited
+        try {
+            Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'link'));
+        } catch (\Exception $e) {
+            Log::error('Failed to queue verification link email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
     }
 
     private function runAutoChecks(Request $request, array $data, User $user): array
