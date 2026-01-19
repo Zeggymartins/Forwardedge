@@ -246,11 +246,12 @@
                         <input type="file" id="id_front" name="id_front" class="d-none" accept="image/jpeg,image/png,.pdf" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">ID Back <span class="text-muted">(optional for passport)</span></label>
+                        <label class="form-label">ID Back <span class="text-muted">(optional)</span></label>
                         <div class="file-upload" onclick="document.getElementById('id_back').click()">
                             <i class="bi bi-image d-block"></i>
                             <p>Back of your ID</p>
                             <small class="text-muted">JPG, PNG or PDF (max 5MB)</small>
+                            <small class="text-muted d-block mt-1">Only required for Driver's License & Voter's Card</small>
                             <div class="file-name" id="id_back-name"></div>
                         </div>
                         <input type="file" id="id_back" name="id_back" class="d-none" accept="image/jpeg,image/png,.pdf">

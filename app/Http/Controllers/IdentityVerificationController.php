@@ -171,8 +171,11 @@ class IdentityVerificationController extends Controller
             $reasons[] = 'Please double-check the ID number format for the selected ID type.';
         }
 
-        if (($data['id_type'] ?? '') !== 'intl_passport' && !$request->hasFile('id_back')) {
-            $reasons[] = 'Please upload the back of your ID card.';
+        // Only require ID back for Driver's License and Voter's Card
+        $idType = $data['id_type'] ?? '';
+        $requiresBack = in_array($idType, ['drivers_license', 'voters_card']);
+        if ($requiresBack && !$request->hasFile('id_back')) {
+            $reasons[] = 'Please upload the back of your ID card (required for Driver\'s License and Voter\'s Card).';
         }
 
         $photo = $request->file('photo');

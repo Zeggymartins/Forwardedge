@@ -2,13 +2,13 @@
 
 @section('title', 'Verification Status - Forward Edge')
 
-@section('hide_header', true)
+{{-- @section('hide_header', true) --}}
 
 @push('styles')
 <style>
     .verify-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%);
+        /* background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%); */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -105,6 +105,7 @@
             @if($user->enrollment_id)
                 <div class="enrollment-id">
                     <div class="label">Your Enrollment ID</div>
+                    <div class="label">Please make sure you coppy the enrollment id as it will be used later</div>
                     <div class="id">{{ $user->enrollment_id }}</div>
                 </div>
             @endif

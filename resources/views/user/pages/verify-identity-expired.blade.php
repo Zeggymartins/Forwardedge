@@ -2,13 +2,13 @@
 
 @section('title', 'Verification Link Expired - Forward Edge')
 
-@section('hide_header', true)
+{{-- @section('hide_header', true) --}}
 
 @push('styles')
 <style>
     .verify-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%);
+        /* background: linear-gradient(135deg, #050b1f 0%, #0c1530 100%); */
         display: flex;
         align-items: center;
         justify-content: center;
