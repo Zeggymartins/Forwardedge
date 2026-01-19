@@ -116,8 +116,10 @@
                                         <div class="card border-0 shadow-sm rounded-4 mb-4">
                                             <div class="card-body">
                                                 <h5 class="fw-bold mb-3">🛡️ Verification Details</h5>
+                                                @php
+                                                    $v = $enrollment->user->verification_status ?? 'unverified';
+                                                @endphp
                                                 <p><strong>Status:</strong>
-                                                    @php($v = $enrollment->user->verification_status ?? 'unverified')
                                                     @if($v === 'verified')
                                                         <span class="badge bg-success">Verified</span>
                                                     @elseif($v === 'pending')

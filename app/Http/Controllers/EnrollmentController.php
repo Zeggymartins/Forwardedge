@@ -24,8 +24,11 @@ class EnrollmentController extends Controller
 
         // Require login first
         if (!$user) {
-            session(['url.intended' => $request->fullUrl()]);
-            return redirect()->route('login')
+            session([
+                'url.intended' => $request->fullUrl(),
+                'auth_required' => true,
+            ]);
+            return redirect('/')
                 ->with('info', 'Please login to continue with enrollment.');
         }
 
@@ -36,6 +39,7 @@ class EnrollmentController extends Controller
             // Generate token if user doesn't have one or it's expired
             if (!$user->hasValidVerificationToken()) {
                 IdentityVerificationController::sendVerificationEmail($user);
+                $user->refresh(); // Reload to get the new token
             }
 
             return redirect()->route('verify.show', $user->verification_token)

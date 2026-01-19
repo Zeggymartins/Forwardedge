@@ -30,8 +30,18 @@ class IdentityVerificationController extends Controller
             return view('user.pages.verify-identity-expired', compact('user'));
         }
 
-        // If already submitted/verified, show appropriate message
-        if (in_array($user->verification_status, ['pending', 'verified'])) {
+        // If already verified, redirect to intended URL (e.g., pricing page) or show status
+        if ($user->verification_status === 'verified') {
+            $intended = session()->pull('url.intended');
+            if ($intended) {
+                return redirect($intended)
+                    ->with('success', 'You are already verified! Proceed with enrollment.');
+            }
+            return view('user.pages.verify-identity-status', compact('user'));
+        }
+
+        // If pending, show status page
+        if ($user->verification_status === 'pending') {
             return view('user.pages.verify-identity-status', compact('user'));
         }
 

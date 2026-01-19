@@ -165,6 +165,12 @@
             </div>
         @endif
 
+        @if(session('info'))
+            <div class="alert alert-info mb-4" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd;">
+                <i class="bi bi-info-circle me-2"></i>{{ session('info') }}
+            </div>
+        @endif
+
         @if($user->verification_status === 'rejected' && $user->verification_notes)
             <div class="alert alert-danger mb-4">
                 <i class="bi bi-exclamation-circle me-2"></i>

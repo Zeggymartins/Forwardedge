@@ -39,7 +39,7 @@
 
                         @if($isLink)
                             <p style="margin:0 0 18px;">
-                                Thanks for completing your payment. To protect your account and course access,
+                                To protect your account and ensure a secure learning experience,
                                 we need to verify your identity. This is a quick, one-time step.
                             </p>
                             <p style="margin:0 0 18px;">
