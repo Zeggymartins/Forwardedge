@@ -498,6 +498,6 @@ PHP);
 | Scheduled Tasks
 |--------------------------------------------------------------------------
 */
-Schedule::command('queue:retry-mail 10 --once')
+Schedule::command('queue:retry-mail 10 --once --after="2026-01-19 00:00:00"')
     ->everyFiveMinutes()
     ->withoutOverlapping();

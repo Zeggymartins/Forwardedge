@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class RetryMailJobs extends Command
 {
-    protected $signature = 'queue:retry-mail {batch=10} {--delay=300} {--once}';
+    protected $signature = 'queue:retry-mail {batch=10} {--delay=300} {--once} {--after=}';
     protected $description = 'Retry failed mail jobs in batches with optional delay in seconds';
 
     public function handle(): int
@@ -17,14 +17,15 @@ class RetryMailJobs extends Command
         $delay = max(0, (int) $this->option('delay'));
 
         $runOnce = (bool) $this->option('once');
+        $after = $this->option('after');
 
         if ($runOnce) {
-            $this->retryBatch($batchSize);
+            $this->retryBatch($batchSize, $after);
             return 0;
         }
 
         while (true) {
-            $count = $this->retryBatch($batchSize);
+            $count = $this->retryBatch($batchSize, $after);
 
             if ($count === 0) {
                 $this->info('All failed mail jobs retried.');
@@ -40,10 +41,22 @@ class RetryMailJobs extends Command
         return 0;
     }
 
-    private function retryBatch(int $batchSize): int
+    private function retryBatch(int $batchSize, ?string $after): int
     {
-        $uuids = DB::table('failed_jobs')
-            ->where('payload', 'like', '%App\\\\Mail%')
+        $query = DB::table('failed_jobs')
+            ->where('payload', 'like', '%App\\\\Mail%');
+
+        if ($after) {
+            try {
+                $afterTime = \Carbon\Carbon::parse($after)->toDateTimeString();
+                $query->where('failed_at', '>=', $afterTime);
+            } catch (\Throwable $e) {
+                $this->error('Invalid --after value. Use a valid date/time, e.g. "2026-01-21 00:00:00".');
+                return 0;
+            }
+        }
+
+        $uuids = $query
             ->orderBy('failed_at')
             ->limit($batchSize)
             ->pluck('uuid')
