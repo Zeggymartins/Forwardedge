@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\GoogleDriveInit;
+use App\Console\Commands\RetryMailJobs;
 use App\Console\Commands\ResetAutoRejectScholarships;
 use App\Console\Commands\SendAutoRejectApology;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands([
         GoogleDriveInit::class,
+        RetryMailJobs::class,
         ResetAutoRejectScholarships::class,
         SendAutoRejectApology::class,
     ])

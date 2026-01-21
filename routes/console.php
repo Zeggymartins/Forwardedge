@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |------------------------------------------------------------------------------
@@ -491,3 +492,12 @@ PHP);
     $this->info('Page Builder scaffolding complete ✅');
     $this->comment('Ensure your controller renders: view($page->template ?? "user.pages.dynamic", compact("page"))');
 })->purpose('Scaffold page-builder files (Laravel 11/12, no Console Kernel)');
+
+/*
+|--------------------------------------------------------------------------
+| Scheduled Tasks
+|--------------------------------------------------------------------------
+*/
+Schedule::command('queue:retry-mail 10 --once')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();
