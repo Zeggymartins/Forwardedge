@@ -6,6 +6,7 @@ use App\Models\EmailCampaign;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 
 class EmailCampaignMail extends Mailable implements ShouldQueue
@@ -18,6 +19,11 @@ class EmailCampaignMail extends Mailable implements ShouldQueue
         public ?string $recipientEmail = null
     ) {
         $this->subject($campaign->subject);
+    }
+
+    public function middleware(): array
+    {
+        return [new RateLimited('mail')];
     }
 
     public function build(): self
