@@ -173,9 +173,12 @@
                                                             <td>
                                                                 @switch($user->id_type)
                                                                     @case('nin') National ID (NIN) @break
+                                                                    @case('national_id') National ID (Other Countries) @break
                                                                     @case('voters_card') Voter's Card @break
                                                                     @case('drivers_license') Driver's License @break
                                                                     @case('intl_passport') International Passport @break
+                                                                    @case('student_id') Student ID @break
+                                                                    @case('work_id') Work ID @break
                                                                     @default —
                                                                 @endswitch
                                                             </td>

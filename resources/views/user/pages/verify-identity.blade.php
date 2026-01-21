@@ -222,9 +222,12 @@
                         <select name="id_type" class="form-select @error('id_type') is-invalid @enderror" required>
                             <option value="">Select ID Type</option>
                             <option value="nin" {{ old('id_type') == 'nin' ? 'selected' : '' }}>National ID (NIN)</option>
+                            <option value="national_id" {{ old('id_type') == 'national_id' ? 'selected' : '' }}>National ID (Other Countries)</option>
                             <option value="voters_card" {{ old('id_type') == 'voters_card' ? 'selected' : '' }}>Voter's Card</option>
                             <option value="drivers_license" {{ old('id_type') == 'drivers_license' ? 'selected' : '' }}>Driver's License</option>
                             <option value="intl_passport" {{ old('id_type') == 'intl_passport' ? 'selected' : '' }}>International Passport</option>
+                            <option value="student_id" {{ old('id_type') == 'student_id' ? 'selected' : '' }}>Student ID</option>
+                            <option value="work_id" {{ old('id_type') == 'work_id' ? 'selected' : '' }}>Work ID</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">

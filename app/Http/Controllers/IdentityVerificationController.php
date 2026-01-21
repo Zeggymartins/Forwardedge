@@ -65,7 +65,7 @@ class IdentityVerificationController extends Controller
 
         $validated = $request->validate([
             'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'id_type' => ['required', Rule::in(['nin', 'voters_card', 'drivers_license', 'intl_passport'])],
+            'id_type' => ['required', Rule::in(['nin', 'national_id', 'voters_card', 'drivers_license', 'intl_passport', 'student_id', 'work_id'])],
             'id_number' => 'required|string|max:50',
             'id_front' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'id_back' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -249,13 +249,18 @@ class IdentityVerificationController extends Controller
     private function idNumberLooksValid(string $type, string $number): bool
     {
         $number = trim($number);
-        return match ($type) {
-            'nin' => (bool) preg_match('/^\d{11}$/', $number),
-            'voters_card' => (bool) preg_match('/^[a-zA-Z0-9]{8,20}$/', $number),
-            'drivers_license' => (bool) preg_match('/^[a-zA-Z0-9]{6,15}$/', $number),
-            'intl_passport' => (bool) preg_match('/^[a-zA-Z0-9]{6,12}$/', $number),
-            default => false,
-        };
+        if ($type === 'nin') {
+            return (bool) preg_match('/^\d{11}$/', $number);
+        }
+
+        $normalized = preg_replace('/[^a-zA-Z0-9]/', '', $number) ?? '';
+        $length = strlen($normalized);
+
+        if ($length < 6 || $length > 24) {
+            return false;
+        }
+
+        return (bool) preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\\-\\/\\s]*$/', $number);
     }
 
     private function imageTooSmall(?UploadedFile $file, int $minWidth, int $minHeight): bool
