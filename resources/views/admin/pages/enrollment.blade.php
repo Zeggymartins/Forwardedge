@@ -16,6 +16,78 @@
         </div>
     </div>
 
+    <!-- Filters Card -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ route('admin.enrollments.index') }}">
+                <div class="row g-3 align-items-end">
+                    <!-- Search by Name/Email -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">Name / Email</label>
+                        <input type="text" name="search" class="form-control" placeholder="Search name or email..."
+                            value="{{ $search ?? '' }}">
+                    </div>
+
+                    <!-- Enrollment ID -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Enrollment ID</label>
+                        <input type="text" name="enrollment_id" class="form-control" placeholder="e.g. FE-12345"
+                            value="{{ $enrollmentId ?? '' }}">
+                    </div>
+
+                    <!-- Country Filter -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Country</label>
+                        <select name="country" class="form-select">
+                            <option value="">All Countries</option>
+                            @foreach($allCountries ?? [] as $c)
+                                <option value="{{ $c }}" {{ ($country ?? '') === $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            @foreach($allowedStatuses ?? ['active', 'pending', 'completed', 'cancelled'] as $s)
+                                <option value="{{ $s }}" {{ ($status ?? '') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Per Page -->
+                    <div class="col-md-1">
+                        <label class="form-label small fw-semibold text-muted">Show</label>
+                        <select name="per_page" class="form-select">
+                            @foreach($perPageOptions ?? [10, 20, 50, 100] as $opt)
+                                <option value="{{ $opt }}" {{ ($perPage ?? 20) == $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filter & Reset Buttons -->
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary rounded-pill px-3">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                            <a href="{{ route('admin.enrollments.index') }}" class="btn btn-outline-secondary rounded-pill px-3">
+                                <i class="bi bi-x-circle"></i> Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">Showing {{ $enrollments->firstItem() ?? 0 }} - {{ $enrollments->lastItem() ?? 0 }} of {{ $enrollments->total() }} enrollments</span>
+    </div>
+
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
@@ -261,7 +333,7 @@
                         </div>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted fs-5">🚀 No enrollments yet.</td>
+                            <td colspan="9" class="text-center py-5 text-muted fs-5">🚀 No enrollments found.</td>
                         </tr>
                     @endforelse
                 </tbody>

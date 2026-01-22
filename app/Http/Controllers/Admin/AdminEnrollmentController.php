@@ -19,12 +19,54 @@ class AdminEnrollmentController extends Controller
     /**
      * Display a listing of enrollments.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // eager-load related models (user, course, courseSchedule+course)
+        // Get filter inputs
+        $search = trim((string) $request->input('search', ''));
+        $enrollmentId = trim((string) $request->input('enrollment_id', ''));
+        $country = $request->input('country');
+        $status = $request->input('status');
+        $perPage = (int) $request->input('per_page', 20);
+
+        $perPageOptions = [10, 20, 50, 100];
+        if (!in_array($perPage, $perPageOptions, true)) {
+            $perPage = 20;
+        }
+
+        $allowedStatuses = ['active', 'pending', 'completed', 'cancelled'];
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = null;
+        }
+
+        // Get all unique countries from users for filter dropdown
+        $allCountries = \App\Models\User::whereNotNull('nationality')
+            ->where('nationality', '!=', '')
+            ->distinct()
+            ->orderBy('nationality')
+            ->pluck('nationality');
+
+        // Build query with filters
         $enrollments = Enrollment::with(['user', 'course', 'courseSchedule.course'])
+            ->when($search, function ($q) use ($search) {
+                $term = '%' . $search . '%';
+                $q->whereHas('user', function ($userQuery) use ($term) {
+                    $userQuery->where('name', 'like', $term)
+                        ->orWhere('email', 'like', $term);
+                });
+            })
+            ->when($enrollmentId, function ($q) use ($enrollmentId) {
+                $q->whereHas('user', function ($userQuery) use ($enrollmentId) {
+                    $userQuery->where('enrollment_id', 'like', '%' . $enrollmentId . '%');
+                });
+            })
+            ->when($country, function ($q) use ($country) {
+                $q->whereHas('user', function ($userQuery) use ($country) {
+                    $userQuery->where('nationality', $country);
+                });
+            })
+            ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
 
         $moduleEnrollments = OrderItem::with(['order.user', 'course', 'courseContent'])
@@ -33,7 +75,18 @@ class AdminEnrollmentController extends Controller
             ->paginate(10, ['*'], 'modules_page')
             ->withQueryString();
 
-        return view('admin.pages.enrollment', compact('enrollments', 'moduleEnrollments'));
+        return view('admin.pages.enrollment', compact(
+            'enrollments',
+            'moduleEnrollments',
+            'search',
+            'enrollmentId',
+            'country',
+            'status',
+            'perPage',
+            'perPageOptions',
+            'allCountries',
+            'allowedStatuses'
+        ));
     }
 
     public function exportExcel()

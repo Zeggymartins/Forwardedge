@@ -107,7 +107,7 @@ class IdentityVerificationController extends Controller
                 'verification_status' => 'verified',
                 'verified_at' => now(),
                 'verification_notes' => null,
-                'verification_token_expires_at' => now()->addDays(7),
+                'verification_token_expires_at' => now()->addHours(48),
             ]);
 
             // Queue the email - will retry automatically if rate limited
@@ -132,7 +132,7 @@ class IdentityVerificationController extends Controller
             'verification_status' => 'rejected',
             'verification_notes' => implode(' ', $reasons),
             'verified_at' => null,
-            'verification_token_expires_at' => now()->addDays(7),
+            'verification_token_expires_at' => now()->addHours(48),
         ]);
 
         // Queue the email - will retry automatically if rate limited
@@ -153,7 +153,7 @@ class IdentityVerificationController extends Controller
     {
         $user->update([
             'verification_token' => Str::random(64),
-            'verification_token_expires_at' => now()->addDays(7),
+            'verification_token_expires_at' => now()->addHours(48),
             'verification_status' => 'unverified',
         ]);
 
