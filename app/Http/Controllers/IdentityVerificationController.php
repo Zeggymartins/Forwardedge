@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\IdentityVerificationMail;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -170,47 +168,9 @@ class IdentityVerificationController extends Controller
     private function runAutoChecks(Request $request, array $data, User $user): array
     {
         $reasons = [];
-
-        $legalName = $this->normalizeName($data['legal_name'] ?? '');
-        $accountName = $this->normalizeName($user->name ?? '');
-
-        if (count($legalName) < 2) {
-            $reasons[] = 'Please enter your full legal name (first and last name).';
-        }
-
-        if ($legalName && $accountName && !$this->namesOverlap($legalName, $accountName)) {
-            $reasons[] = 'Your legal name should match the name on your account.';
-        }
-
-        if (!$this->idNumberLooksValid($data['id_type'] ?? '', $data['id_number'] ?? '')) {
-            $reasons[] = 'Please double-check the ID number format for the selected ID type.';
-        }
-
-        // Only require ID back for Driver's License and Voter's Card
         $idType = $data['id_type'] ?? '';
-        $requiresBack = in_array($idType, ['drivers_license', 'voters_card']);
-        if ($requiresBack && !$request->hasFile('id_back')) {
-            $reasons[] = 'Please upload the back of your ID card (required for Driver\'s License and Voter\'s Card).';
-        }
-
-        $photo = $request->file('photo');
-        if ($this->imageTooSmall($photo, 300, 300)) {
-            $reasons[] = 'Your photo is too small or unclear. Please upload a clearer image.';
-        }
-
-        $idFront = $request->file('id_front');
-        if ($this->imageTooSmall($idFront, 600, 350)) {
-            $reasons[] = 'Your ID front image is too small or unclear. Please upload a clearer image.';
-        }
-
-        $idBack = $request->file('id_back');
-        if ($idBack && $this->imageTooSmall($idBack, 600, 350)) {
-            $reasons[] = 'Your ID back image is too small or unclear. Please upload a clearer image.';
-        }
-
-        $dob = Carbon::parse($data['date_of_birth']);
-        if ($dob->diffInYears(now()) < 13) {
-            $reasons[] = 'Please confirm your date of birth.';
+        if ($idType === 'nin' && !$this->idNumberLooksValid($idType, $data['id_number'] ?? '')) {
+            $reasons[] = 'Please double-check your NIN (11 digits).';
         }
 
         if (!empty($reasons)) {
@@ -222,28 +182,6 @@ class IdentityVerificationController extends Controller
         }
 
         return $reasons;
-    }
-
-    private function normalizeName(string $value): array
-    {
-        $value = trim(strtolower($value));
-        $value = preg_replace('/[^a-z\s]/', ' ', $value);
-        $parts = preg_split('/\s+/', $value);
-        return array_values(array_filter($parts));
-    }
-
-    private function namesOverlap(array $legalName, array $accountName): bool
-    {
-        $legal = array_unique($legalName);
-        $account = array_unique($accountName);
-
-        foreach ($legal as $part) {
-            if (strlen($part) >= 3 && in_array($part, $account, true)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function idNumberLooksValid(string $type, string $number): bool
@@ -261,23 +199,5 @@ class IdentityVerificationController extends Controller
         }
 
         return (bool) preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\\-\\/\\s]*$/', $number);
-    }
-
-    private function imageTooSmall(?UploadedFile $file, int $minWidth, int $minHeight): bool
-    {
-        if (!$file) {
-            return false;
-        }
-
-        if ($file->getClientOriginalExtension() === 'pdf') {
-            return false;
-        }
-
-        $info = @getimagesize($file->getRealPath());
-        if (!$info || !isset($info[0], $info[1])) {
-            return true;
-        }
-
-        return $info[0] < $minWidth || $info[1] < $minHeight;
     }
 }
