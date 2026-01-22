@@ -26,6 +26,7 @@ class AdminEnrollmentController extends Controller
         $enrollmentId = trim((string) $request->input('enrollment_id', ''));
         $country = $request->input('country');
         $status = $request->input('status');
+        $verificationStatus = $request->input('verification_status');
         $perPage = (int) $request->input('per_page', 20);
 
         $perPageOptions = [10, 20, 50, 100];
@@ -36,6 +37,11 @@ class AdminEnrollmentController extends Controller
         $allowedStatuses = ['active', 'pending', 'completed', 'cancelled'];
         if (!in_array($status, $allowedStatuses, true)) {
             $status = null;
+        }
+
+        $allowedVerificationStatuses = ['verified', 'pending', 'rejected', 'unverified'];
+        if (!in_array($verificationStatus, $allowedVerificationStatuses, true)) {
+            $verificationStatus = null;
         }
 
         // Get all unique countries from users for filter dropdown
@@ -64,6 +70,16 @@ class AdminEnrollmentController extends Controller
                     $userQuery->where('nationality', $country);
                 });
             })
+            ->when($verificationStatus, function ($q) use ($verificationStatus) {
+                $q->whereHas('user', function ($userQuery) use ($verificationStatus) {
+                    if ($verificationStatus === 'unverified') {
+                        $userQuery->whereNull('verification_status')
+                            ->orWhere('verification_status', 'unverified');
+                    } else {
+                        $userQuery->where('verification_status', $verificationStatus);
+                    }
+                });
+            })
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
             ->paginate($perPage)
@@ -82,10 +98,12 @@ class AdminEnrollmentController extends Controller
             'enrollmentId',
             'country',
             'status',
+            'verificationStatus',
             'perPage',
             'perPageOptions',
             'allCountries',
-            'allowedStatuses'
+            'allowedStatuses',
+            'allowedVerificationStatuses'
         ));
     }
 

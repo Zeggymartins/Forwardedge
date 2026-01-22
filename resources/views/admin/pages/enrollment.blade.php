@@ -57,6 +57,19 @@
                         </select>
                     </div>
 
+                    <!-- Verification Status Filter -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Verification</label>
+                        <select name="verification_status" class="form-select">
+                            <option value="">All</option>
+                            <option value="verified" {{ ($verificationStatus ?? '') === 'verified' ? 'selected' : '' }}>Verified</option>
+                            <option value="pending" {{ ($verificationStatus ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="rejected" {{ ($verificationStatus ?? '') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="unverified" {{ ($verificationStatus ?? '') === 'unverified' ? 'selected' : '' }}>Unverified</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 align-items-end mt-2">
                     <!-- Per Page -->
                     <div class="col-md-1">
                         <label class="form-label small fw-semibold text-muted">Show</label>
@@ -68,7 +81,7 @@
                     </div>
 
                     <!-- Filter & Reset Buttons -->
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary rounded-pill px-3">
                                 <i class="bi bi-funnel"></i> Filter
@@ -342,7 +355,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $enrollments->links() }}
+        {{ $enrollments->links('pagination::bootstrap-5') }}
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 mt-5">
@@ -394,7 +407,7 @@
         </div>
     </div>
     <div class="mt-4">
-        {{ $moduleEnrollments->links() }}
+        {{ $moduleEnrollments->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection
