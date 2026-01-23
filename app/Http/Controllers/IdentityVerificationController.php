@@ -167,37 +167,6 @@ class IdentityVerificationController extends Controller
 
     private function runAutoChecks(Request $request, array $data, User $user): array
     {
-        $reasons = [];
-        $idType = $data['id_type'] ?? '';
-        if ($idType === 'nin' && !$this->idNumberLooksValid($idType, $data['id_number'] ?? '')) {
-            $reasons[] = 'Please double-check your NIN (11 digits).';
-        }
-
-        if (!empty($reasons)) {
-            Log::info('Verification auto-check flagged', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'reasons' => $reasons,
-            ]);
-        }
-
-        return $reasons;
-    }
-
-    private function idNumberLooksValid(string $type, string $number): bool
-    {
-        $number = trim($number);
-        if ($type === 'nin') {
-            return (bool) preg_match('/^\d{11}$/', $number);
-        }
-
-        $normalized = preg_replace('/[^a-zA-Z0-9]/', '', $number) ?? '';
-        $length = strlen($normalized);
-
-        if ($length < 6 || $length > 24) {
-            return false;
-        }
-
-        return (bool) preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\\-\\/\\s]*$/', $number);
+        return [];
     }
 }
