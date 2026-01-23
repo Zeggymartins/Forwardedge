@@ -321,5 +321,83 @@
             });
         }
     });
+
+    // Validate files before form submission
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        const fileInputs = [
+            { id: 'photo', required: true, label: 'Personal Photo' },
+            { id: 'id_front', required: true, label: 'ID Front' },
+            { id: 'id_back', required: false, label: 'ID Back' }
+        ];
+
+        let hasError = false;
+        let errorMessages = [];
+
+        for (const fileInfo of fileInputs) {
+            const input = document.getElementById(fileInfo.id);
+            if (!input) continue;
+
+            const files = input.files;
+
+            // Check if required file is missing
+            if (fileInfo.required && (!files || files.length === 0)) {
+                hasError = true;
+                errorMessages.push(fileInfo.label + ' is required.');
+                continue;
+            }
+
+            // Skip validation if file is optional and not provided
+            if (!files || files.length === 0) continue;
+
+            const file = files[0];
+
+            // Try to read a small portion of the file to verify it's still accessible
+            try {
+                await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = resolve;
+                    reader.onerror = () => reject(new Error('File not accessible'));
+
+                    // Read just the first byte to check accessibility
+                    const slice = file.slice(0, 1);
+                    reader.readAsArrayBuffer(slice);
+                });
+            } catch (err) {
+                hasError = true;
+                errorMessages.push(fileInfo.label + ': The file "' + file.name + '" could not be accessed. Please re-select the file.');
+
+                // Clear the invalid file input
+                input.value = '';
+                const nameEl = document.getElementById(fileInfo.id + '-name');
+                if (nameEl) nameEl.textContent = '';
+                const uploadEl = input.previousElementSibling;
+                if (uploadEl && uploadEl.classList.contains('file-upload')) {
+                    uploadEl.classList.remove('has-file');
+                }
+            }
+        }
+
+        if (hasError) {
+            e.preventDefault();
+
+            // Show error message
+            let alertDiv = document.querySelector('.file-error-alert');
+            if (!alertDiv) {
+                alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger mb-4 file-error-alert';
+                const form = document.querySelector('form');
+                form.insertBefore(alertDiv, form.firstChild);
+            }
+
+            alertDiv.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i><strong>File Error:</strong><ul class="mb-0 mt-2">' +
+                errorMessages.map(msg => '<li>' + msg + '</li>').join('') +
+                '</ul><p class="mb-0 mt-2"><small>This can happen if the file was moved, renamed, or is stored in cloud storage (Google Drive, Dropbox). Please select files directly from your device.</small></p>';
+
+            // Scroll to the error
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            return false;
+        }
+    });
 </script>
 @endpush
