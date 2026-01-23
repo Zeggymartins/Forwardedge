@@ -82,7 +82,12 @@ class IdentityVerificationController extends Controller
             ? $request->file('id_back')->store($basePath, 'private')
             : null;
 
-        // Update user with verification data
+        // Generate enrollment ID if not already set
+        if (!$user->enrollment_id) {
+            $user->enrollment_id = User::generateEnrollmentId();
+        }
+
+        // Update user with verification data - auto-verify on submission
         $user->update([
             'photo' => $photoPath,
             'id_type' => $validated['id_type'],
@@ -93,57 +98,27 @@ class IdentityVerificationController extends Controller
             'date_of_birth' => $validated['date_of_birth'],
             'nationality' => $validated['nationality'],
             'state_of_origin' => $validated['state_of_origin'],
-            'verification_status' => 'pending',
+            'verification_status' => 'verified',
+            'verified_at' => now(),
+            'verification_notes' => null,
         ]);
 
-        $reasons = $this->runAutoChecks($request, $validated, $user);
-
-        if (empty($reasons)) {
-            if (!$user->enrollment_id) {
-                $user->enrollment_id = User::generateEnrollmentId();
-            }
-
-            $user->update([
-                'verification_status' => 'verified',
-                'verified_at' => now(),
-                'verification_notes' => null,
-                'verification_token_expires_at' => now()->addHours(48),
-            ]);
-
-            // Queue the email - will retry automatically if rate limited
-            try {
-                Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'verified'));
-            } catch (\Exception $e) {
-                Log::error('Failed to queue verification email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
-            }
-
-            // Redirect to intended URL (e.g., pricing page) if set
-            $intended = session()->pull('url.intended');
-            if ($intended) {
-                return redirect($intended)
-                    ->with('success', 'Verification complete! You can now proceed with enrollment.');
-            }
-
-            return redirect()->route('verify.show', $token)
-                ->with('success', 'Verification complete. You can now access your course content.');
+        // Send verification complete email
+        try {
+            Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'verified'));
+        } catch (\Exception $e) {
+            Log::error('Failed to queue verification email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
 
-        $user->update([
-            'verification_status' => 'rejected',
-            'verification_notes' => implode(' ', $reasons),
-            'verified_at' => null,
-            'verification_token_expires_at' => now()->addHours(48),
-        ]);
-
-        // Queue the email - will retry automatically if rate limited
-        try {
-            Mail::to($user->email)->queue(new IdentityVerificationMail($user, 'resubmit'));
-        } catch (\Exception $e) {
-            Log::error('Failed to queue resubmit email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        // Redirect to intended URL (e.g., pricing page) if set
+        $intended = session()->pull('url.intended');
+        if ($intended) {
+            return redirect($intended)
+                ->with('success', 'Verification complete! You can now proceed with enrollment.');
         }
 
         return redirect()->route('verify.show', $token)
-            ->with('error', 'We need a quick update to complete your verification. Please check the notes and resubmit.');
+            ->with('success', 'Verification complete. You can now access your course content.');
     }
 
     /**
@@ -163,10 +138,5 @@ class IdentityVerificationController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to queue verification link email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
-    }
-
-    private function runAutoChecks(Request $request, array $data, User $user): array
-    {
-        return [];
     }
 }

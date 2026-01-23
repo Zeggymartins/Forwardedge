@@ -221,7 +221,7 @@
                         <label class="form-label">ID Type <span class="text-danger">*</span></label>
                         <select name="id_type" class="form-select @error('id_type') is-invalid @enderror" required>
                             <option value="">Select ID Type</option>
-                            <option value="nin" {{ old('id_type') == 'nin' ? 'selected' : '' }}>National ID (NIN)</option>
+                            <option value="nin" {{ old('id_type') == 'nin' ? 'selected' : '' }}>National ID (NIN)(for Nigerians only)</option>
                             <option value="national_id" {{ old('id_type') == 'national_id' ? 'selected' : '' }}>National ID (Other Countries)</option>
                             <option value="voters_card" {{ old('id_type') == 'voters_card' ? 'selected' : '' }}>Voter's Card</option>
                             <option value="drivers_license" {{ old('id_type') == 'drivers_license' ? 'selected' : '' }}>Driver's License</option>
