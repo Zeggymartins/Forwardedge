@@ -355,15 +355,12 @@
                         @if ($colType === 'photo')
                           @php
                             $user = $value;
-                            $photoUrl = null;
-                            if ($user && $user->photo) {
-                                $photoUrl = Storage::disk('private')->exists($user->photo)
-                                    ? route('verification.document', ['user' => $user->id, 'type' => 'photo'])
-                                    : null;
-                            }
+                            $photoUrl = $user && $user->photo
+                                ? route('user.photo', $user->id)
+                                : $defaultAvatar;
                           @endphp
                           <div class="pb-avatar">
-                            <img src="{{ $photoUrl ?? $defaultAvatar }}" alt="Avatar" onerror="this.src='{{ $defaultAvatar }}'">
+                            <img src="{{ $photoUrl }}" alt="Avatar" onerror="this.src='{{ $defaultAvatar }}'">
                           </div>
                         @elseif ($colType === 'nationality')
                           <span class="pb-country">

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -139,5 +140,22 @@ class IdentityVerificationController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to queue verification link email', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Serve user verification photo publicly
+     */
+    public function photo(User $user)
+    {
+        if (!$user->photo || !Storage::disk('private')->exists($user->photo)) {
+            // Return default avatar
+            $defaultAvatar = public_path('frontend/assets/images/avatar.png');
+            if (file_exists($defaultAvatar)) {
+                return response()->file($defaultAvatar);
+            }
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('private')->path($user->photo));
     }
 }

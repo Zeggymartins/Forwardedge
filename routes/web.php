@@ -115,6 +115,8 @@ Route::get('/verify/{token}', [\App\Http\Controllers\IdentityVerificationControl
     ->name('verify.show');
 Route::post('/verify/{token}', [\App\Http\Controllers\IdentityVerificationController::class, 'store'])
     ->name('verify.store');
+Route::get('/user/{user}/photo', [\App\Http\Controllers\IdentityVerificationController::class, 'photo'])
+    ->name('user.photo');
 
 Route::get('/csrf-refresh', function () {
     return response()->json([
