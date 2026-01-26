@@ -192,16 +192,20 @@
         const COURSE_CATALOG = @json(($courseCatalog ?? collect())->values());
         const TABLE_COLUMN_OPTIONS = {
             enrollments: [
-                { value: 'id', label: 'Enrollment ID' },
+                { value: 'user_photo', label: 'Photo' },
+                { value: 'id', label: 'ID' },
+                { value: 'enrollment_id', label: 'Enrollment ID' },
                 { value: 'user_name', label: 'Student Name' },
-                { value: 'user_email', label: 'Student Email' },
+                { value: 'user_email', label: 'Email' },
+                { value: 'nationality', label: 'Country (with Flag)' },
                 { value: 'course_title', label: 'Course' },
-                { value: 'schedule_dates', label: 'Schedule Dates' },
-                { value: 'payment_plan', label: 'Payment Plan' },
-                { value: 'total_amount', label: 'Total Amount' },
+                { value: 'schedule_dates', label: 'Schedule' },
+                { value: 'payment_plan', label: 'Plan' },
+                { value: 'total_amount', label: 'Amount' },
                 { value: 'balance', label: 'Balance' },
                 { value: 'status', label: 'Status' },
-                { value: 'created_at', label: 'Created Date' },
+                { value: 'verification_status', label: 'Verified' },
+                { value: 'created_at', label: 'Enrolled Date' },
             ],
             course_contents: [
                 { value: 'id', label: 'Content ID' },
