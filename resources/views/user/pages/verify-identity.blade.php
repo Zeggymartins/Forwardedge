@@ -197,6 +197,11 @@
         <form action="{{ route('verify.store', $token) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
+            <div class="alert mb-4" style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #86efac; border-radius: 8px;">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Good news!</strong> Uploading your ID document is now optional. Just upload your photo and fill in your personal details to complete verification.
+            </div>
+
             <!-- Personal Photo Section -->
             <div class="form-section">
                 <h3><i class="bi bi-camera me-2"></i>Personal Photo</h3>
@@ -214,12 +219,12 @@
 
             <!-- Identity Document Section -->
             <div class="form-section">
-                <h3><i class="bi bi-card-heading me-2"></i>Identity Document</h3>
+                <h3><i class="bi bi-card-heading me-2"></i>Identity Document <span class="text-muted" style="font-size: 12px;">(optional)</span></h3>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">ID Type <span class="text-danger">*</span></label>
-                        <select name="id_type" class="form-select @error('id_type') is-invalid @enderror" required>
+                        <label class="form-label">ID Type <span class="text-muted">(optional)</span></label>
+                        <select name="id_type" class="form-select @error('id_type') is-invalid @enderror">
                             <option value="">Select ID Type</option>
                             <option value="nin" {{ old('id_type') == 'nin' ? 'selected' : '' }}>National ID (NIN)(for Nigerians only)</option>
                             <option value="national_id" {{ old('id_type') == 'national_id' ? 'selected' : '' }}>National ID (Other Countries)</option>
@@ -231,22 +236,22 @@
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">ID Number <span class="text-danger">*</span></label>
+                        <label class="form-label">ID Number <span class="text-muted">(optional)</span></label>
                         <input type="text" name="id_number" class="form-control @error('id_number') is-invalid @enderror"
-                               value="{{ old('id_number') }}" placeholder="Enter your ID number" required>
+                               value="{{ old('id_number') }}" placeholder="Enter your ID number">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">ID Front <span class="text-danger">*</span></label>
+                        <label class="form-label">ID Front <span class="text-muted">(optional)</span></label>
                         <div class="file-upload" onclick="document.getElementById('id_front').click()">
                             <i class="bi bi-image d-block"></i>
                             <p>Front of your ID</p>
                             <small class="text-muted">JPG, PNG or PDF (max 5MB)</small>
                             <div class="file-name" id="id_front-name"></div>
                         </div>
-                        <input type="file" id="id_front" name="id_front" class="d-none" accept="image/jpeg,image/png,.pdf" required>
+                        <input type="file" id="id_front" name="id_front" class="d-none" accept="image/jpeg,image/png,.pdf">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">ID Back <span class="text-muted">(optional)</span></label>
@@ -254,7 +259,6 @@
                             <i class="bi bi-image d-block"></i>
                             <p>Back of your ID</p>
                             <small class="text-muted">JPG, PNG or PDF (max 5MB)</small>
-                            <small class="text-muted d-block mt-1">Only required for Driver's License & Voter's Card</small>
                             <div class="file-name" id="id_back-name"></div>
                         </div>
                         <input type="file" id="id_back" name="id_back" class="d-none" accept="image/jpeg,image/png,.pdf">
@@ -322,65 +326,14 @@
         }
     });
 
-    // Validate files before form submission
-    document.querySelector('form').addEventListener('submit', async function(e) {
-        const fileInputs = [
-            { id: 'photo', required: true, label: 'Personal Photo' },
-            { id: 'id_front', required: true, label: 'ID Front' },
-            { id: 'id_back', required: false, label: 'ID Back' }
-        ];
+    // Simple synchronous validation - no async issues
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const photoInput = document.getElementById('photo');
 
-        let hasError = false;
-        let errorMessages = [];
-
-        for (const fileInfo of fileInputs) {
-            const input = document.getElementById(fileInfo.id);
-            if (!input) continue;
-
-            const files = input.files;
-
-            // Check if required file is missing
-            if (fileInfo.required && (!files || files.length === 0)) {
-                hasError = true;
-                errorMessages.push(fileInfo.label + ' is required.');
-                continue;
-            }
-
-            // Skip validation if file is optional and not provided
-            if (!files || files.length === 0) continue;
-
-            const file = files[0];
-
-            // Try to read a small portion of the file to verify it's still accessible
-            try {
-                await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = resolve;
-                    reader.onerror = () => reject(new Error('File not accessible'));
-
-                    // Read just the first byte to check accessibility
-                    const slice = file.slice(0, 1);
-                    reader.readAsArrayBuffer(slice);
-                });
-            } catch (err) {
-                hasError = true;
-                errorMessages.push(fileInfo.label + ': The file "' + file.name + '" could not be accessed. Please re-select the file.');
-
-                // Clear the invalid file input
-                input.value = '';
-                const nameEl = document.getElementById(fileInfo.id + '-name');
-                if (nameEl) nameEl.textContent = '';
-                const uploadEl = input.previousElementSibling;
-                if (uploadEl && uploadEl.classList.contains('file-upload')) {
-                    uploadEl.classList.remove('has-file');
-                }
-            }
-        }
-
-        if (hasError) {
+        // Check if required photo is missing
+        if (!photoInput || !photoInput.files || photoInput.files.length === 0) {
             e.preventDefault();
 
-            // Show error message
             let alertDiv = document.querySelector('.file-error-alert');
             if (!alertDiv) {
                 alertDiv = document.createElement('div');
@@ -389,15 +342,20 @@
                 form.insertBefore(alertDiv, form.firstChild);
             }
 
-            alertDiv.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i><strong>File Error:</strong><ul class="mb-0 mt-2">' +
-                errorMessages.map(msg => '<li>' + msg + '</li>').join('') +
-                '</ul><p class="mb-0 mt-2"><small>This can happen if the file was moved, renamed, or is stored in cloud storage (Google Drive, Dropbox). Please select files directly from your device.</small></p>';
-
-            // Scroll to the error
+            alertDiv.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i><strong>Error:</strong> Personal Photo is required.';
             alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
             return false;
         }
+
+        // Show loading state on submit button
+        const submitBtn = document.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+        }
+
+        // Form will submit normally
+        return true;
     });
 </script>
 @endpush

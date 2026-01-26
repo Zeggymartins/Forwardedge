@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -63,9 +62,9 @@ class IdentityVerificationController extends Controller
 
         $validated = $request->validate([
             'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'id_type' => ['required', Rule::in(['nin', 'national_id', 'voters_card', 'drivers_license', 'intl_passport', 'student_id', 'work_id'])],
-            'id_number' => 'required|string|max:50',
-            'id_front' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'id_type' => ['nullable', Rule::in(['nin', 'national_id', 'voters_card', 'drivers_license', 'intl_passport', 'student_id', 'work_id'])],
+            'id_number' => 'nullable|string|max:50',
+            'id_front' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'id_back' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'legal_name' => 'required|string|max:255',
             'date_of_birth' => 'required|date|before:today',
@@ -77,7 +76,9 @@ class IdentityVerificationController extends Controller
         $basePath = "verifications/{$user->id}";
 
         $photoPath = $request->file('photo')->store($basePath, 'private');
-        $idFrontPath = $request->file('id_front')->store($basePath, 'private');
+        $idFrontPath = $request->hasFile('id_front')
+            ? $request->file('id_front')->store($basePath, 'private')
+            : null;
         $idBackPath = $request->hasFile('id_back')
             ? $request->file('id_back')->store($basePath, 'private')
             : null;
