@@ -148,14 +148,18 @@ class IdentityVerificationController extends Controller
     public function photo(User $user)
     {
         if (!$user->photo || !Storage::disk('private')->exists($user->photo)) {
-            // Return default avatar
-            $defaultAvatar = public_path('frontend/assets/images/avatar.png');
-            if (file_exists($defaultAvatar)) {
-                return response()->file($defaultAvatar);
-            }
-            abort(404);
+            // Redirect to generated avatar
+            $name = urlencode($user->name ?? 'User');
+            return redirect("https://ui-avatars.com/api/?name={$name}&background=e2e8f0&color=64748b&size=88");
         }
 
-        return response()->file(Storage::disk('private')->path($user->photo));
+        $path = Storage::disk('private')->path($user->photo);
+        $lastModified = filemtime($path);
+
+        return response()->file($path, [
+            'Cache-Control' => 'public, max-age=604800', // Cache for 7 days
+            'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
+            'ETag' => md5($user->id . $lastModified),
+        ]);
     }
 }

@@ -106,7 +106,7 @@
       return $countryFlags[$key] ?? '🌍';
   };
 
-  $defaultAvatar = asset('frontend/assets/images/avatar.png');
+  $defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=e2e8f0&color=64748b&size=88';
 
   $enrollmentColumns = [
       'user_photo' => [
@@ -355,12 +355,14 @@
                         @if ($colType === 'photo')
                           @php
                             $user = $value;
+                            $userName = $user?->name ?? 'User';
+                            $fallbackAvatar = 'https://ui-avatars.com/api/?name=' . urlencode($userName) . '&background=e2e8f0&color=64748b&size=88';
                             $photoUrl = $user && $user->photo
                                 ? route('user.photo', $user->id)
-                                : $defaultAvatar;
+                                : $fallbackAvatar;
                           @endphp
                           <div class="pb-avatar">
-                            <img src="{{ $photoUrl }}" alt="Avatar" onerror="this.src='{{ $defaultAvatar }}'">
+                            <img src="{{ $photoUrl }}" alt="{{ $userName }}" loading="lazy" onerror="this.src='{{ $fallbackAvatar }}'">
                           </div>
                         @elseif ($colType === 'nationality')
                           <span class="pb-country">
