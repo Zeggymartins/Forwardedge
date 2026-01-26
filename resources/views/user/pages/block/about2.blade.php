@@ -60,6 +60,21 @@
 
 @endphp
 
+@push('styles')
+<style>
+  .h6-about .sec-title,
+  .h6-about .sub-title,
+  .h6-about .about-content-area,
+  .h6-about .about-content-area * {
+    color: #fff !important;
+  }
+  .h6-about .about-content-area .text-muted,
+  .h6-about .about-content-area .small {
+    color: rgba(255, 255, 255, 0.82) !important;
+  }
+</style>
+@endpush
+
 {{-- ========== About ========== --}}
 <section class="tj-about-section h6-about section-gap section-gap-x pb-rich-text" aria-label="About">
   <div class="container">
