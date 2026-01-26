@@ -93,6 +93,18 @@
 
   /* Extra space between columns so cards don't "enter" each other */
   .about-cards-row { row-gap: 1.5rem; } /* vertical gap */
+
+  /* Force About columns text to white */
+  .h7-about .sec-heading .sec-title,
+  .h7-about .sec-heading .sub-title,
+  .h7-about .h7-about-content-inner,
+  .h7-about .h7-about-content-inner p,
+  .h7-about .h7-about-content-inner li {
+    color: #fff;
+  }
+  .h7-about .h7-about-content-inner .text-muted {
+    color: rgba(255, 255, 255, 0.82) !important;
+  }
 </style>
 @endpush
 
