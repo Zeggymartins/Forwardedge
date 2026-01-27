@@ -89,4 +89,36 @@ class User extends Authenticatable
             && $this->verification_token_expires_at
             && $this->verification_token_expires_at->isFuture();
     }
+
+    /**
+     * Get the user's scholarship applications
+     */
+    public function scholarshipApplications()
+    {
+        return $this->hasMany(ScholarshipApplication::class);
+    }
+
+    /**
+     * Get location/country from scholarship application or user nationality
+     */
+    public function getCountryAttribute(): ?string
+    {
+        // First check user's nationality from verification
+        if ($this->nationality) {
+            return $this->nationality;
+        }
+
+        // Fallback to scholarship application location
+        $application = $this->scholarshipApplications()->latest()->first();
+        if ($application) {
+            $location = $application->form_data['personal']['location'] ?? null;
+            if ($location) {
+                // Extract country from location (last part after comma)
+                $parts = array_map('trim', explode(',', $location));
+                return end($parts);
+            }
+        }
+
+        return null;
+    }
 }

@@ -20,6 +20,11 @@
             <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
             <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
         </div>
+        <a href="{{ route('admin.scholarships.export', request()->query()) }}" class="btn btn-success">
+            <i class="bi bi-download me-1"></i> Export CSV
+        </a>
+    </div>
+    <div class="mb-4">
         <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="w-100 scholarship-filters">
             <div class="card border-0 shadow-sm filter-card">
                 <div class="card-body p-3 p-lg-4">
@@ -110,14 +115,14 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-6 col-md-3 col-lg-2 filter-field">
-                            <label class="form-label mb-1" for="filter_country">Country</label>
-                            <select name="country" id="filter_country" class="form-select form-select-sm filter-select">
-                                <option value="">Any</option>
+                        <div class="col-12 col-md-6 col-lg-3 filter-field">
+                            <label class="form-label mb-1" for="filter_country">Countries</label>
+                            <select name="country[]" id="filter_country" class="form-select form-select-sm filter-select" multiple>
                                 @foreach(($allCountries ?? []) as $countryOption)
-                                    <option value="{{ $countryOption }}" @selected(($country ?? '') === $countryOption)>{{ $countryOption }}</option>
+                                    <option value="{{ $countryOption }}" @selected(in_array($countryOption, $countries ?? []))>{{ $countryOption }}</option>
                                 @endforeach
                             </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
                         </div>
                         <div class="col-6 col-md-3 col-lg-2 filter-field">
                             <label class="form-label mb-1" for="per_page">Per page</label>

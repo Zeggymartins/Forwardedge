@@ -132,7 +132,7 @@
       ],
       'nationality' => [
           'label' => 'Country',
-          'value' => fn($row) => $row->user?->nationality ?? null,
+          'value' => fn($row) => $row->user?->country ?? $row->user?->nationality ?? null,
           'type' => 'nationality',
       ],
       'course_title' => [
@@ -230,7 +230,7 @@
       }
   } else {
       if ($courseId) {
-          $query = Enrollment::with(['user', 'course', 'schedule.course'])
+          $query = Enrollment::with(['user.scholarshipApplications', 'course', 'schedule.course'])
               ->where('status', 'active')
               ->where(function ($q) use ($courseId) {
                   $q->where('course_id', $courseId)
@@ -288,29 +288,27 @@
       {{-- Filters --}}
       @if ($tableSource === 'enrollments' && $courseId)
       <div class="pb-table-filters">
-        <form method="GET" action="" class="pb-filter-form">
+        <div class="pb-filter-form">
           <div class="pb-search-box">
             <i class="bi bi-search"></i>
-            <input type="text" name="search" value="{{ $search }}" placeholder="Search by name, email, or enrollment ID..." class="pb-search-input">
+            <input type="text" id="pb-table-search" placeholder="Search by name, email, or enrollment ID..." class="pb-search-input">
           </div>
           <div class="pb-filter-actions">
-            <select name="per_page" class="pb-select" onchange="this.form.submit()">
-              <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 per page</option>
-              <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 per page</option>
-              <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 per page</option>
-              <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 per page</option>
-              <option value="200" {{ $perPage == 200 ? 'selected' : '' }}>200 per page</option>
-            </select>
-            <button type="submit" class="pb-btn-search">
-              <i class="bi bi-funnel"></i> Filter
-            </button>
-            @if($search)
-            <a href="?per_page={{ $perPage }}#enrollments-table" class="pb-btn-clear">
+            <form method="GET" action="" class="d-flex align-items-center gap-2">
+              <select name="per_page" class="pb-select" onchange="this.form.submit()">
+                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 per page</option>
+                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 per page</option>
+                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 per page</option>
+                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 per page</option>
+                <option value="200" {{ $perPage == 200 ? 'selected' : '' }}>200 per page</option>
+              </select>
+            </form>
+            <button type="button" id="pb-clear-search" class="pb-btn-clear" style="display: none;">
               <i class="bi bi-x-lg"></i> Clear
-            </a>
-            @endif
+            </button>
+            <span class="pb-search-count text-muted small" id="pb-search-count" style="display: none;"></span>
           </div>
-        </form>
+        </div>
       </div>
       @endif
 
@@ -844,4 +842,68 @@
       display: none;
     }
   }
+
+  .pb-search-count {
+    padding: 8px 12px;
+    background: #f1f5f9;
+    border-radius: 8px;
+  }
+
+  .pb-table tbody tr.pb-hidden {
+    display: none;
+  }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('pb-table-search');
+  const clearBtn = document.getElementById('pb-clear-search');
+  const countSpan = document.getElementById('pb-search-count');
+  const tableBody = document.querySelector('.pb-table tbody');
+
+  if (!searchInput || !tableBody) return;
+
+  const rows = tableBody.querySelectorAll('tr');
+  const totalRows = rows.length;
+
+  function filterTable() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const matches = !searchTerm || text.includes(searchTerm);
+
+      if (matches) {
+        row.classList.remove('pb-hidden');
+        visibleCount++;
+      } else {
+        row.classList.add('pb-hidden');
+      }
+    });
+
+    // Update UI
+    if (searchTerm) {
+      clearBtn.style.display = 'flex';
+      countSpan.style.display = 'inline';
+      countSpan.textContent = visibleCount + ' of ' + totalRows + ' shown';
+    } else {
+      clearBtn.style.display = 'none';
+      countSpan.style.display = 'none';
+    }
+  }
+
+  // Debounce function
+  let debounceTimer;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(filterTable, 150);
+  });
+
+  clearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    filterTable();
+    searchInput.focus();
+  });
+});
+</script>

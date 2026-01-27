@@ -238,8 +238,11 @@ class AdminEnrollmentController extends Controller
             $discoveryChannel = null;
         }
 
-        // Get country filter
-        $country = $request->input('country');
+        // Get country filter (now supports multiple)
+        $countries = $request->input('country', []);
+        if (is_string($countries)) {
+            $countries = $countries ? [$countries] : [];
+        }
 
         // Get all unique countries from applications for filter dropdown
         $allLocations = ScholarshipApplication::select('form_data')
@@ -280,9 +283,12 @@ class AdminEnrollmentController extends Controller
             ->when($scoreMax !== null && $scoreMax !== '', fn ($q) => $q->where('score', '<=', (int) $scoreMax))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->when($discoveryChannel, fn ($q) => $q->where('form_data->attitude->discovery_channel', $discoveryChannel))
-            ->when($country, function ($q) use ($country, $locationMap) {
-                // Get all original location strings that map to this country
-                $matchingLocations = $locationMap[$country] ?? [];
+            ->when(!empty($countries), function ($q) use ($countries, $locationMap) {
+                // Get all original location strings that map to selected countries
+                $matchingLocations = [];
+                foreach ($countries as $country) {
+                    $matchingLocations = array_merge($matchingLocations, $locationMap[$country] ?? []);
+                }
                 if (!empty($matchingLocations)) {
                     $q->whereIn('form_data->personal->location', $matchingLocations);
                 }
@@ -306,7 +312,7 @@ class AdminEnrollmentController extends Controller
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
             'discoveryChannel' => $discoveryChannel,
-            'country' => $country,
+            'countries' => $countries,
             'allCountries' => $allCountries,
         ]);
     }
@@ -351,6 +357,107 @@ class AdminEnrollmentController extends Controller
         }
 
         return back()->with('success', 'Application rejected.');
+    }
+
+    public function exportApplicationsCsv(Request $request)
+    {
+        $rows = $this->buildApplicationsExportRows($request);
+        $filename = 'scholarship-applications-' . now()->format('Ymd-His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, array_keys($rows[0] ?? []));
+            foreach ($rows as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function buildApplicationsExportRows(Request $request): array
+    {
+        // Apply same filters as applications() method
+        $nameEmail = trim((string) $request->input('name_email', ''));
+        $status = $request->input('status');
+        $countries = $request->input('country', []);
+        if (is_string($countries)) {
+            $countries = $countries ? [$countries] : [];
+        }
+
+        // Build location map for country filtering
+        $locationMap = [];
+        if (!empty($countries)) {
+            $allLocations = ScholarshipApplication::select('form_data')
+                ->get()
+                ->pluck('form_data.personal.location')
+                ->filter();
+
+            foreach ($allLocations as $location) {
+                $cleanCountry = $this->extractCountryFromLocation($location);
+                if (!isset($locationMap[$cleanCountry])) {
+                    $locationMap[$cleanCountry] = [];
+                }
+                $locationMap[$cleanCountry][] = $location;
+            }
+        }
+
+        $query = ScholarshipApplication::with(['user', 'course', 'schedule.course'])
+            ->when($nameEmail, function ($q) use ($nameEmail) {
+                $term = '%' . $nameEmail . '%';
+                $q->where(function ($query) use ($term) {
+                    $query->whereHas('user', function ($userQuery) use ($term) {
+                        $userQuery->where('name', 'like', $term)
+                            ->orWhere('email', 'like', $term);
+                    })
+                        ->orWhere('form_data->contact->name', 'like', $term)
+                        ->orWhere('form_data->contact->email', 'like', $term);
+                });
+            })
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->when(!empty($countries), function ($q) use ($countries, $locationMap) {
+                $matchingLocations = [];
+                foreach ($countries as $country) {
+                    $matchingLocations = array_merge($matchingLocations, $locationMap[$country] ?? []);
+                }
+                if (!empty($matchingLocations)) {
+                    $q->whereIn('form_data->personal->location', $matchingLocations);
+                }
+            })
+            ->latest();
+
+        $self = $this;
+        return $query->get()->map(function (ScholarshipApplication $app) use ($self) {
+            $formData = $app->form_data ?? [];
+            $personal = $formData['personal'] ?? [];
+            $contact = $formData['contact'] ?? [];
+            $user = $app->user;
+            $location = $personal['location'] ?? '';
+            $country = $location ? $self->extractCountryFromLocation($location) : '';
+
+            return [
+                'ID' => $app->id,
+                'Name' => $user?->name ?? $contact['name'] ?? $personal['full_name'] ?? '',
+                'Email' => $user?->email ?? $contact['email'] ?? $personal['email'] ?? '',
+                'Phone' => $user?->phone ?? $contact['phone'] ?? $personal['phone'] ?? '',
+                'Location' => $location,
+                'Country' => $country,
+                'Course' => $app->course?->title ?? $app->schedule?->course?->title ?? '',
+                'Schedule' => $app->schedule
+                    ? (optional($app->schedule->start_date)->format('M j, Y') . ' - ' . optional($app->schedule->end_date)->format('M j, Y'))
+                    : 'N/A',
+                'Status' => ucfirst($app->status),
+                'Score' => $app->score ?? '',
+                'Auto Decision' => ucfirst($app->auto_decision ?? 'manual'),
+                'Submitted' => $app->created_at?->format('Y-m-d H:i:s') ?? '',
+            ];
+        })->values()->all();
     }
 
     /**

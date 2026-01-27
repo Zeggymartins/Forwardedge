@@ -377,6 +377,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
 
     Route::prefix('scholarships')->name('admin.scholarships.')->group(function () {
         Route::get('/applications', [AdminEnrollmentController::class, 'applications'])->name('applications');
+        Route::get('/applications/export', [AdminEnrollmentController::class, 'exportApplicationsCsv'])->name('export');
         Route::post('/applications/{application}/approve', [AdminEnrollmentController::class, 'approve'])->name('approve');
         Route::post('/applications/{application}/reject', [AdminEnrollmentController::class, 'reject'])->name('reject');
     });
