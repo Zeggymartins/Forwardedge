@@ -288,27 +288,30 @@
       {{-- Filters --}}
       @if ($tableSource === 'enrollments' && $courseId)
       <div class="pb-table-filters">
-        <div class="pb-filter-form">
+        <form method="GET" action="" class="pb-filter-form" id="pb-search-form">
           <div class="pb-search-box">
             <i class="bi bi-search"></i>
-            <input type="text" id="pb-table-search" placeholder="Search by name, email, or enrollment ID..." class="pb-search-input">
+            <input type="text" name="search" id="pb-table-search" value="{{ $search }}" placeholder="Search by name, email, or enrollment ID..." class="pb-search-input">
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
           </div>
           <div class="pb-filter-actions">
-            <form method="GET" action="" class="d-flex align-items-center gap-2">
-              <select name="per_page" class="pb-select" onchange="this.form.submit()">
-                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 per page</option>
-                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 per page</option>
-                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 per page</option>
-                <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 per page</option>
-                <option value="200" {{ $perPage == 200 ? 'selected' : '' }}>200 per page</option>
-              </select>
-            </form>
-            <button type="button" id="pb-clear-search" class="pb-btn-clear" style="display: none;">
-              <i class="bi bi-x-lg"></i> Clear
+            <select name="per_page" class="pb-select" onchange="document.getElementById('pb-search-form').submit()">
+              <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 per page</option>
+              <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 per page</option>
+              <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 per page</option>
+              <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 per page</option>
+              <option value="200" {{ $perPage == 200 ? 'selected' : '' }}>200 per page</option>
+            </select>
+            <button type="submit" class="pb-btn-search">
+              <i class="bi bi-funnel"></i> Search
             </button>
-            <span class="pb-search-count text-muted small" id="pb-search-count" style="display: none;"></span>
+            @if($search)
+            <a href="?per_page={{ $perPage }}#enrollments-table" class="pb-btn-clear">
+              <i class="bi bi-x-lg"></i> Clear
+            </a>
+            @endif
           </div>
-        </div>
+        </form>
       </div>
       @endif
 
@@ -843,67 +846,36 @@
     }
   }
 
-  .pb-search-count {
-    padding: 8px 12px;
-    background: #f1f5f9;
-    border-radius: 8px;
-  }
-
-  .pb-table tbody tr.pb-hidden {
-    display: none;
-  }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('pb-table-search');
-  const clearBtn = document.getElementById('pb-clear-search');
-  const countSpan = document.getElementById('pb-search-count');
-  const tableBody = document.querySelector('.pb-table tbody');
+  const searchForm = document.getElementById('pb-search-form');
 
-  if (!searchInput || !tableBody) return;
+  if (!searchInput || !searchForm) return;
 
-  const rows = tableBody.querySelectorAll('tr');
-  const totalRows = rows.length;
-
-  function filterTable() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-      const matches = !searchTerm || text.includes(searchTerm);
-
-      if (matches) {
-        row.classList.remove('pb-hidden');
-        visibleCount++;
-      } else {
-        row.classList.add('pb-hidden');
-      }
-    });
-
-    // Update UI
-    if (searchTerm) {
-      clearBtn.style.display = 'flex';
-      countSpan.style.display = 'inline';
-      countSpan.textContent = visibleCount + ' of ' + totalRows + ' shown';
-    } else {
-      clearBtn.style.display = 'none';
-      countSpan.style.display = 'none';
-    }
-  }
-
-  // Debounce function
   let debounceTimer;
+  let lastValue = searchInput.value;
+
+  // Auto-submit after user stops typing (500ms delay for server requests)
   searchInput.addEventListener('input', function() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(filterTable, 150);
+    debounceTimer = setTimeout(function() {
+      // Only submit if value actually changed
+      if (searchInput.value !== lastValue) {
+        lastValue = searchInput.value;
+        searchForm.submit();
+      }
+    }, 500);
   });
 
-  clearBtn.addEventListener('click', function() {
-    searchInput.value = '';
-    filterTable();
-    searchInput.focus();
+  // Submit on Enter key
+  searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      clearTimeout(debounceTimer);
+      searchForm.submit();
+    }
   });
 });
 </script>
