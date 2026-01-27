@@ -295,7 +295,7 @@
             <input type="hidden" name="per_page" value="{{ $perPage }}">
           </div>
           <div class="pb-filter-actions">
-            <select name="per_page" class="pb-select" onchange="document.getElementById('pb-search-form').submit()">
+            <select name="per_page" class="pb-select" id="pb-table-per-page">
               <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 per page</option>
               <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 per page</option>
               <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 per page</option>
@@ -314,6 +314,10 @@
         </form>
       </div>
       @endif
+
+      <div class="pb-table-spinner" aria-hidden="true">
+        <div class="pb-spinner"></div>
+      </div>
 
       {{-- Table --}}
       <div class="pb-table-body">
@@ -438,6 +442,7 @@
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), 0 24px 48px rgba(15, 23, 42, 0.08);
     overflow: hidden;
+    position: relative;
   }
 
   /* Header */
@@ -591,6 +596,38 @@
   /* Table Body */
   .pb-table-body {
     background: #ffffff;
+  }
+
+  .pb-table-spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 5;
+  }
+
+  .pb-table-card.is-loading .pb-table-spinner {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .pb-spinner {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    animation: pb-spin 0.9s linear infinite;
+  }
+
+  @keyframes pb-spin {
+    to { transform: rotate(360deg); }
   }
 
   .pb-table-empty {
@@ -852,30 +889,139 @@
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('pb-table-search');
   const searchForm = document.getElementById('pb-search-form');
+  const perPageSelect = document.getElementById('pb-table-per-page');
+  const tableSection = document.getElementById('enrollments-table');
+  const tableCard = tableSection ? tableSection.querySelector('.pb-table-card') : null;
 
-  if (!searchInput || !searchForm) return;
+  if (!searchForm || !tableSection || !tableCard) return;
 
   let debounceTimer;
-  let lastValue = searchInput.value;
+  let lastValue = searchInput ? searchInput.value : '';
 
-  // Auto-submit after user stops typing (500ms delay for server requests)
-  searchInput.addEventListener('input', function() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(function() {
-      // Only submit if value actually changed
-      if (searchInput.value !== lastValue) {
-        lastValue = searchInput.value;
-        searchForm.submit();
+  const setLoading = (isLoading) => {
+    tableCard.classList.toggle('is-loading', isLoading);
+  };
+
+  const buildUrl = () => {
+    const url = new URL(window.location.href);
+    const formData = new FormData(searchForm);
+    const params = new URLSearchParams(formData);
+    url.search = params.toString();
+    url.hash = 'enrollments-table';
+    return url.toString();
+  };
+
+  const updateFromResponse = (html) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const newSection = doc.getElementById('enrollments-table');
+    if (!newSection) return false;
+
+    const newBody = newSection.querySelector('.pb-table-body');
+    const newPagination = newSection.querySelector('.pb-table-pagination');
+    const newBadge = newSection.querySelector('.pb-table-badge');
+    const currentBody = tableSection.querySelector('.pb-table-body');
+    const currentPagination = tableSection.querySelector('.pb-table-pagination');
+    const currentBadge = tableSection.querySelector('.pb-table-badge');
+
+    if (newBody && currentBody) {
+      currentBody.innerHTML = newBody.innerHTML;
+    }
+
+    if (currentPagination) {
+      if (newPagination) {
+        currentPagination.innerHTML = newPagination.innerHTML;
+      } else {
+        currentPagination.innerHTML = '';
       }
-    }, 500);
+    }
+
+    if (newBadge && currentBadge) {
+      currentBadge.innerHTML = newBadge.innerHTML;
+    }
+
+    return true;
+  };
+
+  const fetchTable = async () => {
+    const url = buildUrl();
+    setLoading(true);
+    try {
+      const response = await fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) throw new Error('Request failed');
+      const html = await response.text();
+      const updated = updateFromResponse(html);
+      if (!updated) {
+        window.location.href = url;
+        return;
+      }
+      history.replaceState({}, '', url);
+    } catch (error) {
+      window.location.href = buildUrl();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (searchInput) {
+    // Auto-submit after user stops typing (500ms delay for server requests)
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        if (searchInput.value !== lastValue) {
+          lastValue = searchInput.value;
+          fetchTable();
+        }
+      }, 500);
+    });
+
+    // Submit on Enter key
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        clearTimeout(debounceTimer);
+        fetchTable();
+      }
+    });
+  }
+
+  searchForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    fetchTable();
   });
 
-  // Submit on Enter key
-  searchInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      clearTimeout(debounceTimer);
-      searchForm.submit();
-    }
+  if (perPageSelect) {
+    perPageSelect.addEventListener('change', function() {
+      fetchTable();
+    });
+  }
+
+  tableCard.addEventListener('click', function(e) {
+    const clearLink = e.target.closest('a.pb-btn-clear');
+    if (!clearLink) return;
+    e.preventDefault();
+    const url = new URL(clearLink.href, window.location.href);
+    url.hash = 'enrollments-table';
+    setLoading(true);
+    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => r.text())
+      .then(html => {
+        const updated = updateFromResponse(html);
+        if (!updated) {
+          window.location.href = url.toString();
+          return;
+        }
+        if (searchInput) {
+          searchInput.value = '';
+          lastValue = '';
+        }
+        history.replaceState({}, '', url.toString());
+      })
+      .catch(() => {
+        window.location.href = url.toString();
+      })
+      .finally(() => setLoading(false));
   });
 });
 </script>
