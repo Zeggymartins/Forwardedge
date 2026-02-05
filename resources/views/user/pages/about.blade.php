@@ -174,11 +174,12 @@
                                     <img src="{{ asset('frontend/assets/images/brands/client6.png') }}" alt="">
                                 </div>
                             </div>
-                            <div class="swiper-slide client-item">
+                            {{-- <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/client7.jpg') }}" alt="">
                                 </div>
-                            </div><div class="swiper-slide client-item">
+                            </div> --}}
+                            <div class="swiper-slide client-item">
                                 <div class="">
                                     <img src="{{ asset('frontend/assets/images/brands/client8.jpg') }}" alt="">
                                 </div>
