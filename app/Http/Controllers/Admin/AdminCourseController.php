@@ -42,6 +42,11 @@ class AdminCourseController extends Controller
             'thumbnail'   => 'nullable|file|mimes:jpg,jpeg,png,svg,webp|max:4096',
             'status'      => 'nullable|in:draft,published',
 
+            // External platform fields
+            'is_external'             => 'nullable|boolean',
+            'external_platform_name'  => 'nullable|string|max:255',
+            'external_course_url'     => 'nullable|url|max:500',
+
             // Single schedule payload
             'schedule'              => 'nullable|array',
             'schedule.start_date'   => 'nullable|date',
@@ -73,6 +78,9 @@ class AdminCourseController extends Controller
                     'description' => $validated['description'] ?? null,
                     'thumbnail'   => $thumb,
                     'status'      => $validated['status'] ?? 'draft',
+                    'is_external' => $request->boolean('is_external'),
+                    'external_platform_name' => $validated['external_platform_name'] ?? null,
+                    'external_course_url' => $validated['external_course_url'] ?? null,
                 ]);
 
                 // Schedule (single)
@@ -124,6 +132,9 @@ class AdminCourseController extends Controller
             'description' => 'nullable|string',
             'thumbnail' => 'nullable|image|max:4096',
             'status' => 'nullable|in:draft,published',
+            'is_external' => 'nullable|boolean',
+            'external_platform_name' => 'nullable|string|max:255',
+            'external_course_url' => 'nullable|url|max:500',
         ]);
 
         if ($request->hasFile('thumbnail')) {
@@ -132,6 +143,9 @@ class AdminCourseController extends Controller
             }
             $validated['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
         }
+
+        // Handle external fields
+        $validated['is_external'] = $request->boolean('is_external');
 
         $course->update($validated);
 
@@ -362,7 +376,11 @@ class AdminCourseController extends Controller
             $query->withCount('phases')->orderBy('order')->orderBy('created_at');
         }])->withCount('contents')->latest()->get();
 
-        $allCourses = Course::orderBy('title')->get(['id', 'title']);
+        // Only show internal courses (non-external) in the content creation dropdown
+        $allCourses = Course::where('is_external', false)
+            ->orWhereNull('is_external')
+            ->orderBy('title')
+            ->get(['id', 'title']);
 
         return view('admin.pages.courses.contents', [
             'courses' => $courses,
@@ -372,61 +390,96 @@ class AdminCourseController extends Controller
 
     public function storeContent(Request $request)
     {
+        $deliveryMode = $request->input('delivery_mode', 'local');
+
         $validated = $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:text,video,pdf,image,quiz,assignment',
-            'content' => 'nullable|string',
-            'file' => 'nullable|file|max:10240',
-            'price' => 'required|numeric|min:0',
+            'course_id'      => 'required|exists:courses,id',
+            'title'          => 'required|string|max:255',
+            'delivery_mode'  => 'required|in:local,drive,external',
+            'type'           => 'required_if:delivery_mode,local|nullable|in:text,video,pdf,image,quiz,assignment',
+            'content'        => 'nullable|string',
+            'file'           => 'nullable|file|max:10240',
+            'price'          => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
-            'drive_folder_id' => 'nullable|string|max:255',
-            'drive_share_link' => 'nullable|url',
-            'auto_grant_access' => 'nullable|boolean',
-            'phases' => 'nullable|array',
-            'phases.*.title' => 'required_with:phases|string|max:255',
-            'phases.*.order' => 'nullable|integer|min:1',
-            'phases.*.duration' => 'nullable|integer|min:0',
-            'phases.*.content' => 'nullable|string',
-            'phases.*.image' => 'nullable|image|max:4096',
-            'phases.*.topics' => 'nullable|array',
-            'phases.*.topics.*.title' => 'required_with:phases.*.topics|string|max:255',
-            'phases.*.topics.*.order' => 'nullable|integer|min:1',
+            'drive_folder_id'    => 'required_if:delivery_mode,drive|nullable|string|max:255',
+            'drive_share_link'   => 'nullable|url',
+            'auto_grant_access'  => 'nullable|boolean',
+            'external_url'       => 'required_if:delivery_mode,external|nullable|url',
+            'phases'             => 'nullable|array',
+            'phases.*.title'     => 'required_with:phases|string|max:255',
+            'phases.*.order'     => 'nullable|integer|min:1',
+            'phases.*.duration'  => 'nullable|integer|min:0',
+            'phases.*.content'   => 'nullable|string',
+            'phases.*.image'     => 'nullable|image|max:4096',
+            'phases.*.topics'    => 'nullable|array',
+            'phases.*.topics.*.title'   => 'required_with:phases.*.topics|string|max:255',
+            'phases.*.topics.*.order'   => 'nullable|integer|min:1',
             'phases.*.topics.*.content' => 'nullable|string',
         ]);
 
+        // Prevent adding content to external courses
+        $course = Course::find($validated['course_id']);
+        if ($course && $course->isExternal()) {
+            return back()->withErrors([
+                'course_id' => 'Cannot add content to external courses. Content is managed on ' . ($course->external_platform_name ?? 'the external platform') . '.'
+            ])->withInput();
+        }
 
-        $filePath = null;
+        // Resolve fields based on delivery mode
+        $filePath       = null;
+        $contentText    = null;
+        $driveFolder    = null;
+        $driveShareLink = null;
+        $autoGrant      = false;
+        $type           = 'text';
 
-        if ($request->hasFile('file')) {
-            $allowedMimes = [
-                'video' => ['mp4', 'avi', 'mov', 'wmv'],
-                'pdf' => ['pdf'],
-                'image' => ['jpg', 'jpeg', 'png', 'webp'],
-                'quiz' => ['pdf', 'doc', 'docx'],
-                'assignment' => ['pdf', 'doc', 'docx'],
-            ];
+        $allowedMimes = [
+            'video'      => ['mp4', 'avi', 'mov', 'wmv'],
+            'pdf'        => ['pdf'],
+            'image'      => ['jpg', 'jpeg', 'png', 'webp'],
+            'quiz'       => ['pdf', 'doc', 'docx'],
+            'assignment' => ['pdf', 'doc', 'docx'],
+        ];
 
-            $ext = $request->file('file')->getClientOriginalExtension();
-            if (in_array($ext, $allowedMimes[$request->type] ?? [])) {
-                $filePath = $request->file('file')->store("courses/contents/{$request->type}", 'public');
-            }
+        switch ($deliveryMode) {
+            case 'local':
+                $type = $validated['type'] ?? 'text';
+                if ($type === 'text') {
+                    $contentText = $validated['content'] ?? null;
+                } elseif ($request->hasFile('file')) {
+                    $ext = $request->file('file')->getClientOriginalExtension();
+                    if (in_array($ext, $allowedMimes[$type] ?? [])) {
+                        $filePath = $request->file('file')->store("courses/contents/{$type}", 'public');
+                    }
+                }
+                break;
+
+            case 'drive':
+                $driveFolder    = $validated['drive_folder_id'] ?? null;
+                $driveShareLink = $validated['drive_share_link'] ?? null;
+                $autoGrant      = $request->boolean('auto_grant_access');
+                break;
+
+            case 'external':
+                $contentText = $request->input('external_url'); // URL stored in content column
+                break;
         }
 
         $nextOrder = (int) CourseContent::where('course_id', $validated['course_id'])->max('order') + 1;
 
         $content = CourseContent::create([
-            'course_id' => $validated['course_id'],
-            'title' => $validated['title'],
-            'type' => $validated['type'],
-            'price' => $validated['price'],
-            'discount_price' => $request->input('discount_price'),
-            'content' => $validated['type'] === 'text' ? $validated['content'] : null,
-            'file_path' => $filePath,
-            'order' => $nextOrder,
-            'drive_folder_id' => $validated['drive_folder_id'] ?? null,
-            'drive_share_link' => $validated['drive_share_link'] ?? null,
-            'auto_grant_access' => $request->boolean('auto_grant_access'),
+            'course_id'          => $validated['course_id'],
+            'title'              => $validated['title'],
+            'type'               => $type,
+            'delivery_mode'      => $deliveryMode,
+            'price'              => $validated['price'],
+            'discount_price'     => $request->input('discount_price'),
+            'content'            => $contentText,
+            'file_path'          => $filePath,
+            'order'              => $nextOrder,
+            'drive_folder_id'    => $driveFolder,
+            'drive_share_link'   => $driveShareLink,
+            'auto_grant_access'  => $autoGrant,
         ]);
 
         $phases = $request->input('phases', []);
@@ -467,69 +520,99 @@ class AdminCourseController extends Controller
     }
     public function updateContent(Request $request, CourseContent $courseContent)
     {
+        $deliveryMode = $request->input('delivery_mode', 'local');
+
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'type'  => 'required|in:text,video,pdf,image,quiz,assignment',
-            'content' => 'nullable|string',
-            'file' => 'nullable|file|max:10240',
-            'drive_folder_id' => 'nullable|string|max:255',
-            'drive_share_link' => 'nullable|url',
-            'auto_grant_access' => 'nullable|boolean',
-            'price' => 'required|numeric|min:0',
+            'title'          => 'required|string|max:255',
+            'delivery_mode'  => 'required|in:local,drive,external',
+            'type'           => 'required_if:delivery_mode,local|nullable|in:text,video,pdf,image,quiz,assignment',
+            'content'        => 'nullable|string',
+            'file'           => 'nullable|file|max:10240',
+            'price'          => 'required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0|lt:price',
+            'drive_folder_id'    => 'required_if:delivery_mode,drive|nullable|string|max:255',
+            'drive_share_link'   => 'nullable|url',
+            'auto_grant_access'  => 'nullable|boolean',
+            'external_url'       => 'required_if:delivery_mode,external|nullable|url',
         ]);
 
         $allowedMimes = [
-            'video' => ['mp4', 'avi', 'mov', 'wmv'],
-            'pdf' => ['pdf'],
-            'image' => ['jpg', 'jpeg', 'png', 'webp'],
-            'quiz' => ['pdf', 'doc', 'docx'],
+            'video'      => ['mp4', 'avi', 'mov', 'wmv'],
+            'pdf'        => ['pdf'],
+            'image'      => ['jpg', 'jpeg', 'png', 'webp'],
+            'quiz'       => ['pdf', 'doc', 'docx'],
             'assignment' => ['pdf', 'doc', 'docx'],
         ];
 
-        if ($data['type'] === 'text') {
-            $data['file_path'] = null;
-        }
+        $filePath       = $courseContent->file_path;
+        $contentText    = null;
+        $driveFolder    = null;
+        $driveShareLink = null;
+        $autoGrant      = false;
+        $type           = $courseContent->type;
 
-        // delete old file
-        $typeChanged = $data['type'] !== $courseContent->type;
-
-        if ($data['type'] === 'text' && $courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
+        // If switching away from local, delete any old file
+        if ($deliveryMode !== 'local' && $courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
             Storage::disk('public')->delete($courseContent->file_path);
-            $courseContent->file_path = null;
+            $filePath = null;
         }
 
-        if ($data['type'] !== 'text' && $typeChanged && !$request->hasFile('file') && !$courseContent->file_path) {
-            return back()->with('error', 'Please upload a file for the selected content type.');
-        }
+        switch ($deliveryMode) {
+            case 'local':
+                $type = $data['type'] ?? 'text';
 
-        if ($request->hasFile('file')) {
-            $ext = $request->file('file')->getClientOriginalExtension();
-            $type = $data['type'];
+                if ($type === 'text') {
+                    // Switching to text — drop old file if present
+                    if ($courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
+                        Storage::disk('public')->delete($courseContent->file_path);
+                    }
+                    $filePath    = null;
+                    $contentText = $data['content'] ?? null;
+                } else {
+                    $contentText = null;
+                    $typeChanged = $type !== $courseContent->type;
 
-            if (!in_array($ext, $allowedMimes[$type] ?? [])) {
-                return back()->with('error', 'Invalid file type for this content.');
-            }
+                    if ($request->hasFile('file')) {
+                        $ext = $request->file('file')->getClientOriginalExtension();
+                        if (!in_array($ext, $allowedMimes[$type] ?? [])) {
+                            return back()->with('error', 'Invalid file type for this content.');
+                        }
+                        if ($courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
+                            Storage::disk('public')->delete($courseContent->file_path);
+                        }
+                        $filePath = $request->file('file')->store("courses/contents/{$type}", 'public');
+                    } elseif ($typeChanged && empty($courseContent->file_path)) {
+                        return back()->with('error', 'Please upload a file for the selected content type.');
+                    }
+                    // else: keep existing file
+                }
+                break;
 
-            if ($courseContent->file_path && Storage::disk('public')->exists($courseContent->file_path)) {
-                Storage::disk('public')->delete($courseContent->file_path);
-            }
+            case 'drive':
+                $filePath       = null; // no file for drive mode
+                $contentText    = null;
+                $driveFolder    = $data['drive_folder_id'] ?? null;
+                $driveShareLink = $data['drive_share_link'] ?? null;
+                $autoGrant      = $request->boolean('auto_grant_access');
+                break;
 
-            $data['file_path'] = $request->file('file')->store("courses/contents/{$type}", 'public');
-        } elseif ($data['type'] !== 'text' && empty($courseContent->file_path)) {
-            return back()->with('error', 'Please upload a file for this content type.');
+            case 'external':
+                $filePath    = null;
+                $contentText = $request->input('external_url'); // URL stored in content column
+                break;
         }
 
         $courseContent->update([
-            'title' => $data['title'],
-            'type' => $data['type'],
-            'price' => $data['price'],
-            'discount_price' => $request->input('discount_price'),
-            'content' => $data['type'] === 'text' ? $data['content'] : null,
-            'file_path' => $data['type'] === 'text' ? null : ($data['file_path'] ?? $courseContent->file_path),
-            'drive_folder_id' => $data['drive_folder_id'] ?? null,
-            'drive_share_link' => $data['drive_share_link'] ?? null,
-            'auto_grant_access' => $request->boolean('auto_grant_access'),
+            'title'              => $data['title'],
+            'type'               => $type,
+            'delivery_mode'      => $deliveryMode,
+            'price'              => $data['price'],
+            'discount_price'     => $request->input('discount_price'),
+            'content'            => $contentText,
+            'file_path'          => $filePath,
+            'drive_folder_id'    => $driveFolder,
+            'drive_share_link'   => $driveShareLink,
+            'auto_grant_access'  => $autoGrant,
         ]);
 
         return back()->with('success', 'Content updated successfully!');
@@ -551,7 +634,11 @@ class AdminCourseController extends Controller
             $query->orderBy('order')->orderBy('created_at');
         }, 'contents.phases.topics'])->findOrFail($courseId);
 
-        $courseOptions = Course::orderBy('title')->get(['id', 'title']);
+        // Only show internal courses (non-external) in the content creation dropdown
+        $courseOptions = Course::where('is_external', false)
+            ->orWhereNull('is_external')
+            ->orderBy('title')
+            ->get(['id', 'title']);
 
         return view('admin.pages.courses.course_contents', compact('course', 'courseOptions'));
     }

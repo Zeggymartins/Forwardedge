@@ -36,6 +36,10 @@
               $planContentId = $p['course_content_id'] ?? null;
               $linkedContent = $planContentId ? $linkedContents->get($planContentId) : null;
               $linkedCourse = $linkedContent?->course ?? $linkedCourses->get($p['course_id'] ?? null);
+
+              // Check if course is external
+              $isExternalCourse = $linkedCourse && $linkedCourse->isExternal();
+
               $moduleLink = null;
               if ($linkedContent && $linkedCourse && $linkedCourse->slug) {
                   $moduleLink = route('shop.details', ['slug' => $linkedCourse->slug, 'content' => $linkedContent->id]);
@@ -52,16 +56,25 @@
               $priceUsdDisp = $priceUsdRaw !== '' ? number_format((float)$priceUsdRaw, 2) : null;
 
               // HREF logic:
-              //  1) If editor set a 'link', use it.
-              //  2) Else, fall back to internal pricing page that reads page+block+plan.
+              //  1) If course is external, link to external platform
+              //  2) Else if editor set a 'link', use it
+              //  3) Else, fall back to internal pricing page that reads page+block+plan
               $editorLink = trim((string)($p['link'] ?? ''));
               $internal   = route('enroll.pricing', [
                                 'page'  => $page->id,
                                 'block' => $block->id,
                                 'plan'  => $i,
                               ]);
-              $href       = $moduleLink ?? ($editorLink !== '' ? $editorLink : $internal);
-              $linkText   = $p['link_text'] ?? null;
+
+              if ($isExternalCourse) {
+                  $href = $linkedCourse->external_course_url;
+                  $linkText = $p['link_text'] ?? 'Buy on ' . ($linkedCourse->external_platform_name ?? 'External Platform');
+                  $isExternalLink = true;
+              } else {
+                  $href = $moduleLink ?? ($editorLink !== '' ? $editorLink : $internal);
+                  $linkText = $p['link_text'] ?? null;
+                  $isExternalLink = false;
+              }
             @endphp
             @continue(blank($title))
 
@@ -104,9 +117,18 @@
 
                     @if(!blank($href) && !blank($linkText))
                       <div class="pricing-btn">
-                        <a class="text-btn" href="{{ $href }}">
+                        <a class="text-btn" href="{{ $href }}"
+                           @if($isExternalLink) target="_blank" rel="noopener noreferrer" @endif>
                           <span class="btn-text"><span>{!! pb_text($linkText) !!}</span></span>
-                          <span class="btn-icon"><i class="tji-arrow-right-long"></i></span>
+                          <span class="btn-icon">
+                            <i class="tji-arrow-right-long"></i>
+                            @if($isExternalLink)
+                              <svg style="width: 14px; height: 14px; margin-left: 4px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path>
+                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path>
+                              </svg>
+                            @endif
+                          </span>
                         </a>
                       </div>
                     @endif

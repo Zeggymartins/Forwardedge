@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\CourseContent;
 use App\Models\CourseSchedule;
 use App\Models\Enrollment;
@@ -78,6 +79,18 @@ class EnrollmentController extends Controller
         if ($courseId <= 0 && $courseContentId > 0) {
             $courseId = (int) CourseContent::where('id', $courseContentId)->value('course_id');
         }
+        if ($courseId <= 0 && $courseContentId <= 0) {
+            return redirect()
+                ->route('page.show', $page->slug)
+                ->with('error', 'Please link a course or course module to this pricing plan in Page Builder.');
+        }
+
+        // Check if course is external - redirect to external platform
+        $course = Course::find($courseId);
+        if ($course && $course->isExternal()) {
+            return redirect($course->external_course_url)
+                ->with('info', 'This course is hosted on ' . ($course->external_platform_name ?? 'an external platform') . '. You will be redirected to complete your purchase.');
+        }
         $scheduleId = null;
         if ($courseId > 0) {
             $schedule = CourseSchedule::where('course_id', $courseId)
@@ -92,13 +105,9 @@ class EnrollmentController extends Controller
             }
 
             if (!$schedule) {
-                $schedule = CourseSchedule::create([
-                    'course_id' => $courseId,
-                    'start_date' => now()->toDateString(),
-                    'end_date' => null,
-                    'location' => 'Online',
-                    'type' => 'self-paced',
-                ]);
+                return redirect()
+                    ->route('page.show', $page->slug)
+                    ->with('error', 'No schedule available for this course. Please choose another plan or contact support.');
             }
 
             $scheduleId = $schedule?->id;
@@ -166,23 +175,13 @@ class EnrollmentController extends Controller
                         ->first();
                 }
 
-                if (!$schedule) {
-                    $schedule = CourseSchedule::create([
-                        'course_id' => $courseId,
-                        'start_date' => now()->toDateString(),
-                        'end_date' => null,
-                        'location' => 'Online',
-                        'type' => 'self-paced',
-                    ]);
-                }
-
                 $scheduleId = $schedule?->id ?? 0;
             }
         }
 
         if ($scheduleId <= 0) {
             return response()->json([
-                'error' => 'Enrollment schedule not found. Please link a course to this pricing plan in Page Builder.',
+                'error' => 'Enrollment schedule not found. Please link a course with an active schedule to this pricing plan in Page Builder.',
             ], 422);
         }
 

@@ -33,6 +33,49 @@
                 </div>
 
                 <hr class="my-4">
+
+                {{-- External Platform Fields --}}
+                <h5 class="fw-semibold mb-2">External Platform (optional)</h5>
+                <p class="text-muted small mb-3">
+                    Check this if the course is hosted on an external platform like Udemy, Teachable, etc.
+                </p>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_external" id="is_external" value="1"
+                                {{ old('is_external') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_external">
+                                This course is hosted on an external platform
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="external-fields" style="display: {{ old('is_external') ? 'block' : 'none' }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">External Platform</label>
+                                <select name="external_platform_name" class="form-select">
+                                    <option value="">Select Platform</option>
+                                    @foreach(['Udemy', 'Teachable', 'Coursera', 'Skillshare', 'LinkedIn Learning', 'Other'] as $platform)
+                                        <option value="{{ $platform }}" {{ old('external_platform_name') == $platform ? 'selected' : '' }}>
+                                            {{ $platform }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Course URL on Platform</label>
+                                <input type="url" name="external_course_url" class="form-control"
+                                    value="{{ old('external_course_url') }}"
+                                    placeholder="https://www.udemy.com/course/your-course/">
+                                <small class="text-muted">Full URL where users can purchase this course</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
                 <h5 class="fw-semibold mb-2">Schedule (optional)</h5>
                 <p class="text-muted small mb-4">
                     Each course can carry one schedule. You can always edit it later from the course dashboard.
@@ -75,7 +118,7 @@
 
 
 @push('scripts')
-  
+
 <script>
 const slugInput = document.getElementById('slug');
 const titleInput = document.getElementById('title');
@@ -86,6 +129,16 @@ if (titleInput && slugInput) {
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-');
+  });
+}
+
+// Toggle external platform fields
+const externalCheckbox = document.getElementById('is_external');
+const externalFields = document.getElementById('external-fields');
+
+if (externalCheckbox && externalFields) {
+  externalCheckbox.addEventListener('change', function() {
+    externalFields.style.display = this.checked ? 'block' : 'none';
   });
 }
 </script>

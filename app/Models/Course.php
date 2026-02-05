@@ -16,8 +16,16 @@ class Course extends Model
         'description',
         'thumbnail',
         'status',
-        'is_featured'
+        'is_featured',
+        'is_external',
+        'external_platform_name',
+        'external_course_url',
     ];
+
+    protected $casts = [
+        'is_external' => 'boolean',
+    ];
+
     protected $table = 'courses';
 
     public function contents()
@@ -53,5 +61,13 @@ class Course extends Model
     public function page()
     {
         return $this->morphOne(Page::class, 'pageable');
+    }
+
+    /**
+     * Check if this course is hosted on an external platform
+     */
+    public function isExternal(): bool
+    {
+        return $this->is_external && !empty($this->external_course_url);
     }
 }

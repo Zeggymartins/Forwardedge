@@ -253,6 +253,15 @@ class PaymentController extends Controller
             $schedule = $payment->payable;
             $plan = $payment->metadata['payment_plan'] ?? 'full';
             $total = $payment->metadata['total'] ?? $payment->amount;
+            $courseId = $schedule->course_id ?? ($payment->metadata['course_id'] ?? null);
+
+            if (!$courseId) {
+                Log::error('Enrollment creation failed: schedule missing course_id', [
+                    'payment_id' => $payment->id,
+                    'schedule_id' => $schedule->id ?? null,
+                ]);
+                return;
+            }
 
             // 🔒 Prevent duplicate enrollments
             $existingEnrollment = Enrollment::where('user_id', $payment->user_id)
@@ -270,6 +279,7 @@ class PaymentController extends Controller
 
             $enrollment = Enrollment::create([
                 'user_id' => $payment->user_id,
+                'course_id' => $courseId,
                 'course_schedule_id' => $schedule->id,
                 'payment_plan' => $plan,
                 'total_amount' => $total,

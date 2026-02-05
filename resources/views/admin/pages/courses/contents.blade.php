@@ -63,20 +63,31 @@
                                     </span>
                                 </div>
                                 <div class="d-flex gap-2 align-items-center mt-2 flex-wrap">
-                                    <span class="badge bg-secondary-subtle text-secondary fw-semibold">
-                                        {{ $course->contents_count }} {{ Str::plural('Content', $course->contents_count) }}
-                                    </span>
-                                    @if (!is_null($startingDisplay))
-                                        <span class="badge bg-primary-subtle text-primary fw-semibold">
-                                            From ₦{{ number_format($startingDisplay, 2) }}
+                                    @if($course->isExternal())
+                                        <span class="badge bg-info-subtle text-info fw-semibold">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>External ({{ $course->external_platform_name }})
                                         </span>
+                                    @else
+                                        <span class="badge bg-secondary-subtle text-secondary fw-semibold">
+                                            {{ $course->contents_count }} {{ Str::plural('Content', $course->contents_count) }}
+                                        </span>
+                                        @if (!is_null($startingDisplay))
+                                            <span class="badge bg-primary-subtle text-primary fw-semibold">
+                                                From ₦{{ number_format($startingDisplay, 2) }}
+                                            </span>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex-grow-1">
-                            @if ($course->contents->isEmpty())
+                            @if($course->isExternal())
+                                <div class="border rounded-3 py-4 px-3 bg-light">
+                                    <p class="mb-2 text-muted small"><i class="bi bi-info-circle me-1"></i>This course is hosted externally.</p>
+                                    <p class="mb-0 small">Content is managed on <strong>{{ $course->external_platform_name }}</strong></p>
+                                </div>
+                            @elseif ($course->contents->isEmpty())
                                 <div class="border rounded-3 py-4 text-center text-muted">
                                     No content blocks yet.
                                 </div>
@@ -87,8 +98,14 @@
                                             <div class="me-3">
                                                 <h6 class="mb-1">{{ $content->title }}</h6>
                                                 <small class="text-muted">
-                                                    {{ ucfirst($content->type) }} · {{ $content->phases_count }}
-                                                    {{ Str::plural('phase', $content->phases_count) }}
+                                                    @if ($content->delivery_mode === 'drive')
+                                                        <span class="badge bg-success-subtle text-success me-1">Drive</span>
+                                                    @elseif ($content->delivery_mode === 'external')
+                                                        <span class="badge bg-info-subtle text-info me-1">External</span>
+                                                    @else
+                                                        {{ ucfirst($content->type) }} ·
+                                                    @endif
+                                                    {{ $content->phases_count }} {{ Str::plural('phase', $content->phases_count) }}
                                                 </small>
                                             </div>
                                             <div class="text-end ms-auto me-3">
@@ -107,16 +124,18 @@
 
                                                 @php
                                                     $payload = [
-                                                        'id'        => $content->id,
-                                                        'title'     => $content->title,
-                                                        'type'      => $content->type,
-                                                        'content'   => $content->content,
-                                                        'file_name' => $content->file_path ? basename($content->file_path) : null,
-                                                        'has_file'  => (bool) $content->file_path,
-                                                        'price'     => $content->price,
-                                                        'discount_price' => $content->discount_price,
-                                                        'drive_folder_id' => $content->drive_folder_id,
-                                                        'drive_share_link' => $content->drive_share_link,
+                                                        'id'            => $content->id,
+                                                        'title'         => $content->title,
+                                                        'type'          => $content->type,
+                                                        'delivery_mode' => $content->delivery_mode ?? 'local',
+                                                        'content'       => $content->content,
+                                                        'external_url'  => ($content->delivery_mode === 'external') ? $content->content : null,
+                                                        'file_name'     => $content->file_path ? basename($content->file_path) : null,
+                                                        'has_file'      => (bool) $content->file_path,
+                                                        'price'         => $content->price,
+                                                        'discount_price'    => $content->discount_price,
+                                                        'drive_folder_id'   => $content->drive_folder_id,
+                                                        'drive_share_link'  => $content->drive_share_link,
                                                         'auto_grant_access' => $content->auto_grant_access,
                                                     ];
                                                 @endphp
@@ -139,14 +158,22 @@
                             @endif
                         </div>
 
-                        <div class="mt-3 d-flex justify-content-between align-items-center">
-                            <a href="{{ route('admin.course_contents.show', $course->id) }}"
-                                class="btn btn-outline-secondary btn-sm rounded-pill">Manage Contents</a>
-                            <button class="btn btn-outline text-decoration-none p-2" data-bs-toggle="modal"
-                                data-bs-target="#addContentModal" data-course="{{ $course->id }}">
-                                + Add Module
-                            </button>
-                        </div>
+                        @if(!$course->isExternal())
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
+                                <a href="{{ route('admin.course_contents.show', $course->id) }}"
+                                    class="btn btn-outline-secondary btn-sm rounded-pill">Manage Contents</a>
+                                <button class="btn btn-outline text-decoration-none p-2" data-bs-toggle="modal"
+                                    data-bs-target="#addContentModal" data-course="{{ $course->id }}">
+                                    + Add Module
+                                </button>
+                            </div>
+                        @else
+                            <div class="mt-3">
+                                <a href="{{ $course->external_course_url }}" target="_blank" class="btn btn-outline-info btn-sm rounded-pill w-100">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>View on {{ $course->external_platform_name }}
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endforeach

@@ -6,6 +6,7 @@
 @php
   /** @var \App\Models\Course $course */
   $sch = $schedule ?: (($course->schedules ?? collect())->first());
+  $isExternalCourse = isset($course) && method_exists($course, 'isExternal') && $course->isExternal();
 
   if ($sch) {
       $isFree   = method_exists($sch, 'isFree') ? $sch->isFree() : ((int)($sch->price ?? 0) === 0);
@@ -17,7 +18,7 @@
   }
 @endphp
 
-@if(!empty($sch))
+@if(!empty($sch) && !$isExternalCourse)
   <div class="mt-3 pt-3" style="border-top:1px solid var(--tj-border, #edf2f7)">
     <div class="d-flex align-items-center gap-3 flex-wrap">
       <div class="d-flex align-items-baseline gap-2">

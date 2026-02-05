@@ -8,6 +8,7 @@ use App\Models\CourseContentAccessLog;
 use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class CourseContentController extends Controller
@@ -161,10 +162,38 @@ class CourseContentController extends Controller
             return true;
         }
 
-        // Could also check for Google Workspace domains via DNS MX records
-        // but that's more complex and slower
+        if (empty($domain)) {
+            return false;
+        }
 
-        return false;
+        if (!config('services.google_workspace.mx_check', true)) {
+            return false;
+        }
+
+        $cacheMinutes = (int) config('services.google_workspace.cache_minutes', 10080);
+
+        return Cache::remember("google-workspace-mx:{$domain}", now()->addMinutes($cacheMinutes), function () use ($domain) {
+            if (!function_exists('dns_get_record')) {
+                return false;
+            }
+
+            $records = dns_get_record($domain, DNS_MX);
+            if (!$records) {
+                return false;
+            }
+
+            foreach ($records as $record) {
+                $target = strtolower(rtrim($record['target'] ?? '', '.'));
+                if ($target === '') {
+                    continue;
+                }
+                if (str_contains($target, 'google.com') || str_contains($target, 'googlemail.com')) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 
     /**

@@ -39,9 +39,18 @@
                         <div>
                             <h5 class="fw-bold mb-1">{{ $content->title }}</h5>
                             <div class="d-flex gap-2 align-items-center flex-wrap">
-                                <span class="badge bg-secondary-subtle text-secondary fw-semibold">{{ ucfirst($content->type) }}</span>
-                                @if ($content->file_path)
-                                    <span class="badge bg-primary-subtle text-primary fw-semibold">File Attached</span>
+                                @if ($content->delivery_mode === 'drive')
+                                    <span class="badge bg-success-subtle text-success fw-semibold"><i class="bi bi-google me-1"></i>Google Drive</span>
+                                    @if ($content->auto_grant_access)
+                                        <span class="badge bg-success-subtle text-success fw-semibold">Auto access</span>
+                                    @endif
+                                @elseif ($content->delivery_mode === 'external')
+                                    <span class="badge bg-info-subtle text-info fw-semibold"><i class="bi bi-box-arrow-up-right me-1"></i>External URL</span>
+                                @else
+                                    <span class="badge bg-secondary-subtle text-secondary fw-semibold">{{ ucfirst($content->type) }}</span>
+                                    @if ($content->file_path)
+                                        <span class="badge bg-primary-subtle text-primary fw-semibold">File Attached</span>
+                                    @endif
                                 @endif
                                 @if (!is_null($content->price))
                                     <span class="badge bg-primary-subtle text-primary fw-semibold">
@@ -52,28 +61,24 @@
                                     @endif
                                 @endif
                                 <span class="text-muted small">Created {{ $content->created_at->format('d M, Y') }}</span>
-                                @if ($content->drive_folder_id)
-                                    <span class="badge bg-info-subtle text-info fw-semibold">Drive linked</span>
-                                @endif
-                                @if ($content->auto_grant_access)
-                                    <span class="badge bg-success-subtle text-success fw-semibold">Auto access</span>
-                                @endif
                             </div>
                         </div>
                         <div class="content-actions">
                             <button class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#viewContentModal{{ $content->id }}">View</button>
                             @php
                                 $contentPayload = [
-                                    'id'        => $content->id,
-                                    'title'     => $content->title,
-                                    'type'      => $content->type,
-                                    'content'   => $content->content,
-                                    'file_name' => $content->file_path ? basename($content->file_path) : null,
-                                    'has_file'  => (bool) $content->file_path,
-                                    'price'     => $content->price,
-                                    'discount_price' => $content->discount_price,
-                                    'drive_folder_id' => $content->drive_folder_id,
-                                    'drive_share_link' => $content->drive_share_link,
+                                    'id'            => $content->id,
+                                    'title'         => $content->title,
+                                    'type'          => $content->type,
+                                    'delivery_mode' => $content->delivery_mode ?? 'local',
+                                    'content'       => $content->content,
+                                    'external_url'  => ($content->delivery_mode === 'external') ? $content->content : null,
+                                    'file_name'     => $content->file_path ? basename($content->file_path) : null,
+                                    'has_file'      => (bool) $content->file_path,
+                                    'price'         => $content->price,
+                                    'discount_price'    => $content->discount_price,
+                                    'drive_folder_id'   => $content->drive_folder_id,
+                                    'drive_share_link'  => $content->drive_share_link,
                                     'auto_grant_access' => $content->auto_grant_access,
                                 ];
                             @endphp
@@ -87,25 +92,38 @@
                 </div>
 
                 <div class="card-body pt-3">
-                    @if ($content->type === 'text' && $content->content)
+                    @if ($content->delivery_mode === 'external')
                         <div class="mb-4">
-                            <h6 class="text-muted text-uppercase small">Overview</h6>
-                            <p class="mb-0">{{ Str::limit($content->content, 400) }}</p>
+                            <h6 class="text-muted text-uppercase small">External Resource</h6>
+                            <a href="{{ $content->content }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Open External Link
+                            </a>
+                            <p class="text-muted small mb-0 mt-1">Learners will be redirected here after accessing this content.</p>
                         </div>
-                    @elseif ($content->file_path)
-                        <div class="mb-4">
-                            <h6 class="text-muted text-uppercase small">Resource</h6>
-                            <p class="mb-2 text-muted">{{ basename($content->file_path) }}</p>
-                            <a href="{{ asset('storage/' . $content->file_path) }}" target="_blank" class="btn btn-outline-primary btn-sm">Open File</a>
-                        </div>
-                    @endif
-
-                    @if ($content->drive_share_link)
+                    @elseif ($content->delivery_mode === 'drive')
                         <div class="mb-4">
                             <h6 class="text-muted text-uppercase small">Google Drive</h6>
-                            <a href="{{ $content->drive_share_link }}" target="_blank" class="btn btn-outline-success btn-sm">Open Shared Folder</a>
-                            <p class="text-muted small mb-0">Learners will be granted access to this folder after a successful payment.</p>
+                            @if ($content->drive_share_link)
+                                <a href="{{ $content->drive_share_link }}" target="_blank" class="btn btn-outline-success btn-sm">Open Shared Folder</a>
+                            @endif
+                            <p class="text-muted small mb-0 mt-1">
+                                Folder ID: <code>{{ $content->drive_folder_id }}</code>
+                                @if ($content->auto_grant_access) · Auto-access enabled @endif
+                            </p>
                         </div>
+                    @else
+                        @if ($content->type === 'text' && $content->content)
+                            <div class="mb-4">
+                                <h6 class="text-muted text-uppercase small">Overview</h6>
+                                <p class="mb-0">{{ Str::limit($content->content, 400) }}</p>
+                            </div>
+                        @elseif ($content->file_path)
+                            <div class="mb-4">
+                                <h6 class="text-muted text-uppercase small">Resource</h6>
+                                <p class="mb-2 text-muted">{{ basename($content->file_path) }}</p>
+                                <a href="{{ asset('storage/' . $content->file_path) }}" target="_blank" class="btn btn-outline-primary btn-sm">Open File</a>
+                            </div>
+                        @endif
                     @endif
 
                     <div class="phase-builder p-3 rounded-3">
@@ -178,7 +196,25 @@
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            @if ($content->type === 'text')
+                            @if ($content->delivery_mode === 'external')
+                                <div class="text-center py-3">
+                                    <p class="text-muted mb-3">This content redirects learners to an external resource.</p>
+                                    <a href="{{ $content->content }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info">
+                                        <i class="bi bi-box-arrow-up-right me-2"></i>Open External Resource
+                                    </a>
+                                </div>
+                            @elseif ($content->delivery_mode === 'drive')
+                                <div class="text-center py-3">
+                                    <p class="text-muted mb-3">This content is hosted on Google Drive.</p>
+                                    @if ($content->drive_share_link)
+                                        <a href="{{ $content->drive_share_link }}" target="_blank" class="btn btn-outline-success">
+                                            <i class="bi bi-google me-2"></i>Open Google Drive Folder
+                                        </a>
+                                    @else
+                                        <p class="text-muted">Folder ID: <code>{{ $content->drive_folder_id }}</code></p>
+                                    @endif
+                                </div>
+                            @elseif ($content->type === 'text')
                                 <p>{{ $content->content }}</p>
                             @elseif ($content->type === 'video')
                                 <video class="w-100 rounded" controls>

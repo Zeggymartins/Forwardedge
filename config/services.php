@@ -66,4 +66,9 @@ return [
         'impersonate' => env('GOOGLE_DRIVE_IMPERSONATE'),
         'notify'      => env('GOOGLE_DRIVE_SEND_NOTIFICATION', true),
     ],
+
+    'google_workspace' => [
+        'mx_check' => env('GOOGLE_WORKSPACE_MX_CHECK', true),
+        'cache_minutes' => env('GOOGLE_WORKSPACE_MX_CACHE', 10080),
+    ],
 ];

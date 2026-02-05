@@ -14,6 +14,7 @@ class CourseContent extends Model
         'title',
         'file_path',
         'type',
+        'delivery_mode',
         'price',
         'discount_price',
         'content',

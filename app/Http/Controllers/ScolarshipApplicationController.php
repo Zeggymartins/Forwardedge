@@ -8,6 +8,7 @@ use App\Models\CourseSchedule;
 use App\Models\Scholarship;
 use App\Models\ScholarshipApplication;
 use App\Models\User;
+use App\Services\PhoneNumberNormalizer;
 use App\Services\ScholarshipApplicationManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,8 @@ class ScolarshipApplicationController extends Controller
         $contactEmail = strtolower($data['email']);
         $contactName  = $data['full_name'];
         $contactPhone = $data['phone'];
+        $phoneMeta = app(PhoneNumberNormalizer::class)->normalize($contactPhone, $data['location'] ?? null, null, true);
+        $normalizedPhone = $phoneMeta['e164'] ?? $contactPhone;
 
         if (!$user) {
             // Create or reuse user by email
@@ -163,7 +166,7 @@ class ScolarshipApplicationController extends Controller
                 ['email' => $contactEmail],
                 [
                     'name'     => $contactName,
-                    'phone'    => $contactPhone ?? null,
+                    'phone'    => $normalizedPhone ?? null,
                     'password' => bcrypt(Str::random(18)), // random password; they can reset later
                 ]
             );
@@ -175,7 +178,7 @@ class ScolarshipApplicationController extends Controller
                 $updated = true;
             }
             if ((empty($user->phone) || $user->phone === '—') && !empty($contactPhone)) {
-                $user->phone = $contactPhone;
+                $user->phone = $normalizedPhone;
                 $updated = true;
             }
             if ($updated) $user->save();
@@ -185,7 +188,7 @@ class ScolarshipApplicationController extends Controller
                 $updates['name'] = $contactName;
             }
             if ((empty($user->phone) || $user->phone === '—') && !empty($contactPhone)) {
-                $updates['phone'] = $contactPhone;
+                $updates['phone'] = $normalizedPhone;
             }
             if ($updates) {
                 $user->fill($updates)->save();
@@ -207,12 +210,14 @@ class ScolarshipApplicationController extends Controller
         }
         $source = $authUser ? 'registered' : 'guest_to_user';
         // Create application
-        $application = DB::transaction(function () use ($schedule, $user, $data, $source, $options, $contactName, $contactEmail, $contactPhone) {
+        $application = DB::transaction(function () use ($schedule, $user, $data, $source, $options, $contactName, $contactEmail, $contactPhone, $phoneMeta, $normalizedPhone) {
             $formPayload = [
                 'personal' => [
                     'full_name' => $contactName,
                     'email'     => $contactEmail,
-                    'phone'     => $contactPhone,
+                    'phone'     => $normalizedPhone,
+                    'phone_raw' => $contactPhone,
+                    'phone_meta' => $phoneMeta,
                     'gender'    => $data['gender'],
                     'age_range' => $data['age_range'],
                     'location'  => $data['location'],
@@ -266,7 +271,9 @@ class ScolarshipApplicationController extends Controller
                 'contact' => [
                     'name'   => $contactName,
                     'email'  => $contactEmail,
-                    'phone'  => $contactPhone,
+                    'phone'  => $normalizedPhone,
+                    'phone_raw' => $contactPhone,
+                    'phone_meta' => $phoneMeta,
                     'source' => $source,
                 ],
                 // legacy keys for backward compatibility

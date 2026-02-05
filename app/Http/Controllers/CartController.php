@@ -25,6 +25,15 @@ class CartController extends Controller
         ]);
 
         $course = Course::findOrFail($data['course_id']);
+
+        // Block external courses from being added to cart
+        if ($course->isExternal()) {
+            return response()->json([
+                'error' => 'This course is available on ' . ($course->external_platform_name ?? 'an external platform') . '. Please purchase directly from the platform.',
+                'external_url' => $course->external_course_url
+            ], 422);
+        }
+
         $contentId = $data['course_content_id'] ?? null;
 
         if ($contentId) {
