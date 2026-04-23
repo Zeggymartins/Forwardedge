@@ -14,12 +14,15 @@ class EventController extends Controller
     {
         $events = Event::where('status', 'published')
             ->published()
-            ->whereHas('pages', function ($q) {
-                $q->where('status', 'published')
-                    ->when(
-                        Schema::hasColumn('pages', 'show_on_events'),
-                        fn($pageQuery) => $pageQuery->where('show_on_events', true)
-                    );
+            ->where(function ($q) {
+                $q->whereDoesntHave('pages')
+                    ->orWhereHas('pages', function ($pageQuery) {
+                        $pageQuery->where('status', 'published')
+                            ->when(
+                                Schema::hasColumn('pages', 'show_on_events'),
+                                fn($visiblePageQuery) => $visiblePageQuery->where('show_on_events', true)
+                            );
+                    });
             })
             ->orderBy('start_date', 'asc')
             ->paginate(6);
@@ -51,7 +54,7 @@ class EventController extends Controller
             return redirect()->route('page.show', $page->slug);
         }
 
-        abort(404, 'No page associated with this event.');
+        return view('user.pages.events_details', compact('event'));
     }
 
 

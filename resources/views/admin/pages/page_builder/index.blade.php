@@ -228,13 +228,13 @@
               </select>
             </div>
 
-            <div class="col-12 owner-select owner-event" style="display:none;">
+            <div class="col-12">
               <input type="hidden" name="show_on_events" value="0">
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" name="show_on_events" value="1" id="showOnEvents" checked>
-                <label class="form-check-label" for="showOnEvents">Show this page in Events and the home resources</label>
+                <label class="form-check-label" for="showOnEvents">Show on Events and home resources</label>
               </div>
-              <small class="text-muted">Turn this off when an event page should stay published but not appear in event/resource lists.</small>
+              <small class="text-muted">Applies to event pages. Turn it off when an event page should stay published but not appear in event/resource lists.</small>
             </div>
 
             <div class="col-12">

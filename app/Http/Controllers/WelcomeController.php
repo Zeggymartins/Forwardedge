@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
-use App\Models\CourseSchedule;
+use App\Models\Course;
 use App\Models\Event;
 use App\Models\Faq;
 use App\Models\Service;
@@ -49,10 +49,12 @@ class WelcomeController extends Controller
 
         $events = Event::query()
             ->where('status', 'published')
-            ->whereDate('end_date', '>=', now())
-            ->whereHas('pages', fn ($q) => $this->visibleEventPageQuery($q))
+            ->where(function ($q) {
+                $q->whereDoesntHave('pages')
+                    ->orWhereHas('pages', fn ($pageQuery) => $this->visibleEventPageQuery($pageQuery));
+            })
             ->with(['pages' => fn ($q) => $this->visibleEventPageQuery($q)->latest('updated_at')])
-            ->orderBy('start_date', 'asc')
+            ->orderByDesc('start_date')
             ->take(6)
             ->get()
             ->map(function (Event $event) {
@@ -73,18 +75,14 @@ class WelcomeController extends Controller
                 ];
             });
 
-        $bootcamps = CourseSchedule::with(['course'])
-            ->upcoming()
-            ->forPublishedCourses()
-            ->orderBy('start_date', 'asc')
+        $bootcamps = Course::query()
+            ->where('status', 'published')
+            ->with(['pages' => fn ($q) => $q->where('status', 'published')->latest('updated_at')])
+            ->latest()
             ->take(6)
             ->get()
-            ->map(function (CourseSchedule $schedule) {
-                $course = $schedule->course;
-                if (!$course) {
-                    return null;
-                }
-
+            ->map(function (Course $course) {
+                $page = $course->pages->first();
                 $thumb = (!empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail))
                     ? asset('storage/' . $course->thumbnail)
                     : asset('frontend/assets/images/service/service-1.webp');
@@ -92,12 +90,12 @@ class WelcomeController extends Controller
                 return [
                     'type' => 'schedule',
                     'img' => $thumb,
-                    'date' => $schedule->start_date ? $schedule->start_date->format('d') : '',
-                    'month' => $schedule->start_date ? $schedule->start_date->format('M') : '',
-                    'badge' => ucfirst($schedule->type ?? 'Bootcamp'),
-                    'meta_right' => $schedule->location ?: 'Online',
+                    'date' => optional($course->created_at)->format('d'),
+                    'month' => optional($course->created_at)->format('M'),
+                    'badge' => 'Bootcamp',
+                    'meta_right' => 'Online',
                     'title' => $course->title ?? 'Bootcamp',
-                    'url' => route('course.show', $course->slug),
+                    'url' => $page ? route('page.show', $page->slug) : route('shop.details', $course->slug),
                     'cta' => 'View Details',
                 ];
             })
