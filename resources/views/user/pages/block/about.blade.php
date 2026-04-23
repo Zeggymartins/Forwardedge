@@ -17,6 +17,10 @@
 
     // Tiles (4-up grid on the right)
     $tiles = is_array($d['tiles'] ?? null) ? $d['tiles'] : [];
+
+    // Text color (admin-controlled, defaults to white for dark-bg sections)
+    $textColor = $d['text_color'] ?? '#ffffff';
+    $textColorMuted = $textColor . 'D0'; // ~82% opacity for muted text
 @endphp
 @php
     use Illuminate\Support\Facades\Storage;
@@ -94,20 +98,20 @@
   /* Extra space between columns so cards don't "enter" each other */
   .about-cards-row { row-gap: 1.5rem; } /* vertical gap */
 
-  /* Force About columns text to white */
-  .h7-about .sec-heading .sec-title,
-  .h7-about .sec-heading .sub-title,
-  .h7-about .h7-about-content-inner,
-  .h7-about .h7-about-content-inner * {
-    color: #fff !important;
+  /* About text color — set by admin (defaults to #ffffff for dark-bg sections) */
+  .h7-about-{{ $block->id }} .sec-heading .sec-title,
+  .h7-about-{{ $block->id }} .sec-heading .sub-title,
+  .h7-about-{{ $block->id }} .h7-about-content-inner,
+  .h7-about-{{ $block->id }} .h7-about-content-inner * {
+    color: {{ $textColor }} !important;
   }
-  .h7-about .h7-about-content-inner .text-muted {
-    color: rgba(255, 255, 255, 0.82) !important;
+  .h7-about-{{ $block->id }} .h7-about-content-inner .text-muted {
+    color: {{ $textColorMuted }} !important;
   }
 </style>
 @endpush
 
-<section class="tj-about-section h7-about section-gap section-gap-x mt-10 pb-rich-text">
+<section class="tj-about-section h7-about h7-about-{{ $block->id }} section-gap section-gap-x mt-10 pb-rich-text">
   <div class="container">
     <div class="row row-gap-4">
       <div class="col-12">

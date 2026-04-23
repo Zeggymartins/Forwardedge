@@ -170,6 +170,8 @@ final class PageBlueprint
 
                 'cta.link_text'     => ['nullable', 'string', 'max:60'],
                 'cta.link'          => self::linkRule(),
+
+                'text_color'        => ['nullable', 'string', 'max:30'],
             ],
 
             'about2' => [
@@ -186,6 +188,8 @@ final class PageBlueprint
                 'columns.*.description' => ['nullable', 'string', 'max:600'],
                 'columns.*.list'        => ['nullable', 'array', 'max:20'],
                 'columns.*.list.*'      => ['string', 'max:140'], // Removed 'required_with'
+
+                'text_color'            => ['nullable', 'string', 'max:30'],
             ],
 
             'sections' => [

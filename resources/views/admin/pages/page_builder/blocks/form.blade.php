@@ -1393,9 +1393,13 @@
     <label class="form-label small-label">Kicker</label>
     <input class="form-control" name="data[kicker]">
   </div>
-  <div class="col-md-8">
+  <div class="col-md-6">
     <label class="form-label small-label">Title*</label>
     <input class="form-control" name="data[title]" required>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label small-label">Text Color</label>
+    <input class="form-control form-control-color w-100" type="color" name="data[text_color]" value="#ffffff" title="Heading &amp; body text color">
   </div>
   <div class="col-12">
     <label class="form-label small-label">Subtitle</label>
@@ -1404,6 +1408,12 @@
   <div class="col-12">
     <label class="form-label small-label">Text</label>
     <textarea class="form-control" name="data[text]" rows="3"></textarea>
+  </div>
+  <div class="col-12"><div class="section-divider"><span class="section-divider-label">Banner Image</span></div></div>
+  <div class="col-md-6">
+    <label class="form-label small-label">Banner (left visual)</label>
+    <input class="form-control" type="file" name="banner_left" accept=".webp,.jpg,.jpeg,.png" data-file-key="banner_left">
+    <div class="mt-2"><img data-preview-key="banner_left" style="max-width:100%;height:auto;display:none"></div>
   </div>
   <div class="col-12"><div class="section-divider"><span class="section-divider-label">List</span></div></div>
   <div class="col-12 d-flex justify-content-between">
@@ -1517,7 +1527,11 @@
                     return html(`
 <div class="row g-3">
   <div class="col-md-4"><label class="form-label small-label">Kicker</label><input class="form-control" name="data[kicker]"></div>
-  <div class="col-md-8"><label class="form-label small-label">Title*</label><input class="form-control" name="data[title]" required></div>
+  <div class="col-md-6"><label class="form-label small-label">Title*</label><input class="form-control" name="data[title]" required></div>
+  <div class="col-md-2">
+    <label class="form-label small-label">Text Color</label>
+    <input class="form-control form-control-color w-100" type="color" name="data[text_color]" value="#ffffff" title="Heading &amp; body text color">
+  </div>
   <div class="col-12"><label class="form-label small-label">Text</label><textarea class="form-control" name="data[text]" rows="3"></textarea></div>
   <div class="col-md-5"><label class="form-label small-label">Link Text</label><input class="form-control" name="data[link_text]"></div>
   ${linkControl('data[link]', 'Link', 'col-md-7')}
