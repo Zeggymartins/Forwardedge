@@ -50,6 +50,7 @@
               <th>Title</th>
               <th>Type</th>
               <th>Status</th>
+              <th>Events</th>
               <th>Updated</th>
               <th class="text-end" style="min-width: 360px;">Actions</th>
             </tr>
@@ -84,6 +85,15 @@
                     {{ ucfirst($p->status) }}
                   </span>
                 </td>
+                <td>
+                  @if ($p->pageable_type === \App\Models\Event::class)
+                    <span class="badge bg-{{ $p->show_on_events ? 'success' : 'secondary' }}">
+                      {{ $p->show_on_events ? 'Shown' : 'Hidden' }}
+                    </span>
+                  @else
+                    <span class="text-muted">-</span>
+                  @endif
+                </td>
                 <td><small>{{ $p->updated_at?->diffForHumans() }}</small></td>
                 <td class="text-end">
                   <div class="d-flex gap-2 justify-content-end">
@@ -102,6 +112,7 @@
                         'title' => $p->title,
                         'slug' => $p->slug,
                         'status' => $p->status,
+                        'show_on_events' => (bool) $p->show_on_events,
                         'owner_type' => $ownerType,
                         'owner_id' => $p->pageable_id,
                         'meta' => $p->meta,
@@ -128,7 +139,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="5" class="text-center text-muted py-5">
+                <td colspan="6" class="text-center text-muted py-5">
                   <i class="bi bi-file-earmark-text display-4 d-block mb-3"></i>
                   <p class="mb-0">No pages yet. Click "Create Page" to get started.</p>
                 </td>
@@ -215,6 +226,15 @@
                   <option value="{{ $e->id }}">{{ $e->title }}</option>
                 @endforeach
               </select>
+            </div>
+
+            <div class="col-12 owner-select owner-event" style="display:none;">
+              <input type="hidden" name="show_on_events" value="0">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="show_on_events" value="1" id="showOnEvents" checked>
+                <label class="form-check-label" for="showOnEvents">Show this page in Events and the home resources</label>
+              </div>
+              <small class="text-muted">Turn this off when an event page should stay published but not appear in event/resource lists.</small>
             </div>
 
             <div class="col-12">
@@ -304,6 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     title: document.getElementById('pageTitle'),
     slug: document.getElementById('pageSlug'),
     status: document.getElementById('pageStatus'),
+    showOnEvents: document.getElementById('showOnEvents'),
     ownerCourse: document.getElementById('ownerCourse'),
     ownerEvent: document.getElementById('ownerEvent'),
     metaTitle: document.getElementById('metaTitle'),
@@ -397,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.metaImageFile) elements.metaImageFile.value = '';
     updateMetaImagePreview('');
     if (elements.metaCanonical) elements.metaCanonical.value = '';
+    if (elements.showOnEvents) elements.showOnEvents.checked = true;
   }
 
   function populateForm(data) {
@@ -406,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.title.value = data.title || '';
     elements.slug.value = data.slug || '';
     elements.status.value = data.status || 'draft';
+    if (elements.showOnEvents) elements.showOnEvents.checked = data.show_on_events !== false && data.show_on_events !== 0;
     const meta = data.meta || {};
     if (elements.metaTitle) elements.metaTitle.value = meta.title || '';
     if (elements.metaDescription) elements.metaDescription.value = meta.description || '';
@@ -558,6 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: @json(old('title', '')),
       slug: @json(old('slug', '')),
       status: @json(old('status', 'draft')),
+      show_on_events: @json((bool) old('show_on_events', true)),
       owner_type: @json(old('owner_type', '')),
       owner_id: @json(old('owner_id', '')),
       meta: {

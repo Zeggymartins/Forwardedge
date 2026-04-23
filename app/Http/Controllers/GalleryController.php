@@ -22,8 +22,11 @@ class GalleryController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',   // single shared title
+            'images' => 'required|array|max:20',
             'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $uploaded = 0;
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
@@ -33,7 +36,17 @@ class GalleryController extends Controller
                     'title' => $request->title, // same title for all images
                     'image' => $path
                 ]);
+
+                $uploaded++;
             }
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'uploaded' => $uploaded,
+                'message' => "{$uploaded} photo(s) uploaded successfully.",
+            ]);
         }
 
         return redirect()->back()->with('success', 'Photos uploaded successfully!');

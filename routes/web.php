@@ -572,9 +572,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('ctrl-panel-v2')->group(functi
         // Edit/save are still used by the one-page form when you click “Edit”
         Route::put('/block/{block}',    [PageBuilderController::class, 'updateBlock'])->name('pb.blocks.update');
         Route::delete('/block/{block}', [PageBuilderController::class, 'destroyBlock'])->name('pb.blocks.destroy');
+        Route::post('/block/{block}/publish', [PageBuilderController::class, 'togglePublish'])->name('pb.blocks.publish');
+        Route::post('/block/{block}/clone',   [PageBuilderController::class, 'cloneBlock'])->name('pb.blocks.clone');
 
         // Drag-sort autosave
         Route::post('/{page}/blocks/reorder', [PageBuilderController::class, 'reorderBlocks'])->name('pb.blocks.reorder');
+
+        // Admin-only preview (shows draft blocks too)
+        Route::get('/{page}/preview', [PageBuilderController::class, 'previewPage'])->name('pb.blocks.preview');
     });
 });
 

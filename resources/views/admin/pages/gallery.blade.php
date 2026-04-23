@@ -13,6 +13,27 @@
             <i class="bi bi-plus-circle me-2"></i> Add Photos
         </button>
     </div>
+
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Upload failed.</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <div id="galleryUploadAlert" class="alert d-none" role="alert"></div>
     {{-- Gallery Grid --}}
     <div class="row g-4">
         @foreach($photos as $photo)
@@ -94,7 +115,7 @@
 {{-- Add Photos Modal --}}
 <div class="modal fade" id="addPhotoModal" tabindex="-1">
     <div class="modal-dialog">
-        <form action="{{ route('admin.gallery.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="galleryUploadForm" action="{{ route('admin.gallery.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">
@@ -108,12 +129,18 @@
                     </div>
                     <div class="mb-3">
                         <label>Choose Photos</label>
-                        <input type="file" name="images[]" class="form-control" multiple required accept="image/*">
-                        <small class="text-muted">You can select multiple images at once</small>
+                        <input type="file" id="galleryImages" name="images[]" class="form-control" multiple required accept="image/*">
+                        <small class="text-muted">Large selections are uploaded in small batches to avoid server upload limits.</small>
                     </div>
+                    <div class="progress d-none" id="galleryUploadProgress" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted d-none mt-2" id="galleryUploadStatus"></small>
+                    <div class="alert alert-danger d-none mt-3 mb-0" id="galleryUploadError"></div>
+                    <div class="alert alert-success d-none mt-3 mb-0" id="galleryUploadSuccess"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Upload Photos</button>
+                    <button type="submit" class="btn btn-primary" id="galleryUploadButton">Upload Photos</button>
                 </div>
             </div>
         </form>
@@ -123,20 +150,89 @@
 
 {{-- JS to dynamically add inputs --}}
 <script>
-function addPhotoInput() {
-    let container = document.getElementById('photo-inputs');
-    let html = `
-        <div class="mb-3">
-            <label>Title</label>
-            <input type="text" name="titles[]" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label>Photo</label>
-            <input type="file" name="images[]" class="form-control" required>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('galleryUploadForm');
+    if (!form) return;
+
+    const batchSize = 3;
+    const fileInput = document.getElementById('galleryImages');
+    const button = document.getElementById('galleryUploadButton');
+    const progress = document.getElementById('galleryUploadProgress');
+    const progressBar = progress?.querySelector('.progress-bar');
+    const status = document.getElementById('galleryUploadStatus');
+    const errorBox = document.getElementById('galleryUploadError');
+    const successBox = document.getElementById('galleryUploadSuccess');
+
+    const setMessage = (box, message) => {
+        if (!box) return;
+        box.textContent = message;
+        box.classList.toggle('d-none', !message);
+    };
+
+    const setProgress = (done, total) => {
+        const percent = total ? Math.round((done / total) * 100) : 0;
+        progress?.classList.remove('d-none');
+        if (progressBar) {
+            progressBar.style.width = `${percent}%`;
+            progressBar.setAttribute('aria-valuenow', String(percent));
+        }
+        if (status) {
+            status.textContent = `Uploaded ${done} of ${total} selected file(s)`;
+            status.classList.remove('d-none');
+        }
+    };
+
+    form.addEventListener('submit', async (event) => {
+        const files = Array.from(fileInput?.files || []);
+        if (files.length <= batchSize) return;
+
+        event.preventDefault();
+        setMessage(errorBox, '');
+        setMessage(successBox, '');
+
+        button.disabled = true;
+        fileInput.disabled = true;
+
+        let uploaded = 0;
+        try {
+            for (let start = 0; start < files.length; start += batchSize) {
+                const formData = new FormData();
+                formData.append('_token', form.querySelector('input[name="_token"]').value);
+                formData.append('title', form.querySelector('input[name="title"]').value);
+
+                files.slice(start, start + batchSize).forEach((file) => {
+                    formData.append('images[]', file);
+                });
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok || !data.success) {
+                    const errors = data.errors ? Object.values(data.errors).flat().join(' ') : '';
+                    throw new Error(errors || data.message || 'One upload batch failed.');
+                }
+
+                uploaded += Number(data.uploaded || 0);
+                setProgress(Math.min(start + batchSize, files.length), files.length);
+            }
+
+            setMessage(successBox, `${uploaded} photo(s) uploaded successfully. Refreshing gallery...`);
+            window.location.reload();
+        } catch (error) {
+            setMessage(errorBox, error.message || 'Upload failed. Please try again.');
+            button.disabled = false;
+            fileInput.disabled = false;
+        }
+    });
+});
 </script>
 
 

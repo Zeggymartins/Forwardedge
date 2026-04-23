@@ -60,7 +60,12 @@ class Course extends Model
 
     public function page()
     {
-        return $this->morphOne(Page::class, 'pageable');
+        return $this->morphOne(Page::class, 'pageable')->latestOfMany();
+    }
+
+    public function pages()
+    {
+        return $this->morphMany(Page::class, 'pageable');
     }
 
     /**

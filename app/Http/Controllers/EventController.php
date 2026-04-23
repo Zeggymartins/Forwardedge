@@ -14,6 +14,13 @@ class EventController extends Controller
     {
         $events = Event::where('status', 'published')
             ->published()
+            ->whereHas('pages', function ($q) {
+                $q->where('status', 'published')
+                    ->when(
+                        Schema::hasColumn('pages', 'show_on_events'),
+                        fn($pageQuery) => $pageQuery->where('show_on_events', true)
+                    );
+            })
             ->orderBy('start_date', 'asc')
             ->paginate(6);
 

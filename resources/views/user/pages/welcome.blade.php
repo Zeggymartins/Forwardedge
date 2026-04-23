@@ -861,79 +861,13 @@
                         <span class="sub-title wow fadeInUp" data-wow-delay=".3s">
                             <i class="tji-box"></i>Events & Insights & Ideas
                         </span>
-                        <h2 class="sec-title title-anim">The Ultimate <span>Resource.</span></h2>
+                        <h2 class="sec-title">The Ultimate <span>Resource.</span></h2>
                     </div>
                 </div>
             </div>
 
             @php
-                // Take up to 3 from each source
-                $blogItems = ($blogs ?? collect())->take(3);
-                $eventItems = ($events ?? collect())->take(3);
-                $scheduleItems = ($upcomingSchedules ?? collect())->take(3);
-
-                // Build one unified "event-card" style list
-                $cards = collect();
-
-                // BLOGS
-                foreach ($blogItems as $blog) {
-                    $cards->push([
-                        'type' => 'blog',
-                        'img' => $blog->thumbnail
-                            ? asset('storage/' . $blog->thumbnail)
-                            : asset('frontend/assets/images/blog/default.webp'),
-                        'date' => optional($blog->created_at)->format('d'),
-                        'month' => optional($blog->created_at)->format('M'),
-                        'badge' => 'Blog',
-                        'meta_right' => $blog->author->name ?? 'Admin',
-                        'title' => $blog->title,
-                        'url' => route('blogs.show', $blog->slug ?? $blog->id),
-                        'cta' => 'Read More',
-                    ]);
-                }
-
-                // EVENTS
-                foreach ($eventItems as $event) {
-                    $cards->push([
-                        'type' => 'event',
-                        'img' => $event->thumbnail
-                            ? asset('storage/' . $event->thumbnail)
-                            : asset('frontend/assets/images/project/project-6.webp'),
-                        'date' => optional($event->start_date)->format('d'),
-                        'month' => optional($event->start_date)->format('M'),
-                        'badge' => 'Event',
-                        'meta_right' => $event->location ?? 'Online',
-                        'title' => $event->title,
-                        'url' => route('events.show', $event->slug),
-                        'cta' => 'View Details',
-                    ]);
-                }
-
-                // Upcoming course schedules
-                foreach ($scheduleItems as $course) {
-                    $schedule = optional($course->schedules)->first();
-                    if (!$schedule) {
-                        continue;
-                    }
-
-                    $thumb = (!empty($course->thumbnail) && Storage::disk('public')->exists($course->thumbnail))
-                        ? asset('storage/' . $course->thumbnail)
-                        : asset('frontend/assets/images/service/service-1.webp');
-
-                    $slug = $course->slug ?? null;
-
-                    $cards->push([
-                        'type'       => 'schedule',
-                        'img'        => $thumb,
-                        'date'       => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('d') : '',
-                        'month'      => $schedule->start_date ? \Carbon\Carbon::parse($schedule->start_date)->format('M') : '',
-                        'badge'      => ucfirst($schedule->type ?? 'virtual'),
-                        'meta_right' => $schedule->location ?: 'Online',
-                        'title'      => $course->title ?? 'Bootcamp',
-                        'url'        => $slug ? route('course.show', $course->slug) : route('course.enroll'),
-                        'cta'        => $slug ? 'View Details' : 'Enroll Now',
-                    ]);
-                }
+                $cards = collect($homeResourceCards ?? [])->take(6);
             @endphp
 
 <div class="row row-gap-4 mt-4">

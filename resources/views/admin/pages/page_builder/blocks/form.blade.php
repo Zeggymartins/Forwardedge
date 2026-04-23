@@ -23,20 +23,47 @@
 @endpush
 
 @section('main')
+@php
+$blockMeta = [
+    'hero'             => ['icon' => 'bi-star-fill',                    'color' => '#6366f1'],
+    'hero2'            => ['icon' => 'bi-layout-text-window-reverse',   'color' => '#8b5cf6'],
+    'hero3'            => ['icon' => 'bi-badge-hd',                     'color' => '#7c3aed'],
+    'hero4'            => ['icon' => 'bi-rocket-takeoff',               'color' => '#a855f7'],
+    'program_overview' => ['icon' => 'bi-journal-bookmark',             'color' => '#0ea5e9'],
+    'overview'         => ['icon' => 'bi-grid-3x3-gap',                 'color' => '#0284c7'],
+    'overview2'        => ['icon' => 'bi-collection',                   'color' => '#0369a1'],
+    'about'            => ['icon' => 'bi-people',                       'color' => '#059669'],
+    'about2'           => ['icon' => 'bi-person-lines-fill',            'color' => '#047857'],
+    'sections'         => ['icon' => 'bi-layout-three-columns',         'color' => '#d97706'],
+    'sections2'        => ['icon' => 'bi-layout-wtf',                   'color' => '#b45309'],
+    'marquees'         => ['icon' => 'bi-arrows-move',                  'color' => '#dc2626'],
+    'logo_slider'      => ['icon' => 'bi-images',                       'color' => '#9333ea'],
+    'gallary'          => ['icon' => 'bi-camera',                       'color' => '#ec4899'],
+    'testimonial'      => ['icon' => 'bi-chat-quote',                   'color' => '#f59e0b'],
+    'pricing'          => ['icon' => 'bi-tag',                          'color' => '#10b981'],
+    'faq'              => ['icon' => 'bi-question-circle',              'color' => '#6b7280'],
+    'closing_cta'      => ['icon' => 'bi-megaphone',                    'color' => '#ef4444'],
+    'form_dark'        => ['icon' => 'bi-ui-checks',                    'color' => '#374151'],
+    'form_light'       => ['icon' => 'bi-ui-checks-grid',              'color' => '#6b7280'],
+    'table'            => ['icon' => 'bi-table',                        'color' => '#1d4ed8'],
+];
+@endphp
     <div class="container py-5">
 
         {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="mb-0">Page Builder • {{ $page->title }}</h3>
-                <div class="text-muted">Add blocks, edit content in modals, and drag to reorder.</div>
+                <div class="text-muted small">Drag blocks to reorder • click edit to configure • changes save instantly</div>
             </div>
             <div class="d-flex gap-2">
-                <a class="btn btn-dark" href="{{ route('page.show', $page->slug) }}" target="_blank">Preview</a>
+                <a class="btn btn-outline-secondary" href="{{ route('page.show', $page->slug) }}" target="_blank">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Live Page
+                </a>
             </div>
         </div>
 
-        {{-- Alerts --}}
+        {{-- Alerts (non-AJAX fallback) --}}
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -52,127 +79,179 @@
         @endif
 
         {{-- Add Block toolbar --}}
-        <div class="card rounded-12 shadow-soft mb-4 p-4">
-            <div class="card-body">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label small-label">Add Block</label>
-                        <input type="search" class="form-control form-control-sm mb-2" id="blockSearch"
-                            placeholder="Search blocks quickly">
-                        <select class="form-select" id="add_type">
-                            <option value="" selected disabled>Choose a block…</option>
-                            @foreach ($blockTypes as $t)
-                                <option value="{{ $t }}">{{ ucfirst(str_replace('_', ' ', $t)) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small-label">Variant</label>
-                        <select class="form-select" id="add_variant">
-                            <option value="">Default</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 text-md-end">
-                        <button class="btn btn-dark w-100" id="openAddModal" disabled>Configure & Add</button>
-                    </div>
+        <div class="card rounded-12 shadow-soft mb-4 p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="text-muted small">
+                    Sections on this page: <strong>{{ $blocks->count() }}</strong>
                 </div>
+                <button class="btn btn-dark" id="openBlockPickerBtn">
+                    <i class="bi bi-plus-circle me-1"></i> Add Block
+                </button>
             </div>
         </div>
 
         {{-- Blocks List --}}
         <div class="card rounded-12 shadow-soft">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="fw-semibold">Blocks (drag to reorder)</div>
-                <small class="text-muted">Order autosaves after each drag.</small>
+                <div class="fw-semibold">Blocks</div>
+                <small class="text-muted">Drag to reorder • order saves automatically</small>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush" id="blockList">
                     @forelse($blocks as $b)
-                        <li class="list-group-item d-flex align-items-center gap-3 block-row" draggable="true"
-                            data-id="{{ $b->id }}">
-                            <span class="drag-handle">☰</span>
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold text-capitalize">
-                                    {{ str_replace('_', ' ', $b->type) }}
-                                    <span class="text-muted">• {{ $b->variant ?: 'default' }}</span>
+                        @php
+                            $meta = $blockMeta[$b->type] ?? ['icon' => 'bi-puzzle', 'color' => '#6b7280'];
+                            $preview = \Illuminate\Support\Str::limit(
+                                $b->data['title'] ?? $b->data['subtitle'] ?? $b->data['text']
+                                    ?? ($b->data['items'][0]['title'] ?? null)
+                                    ?? ($b->data['plans'][0]['title'] ?? null)
+                                    ?? ($b->data['kicker'] ?? null)
+                                    ?? '', 60
+                            );
+                        @endphp
+                        <li class="list-group-item px-3 py-3 block-row" draggable="true" data-id="{{ $b->id }}">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="drag-handle text-muted" style="cursor:grab;user-select:none" title="Drag to reorder">☰</span>
+
+                                {{-- Coloured type icon --}}
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:40px;height:40px;background:{{ $meta['color'] }}22;color:{{ $meta['color'] }}">
+                                    <i class="bi {{ $meta['icon'] }} fs-5"></i>
                                 </div>
-                                <div class="small text-muted">
-                                    #{{ $b->order }}
-                                    @unless ($b->is_published)
-                                        • <span class="text-danger">unpublished</span>
-                                    @endunless
+
+                                {{-- Info --}}
+                                <div class="flex-grow-1" style="min-width:0">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="fw-semibold text-capitalize">{{ str_replace('_', ' ', $b->type) }}</span>
+                                        @if($b->variant && $b->variant !== 'default')
+                                            <span class="badge bg-secondary-subtle text-secondary fw-normal">{{ $b->variant }}</span>
+                                        @endif
+                                        <span class="badge {{ $b->is_published ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
+                                              data-pub-badge>{{ $b->is_published ? 'Live' : 'Draft' }}</span>
+                                    </div>
+                                    @if($preview)
+                                        <div class="small text-muted text-truncate" data-block-preview>{{ $preview }}</div>
+                                    @endif
                                 </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" data-action="edit"
-                                    data-payload='@json($b)'>Edit</button>
-                                <form method="POST" action="{{ route('pb.blocks.destroy', $b) }}"
-                                    onsubmit="return confirm('Delete this block?')">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-outline-danger btn-sm">Delete</button>
-                                </form>
+
+                                {{-- Actions --}}
+                                <div class="d-flex gap-1 flex-shrink-0">
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                            data-action="toggle-publish"
+                                            data-id="{{ $b->id }}"
+                                            data-published="{{ $b->is_published ? '1' : '0' }}"
+                                            title="{{ $b->is_published ? 'Unpublish' : 'Publish' }}">
+                                        <i class="bi {{ $b->is_published ? 'bi-eye-slash' : 'bi-eye' }}"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-action="edit"
+                                            data-payload='@json($b)' title="Edit block">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-action="clone"
+                                            data-id="{{ $b->id }}" title="Duplicate block">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                    <form method="POST" action="{{ route('pb.blocks.destroy', $b) }}" data-action="delete">
+                                        @csrf @method('DELETE')
+                                        <button class="btn btn-outline-danger btn-sm" type="submit" title="Delete block">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </li>
                     @empty
-                        <li class="list-group-item text-center text-muted py-4">
-                            No blocks yet. Use the toolbar above to add one.
+                        <li class="list-group-item text-center text-muted py-5">
+                            No blocks yet. Click <strong>Add Block</strong> above to get started.
                         </li>
                     @endforelse
                 </ul>
             </div>
         </div>
+
+        {{-- Live preview pane --}}
+        <div class="mt-3">
+            <button class="btn btn-outline-secondary btn-sm" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#previewPane" id="togglePreviewBtn">
+                <i class="bi bi-eye me-1"></i> Live Preview
+            </button>
+            <div class="collapse mt-2" id="previewPane">
+                <div class="card shadow-soft rounded-12 overflow-hidden" style="height:650px">
+                    <iframe id="previewFrame"
+                            src="{{ route('pb.blocks.preview', $page) }}"
+                            style="width:100%;height:100%;border:0"
+                            sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    {{-- ============== Modal (Add/Edit) ============== --}}
-    <div class="modal fade" id="blockModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+    {{-- ============== Block Picker Modal ============== --}}
+    <div class="modal fade" id="blockPickerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <form id="modalForm" method="POST" enctype="multipart/form-data" novalidate>
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Configure Block</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <label class="form-label small-label">Block Type</label>
-                                <select class="form-select" id="modal_type" name="type" required>
-                                    @foreach ($blockTypes as $t)
-                                        <option value="{{ $t }}">{{ ucfirst(str_replace('_', ' ', $t)) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small-label">Variant</label>
-                                <select class="form-select" id="modal_variant" name="variant">
-                                    <option value="">Default</option>
-                                    {{-- options filled by JS based on type --}}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small-label">Published</label>
-                                <select class="form-select" name="is_published" id="modal_published">
-                                    <option value="1" selected>Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <hr class="my-3">
-
-                        {{-- Dynamic fields mount point --}}
-                        <div id="fieldMount"></div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-dark" id="modalSubmit">Save</button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-grid me-2"></i>Choose a Block Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="search" class="form-control mb-3" id="pickerSearch" placeholder="Search block types…">
+                    <div class="row g-3" id="pickerGrid"></div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    {{-- ============== Offcanvas Panel (Add/Edit) ============== --}}
+    <div class="offcanvas offcanvas-end" id="blockPanel" tabindex="-1" aria-labelledby="blockPanelLabel"
+         style="width:min(600px,100vw)">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="blockPanelLabel">Configure Block</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0 d-flex flex-column" style="height:calc(100% - 57px)">
+            <form id="modalForm" method="POST" enctype="multipart/form-data" novalidate
+                  class="d-flex flex-column h-100">
+                @csrf
+                {{-- Type / Variant / Published row --}}
+                <div class="p-3 border-bottom flex-shrink-0">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label small-label">Block Type</label>
+                            <select class="form-select" id="modal_type" name="type" required>
+                                @foreach ($blockTypes as $t)
+                                    <option value="{{ $t }}">{{ ucfirst(str_replace('_', ' ', $t)) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small-label">Variant</label>
+                            <select class="form-select" id="modal_variant" name="variant">
+                                <option value="">Default</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small-label">Published</label>
+                            <select class="form-select" name="is_published" id="modal_published">
+                                <option value="1" selected>Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Scrollable dynamic fields --}}
+                <div id="fieldMount" class="flex-grow-1 p-3" style="overflow-y:auto"></div>
+
+                {{-- Sticky footer --}}
+                <div class="border-top p-3 d-flex gap-2 justify-content-end bg-white flex-shrink-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+                    <button type="submit" class="btn btn-dark" id="modalSubmit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -184,6 +263,54 @@
         /* ====== CONFIG ====== */
         const VARIANTS = @json($variants);
         const STORAGE_ROOT = @json(rtrim(asset('storage'), '/'));
+
+        /* ====== BLOCK TYPE METADATA (icons + colors for cards & picker) ====== */
+        const BLOCK_TYPE_META = {
+            hero:             { icon: 'bi-star-fill',                   color: '#6366f1', label: 'Hero' },
+            hero2:            { icon: 'bi-layout-text-window-reverse',  color: '#8b5cf6', label: 'Hero 2' },
+            hero3:            { icon: 'bi-badge-hd',                    color: '#7c3aed', label: 'Hero 3' },
+            hero4:            { icon: 'bi-rocket-takeoff',              color: '#a855f7', label: 'Hero 4' },
+            program_overview: { icon: 'bi-journal-bookmark',            color: '#0ea5e9', label: 'Programme Overview' },
+            overview:         { icon: 'bi-grid-3x3-gap',                color: '#0284c7', label: 'Overview' },
+            overview2:        { icon: 'bi-collection',                  color: '#0369a1', label: 'Overview 2' },
+            about:            { icon: 'bi-people',                      color: '#059669', label: 'About' },
+            about2:           { icon: 'bi-person-lines-fill',           color: '#047857', label: 'About 2' },
+            sections:         { icon: 'bi-layout-three-columns',        color: '#d97706', label: 'Sections' },
+            sections2:        { icon: 'bi-layout-wtf',                  color: '#b45309', label: 'Sections 2' },
+            marquees:         { icon: 'bi-arrows-move',                 color: '#dc2626', label: 'Marquee' },
+            logo_slider:      { icon: 'bi-images',                      color: '#9333ea', label: 'Logo Slider' },
+            gallary:          { icon: 'bi-camera',                      color: '#ec4899', label: 'Gallery' },
+            testimonial:      { icon: 'bi-chat-quote',                  color: '#f59e0b', label: 'Testimonial' },
+            pricing:          { icon: 'bi-tag',                         color: '#10b981', label: 'Pricing' },
+            faq:              { icon: 'bi-question-circle',             color: '#6b7280', label: 'FAQ' },
+            closing_cta:      { icon: 'bi-megaphone',                   color: '#ef4444', label: 'Closing CTA' },
+            form_dark:        { icon: 'bi-ui-checks',                   color: '#374151', label: 'Form (Dark)' },
+            form_light:       { icon: 'bi-ui-checks-grid',              color: '#6b7280', label: 'Form (Light)' },
+            table:            { icon: 'bi-table',                       color: '#1d4ed8', label: 'Table' },
+        };
+        const BLOCK_DESCRIPTIONS = {
+            hero:             'Full-width hero with headline, CTA buttons, and a large banner image.',
+            hero2:            'Split-layout hero with image on one side and text on the other.',
+            hero3:            'Compact announcement banner with badge icon and verified marker.',
+            hero4:            'Large hero with kicker text, subtitle, and dual CTA buttons.',
+            program_overview: 'Programme highlights with icons and optional action links.',
+            overview:         'Feature cards or timeline view for key points and benefits.',
+            overview2:        'Icon grid for programme includes or deliverables.',
+            about:            'About section with a large banner image, stat tiles, and feature cards.',
+            about2:           'Split about section with two detail columns, image, and CTA.',
+            sections:         'Alternating content sections with images and descriptions.',
+            sections2:        'Card grid layout for services or topic sections.',
+            marquees:         'Horizontal scrolling marquee of images or text.',
+            logo_slider:      'Infinite logo/brand slider strip.',
+            gallary:          'Photo gallery in grid or masonry layout.',
+            testimonial:      'Testimonials in slider, grid, or featured card layout.',
+            pricing:          'Pricing plans with features list, linked to courses.',
+            faq:              'Accordion or tabbed FAQ section.',
+            closing_cta:      'Bottom-of-page call-to-action with one or more buttons.',
+            form_dark:        'Contact/lead capture form on a dark background.',
+            form_light:       'Contact/lead capture form on a light background.',
+            table:            'Dynamic data table (enrollments or course content list).',
+        };
         const APP_ORIGIN = @json(rtrim(url('/'), '/'));
         const PUBLIC_ROOT = STORAGE_ROOT + '/';
         const INTERNAL_ROUTES = @json($internalRoutes ?? []);
@@ -251,7 +378,7 @@
 
                 if (window.jQuery && window.jQuery.fn.select2) {
                     jQuery(select).select2({
-                        dropdownParent: jQuery('#blockModal'),
+                        dropdownParent: jQuery('#blockPanel'),
                         placeholder: 'Search icon',
                         allowClear: true,
                         width: '100%',
@@ -862,57 +989,70 @@
             scope.querySelectorAll('[data-link-picker]').forEach(hydrateLinkPicker);
         }
 
-        /* ====== ADD BLOCK BAR ====== */
-        const addType = document.getElementById('add_type');
-        const addVariant = document.getElementById('add_variant');
-        const openAddModalBtn = document.getElementById('openAddModal');
-        const blockSearchInput = document.getElementById('blockSearch');
-        const addTypeOptionsCache = addType ? Array.from(addType.options) : [];
+        /* ====== ADD BLOCK BAR (visual picker) ====== */
 
         function updateVariantSelect(type, selectEl) {
+            if (!selectEl) return;
             const opts = VARIANTS[type] || ['default'];
             selectEl.innerHTML = '<option value="">Default</option>' +
                 opts.filter(o => o !== 'default')
                 .map(o => `<option value="${o}">${o}</option>`).join('');
         }
 
-        addType?.addEventListener('change', () => {
-            updateVariantSelect(addType.value, addVariant);
-            openAddModalBtn.disabled = !addType.value;
-        });
+        function buildBlockPicker() {
+            const grid = document.getElementById('pickerGrid');
+            if (!grid || grid.dataset.built) return;
+            grid.dataset.built = '1';
 
-        blockSearchInput?.addEventListener('input', () => {
-            const query = blockSearchInput.value.trim().toLowerCase();
-            if (!query) return;
-            const match = addTypeOptionsCache.find(opt => opt.value && opt.text.toLowerCase().includes(query));
-            if (match) {
-                addType.value = match.value;
-                addType.dispatchEvent(new Event('change'));
-            }
-        });
-
-        blockSearchInput?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (addType.value) {
-                    openAddModalBtn.disabled = false;
-                    openAddModalBtn.focus();
-                }
-            }
-        });
-
-        openAddModalBtn?.addEventListener('click', () => {
-            openModal('create', {
-                type: addType.value,
-                variant: addVariant.value
+            Object.entries(BLOCK_TYPE_META).forEach(([type, meta]) => {
+                const variants = VARIANTS[type] || ['default'];
+                const col = document.createElement('div');
+                col.className = 'col-md-4 col-lg-3';
+                col.dataset.blockLabel = meta.label.toLowerCase();
+                col.innerHTML = `
+                  <div class="border rounded-3 p-3 h-100 d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="rounded-2 d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                            style="background:${meta.color}22;color:${meta.color};width:32px;height:32px">
+                        <i class="bi ${meta.icon}"></i>
+                      </span>
+                      <strong class="text-capitalize">${meta.label}</strong>
+                    </div>
+                    <p class="small text-muted mb-0 flex-grow-1">${BLOCK_DESCRIPTIONS[type] || ''}</p>
+                    <div class="d-flex flex-wrap gap-1">
+                      ${variants.map(v => `<button type="button" class="btn btn-sm btn-outline-secondary picker-btn"
+                        data-type="${type}" data-variant="${v === 'default' ? '' : v}">${v}</button>`).join('')}
+                    </div>
+                  </div>`;
+                grid.appendChild(col);
             });
+
+            grid.addEventListener('click', e => {
+                const btn = e.target.closest('.picker-btn');
+                if (!btn) return;
+                const pickerModal = bootstrap.Modal.getInstance(document.getElementById('blockPickerModal'));
+                pickerModal?.hide();
+                setTimeout(() => openModal('create', { type: btn.dataset.type, variant: btn.dataset.variant }), 300);
+            });
+
+            document.getElementById('pickerSearch')?.addEventListener('input', e => {
+                const q = e.target.value.toLowerCase();
+                grid.querySelectorAll('[data-block-label]').forEach(col => {
+                    col.style.display = col.dataset.blockLabel.includes(q) ? '' : 'none';
+                });
+            });
+        }
+
+        document.getElementById('openBlockPickerBtn')?.addEventListener('click', () => {
+            buildBlockPicker();
+            new bootstrap.Modal(document.getElementById('blockPickerModal')).show();
         });
 
-        /* ====== MODAL ====== */
+        /* ====== OFFCANVAS PANEL ====== */
         let bsModal;
 
         function ensureModal() {
-            if (!bsModal) bsModal = new bootstrap.Modal(document.getElementById('blockModal'));
+            if (!bsModal) bsModal = new bootstrap.Offcanvas(document.getElementById('blockPanel'));
             return bsModal;
         }
 
@@ -979,15 +1119,15 @@
                 initLinkPickers(mount);
                 initIconPickers(mount);
 
-                // 2. Then hydrate data with LONGER delay to ensure DOM is ready
+                // 2. Hydrate after two animation frames (DOM fully painted, no fixed-ms fragility)
                 if (dataPayload && typeof dataPayload === 'object') {
-                    setTimeout(() => {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
                         hydrateFields(mount, dataPayload);
                         initLinkPickers(mount);
                         initIconPickers(mount);
                         syncIconPickers(mount);
                         refreshExistingImagePreviews(mount, data.data || {});
-                    }, 200); // 👈 Increased delay
+                    }));
                 }
 
                 // 3. Setup file previews
@@ -1012,32 +1152,72 @@
                 }
             };
 
-            // Form submit handler
-            // Form submit handler
+            // Form submit handler — AJAX with iziToast feedback
             if (!form.dataset.finalizeHooked) {
-                // Replace your form submit listener with this enhanced version:
-                form.addEventListener('submit', (e) => {
-                    console.log('🚀 Form submitting...');
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
 
                     const mount = document.getElementById('fieldMount');
-
-                    // Step 1: Remove completely empty items (no text in ANY field)
                     pruneEmptyRepeaterItems(mount);
-
-                    // Step 2: Remove empty list entries specifically
                     pruneEmptyListInputs(mount);
-
-                    // Step 3: Final comprehensive renumbering
                     finalizeRepeaters(mount);
-
-                    // Step 4: Clean up any remaining placeholders
                     stripLeftoverPlaceholders(mount);
 
-                    // Step 5: Debug check
-                    debugFormData(mount);
+                    const submitBtn = document.getElementById('modalSubmit');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Saving…';
 
-                    console.log('✅ Form preparation complete');
+                    try {
+                        const res = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': getCSRF(),
+                            },
+                            body: new FormData(form),
+                            credentials: 'same-origin',
+                        });
 
+                        const json = await res.json().catch(() => null);
+
+                        if (res.ok && json?.ok) {
+                            iziToast.success({
+                                title: 'Saved',
+                                message: json.message || 'Block saved.',
+                                position: 'topRight',
+                                timeout: 3500,
+                            });
+                            bsModal?.hide();
+                            if (json.block) {
+                                updateBlockCard(json.block);
+                            }
+                            // Refresh live preview if open
+                            const frame = document.getElementById('previewFrame');
+                            if (frame && !document.getElementById('previewPane')?.classList.contains('collapse')) {
+                                frame.contentWindow?.location?.reload();
+                            }
+                        } else {
+                            const msgs = json?.errors
+                                ? Object.values(json.errors).flat().join(' ')
+                                : (json?.message || 'An error occurred while saving.');
+                            iziToast.error({
+                                title: 'Error',
+                                message: msgs,
+                                position: 'topRight',
+                                timeout: 6000,
+                            });
+                        }
+                    } catch (err) {
+                        iziToast.error({
+                            title: 'Network Error',
+                            message: 'Could not reach the server. Please try again.',
+                            position: 'topRight',
+                            timeout: 5000,
+                        });
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Save';
+                    }
                 });
                 form.dataset.finalizeHooked = '1';
             }
@@ -2068,7 +2248,7 @@
 
                 // Initialize existing tiles
                 if (existing.tiles && Array.isArray(existing.tiles)) {
-                    setTimeout(() => {
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
                         existing.tiles.forEach((tile, i) => {
                             const sel = mount.querySelector(`[data-tile-type="${i}"]`);
                             if (sel) {
@@ -2076,7 +2256,7 @@
                                 toggleTileGroups(mount, i, sel.value);
                             }
                         });
-                    }, 100);
+                    }));
                 }
             }
 
@@ -2164,7 +2344,7 @@
 
                         if (max && count >= max) {
 
-                            alert(`Maximum ${max} items allowed`);
+                            iziToast.warning({ title: 'Limit Reached', message: `Maximum ${max} items allowed`, position: 'topRight', timeout: 3000 });
 
                             return;
                         }
@@ -2785,9 +2965,9 @@
 
 
 
-                // Hydrate with delay
+                // Hydrate after two paint frames (replaces fragile setTimeout)
 
-                setTimeout(() => {
+                requestAnimationFrame(() => requestAnimationFrame(() => {
 
                     console.log(`💾 Hydrating ${arrKey} items...`);
 
@@ -2833,7 +3013,7 @@
 
                     console.log(`✅ Finished hydrating ${arrKey}`);
 
-                }, 200);
+                }));
 
             }
 
@@ -2843,7 +3023,7 @@
 
         function hydrateNestedArray(scope, parentKey, parentIdx, childKey, childArray) {
 
-            setTimeout(() => {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
 
                 const nestedName = `${parentKey}_${parentIdx}_${childKey}`;
 
@@ -2887,9 +3067,9 @@
 
 
 
-                // Hydrate after renumbering
+                // Hydrate after renumbering (two paint frames, no fixed-ms fragility)
 
-                setTimeout(() => {
+                requestAnimationFrame(() => requestAnimationFrame(() => {
 
                     childArray.forEach((item, j) => {
 
@@ -2933,9 +3113,9 @@
 
                     );
 
-                }, 150);
+                }));
 
-            }, 250);
+            }));
 
         }
 
@@ -3193,7 +3373,7 @@
 
             if (filledPlans.length === 0) {
 
-                alert('Please add at least one pricing plan');
+                iziToast.warning({ title: 'Validation', message: 'Please add at least one pricing plan.', position: 'topRight', timeout: 4000 });
 
                 return false;
 
@@ -3232,7 +3412,84 @@
                     openModal('edit', payload);
                 } catch (err) {
                     console.error('Error parsing block data:', err);
-                    alert('Error loading block data');
+                    iziToast.error({ title: 'Load Error', message: 'Error loading block data.', position: 'topRight' });
+                }
+            });
+
+            // Quick publish toggle
+            blockList.addEventListener('click', (e) => {
+                const toggleBtn = e.target.closest('[data-action="toggle-publish"]');
+                if (!toggleBtn) return;
+                const newState = toggleBtn.dataset.published !== '1';
+                fetch(@json(route('pb.blocks.publish', ['block' => '__ID__'])).replace('__ID__', toggleBtn.dataset.id), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCSRF(),
+                    },
+                    body: JSON.stringify({ is_published: newState }),
+                    credentials: 'same-origin',
+                }).then(r => r.json()).then(json => {
+                    if (!json.ok) return;
+                    toggleBtn.dataset.published = newState ? '1' : '0';
+                    toggleBtn.title = newState ? 'Unpublish' : 'Publish';
+                    toggleBtn.querySelector('i').className = `bi ${newState ? 'bi-eye-slash' : 'bi-eye'}`;
+                    const badge = toggleBtn.closest('.block-row')?.querySelector('[data-pub-badge]');
+                    if (badge) {
+                        badge.className = newState ? 'badge bg-success-subtle text-success' : 'badge bg-danger-subtle text-danger';
+                        badge.textContent = newState ? 'Live' : 'Draft';
+                    }
+                    iziToast.success({ title: newState ? 'Published' : 'Unpublished', message: '', position: 'topRight', timeout: 2500 });
+                }).catch(() => {
+                    iziToast.error({ title: 'Error', message: 'Could not update publish status.', position: 'topRight' });
+                });
+            });
+
+            // Clone block
+            blockList.addEventListener('click', (e) => {
+                const cloneBtn = e.target.closest('[data-action="clone"]');
+                if (!cloneBtn) return;
+                cloneBtn.disabled = true;
+                fetch(@json(route('pb.blocks.clone', ['block' => '__ID__'])).replace('__ID__', cloneBtn.dataset.id), {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': getCSRF() },
+                    credentials: 'same-origin',
+                }).then(r => r.json()).then(json => {
+                    cloneBtn.disabled = false;
+                    if (json.ok) {
+                        iziToast.success({ title: 'Duplicated', message: json.message, position: 'topRight', timeout: 3500 });
+                        window.location.reload();
+                    }
+                }).catch(() => { cloneBtn.disabled = false; });
+            });
+
+            // Delete block via AJAX
+            blockList.addEventListener('submit', async (e) => {
+                const delForm = e.target.closest('form[data-action="delete"]');
+                if (!delForm) return;
+                e.preventDefault();
+                if (!confirm('Delete this block? This cannot be undone.')) return;
+                const row = delForm.closest('.block-row');
+                try {
+                    const res = await fetch(delForm.action, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': getCSRF() },
+                        body: new FormData(delForm),
+                        credentials: 'same-origin',
+                    });
+                    if (res.ok) {
+                        row?.remove();
+                        iziToast.success({ title: 'Deleted', message: 'Block removed.', position: 'topRight', timeout: 3000 });
+                        const frame = document.getElementById('previewFrame');
+                        if (frame && !document.getElementById('previewPane')?.classList.contains('collapse')) {
+                            frame.contentWindow?.location?.reload();
+                        }
+                    } else {
+                        iziToast.error({ title: 'Error', message: 'Could not delete block.', position: 'topRight' });
+                    }
+                } catch {
+                    iziToast.error({ title: 'Network Error', message: 'Delete failed. Please try again.', position: 'topRight' });
                 }
             });
 
@@ -3294,14 +3551,43 @@
                     if (!res.ok) throw new Error('Failed to save order');
                 } catch (err) {
                     console.error('Error saving order:', err);
-                    alert('Could not save block order. Please refresh and try again.');
+                    iziToast.error({ title: 'Reorder Error', message: 'Could not save block order. Refresh to retry.', position: 'topRight' });
                 }
             }
         }
 
+        /* ====== CARD HELPERS ====== */
+
+        function extractPreviewText(block) {
+            const d = block.data || {};
+            const t = d.title || d.section_title || d.subtitle || d.text
+                || (Array.isArray(d.items) && d.items[0]?.title)
+                || (Array.isArray(d.plans) && d.plans[0]?.title)
+                || (Array.isArray(d.slides) && d.slides[0]?.title)
+                || '';
+            return String(t).slice(0, 60) + (t.length > 60 ? '…' : '');
+        }
+
+        function updateBlockCard(block) {
+            const row = blockList?.querySelector(`.block-row[data-id="${block.id}"]`);
+            if (!row) { window.location.reload(); return; }
+            row.querySelector('[data-action="edit"]')?.setAttribute('data-payload', JSON.stringify(block));
+            const badge = row.querySelector('[data-pub-badge]');
+            if (badge) {
+                badge.className = block.is_published
+                    ? 'badge bg-success-subtle text-success'
+                    : 'badge bg-danger-subtle text-danger';
+                badge.textContent = block.is_published ? 'Live' : 'Draft';
+            }
+            const preview = row.querySelector('[data-block-preview]');
+            if (preview) preview.textContent = extractPreviewText(block);
+        }
+
         /* ====== INITIALIZATION ====== */
-        if (addType) {
-            updateVariantSelect(addType.value || '', addVariant);
+        // Offcanvas panel variant select initialised when picker opens a block type
+        const modalVariant = document.getElementById('modal_variant');
+        if (modalVariant) {
+            updateVariantSelect(document.getElementById('modal_type')?.value || '', modalVariant);
         }
 
         console.log('✅ Page Builder initialized');

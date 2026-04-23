@@ -51,6 +51,7 @@ class PageBuilderController extends Controller
             'title'      => 'required|string|max:255',
             'slug'       => 'nullable|string|max:255|unique:pages,slug',
             'status'     => 'required|string|in:draft,published',
+            'show_on_events' => 'nullable|boolean',
             'owner_type' => 'nullable|string|in:course,event',
             'owner_id'   => 'nullable|integer',
             'meta_title'       => 'nullable|string|max:255',
@@ -63,6 +64,9 @@ class PageBuilderController extends Controller
 
         $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
         $this->assertUniquePageSlug($data['slug']);
+        $data['show_on_events'] = ($data['owner_type'] ?? null) === 'event'
+            ? $request->boolean('show_on_events', true)
+            : true;
 
         if (!empty($data['owner_type']) && !empty($data['owner_id'])) {
             $pageableClass = match ($data['owner_type']) {
@@ -101,6 +105,7 @@ class PageBuilderController extends Controller
             'title'      => 'required|string|max:255',
             'slug'       => 'nullable|string|max:255|unique:pages,slug,' . $page->id,
             'status'     => 'required|string|in:draft,published',
+            'show_on_events' => 'nullable|boolean',
             'owner_type' => 'nullable|string|in:course,event',
             'owner_id'   => 'nullable|integer',
             'meta_title'       => 'nullable|string|max:255',
@@ -113,6 +118,9 @@ class PageBuilderController extends Controller
 
         $data['slug'] = $this->normalizePageSlug($data['slug'] ?? null, $data['title']);
         $this->assertUniquePageSlug($data['slug'], $page->id);
+        $data['show_on_events'] = ($data['owner_type'] ?? null) === 'event'
+            ? $request->boolean('show_on_events', true)
+            : true;
 
         if (!empty($data['owner_type']) && !empty($data['owner_id'])) {
             $pageableClass = match ($data['owner_type']) {
@@ -272,6 +280,9 @@ class PageBuilderController extends Controller
         try {
             $cleanedData = $this->cleanBlockData($rawData, $type);
         } catch (\InvalidArgumentException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'errors' => ['data' => $e->getMessage()]], 422);
+            }
             return back()
                 ->withErrors(['data' => $e->getMessage()])
                 ->withInput();
@@ -297,13 +308,22 @@ class PageBuilderController extends Controller
         // Create block
         $nextOrder = ((int) $page->blocks()->max('order')) + 10;
 
-        $page->blocks()->create([
+        $block = $page->blocks()->create([
             'type'         => $type,
             'variant'      => $request->input('variant'),
             'data'         => $payload,
             'order'        => $nextOrder,
             'is_published' => (bool) $request->boolean('is_published', true),
         ]);
+
+        if ($request->expectsJson()) {
+            $block->refresh();
+            return response()->json([
+                'ok'      => true,
+                'message' => "Block '{$type}' created successfully.",
+                'block'   => $block,
+            ]);
+        }
 
         return redirect()
             ->route('pb.blocks', $page)
@@ -320,6 +340,9 @@ class PageBuilderController extends Controller
         try {
             $cleanedData = $this->cleanBlockData($rawData, $type);
         } catch (\InvalidArgumentException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'errors' => ['data' => $e->getMessage()]], 422);
+            }
             return back()
                 ->withErrors(['data' => $e->getMessage()])
                 ->withInput();
@@ -354,6 +377,15 @@ class PageBuilderController extends Controller
             'is_published' => (bool) $request->boolean('is_published', $block->is_published),
         ]);
 
+        if ($request->expectsJson()) {
+            $block->refresh();
+            return response()->json([
+                'ok'      => true,
+                'message' => "Block '{$type}' updated successfully.",
+                'block'   => $block,
+            ]);
+        }
+
         return redirect()
             ->route('pb.blocks', $block->page)
             ->with('success', "Block '{$type}' updated successfully.");
@@ -365,12 +397,61 @@ class PageBuilderController extends Controller
         $page = $block->page;
         $block->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => 'Block deleted.']);
+        }
+
         return redirect()->route('pb.blocks', $page)->with('success', 'Block deleted.');
+    }
+
+    public function togglePublish(Request $request, Block $block)
+    {
+        $block->update(['is_published' => $request->boolean('is_published')]);
+        return response()->json(['ok' => true, 'is_published' => $block->is_published]);
+    }
+
+    public function cloneBlock(Block $block)
+    {
+        $page = $block->page;
+        $nextOrder = ((int) $page->blocks()->max('order')) + 10;
+
+        $newBlock = $page->blocks()->create([
+            'type'         => $block->type,
+            'variant'      => $block->variant,
+            'data'         => $block->data,
+            'order'        => $nextOrder,
+            'is_published' => false,
+        ]);
+
+        $newBlock->refresh();
+
+        return response()->json([
+            'ok'      => true,
+            'message' => 'Block duplicated as Draft.',
+            'block'   => $newBlock,
+        ]);
+    }
+
+    public function previewPage(Page $page)
+    {
+        $page->load(['blocks' => fn($q) => $q->orderBy('order')]);
+        seo()->forPage($page);
+        return view('user.pages.dynamic', compact('page'));
     }
 
     public function reorderBlocks(Request $request, Page $page)
     {
         $order = $request->input('order');
+
+        // Defence-in-depth: abort if any submitted ID doesn't belong to this page
+        $allIds = collect($order)->map(fn($item) => is_array($item) ? ($item['id'] ?? null) : $item)
+            ->filter()->map(fn($id) => (int) $id);
+        if ($allIds->isNotEmpty()) {
+            $validIds = $page->blocks()->whereIn('id', $allIds)->pluck('id');
+            if ($allIds->diff($validIds)->isNotEmpty()) {
+                abort(403, 'Block IDs do not belong to this page.');
+            }
+        }
 
         DB::transaction(function () use ($order, $page) {
             // Case A: [{id: 123, order: 10}, {id: 456, order: 20}]

@@ -15,13 +15,15 @@ class Page extends Model
         'template',
         'meta',
         'published_at',
+        'show_on_events',
         'pageable_type',  // Changed from owner_type
         'pageable_id'     // Changed from owner_id
     ];
 
     protected $casts = [
         'meta' => 'array',
-        'published_at' => 'datetime'
+        'published_at' => 'datetime',
+        'show_on_events' => 'boolean',
     ];
 
     public function blocks(): HasMany
