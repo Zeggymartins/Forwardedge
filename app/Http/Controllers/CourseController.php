@@ -14,19 +14,22 @@ class CourseController extends Controller
 {
     public function getCourse()
     {
-        $contents = CourseContent::query()
+        $courses = Course::query()
             ->with([
-                'course:id,title,slug,description,thumbnail',
-                'phases.topics',
+                'pages' => fn($q) => $q->where('status', 'published')->latest('updated_at'),
+                'contents' => fn($q) => $q
+                    ->orderBy('order')
+                    ->orderByDesc('created_at')
+                    ->with(['phases.topics'])
+                    ->withAvg('reviews', 'rating')
+                    ->withCount('reviews'),
             ])
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews')
-            ->whereHas('course', fn($q) => $q->where('status', 'published'))
-            ->orderBy('order')
-            ->orderByDesc('created_at')
+            ->withCount('contents')
+            ->where('status', 'published')
+            ->latest('updated_at')
             ->paginate(9);
 
-        return view('user.pages.academy', compact('contents'));
+        return view('user.pages.academy', compact('courses'));
     }
     public function showdetails(string $slug)
     {
