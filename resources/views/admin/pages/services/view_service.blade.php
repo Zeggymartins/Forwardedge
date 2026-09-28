@@ -30,18 +30,29 @@
 @section('title', 'Services Management')
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-dark">🛠 Services</h1>
-        <a href="{{ route('admin.services.add') }}" class="btn btn-primary rounded-pill px-4 py-2">
-            <i class="bi bi-plus-circle me-2"></i> Add Service
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-collection"></i></div>
+            <div>
+                <h1>Services</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Services</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <a href="{{ route('admin.services.add') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus me-1"></i> Add Service
         </a>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0 table-responsive">
             <table class="table align-middle mb-0 service-table">
-                <thead class="bg-gradient">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Thumbnail</th>

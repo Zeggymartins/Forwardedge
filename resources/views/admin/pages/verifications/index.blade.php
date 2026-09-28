@@ -93,11 +93,18 @@
 
 @section('main')
 <div class="container py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-bold text-dark mb-1">Identity Verifications</h1>
-            <p class="text-muted mb-0">Review and manage user identity verification submissions</p>
+    <div class="pagetitle mb-3">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-shield-check"></i></div>
+            <div>
+                <h1>Identity Verifications</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Verifications</li>
+                    </ol>
+                </nav>
+            </div>
         </div>
         <div class="d-flex gap-2">
             @php

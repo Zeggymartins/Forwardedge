@@ -5,9 +5,24 @@
 
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <h1 class="fw-bold text-dark mb-0">📋 Event Registrations</h1>
+<div class="container py-4">
+    <div class="pagetitle mb-3">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-person-lines-fill"></i></div>
+            <div>
+                <h1>Event Registrations</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.events.list') }}">Events</a></li>
+                        <li class="breadcrumb-item active">Registrations</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+        <div></div>
         @if(!empty($events ?? []))
             <form method="GET" class="d-flex gap-2 align-items-center">
                 <select name="event" class="form-select">
@@ -29,7 +44,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient-primary">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Event</th>

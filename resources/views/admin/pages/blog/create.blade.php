@@ -3,11 +3,23 @@
 @section('title', 'Create New Blog Post')
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-dark"><i class="bi bi-feather me-2 text-primary"></i> Create New Blog Post</h1>
-        <a href="{{ route('admin.blogs.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-            <i class="bi bi-arrow-left"></i> Back to Blogs
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-feather"></i></div>
+            <div>
+                <h1>Create Blog Post</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.blogs.index') }}">Blogs</a></li>
+                        <li class="breadcrumb-item active">New Post</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <a href="{{ route('admin.blogs.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Blogs
         </a>
     </div>
 

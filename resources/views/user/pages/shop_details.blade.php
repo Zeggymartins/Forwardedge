@@ -29,6 +29,20 @@
 @extends('user.master_page')
 @section('title', $moduleTitle . ' | Product Details')
 
+@push('jsonld')
+@php
+$_jsonLd = [
+    '@context'    => 'https://schema.org',
+    '@type'       => 'Course',
+    'name'        => $course->title,
+    'description' => Str::limit(strip_tags($course->description ?? $course->title), 200),
+    'provider'    => ['@type' => 'Organization', 'name' => 'Forward Edge Consulting', 'url' => config('app.url')],
+];
+if ($course->thumbnail) $_jsonLd['image'] = asset('storage/'.$course->thumbnail);
+@endphp
+<script type="application/ld+json">{!! json_encode($_jsonLd) !!}</script>
+@endpush
+
 @push('styles')
 <style>
     .content-picker{

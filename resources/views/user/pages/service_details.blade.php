@@ -22,11 +22,11 @@
                             @foreach ($service->contents as $content)
                                 @if ($content->type === 'heading')
                                     <h3 class="wow fadeInUp" data-wow-delay=".3s">
-                                        {!! $content->content !!}
+                                        {{ $content->content }}
                                     </h3>
                                 @elseif($content->type === 'paragraph')
                                     <p class="wow fadeInUp" data-wow-delay=".3s">
-                                        {!! $content->content !!}
+                                        {!! nl2br(e($content->content)) !!}
                                     </p>
                                     {{-- LIST --}}
                                 @elseif($content->type === 'list')

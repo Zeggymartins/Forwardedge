@@ -17,7 +17,31 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'role',
+        'nationality',
+        'date_of_birth',
+        'enrollment_id',
+        'email_verified_at',
+        'verification_token',
+        'verification_token_expires_at',
+        'verified_at',
+        'remember_token',
+        // Identity verification
+        'photo',
+        'id_type',
+        'id_front',
+        'id_back',
+        'id_number',
+        'legal_name',
+        'state_of_origin',
+        'verification_status',
+        'verification_notes',
+    ];
 
     /**
      * Boot the model

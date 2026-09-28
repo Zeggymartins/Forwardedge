@@ -36,7 +36,7 @@
   <div class="card border-0 shadow-soft rounded-12">
     <div class="card-body p-0">
       <table class="table align-middle mb-0">
-        <thead class="bg-gradient">
+        <thead>
           <tr>
             <th class="py-3 px-4">#</th>
             <th class="py-3 px-4">Question</th>

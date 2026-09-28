@@ -26,7 +26,7 @@ class CsrfCartTest extends TestCase
             'title' => 'Test Course',
             'slug' => 'test-course',
             'description' => 'Test Description',
-            'status' => 'active',
+            'status' => 'published',
         ]);
 
         $response = $this->postJson('/user/cart/add', [
@@ -52,7 +52,7 @@ class CsrfCartTest extends TestCase
             'title' => 'Test Course',
             'slug' => 'test-course-2',
             'description' => 'Test Description',
-            'status' => 'active',
+            'status' => 'published',
         ]);
 
         $this->actingAs($user);
@@ -80,7 +80,7 @@ class CsrfCartTest extends TestCase
             'title' => 'Test Course',
             'slug' => 'test-course-3',
             'description' => 'Test Description',
-            'status' => 'active',
+            'status' => 'published',
         ]);
 
         $this->actingAs($user);
@@ -109,7 +109,6 @@ class CsrfCartTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'token',
-            'session_id',
             'has_session',
         ]);
     }

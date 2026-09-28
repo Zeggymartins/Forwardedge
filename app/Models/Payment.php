@@ -35,4 +35,14 @@ class Payment extends Model
     {
         return $this->morphTo();
     }
+
+    public function getPayableTypeLabelAttribute(): string
+    {
+        return match (class_basename((string) $this->payable_type)) {
+            'CourseSchedule' => 'Bootcamp',
+            'EventTicket', 'Event', 'EventRegistration' => 'Event',
+            'Orders' => 'Order',
+            default => class_basename((string) $this->payable_type),
+        };
+    }
 }

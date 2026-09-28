@@ -11,7 +11,7 @@ class AdminTransactionsController extends Controller
 {
     public function index()
     {
-        $transactions = Payment::with(['user', 'payable'])
+        $transactions = Payment::with('user')
             ->latest()
             ->paginate(10);
 
@@ -23,7 +23,7 @@ class AdminTransactionsController extends Controller
      */
     public function show($id)
     {
-        $transaction = Payment::with(['user', 'payable'])->findOrFail($id);
+        $transaction = Payment::with('user')->findOrFail($id);
         return response()->json($transaction);
     }
 

@@ -3,12 +3,22 @@
 @section('title', 'Blog Posts List')
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-dark"><i class="bi bi-journal-richtext me-2 text-primary"></i> Blog Posts</h1>
-        {{-- Link to the new blog creation route --}}
-        <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary rounded-pill px-4 py-2">
-            <i class="bi bi-plus-circle me-2"></i> Create New Post
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-journal-richtext"></i></div>
+            <div>
+                <h1>Blog Posts</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Blogs</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus me-1"></i> New Post
         </a>
     </div>
 

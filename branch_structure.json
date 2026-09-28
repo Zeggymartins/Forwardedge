@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "fix/verification-access-and-site-updates",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "fix/verification-access-and-site-updates": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "fix/verification-access-and-site-updates",
+    "origin"
+  ]
+}

@@ -8,22 +8,35 @@ use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $photos = Gallery::latest()->get();
-        return view('admin.pages.gallery', compact('photos'));
+        $query = Gallery::latest();
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+        $photos     = $query->paginate(20);
+        $categories = Gallery::whereNotNull('category')->distinct()->orderBy('category')->pluck('category');
+        return view('admin.pages.gallery', compact('photos', 'categories'));
     }
-    public function getPhotos()
+
+    public function getPhotos(Request $request)
     {
-        $photos = Gallery::latest()->paginate(12);
-        return view('user.pages.gallery', compact('photos'));
+        $query = Gallery::latest();
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+        $photos     = $query->paginate(12);
+        $categories = Gallery::whereNotNull('category')->distinct()->orderBy('category')->pluck('category');
+        return view('user.pages.gallery', compact('photos', 'categories'));
     }
+
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',   // single shared title
-            'images' => 'required|array|max:20',
-            'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'title'    => 'required|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'images'   => 'required|array|max:20',
+            'images.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
         $uploaded = 0;
@@ -33,8 +46,9 @@ class GalleryController extends Controller
                 $path = $file->store('gallery', 'public');
 
                 Gallery::create([
-                    'title' => $request->title, // same title for all images
-                    'image' => $path
+                    'title'    => $request->title,
+                    'category' => $request->filled('category') ? $request->category : null,
+                    'image'    => $path,
                 ]);
 
                 $uploaded++;
@@ -56,11 +70,13 @@ class GalleryController extends Controller
     public function update(Request $request, Gallery $gallery)
     {
         $request->validate([
-            'title' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'title'    => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
-        $gallery->title = $request->title;
+        $gallery->title    = $request->title;
+        $gallery->category = $request->filled('category') ? $request->category : null;
 
         if ($request->hasFile('image')) {
             if ($gallery->image && Storage::disk('public')->exists($gallery->image)) {
