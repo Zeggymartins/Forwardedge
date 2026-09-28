@@ -81,7 +81,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/ctrl-panel-v2/login');
+            ->assertRedirect('/');
 
         $this->assertGuest();
         $this->assertNull($user->fresh());

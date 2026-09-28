@@ -48,6 +48,17 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/meanmenu.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/shop.css') }}" />
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/main.css') }}">
+
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "Organization",
+      "name": "Forward Edge Consulting",
+      "url": "{{ config('app.url') }}",
+      "logo": "{{ asset('frontend/assets/images/logos/logo.png') }}"
+    }
+    </script>
+    @stack('jsonld')
     @if (config('services.meta_pixel.id'))
         <!-- Meta Pixel Code -->
         <script>

@@ -95,9 +95,12 @@ class VerifyCourseContentAccess
                 return $next($request);
             }
 
-            // Check if user has access via course enrollment
+            // Check if user has access via a paid, active course enrollment.
+            // Scholarship enrollments (total_amount = 0) cover live training only.
             $hasEnrollment = Enrollment::where('user_id', $user->id)
                 ->where('course_id', $content->course_id)
+                ->where('status', 'active')
+                ->where('total_amount', '>', 0)
                 ->exists();
 
             if ($hasEnrollment) {

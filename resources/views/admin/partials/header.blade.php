@@ -34,28 +34,28 @@
             </a>
         </div>
 
-        <div class="fe-header-pills d-none d-md-flex align-items-center gap-2">
+        <div class="fe-header-pills d-none d-lg-flex align-items-center gap-2">
             <span class="fe-header-pill">
-                <i class="bi bi-lightning-charge-fill me-1"></i>
-                Ops live
+                <span class="d-inline-block rounded-circle me-1" style="width:7px;height:7px;background:#10b981"></span>
+                Live
             </span>
             <span class="fe-header-pill">
-                <i class="bi bi-clock-history me-1"></i>
-                {{ now()->format('D, M j · g:i A') }}
+                <i class="bi bi-clock me-1"></i>
+                {{ now()->format('D, M j') }}
             </span>
         </div>
 
         <div class="fe-header-actions d-flex align-items-center gap-2 ms-auto">
             <a href="{{ route('pb.pages') }}"
-                class="btn btn-ghost btn-sm d-none d-lg-inline-flex align-items-center gap-2">
+                class="btn btn-outline-secondary btn-sm d-none d-lg-inline-flex align-items-center gap-2">
                 <i class="bi bi-layout-text-window-reverse"></i>
                 Pages
             </a>
 
             <a href="{{ route('admin.courses.create') }}"
                 class="btn btn-primary btn-sm d-none d-md-inline-flex align-items-center gap-2">
-                <i class="bi bi-plus-circle"></i>
-                New Academy Training
+                <i class="bi bi-plus"></i>
+                New Training
             </a>
 
             <div class="vr d-none d-lg-block"></div>

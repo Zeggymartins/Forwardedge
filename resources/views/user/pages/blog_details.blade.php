@@ -15,6 +15,22 @@
         <meta property="og:image" content="{{ $seoImage }}">
     @endif
 @endsection
+@push('jsonld')
+@php
+$_jsonLd = [
+    '@context'      => 'https://schema.org',
+    '@type'         => 'Article',
+    'headline'      => $blog->title,
+    'description'   => $excerpt,
+    'author'        => ['@type' => 'Person', 'name' => $blog->author->name ?? 'Forward Edge Consulting'],
+    'publisher'     => ['@type' => 'Organization', 'name' => 'Forward Edge Consulting'],
+    'datePublished' => $blog->created_at->toIso8601String(),
+    'dateModified'  => $blog->updated_at->toIso8601String(),
+];
+if ($seoImage) $_jsonLd['image'] = $seoImage;
+@endphp
+<script type="application/ld+json">{!! json_encode($_jsonLd) !!}</script>
+@endpush
 @push('styles')
     <style>
         .blog-video-frame {

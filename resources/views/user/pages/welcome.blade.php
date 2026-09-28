@@ -484,7 +484,7 @@
                         <div class="countup-item">
                             <div class="inline-content">
                                 <span class="odometer countup-number" data-count="20"></span>
-                                <span class="count-plus">M</span>
+                                <span class="count-plus">k</span>
                             </div>
                             <span class="count-text">Reach Worldwide</span>
                             <span class="count-separator"
@@ -501,10 +501,10 @@
                         </div>
                         <div class="countup-item">
                             <div class="inline-content">
-                                <span class="odometer countup-number" data-count="100"></span>
+                                <span class="odometer countup-number" data-count="10"></span>
                                 <span class="count-plus">+</span>
                             </div>
-                            <span class="count-text">Awards Archived</span>
+                            <span class="count-text">Awards Achieved</span>
                         </div>
                     </div>
                 </div>
@@ -586,7 +586,7 @@
                                         <div class="desc flex-grow-1 mb-3">
                                             <p style="color:black;">We challenged ForwardEdge to optimize our massive cloud spend. Their team
                                                 didn't just migrate us; they implemented a rigorous FinOps and IaC strategy,
-                                                resulting in a **35% reduction in monthly cloud costs** within six months.
+                                                resulting in a 35% reduction in monthly cloud costs within six months.
                                                 The performance improvements and stability provided by their governance
                                                 model were equally impactful.</p>
                                         </div>
@@ -612,7 +612,7 @@
                                         class="testimonial-item d-flex flex-column justify-content-between h-100 p-4 border border-info rounded-lg shadow-xl bg-gray-900 text-white">
                                         <span class="quote-icon text-info"><i class="tji-quote"></i></span>
                                         <div class="desc flex-grow-1 mb-3">
-                                            <p style="color:black;">The team’s expertise in **Domain-Driven Design** and **Microservices** was
+                                            <p style="color:black;">The team’s expertise in Domain-Driven Design and Microservices was
                                                 clear from the start. They delivered a complex platform on time using their
                                                 hyper-transparent Agile process. The resulting product is incredibly
                                                 scalable and our in-house team is now better equipped, thanks to their focus
@@ -681,7 +681,7 @@
                                     <div id="faq-{{ $index + 1 }}" class="collapse {{ $index === 0 ? 'show' : '' }}"
                                         data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            {!! $faq->answer !!}
+                                            {{ $faq->answer }}
                                         </div>
                                     </div>
                                 </div>
@@ -727,7 +727,7 @@
                                     <div id="faq-dummy-{{ $index + 1 }}"
                                         class="collapse {{ $index === 0 ? 'show' : '' }}" data-bs-parent="#faqOne">
                                         <div class="accordion-body faq-text">
-                                            {!! $faq['answer'] !!}
+                                            {{ $faq['answer'] }}
                                         </div>
                                     </div>
                                 </div>

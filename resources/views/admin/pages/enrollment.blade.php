@@ -3,15 +3,26 @@
 @section('title', 'Course Enrollments')
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-dark">📚 Course Enrollments</h1>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('admin.enrollments.export.excel') }}" class="btn btn-outline-success rounded-pill px-3">
-                <i class="bi bi-file-earmark-spreadsheet"></i> Export Excel
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-clipboard-check"></i></div>
+            <div>
+                <h1>Course Enrollments</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Enrollments</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('admin.enrollments.export.excel') }}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel
             </a>
-            <a href="{{ route('admin.enrollments.export.pdf') }}" class="btn btn-outline-danger rounded-pill px-3">
-                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+            <a href="{{ route('admin.enrollments.export.pdf') }}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i> PDF
             </a>
         </div>
     </div>
@@ -104,7 +115,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient-primary">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Student</th>
@@ -365,7 +376,7 @@
                 <span class="text-muted small">Showing {{ $moduleEnrollments->total() }} records</span>
             </div>
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient-primary">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Student</th>

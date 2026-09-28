@@ -13,6 +13,26 @@
                     </div>
                 </div>
             </div>
+            {{-- Category filter tabs --}}
+            @if($categories->isNotEmpty())
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-5">
+                        <a href="{{ route('gallery') }}"
+                           class="btn rounded-pill px-4 py-2 {{ !request('category') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            All
+                        </a>
+                        @foreach($categories as $cat)
+                        <a href="{{ route('gallery', ['category' => $cat]) }}"
+                           class="btn rounded-pill px-4 py-2 {{ request('category') === $cat ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            {{ $cat }}
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="row">
                 @forelse($photos as $index => $photo)
                     <div class="col-lg-3 col-sm-6">
@@ -35,7 +55,7 @@
             </div>
     {{-- ✅ Dynamic Pagination --}}
         <div class="tj-pagination d-flex justify-content-center mt-4">
-            {{ $photos->links('vendor.pagination.custom') }}
+            {{ $photos->appends(request()->query())->links('vendor.pagination.custom') }}
         </div>
         </div>
     </section>

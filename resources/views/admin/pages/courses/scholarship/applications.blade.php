@@ -13,128 +13,195 @@
         }
         return $scholarshipOptions[$group][$value] ?? Str::headline(str_replace('_', ' ', $value));
     };
+    $activeFilters = collect();
+    if ($nameEmail) $activeFilters->push(['label' => 'Applicant', 'value' => $nameEmail]);
+    if ($dateFrom || $dateTo) $activeFilters->push(['label' => 'Submitted', 'value' => trim(($dateFrom ?: 'Any') . ' - ' . ($dateTo ?: 'Any'))]);
+    if ($scoreMin !== null && $scoreMin !== '') $activeFilters->push(['label' => 'Min score', 'value' => $scoreMin]);
+    if ($scoreMax !== null && $scoreMax !== '') $activeFilters->push(['label' => 'Max score', 'value' => $scoreMax]);
+    if ($scoreSort) $activeFilters->push(['label' => 'Score sort', 'value' => $scoreSort === 'asc' ? 'Lowest first' : 'Highest first']);
+    if ($status) $activeFilters->push(['label' => 'Status', 'value' => ucfirst($status)]);
+    if ($discoveryChannel) $activeFilters->push(['label' => 'Referral', 'value' => $optionLabel('discovery_channels', $discoveryChannel)]);
+    if (!empty($countries ?? [])) $activeFilters->push(['label' => 'Countries', 'value' => implode(', ', $countries)]);
+    if (($perPage ?? 20) !== 20) $activeFilters->push(['label' => 'Per page', 'value' => $perPage]);
 @endphp
-<div class="container py-5">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h1 class="h3 mb-1">🎓 Scholarship Applications</h1>
-            <p class="text-muted mb-0">Track, approve, or reject scholarship submissions.</p>
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-mortarboard"></i></div>
+            <div>
+                <h1>Scholarship Applications</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.courses.index') }}">Academy</a></li>
+                        <li class="breadcrumb-item active">Scholarship Applications</li>
+                    </ol>
+                </nav>
+            </div>
         </div>
-        <a href="{{ route('admin.scholarships.export', request()->query()) }}" class="btn btn-success">
-            <i class="bi bi-download me-1"></i> Export CSV
-        </a>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold px-3 py-2">
+                {{ number_format($applications->total()) }} total
+            </span>
+            <a href="{{ route('admin.scholarships.export', request()->query()) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </a>
+        </div>
     </div>
     <div class="mb-4">
         <form action="{{ route('admin.scholarships.applications') }}" method="GET" class="w-100 scholarship-filters">
-            <div class="card border-0 shadow-sm filter-card">
+            <div class="card border-0 shadow-sm filter-shell">
                 <div class="card-body p-3 p-lg-4">
-                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                    <div class="filter-toolbar mb-3">
                         <div>
-                            <div class="filter-title">Filter applications</div>
-                            <div class="filter-subtitle">Search by applicant, score, status, or submitted date.</div>
+                            <div class="filter-title">Application Filters</div>
+                            <div class="filter-subtitle">Search by applicant, score, decision, referral source, country, or submission date.</div>
                         </div>
-                        <span class="filter-pill">Smart filters</span>
+                        <div class="filter-toolbar-meta">
+                            <span class="filter-stat">
+                                <strong>{{ $applications->count() }}</strong>
+                                <span>shown</span>
+                            </span>
+                            <span class="filter-stat">
+                                <strong>{{ $activeFilters->count() }}</strong>
+                                <span>active</span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="row g-3 align-items-end">
-                        <div class="col-12 col-lg-4 filter-field">
-                            <label class="form-label mb-1" for="filter_name_email">Name or email</label>
+
+                    @if($activeFilters->isNotEmpty())
+                        <div class="active-filter-strip mb-3">
+                            @foreach($activeFilters as $filter)
+                                <span class="active-filter-chip">
+                                    <span class="active-filter-label">{{ $filter['label'] }}</span>
+                                    <span>{{ $filter['value'] }}</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div class="filter-grid">
+                        <div class="filter-panel filter-panel-search">
+                            <label class="form-label mb-2" for="filter_name_email">Applicant</label>
                             <input type="text"
                                    id="filter_name_email"
                                    name="name_email"
-                                   class="form-control form-control-sm filter-input"
-                                   placeholder="e.g. Ada Lovelace or ada@email.com"
+                                   class="form-control filter-input"
+                                   placeholder="Name or email"
                                    value="{{ $nameEmail }}">
                         </div>
-                        <div class="col-12 col-md-6 col-lg-3 filter-field">
-                            <label class="form-label mb-1">Submitted date</label>
-                            <div class="row g-1">
-                                <div class="col-6">
+
+                        <div class="filter-panel">
+                            <label class="form-label mb-2">Submitted Date</label>
+                            <div class="filter-inline-grid">
+                                <div>
                                     <label class="form-label filter-sub-label mb-1" for="filter_date_from">From</label>
                                     <input type="date"
                                            id="filter_date_from"
                                            name="date_from"
-                                           class="form-control form-control-sm filter-input"
+                                           class="form-control filter-input"
                                            value="{{ $dateFrom }}">
                                 </div>
-                                <div class="col-6">
+                                <div>
                                     <label class="form-label filter-sub-label mb-1" for="filter_date_to">To</label>
                                     <input type="date"
                                            id="filter_date_to"
                                            name="date_to"
-                                           class="form-control form-control-sm filter-input"
+                                           class="form-control filter-input"
                                            value="{{ $dateTo }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6 col-lg-3 filter-field">
-                            <label class="form-label mb-1">Score range</label>
-                            <div class="row g-1">
-                                <div class="col-6">
+
+                        <div class="filter-panel">
+                            <label class="form-label mb-2">Score Range</label>
+                            <div class="filter-inline-grid">
+                                <div>
                                     <label class="form-label filter-sub-label mb-1" for="filter_score_min">Min</label>
                                     <input type="number"
                                            id="filter_score_min"
                                            name="score_min"
-                                           class="form-control form-control-sm filter-input"
+                                           class="form-control filter-input"
                                            placeholder="0"
                                            value="{{ $scoreMin }}">
                                 </div>
-                                <div class="col-6">
+                                <div>
                                     <label class="form-label filter-sub-label mb-1" for="filter_score_max">Max</label>
                                     <input type="number"
                                            id="filter_score_max"
                                            name="score_max"
-                                           class="form-control form-control-sm filter-input"
+                                           class="form-control filter-input"
                                            placeholder="100"
                                            value="{{ $scoreMax }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3 col-lg-2 filter-field">
-                            <label class="form-label mb-1" for="filter_score_sort">Score sort</label>
-                            <select name="score_sort" id="filter_score_sort" class="form-select form-select-sm filter-select">
-                                <option value="">Any</option>
-                                <option value="asc" @selected($scoreSort === 'asc')>Lowest first</option>
-                                <option value="desc" @selected($scoreSort === 'desc')>Highest first</option>
-                            </select>
-                        </div>
-                        <div class="col-6 col-md-3 col-lg-2 filter-field">
-                            <label class="form-label mb-1" for="filter_status">Status</label>
-                            <select name="status" id="filter_status" class="form-select form-select-sm filter-select">
-                                <option value="">Any</option>
-                                @foreach($statusOptions ?? ['pending','approved','rejected'] as $option)
-                                    <option value="{{ $option }}" @selected(($status ?? '') === $option)>{{ ucfirst($option) }}</option>
+
+                        <div class="filter-panel filter-panel-wide">
+                            <label class="form-label mb-2">Decision Status</label>
+                            <div class="status-chip-row">
+                                @foreach(['' => 'Any', 'pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected'] as $value => $label)
+                                    <label class="status-chip {{ ($status ?? '') === $value ? 'is-active' : '' }}">
+                                        <input type="radio" name="status" value="{{ $value }}" @checked(($status ?? '') === $value)>
+                                        <span>{{ $label }}</span>
+                                    </label>
                                 @endforeach
+                            </div>
+                        </div>
+
+                        <div class="filter-panel">
+                            <label class="form-label mb-2" for="filter_score_sort">Score Sort</label>
+                            <select name="score_sort" id="filter_score_sort" class="form-select filter-select">
+                                <option value="">Newest first</option>
+                                <option value="asc" @selected($scoreSort === 'asc')>Score: low to high</option>
+                                <option value="desc" @selected($scoreSort === 'desc')>Score: high to low</option>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3 col-lg-2 filter-field">
-                            <label class="form-label mb-1" for="filter_discovery_channel">Referral</label>
-                            <select name="discovery_channel" id="filter_discovery_channel" class="form-select form-select-sm filter-select">
+
+                        <div class="filter-panel">
+                            <label class="form-label mb-2" for="filter_discovery_channel">Referral Source</label>
+                            <select name="discovery_channel" id="filter_discovery_channel" class="form-select filter-select">
                                 <option value="">Any</option>
                                 @foreach(($scholarshipOptions['discovery_channels'] ?? []) as $value => $label)
                                     <option value="{{ $value }}" @selected(($discoveryChannel ?? '') === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-md-6 col-lg-3 filter-field">
-                            <label class="form-label mb-1" for="filter_country">Countries</label>
-                            <select name="country[]" id="filter_country" class="form-select form-select-sm filter-select" multiple>
-                                @foreach(($allCountries ?? []) as $countryOption)
-                                    <option value="{{ $countryOption }}" @selected(in_array($countryOption, $countries ?? []))>{{ $countryOption }}</option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
-                        </div>
-                        <div class="col-6 col-md-3 col-lg-2 filter-field">
-                            <label class="form-label mb-1" for="per_page">Per page</label>
-                            <select name="per_page" id="per_page" class="form-select form-select-sm filter-select">
+
+                        <div class="filter-panel">
+                            <label class="form-label mb-2" for="per_page">Per Page</label>
+                            <select name="per_page" id="per_page" class="form-select filter-select">
                                 @foreach($perPageOptions ?? [10,20,50,100] as $option)
                                     <option value="{{ $option }}" @selected(($perPage ?? 20) == $option)>{{ $option }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 col-lg-3 filter-actions d-grid d-md-flex gap-2">
-                            <button type="submit" class="btn btn-sm btn-primary flex-fill">Apply filters</button>
-                            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-sm btn-light flex-fill">Reset</a>
+
+                        <div class="filter-panel filter-panel-countries">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                <label class="form-label mb-0">Countries</label>
+                                <div class="country-actions">
+                                    <button type="button" class="btn btn-link btn-sm p-0 country-toggle" data-country-mode="all">All</button>
+                                    <button type="button" class="btn btn-link btn-sm p-0 country-toggle" data-country-mode="none">None</button>
+                                </div>
+                            </div>
+                            <div class="country-chip-grid">
+                                @foreach(($allCountries ?? []) as $countryOption)
+                                    <label class="country-chip {{ in_array($countryOption, $countries ?? []) ? 'is-active' : '' }}">
+                                        <input type="checkbox" name="country[]" value="{{ $countryOption }}" @checked(in_array($countryOption, $countries ?? []))>
+                                        <span>{{ $countryOption }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="filter-panel filter-panel-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel me-1"></i> Apply Filters
+                            </button>
+                            <a href="{{ route('admin.scholarships.applications') }}" class="btn btn-light">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -142,10 +209,10 @@
         </form>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient-primary text-white">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">Applicant</th>
                         <th class="py-3 px-4">Course</th>
@@ -251,9 +318,9 @@
                         <div class="modal fade" id="viewApplication{{ $application->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-gradient-primary text-white">
+                                    <div class="modal-header">
                                         <h5 class="modal-title">Application #{{ $application->id }}</h5>
-                                        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        <button class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="row g-4">
@@ -410,7 +477,7 @@
                         </div>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">No applications yet.</td>
+                            <td colspan="7" class="text-center py-5 text-muted">No applications yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -447,91 +514,133 @@
 
 @push('styles')
 <style>
-    .mini-list {
-        list-style: none;
-        padding-left: 0;
-        margin-bottom: 0;
+    .mini-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+    .mini-list li { margin-bottom: .35rem; }
+
+    /* Filter shell */
+    .scholarship-filters .filter-shell {
+        border: 1px solid rgba(15,23,42,.08);
+        border-radius: 12px;
+        background: #fff;
     }
-    .mini-list li {
-        margin-bottom: .35rem;
+    .filter-toolbar {
+        display: flex; flex-wrap: wrap; align-items: flex-start;
+        justify-content: space-between; gap: 1rem;
     }
-    .scholarship-filters .filter-card {
-        background: radial-gradient(circle at top right, rgba(14, 116, 144, 0.12), transparent 55%),
-            radial-gradient(circle at bottom left, rgba(30, 64, 175, 0.12), transparent 55%),
-            linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 1.25rem;
-        position: relative;
-        overflow: hidden;
+    .filter-title { font-weight: 700; font-size: .95rem; color: #0f172a; }
+    .filter-subtitle { font-size: .83rem; color: #64748b; }
+    .filter-toolbar-meta { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .filter-stat {
+        min-width: 80px; display: grid; gap: .1rem;
+        padding: .55rem .75rem; border-radius: 10px;
+        background: #f8fafc; border: 1px solid rgba(15,23,42,.08); text-align: center;
     }
-    .scholarship-filters .filter-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(120deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
-        pointer-events: none;
+    .filter-stat strong { color: #0f172a; font-size: .95rem; line-height: 1; }
+    .filter-stat span { color: #64748b; font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+
+    /* Active filter chips */
+    .active-filter-strip { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .active-filter-chip {
+        display: inline-flex; flex-wrap: wrap; gap: .3rem; align-items: center;
+        padding: .3rem .6rem; border-radius: 999px;
+        background: rgba(14,165,233,.08); border: 1px solid rgba(14,165,233,.2);
+        color: #334155; font-size: .8rem;
     }
-    .scholarship-filters .card-body {
-        position: relative;
-        z-index: 1;
+    .active-filter-label { font-weight: 600; color: #0f172a; }
+
+    /* Filter grid */
+    .filter-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: .85rem; }
+    .filter-panel {
+        grid-column: span 3; padding: .85rem;
+        border: 1px solid rgba(15,23,42,.08); border-radius: 10px; background: #f8fafc;
     }
-    .filter-title {
-        font-weight: 600;
-        font-size: 1rem;
-        letter-spacing: 0.01em;
-        color: #0f172a;
+    .filter-panel-search  { grid-column: span 4; }
+    .filter-panel-wide    { grid-column: span 6; }
+    .filter-panel-countries { grid-column: span 9; }
+    .filter-panel-actions {
+        grid-column: span 3; display: grid; align-content: end; gap: .6rem;
     }
-    .filter-subtitle {
-        font-size: 0.85rem;
-        color: #64748b;
+    .filter-panel .form-label { font-weight: 600; font-size: .83rem; color: #334155; }
+    .filter-sub-label { font-weight: 500; color: #64748b; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+    .filter-inline-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .6rem; }
+
+    /* Inputs inside filter — match design system */
+    .filter-input, .filter-select {
+        min-height: 40px; border-radius: 10px;
+        border: 1.5px solid rgba(148,163,184,.45); background: #fff;
     }
-    .filter-pill {
-        background: #e0f2fe;
-        color: #0369a1;
-        padding: 0.25rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
+    .filter-input:focus, .filter-select:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14,165,233,.15);
     }
-    .filter-field .form-label {
-        font-weight: 600;
-        color: #475569;
+
+    /* Status chips (radio) */
+    .status-chip-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .status-chip, .country-chip { position: relative; display: inline-flex; align-items: center; }
+    .status-chip input, .country-chip input { position: absolute; opacity: 0; pointer-events: none; }
+    .status-chip span, .country-chip span {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-height: 36px; padding: .4rem .85rem; border-radius: 999px;
+        border: 1.5px solid rgba(15,23,42,.12); background: #fff;
+        color: #475569; font-weight: 600; font-size: .83rem;
+        transition: all .15s ease; cursor: pointer;
     }
-    .filter-sub-label {
-        font-weight: 500;
-        color: #94a3b8;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
+    .status-chip.is-active span,
+    .status-chip input:checked + span {
+        background: #0ea5e9; border-color: #0ea5e9; color: #fff;
+        box-shadow: 0 4px 12px rgba(14,165,233,.25);
     }
-    .filter-input,
-    .filter-select {
-        border-radius: 0.85rem;
-        border-color: #cbd5e1;
-        background-color: rgba(255, 255, 255, 0.92);
+
+    /* Country chips (checkbox) */
+    .country-actions { display: inline-flex; gap: .5rem; }
+    .country-toggle { color: #0ea5e9; text-decoration: none; font-weight: 600; font-size: .8rem; }
+    .country-chip-grid {
+        display: flex; flex-wrap: wrap; gap: .45rem;
+        max-height: 170px; overflow-y: auto; padding-right: .2rem;
     }
-    .filter-input:focus,
-    .filter-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    .country-chip span { min-height: 34px; padding: .35rem .75rem; border-radius: 8px; font-size: .8rem; }
+    .country-chip.is-active span,
+    .country-chip input:checked + span {
+        background: rgba(14,165,233,.1); border-color: rgba(14,165,233,.35); color: #0369a1;
     }
-    .filter-actions .btn-primary {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-        box-shadow: 0 10px 20px rgba(29, 78, 216, 0.2);
-    }
-    .filter-actions .btn-light {
-        background: #f1f5f9;
-        border-color: #e2e8f0;
-        color: #0f172a;
+
+    @media (max-width: 1199.98px) {
+        .filter-panel, .filter-panel-search, .filter-panel-wide,
+        .filter-panel-countries, .filter-panel-actions { grid-column: span 6; }
     }
     @media (max-width: 767.98px) {
-        .filter-pill {
-            width: 100%;
-            text-align: center;
-        }
+        .filter-panel, .filter-panel-search, .filter-panel-wide,
+        .filter-panel-countries, .filter-panel-actions { grid-column: 1 / -1; }
+        .filter-inline-grid { grid-template-columns: 1fr; }
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.country-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const mode = btn.dataset.countryMode;
+            document.querySelectorAll('.country-chip input[type="checkbox"]').forEach((input) => {
+                input.checked = mode === 'all';
+                input.closest('.country-chip')?.classList.toggle('is-active', input.checked);
+            });
+        });
+    });
+
+    document.querySelectorAll('.country-chip input[type="checkbox"]').forEach((input) => {
+        input.addEventListener('change', () => {
+            input.closest('.country-chip')?.classList.toggle('is-active', input.checked);
+        });
+    });
+
+    document.querySelectorAll('.status-chip input[type="radio"]').forEach((input) => {
+        input.addEventListener('change', () => {
+            document.querySelectorAll('.status-chip').forEach((chip) => chip.classList.remove('is-active'));
+            input.closest('.status-chip')?.classList.add('is-active');
+        });
+    });
+});
+</script>
 @endpush

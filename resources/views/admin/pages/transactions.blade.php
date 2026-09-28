@@ -5,15 +5,26 @@
 
 
 @section('main')
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold text-dark">💳 Transactions</h1>
+    <div class="container py-4">
+        <div class="pagetitle">
+            <div class="pagetitle-left">
+                <div class="pagetitle-icon"><i class="bi bi-credit-card"></i></div>
+                <div>
+                    <h1>Transactions</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                            <li class="breadcrumb-item active">Transactions</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
         </div>
 
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-0">
                 <table class="table align-middle mb-0">
-                    <thead class="bg-gradient-primary">
+                    <thead>
                         <tr>
                             <th class="py-3 px-4">#</th>
                             <th class="py-3 px-4">User</th>
@@ -36,19 +47,7 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="badge bg-light text-dark border px-3 py-2">
-                                        @php
-                                            $type = class_basename($txn->payable_type);
-                                            if ($type === 'CourseSchedule') {
-                                                $typeLabel = 'Bootcamp';
-                                            } elseif ($type === 'EventTicket' || $type === 'Event') {
-                                                $typeLabel = 'Event';
-                                            } elseif ($type === 'Orders') {
-                                                $typeLabel = 'Order';
-                                            } else {
-                                                $typeLabel = $type;
-                                            }
-                                        @endphp
-                                        {{ $typeLabel }} #{{ $txn->payable_id }}
+                                        {{ $txn->payable_type_label }} #{{ $txn->payable_id }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">₦{{ number_format($txn->amount, 2) }}</td>
@@ -97,7 +96,7 @@
                                                     <div class="card border-0 shadow-sm rounded-3">
                                                         <div class="card-body">
                                                             <h6 class="fw-bold">Payable</h6>
-                                                            <p class="mb-1">{{ class_basename($txn->payable_type) }}</p>
+                                                            <p class="mb-1">{{ $txn->payable_type_label }}</p>
                                                         </div>
                                                     </div>
                                                 </div>

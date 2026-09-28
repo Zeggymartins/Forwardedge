@@ -29,11 +29,11 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScolarshipApplicationController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
-use App\Models\Scholarship;
 use Illuminate\Http\Request;
 
 /*
@@ -56,12 +56,12 @@ Route::post(config('admin.secret_setup_path'), [SecretAdminSetupController::clas
 */
 
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // CSRF Debug endpoint - returns fresh token
 Route::get('/csrf-check', function () {
     return response()->json([
         'token' => csrf_token(),
-        'session_id' => session()->getId(),
         'has_session' => session()->isStarted(),
     ]);
 })->name('csrf.check');
@@ -70,7 +70,7 @@ Route::get('/csrf-check', function () {
 Route::match(['get', 'post'], '/csrf-refresh', function () {
     return response()->json([
         'token' => csrf_token(),
-    ]);
+    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 })->name('csrf.refresh');
 
 Route::get('/about', function () {
@@ -118,12 +118,6 @@ Route::post('/verify/{token}', [\App\Http\Controllers\IdentityVerificationContro
 Route::get('/user/{user}/photo', [\App\Http\Controllers\IdentityVerificationController::class, 'photo'])
     ->name('user.photo');
 
-Route::get('/csrf-refresh', function () {
-    return response()->json([
-        'token' => csrf_token(),
-    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-});
-
 Route::get('/email-access/course/{course}/{user}', [\App\Http\Controllers\EmailAccessController::class, 'course'])
     ->middleware(['signed', 'throttle:30,1'])
     ->name('email.access.course');
@@ -152,8 +146,8 @@ Route::get('/course/{slug}', [CourseController::class, 'showdetails'])->name('co
 // Shop (course products)
 Route::prefix('shop')->name('shop')->group(function () {
     Route::get('/', [CourseController::class, 'shop']);
-    Route::get('/{slug}', [CourseController::class, 'shopDetails'])->name('.details');
     Route::get('/data', [CourseController::class, 'shopData'])->name('.data');
+    Route::get('/{slug}', [CourseController::class, 'shopDetails'])->name('.details');
 });
 
 Route::post('/course-content/{content}/reviews', [CourseContentReviewController::class, 'store'])

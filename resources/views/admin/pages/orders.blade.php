@@ -5,14 +5,25 @@
 
 
 @section('main')
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="fw-bold text-dark">📦 Orders</h1>
+<div class="container py-4">
+    <div class="pagetitle">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-bag-check"></i></div>
+            <div>
+                <h1>Orders</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Orders</li>
+                    </ol>
+                </nav>
+            </div>
         </div>
+    </div>
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-0">
             <table class="table align-middle mb-0">
-                <thead class="bg-gradient-primary text-white">
+                <thead>
                     <tr>
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">User</th>

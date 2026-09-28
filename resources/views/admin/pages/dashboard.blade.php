@@ -46,19 +46,20 @@
         ];
     @endphp
 
-    <div class="pagetitle">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3">
+    <div class="pagetitle mt-3">
+        <div class="pagetitle-left">
+            <div class="pagetitle-icon"><i class="bi bi-grid"></i></div>
             <div>
-                <h1 class="mb-1">Dashboard</h1>
-                <nav>
+                <h1>Dashboard</h1>
+                <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard</li>
+                        <li class="breadcrumb-item active">Overview</li>
                     </ol>
                 </nav>
             </div>
-            <p class="text-muted mb-0 small">Snapshot refreshed {{ now()->format('M j, Y') }}</p>
         </div>
+        <span class="text-muted small">{{ now()->format('D, M j Y') }}</span>
     </div>
 
     <section class="section dashboard">
@@ -69,7 +70,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-bag-check"></i></div>
+                                    <div class="kpi-icon kpi-orders"><i class="bi bi-bag-check"></i></div>
                                     <div>
                                         <div class="text-muted small">Orders</div>
                                         <div class="h4 mb-0">{{ number_format($totals['orders'] ?? 0) }}</div>
@@ -81,7 +82,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-credit-card"></i></div>
+                                    <div class="kpi-icon kpi-revenue"><i class="bi bi-credit-card"></i></div>
                                     <div>
                                         <div class="text-muted small">Payments</div>
                                         <div class="h4 mb-0">{{ number_format($totals['payments'] ?? 0) }}</div>
@@ -93,7 +94,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-mortarboard"></i></div>
+                                    <div class="kpi-icon kpi-enroll"><i class="bi bi-mortarboard"></i></div>
                                     <div>
                                         <div class="text-muted small">Enrollments</div>
                                         <div class="h4 mb-0">{{ number_format($totals['enrollments'] ?? 0) }}</div>
@@ -105,7 +106,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-calendar2-check"></i></div>
+                                    <div class="kpi-icon kpi-event"><i class="bi bi-calendar2-check"></i></div>
                                     <div>
                                         <div class="text-muted small">Event Reg.</div>
                                         <div class="h4 mb-0">{{ number_format($totals['event_registrations'] ?? 0) }}</div>
@@ -116,7 +117,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-chat-dots"></i></div>
+                                    <div class="kpi-icon kpi-msg"><i class="bi bi-chat-dots"></i></div>
                                     <div>
                                         <div class="text-muted small">Messages</div>
                                         <div class="h4 mb-0">{{ number_format($totals['messages'] ?? 0) }}</div>
@@ -128,7 +129,7 @@
                         <div class="col">
                             <div class="glass-card p-3 h-100">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="kpi-icon"><i class="bi bi-stack"></i></div>
+                                    <div class="kpi-icon kpi-orders"><i class="bi bi-stack"></i></div>
                                     <div>
                                         <div class="text-muted small">Order Items</div>
                                         <div class="h4 mb-0">{{ number_format($totals['order_items'] ?? 0) }}</div>

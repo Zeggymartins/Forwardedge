@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+Disallow: /ctrl-panel-v2/
+Disallow: /storage/private/
+Allow: /storage/
+
+Sitemap: https://forwardedgeconsulting.com/sitemap.xml

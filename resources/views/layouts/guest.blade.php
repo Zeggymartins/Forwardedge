@@ -12,56 +12,40 @@
         <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700&display=swap" rel="stylesheet" />
 
         <link rel="stylesheet" href="{{ asset('frontend/assets/css/auth-fallback.css') }}">
-
-        <style>
-            .auth-panel--single {
-                grid-template-columns: minmax(0, 1fr);
-                max-width: 520px;
-                margin: 0 auto;
-            }
-
-            .auth-panel--single .auth-card {
-                width: 100%;
-            }
-
-            .auth-panel--single .auth-header {
-                text-align: center;
-            }
-
-            .auth-logo-mark {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 0.75rem;
-            }
-
-            .auth-logo-mark img {
-                width: 64px;
-                height: 64px;
-                object-fit: contain;
-            }
-
-            @media (max-width: 640px) {
-                .auth-panel--single {
-                    max-width: 100%;
-                }
-            }
-        </style>
     </head>
     <body class="auth-shell">
         <div class="auth-bg">
             <main class="auth-wrapper">
-                <div class="auth-panel auth-panel--single">
+                <div class="auth-panel">
+
+                    {{-- LEFT: Brand panel --}}
+                    <aside class="auth-brand">
+                        <div class="auth-logo">
+                            <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge Logo">
+                            <span>Forward Edge</span>
+                        </div>
+                        <h1 class="auth-brand-title">The Management Platform</h1>
+                        <p class="auth-brand-copy">
+                            Manage courses, events, enrollments, and your entire website — all from one control hub.
+                        </p>
+                        <div class="auth-brand-badges">
+                            <span>Course Builder</span>
+                            <span>Page Builder</span>
+                            <span>Event Manager</span>
+                            <span>Enrollments</span>
+                            <span>Analytics</span>
+                        </div>
+                    </aside>
+
+                    {{-- RIGHT: Auth form --}}
                     <section class="auth-card">
                         <div class="auth-card-inner">
-                            <div class="auth-logo-mark">
-                                <img src="{{ asset('frontend/assets/images/logos/logo.png') }}" alt="Forward Edge Logo">
-                            </div>
                             {{ $slot }}
                         </div>
                     </section>
+
                 </div>
             </main>
         </div>
-
     </body>
 </html>

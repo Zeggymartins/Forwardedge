@@ -144,12 +144,12 @@ $blockMeta = [
                                         <i class="bi {{ $b->is_published ? 'bi-eye-slash' : 'bi-eye' }}"></i>
                                     </button>
                                     <button class="btn btn-outline-secondary btn-sm" data-action="edit"
-                                            data-payload='@json($b)' title="Edit block">
+                                            data-payload="{{ base64_encode(json_encode($b)) }}" title="Edit block">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-outline-secondary btn-sm" data-action="clone"
                                             data-id="{{ $b->id }}" title="Duplicate block">
-                                        <i class="bi bi-copy"></i>
+                                        <i class="bi bi-files"></i>
                                     </button>
                                     <form method="POST" action="{{ route('pb.blocks.destroy', $b) }}" data-action="delete">
                                         @csrf @method('DELETE')
@@ -250,8 +250,6 @@ $blockMeta = [
                     <button type="submit" class="btn btn-dark" id="modalSubmit">Save</button>
                 </div>
             </form>
-        </div>
-    </div>
         </div>
     </div>
 
@@ -1059,7 +1057,7 @@ $blockMeta = [
         function openModal(mode, data) {
             const modal = ensureModal();
             const form = document.getElementById('modalForm');
-            const titleEl = document.getElementById('modalTitle');
+            const titleEl = document.getElementById('blockPanelLabel');
             const typeSel = document.getElementById('modal_type');
             const varSel = document.getElementById('modal_variant');
             const pubSel = document.getElementById('modal_published');
@@ -1078,7 +1076,7 @@ $blockMeta = [
             if (mode === 'create') {
                 form.action = @json(route('pb.blocks.store', $page));
                 form.querySelector('input[name="_method"]')?.remove();
-                titleEl.textContent = 'Add Block';
+                if (titleEl) titleEl.textContent = 'Add Block';
             } else {
                 form.action = @json(route('pb.blocks.update', ':id')).replace(':id', data.id);
                 let m = form.querySelector('input[name="_method"]');
@@ -1089,7 +1087,7 @@ $blockMeta = [
                     form.appendChild(m);
                 }
                 m.value = 'PUT';
-                titleEl.textContent = 'Edit Block';
+                if (titleEl) titleEl.textContent = 'Edit Block';
             }
 
             // Set selects
@@ -3400,6 +3398,14 @@ $blockMeta = [
         }
 
         /* ====== BLOCK LIST (DRAG REORDER) ====== */
+        function encodeBlockPayload(block) {
+            return btoa(unescape(encodeURIComponent(JSON.stringify(block))));
+        }
+
+        function decodeBlockPayload(value) {
+            return JSON.parse(decodeURIComponent(escape(atob(value || 'e30='))));
+        }
+
         const blockList = document.getElementById('blockList');
         if (blockList) {
             // Edit button
@@ -3408,7 +3414,7 @@ $blockMeta = [
                 if (!btn) return;
 
                 try {
-                    const payload = JSON.parse(btn.getAttribute('data-payload') || '{}');
+                    const payload = decodeBlockPayload(btn.getAttribute('data-payload'));
                     openModal('edit', payload);
                 } catch (err) {
                     console.error('Error parsing block data:', err);
@@ -3571,7 +3577,7 @@ $blockMeta = [
         function updateBlockCard(block) {
             const row = blockList?.querySelector(`.block-row[data-id="${block.id}"]`);
             if (!row) { window.location.reload(); return; }
-            row.querySelector('[data-action="edit"]')?.setAttribute('data-payload', JSON.stringify(block));
+            row.querySelector('[data-action="edit"]')?.setAttribute('data-payload', encodeBlockPayload(block));
             const badge = row.querySelector('[data-pub-badge]');
             if (badge) {
                 badge.className = block.is_published
